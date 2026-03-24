@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/apphost/" />
+  <Folder Name="/src/services/" />
+  <Folder Name="/src/shared/" />
+  <Folder Name="/src/tests/" />
+  <Folder Name="/src/ui/" />
+</Solution>
