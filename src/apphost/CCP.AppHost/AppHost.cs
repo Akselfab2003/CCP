@@ -1,0 +1,119 @@
+using Microsoft.Extensions.Configuration;
+
+var builder = DistributedApplication.CreateBuilder(args);
+
+// Load environment-specific configuration
+string Environment = builder.Configuration.GetValue("ENVIORMENT", "DEV");
+string KeycloakApiClientSecret = builder.Configuration.GetValue<string>("KeycloakAdminApiClientSecret")
+    ?? throw new InvalidOperationException("KeycloakAdminApiClientSecret configuration value is required.");
+string RealmImportPath = builder.Configuration.GetValue<string>("REALM_IMPORT_PATH")
+    ?? throw new InvalidOperationException("REALM_IMPORT_PATH configuration value is required.");
+string ServiceAccountSecret = builder.Configuration.GetValue<string>("SERVICE_ACCOUNT_SECRET")
+    ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.");
+string RoundCubeDefaultUserEmail = builder.Configuration.GetValue<string>("ROUNDCUBE_DEFAULT_USER_EMAIL")
+    ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_EMAIL configuration value is required when mail infrastructure is enabled.");
+string RoundCubeDefaultUserPassword = builder.Configuration.GetValue<string>("ROUNDCUBE_DEFAULT_USER_PASSWORD")
+    ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_PASSWORD configuration value is required when mail infrastructure is enabled.");
+ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
+
+
+// External Services
+IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
+IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
+IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
+IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
+IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
+
+// Configure External Services
+Postgres.WithImage("pgvector/pgvector", "pg16")
+        .WithBindMount("./init-db", "/docker-entrypoint-initdb.d")
+        .WithOtlpExporter();
+
+Ollama.WithOtlpExporter();
+
+DockerEmailServer
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
+        env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
+        env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
+        env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
+    })
+    .WithEndpoint("smtp", config =>
+    {
+        config.TargetPort = 25;
+        config.Port = 25;
+    })
+    .WithEndpoint("submission", config =>
+    {
+        config.TargetPort = 587;
+        config.Port = 587;
+    })
+    .WithEndpoint("smtps", config =>
+    {
+        config.TargetPort = 465;
+        config.Port = 465;
+    });
+
+Roundcube
+       .WithEnvironment(env =>
+       {
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", "MailServer");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", "MailServer");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "587");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "143");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "143");
+       })
+       .WithEndpoint("webmail", config =>
+       {
+           config.Protocol = System.Net.Sockets.ProtocolType.Tcp;
+           config.UriScheme = "http";
+           config.TargetPort = 80;
+           config.Port = 8081;
+       })
+       .WaitFor(DockerEmailServer);
+
+Keycloak.WithRealmImport(RealmImportPath)
+        .WithArgs("--hostname=localhost")
+        .WithArgs("--hostname-strict=false")
+        .WithEnvironment(env =>
+        {
+            env.EnvironmentVariables.Add("KeycloakAdminApiClient", KeycloakApiClientSecret);
+            env.EnvironmentVariables.Add("CCP.ServiceAccount", ServiceAccountSecret);
+        })
+        .WithOtlpExporter();
+
+// Add Databases
+IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
+IResourceBuilder<PostgresDatabaseResource> ChatDB = Postgres.AddDatabase(name: "chatDB", databaseName: "chatDB");
+IResourceBuilder<PostgresDatabaseResource> MessagingDB = Postgres.AddDatabase(name: "MessagingDatabase", databaseName: "messagingdb");
+IResourceBuilder<PostgresDatabaseResource> CustomerDB = Postgres.AddDatabase(name: "customerdb", databaseName: "customerdb");
+IResourceBuilder<PostgresDatabaseResource> TicketDB = Postgres.AddDatabase(name: "ticketdb", databaseName: "ticketdb");
+
+// Add Projects and their dependencies
+
+
+if (Environment == "DEV")
+{
+    Ollama.WithLifetime(LifeTimeMode)
+          .WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+
+    Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
+            .WithLifetime(LifeTimeMode)
+            .WithVolume("pgdata", "/var/lib/postgresql/data");
+
+    Roundcube.WithLifetime(LifeTimeMode);
+
+    DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
+                     .WithVolume("dms_mail_state", "/var/mail-state")
+                     .WithVolume("dms_mail_logs", "/var/log/mail")
+                     .WithVolume("dms_config", "/tmp/docker-mailserver")
+                     .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true)
+                     .WithLifetime(LifeTimeMode);
+
+    Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data")
+            .WithLifetime(LifeTimeMode);
+}
+
+
+builder.Build().Run();

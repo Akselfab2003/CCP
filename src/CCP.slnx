@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
-  <Folder Name="/src/apphost/" />
+  <Folder Name="/src/apphost/">
+    <Project Path="apphost/CCP.AppHost/CCP.AppHost.csproj" />
+  </Folder>
   <Folder Name="/src/services/" />
   <Folder Name="/src/shared/" />
   <Folder Name="/src/tests/" />
