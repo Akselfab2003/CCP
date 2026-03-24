@@ -10,5 +10,8 @@
     <Project Path="shared/CCP.Shared/CCP.Shared.csproj" Id="88c47ede-90bf-431c-8900-a836c6efbb98" />
   </Folder>
   <Folder Name="/src/tests/" />
-  <Folder Name="/src/ui/" />
+  <Folder Name="/src/ui/">
+    <Project Path="ui/CCP.UI/CCP.UI.csproj" />
+    <Project Path="ui/CCP.Website/CCP.Website.csproj" />
+  </Folder>
 </Solution>

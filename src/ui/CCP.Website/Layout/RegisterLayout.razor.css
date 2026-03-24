@@ -1,0 +1,72 @@
+﻿.page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+    background-color: var(--ccp-bg-app);
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 40px 48px;
+    border-right: 1px solid var(--ccp-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 48px;
+    background: var(--ccp-bg-sidebar);
+}
+
+
+.signup-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+
+
+/* Responsive */
+@media (max-width: 900px) {
+    .page {
+        grid-template-columns: 1fr;
+    }
+
+    .left-panel {
+        display: none;
+    }
+
+    .right-panel {
+        padding: 32px 24px;
+        min-height: 100vh;
+    }
+
+    .signup-container {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .right-panel {
+        padding: 24px 16px;
+    }
+
+    .plan-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .team-size-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

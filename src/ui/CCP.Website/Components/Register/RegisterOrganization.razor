@@ -1,0 +1,52 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+<FluentEditForm Model="Model" FormName="Register" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label class="form-label"
+               for="company-name">
+            Company name <span>*</span>
+        </label>
+        <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <InputText @bind-Value="Model!.CompanyName"
+                       id="company-name"
+                       type="text"
+                       class="form-input"
+                       placeholder='Acme Ltd' />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label"
+               for="domain">
+            Domain <span>*</span>
+        </label>
+        <div class="input-wrap">
+            <span class="input-icon">🌐</span>
+            <InputText @bind-Value="@Model!.Domain"
+                       id="domain"
+                       type="text"
+                       class="form-input"
+                       placeholder="example.com" />
+        </div>
+    </div>
+
+
+</FluentEditForm>
+
+@code {
+    private RegisterOrganizationModel? Model { get; set; }
+
+    [Parameter]
+    public EventCallback<RegisterOrganizationModel> OnValidSubmit { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model ??= new();
+    }
+
+    public async Task HandleValidSubmit()
+    {
+        await OnValidSubmit.InvokeAsync(Model!);
+    }
+}

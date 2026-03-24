@@ -1,0 +1,81 @@
+﻿@inherits LayoutComponentBase
+@inject WebsiteReferencesService References
+
+
+<HeadContent>
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/Homepage/home.css" />
+</HeadContent>
+
+<div class="ccp-shell ccp-shell--public @(_isDarkMode ? "" : "light")">
+
+    <!-- NO SIDEBAR — full-width layout for public pages -->
+
+    <div class="ccp-main">
+
+        <!-- Public Topbar -->
+        <header class="ccp-topbar">
+            <div class="ccp-topbar-left">
+                <!-- Brand (links to public home) -->
+                <a href="/home" class="ccp-public-brand">
+                    <div class="ccp-brand-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </div>
+                    <span class="ccp-brand-name">CCP</span>
+                </a>
+            </div>
+            <div class="ccp-topbar-right">
+                <button class="ccp-topbar-btn ccp-topbar-btn--theme" title="Toggle theme" @onclick="ToggleTheme">
+                    @if (_isDarkMode)
+                    {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+                            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                        </svg>
+                    }
+                </button>
+                <a href="@References.Login" class="ccp-public-login">Log in</a>
+                <a href="@References.Register" class="ccp-public-signup">Sign up</a>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="ccp-content">
+            @Body
+        </main>
+
+    </div>
+</div>
+
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+
+@code {
+    private bool _isDarkMode = true;
+
+    private void ToggleTheme()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+}
+
