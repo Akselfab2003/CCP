@@ -1,0 +1,106 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable central package management -->
+    <!-- https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- .NET ASPIRE - HOSTING
+         Used in the AppHost project to declare and wire up infrastructure
+         resources (Postgres, Keycloak, Ollama, etc.) for local dev orchestration -->
+    <PackageVersion Include="Aspire.Hosting.Keycloak" Version="13.1.2-preview.1.26125.13" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.1.2" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="13.1.1" />
+    <!-- .NET ASPIRE - SERVICE INTEGRATIONS
+         Used in API / service projects to wire up Aspire-managed connections
+         (Aspire-configured Postgres EF Core, Keycloak auth) -->
+    <PackageVersion Include="Aspire.Keycloak.Authentication" Version="13.1.3-preview.1.26166.8" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.2" />
+    <!-- ENTITY FRAMEWORK CORE
+         ORM used across data-access projects and API services -->
+    <PackageVersion Include="coverlet.MTP" Version="8.0.1" />
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
+    <!-- POSTGRESQL / NPGSQL
+         Postgres EF Core provider. Pgvector adds vector similarity search
+         support used for AI/embeddings features -->
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.5.2" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageVersion Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
+    <!-- AUTHENTICATION & TOKEN MANAGEMENT
+         Duende packages manage OIDC token acquisition and refresh.
+         Used in services that call other protected APIs on behalf of users -->
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.1" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.1" />
+    <!-- ASP.NET CORE ABSTRACTIONS
+         Low-level ASP.NET Core interfaces used in shared/SDK projects
+         that must not take a hard dependency on the full ASP.NET Core runtime -->
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" />
+    <!-- OPENAPI / SWAGGER
+         API documentation and spec generation. Microsoft.AspNetCore.OpenApi
+         generates the OpenAPI document at build time. Swashbuckle serves the
+         Swagger UI. Microsoft.OpenApi is the underlying object model.
+         NSwag.Annotations adds extra annotation support -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="3.4.0" />
+    <PackageVersion Include="NSwag.Annotations" Version="14.6.3" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.5" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.5" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.5" />
+    <!-- HTTP CLIENT / KIOTA
+         Microsoft.Extensions.Http provides IHttpClientFactory.
+         Microsoft.Kiota.Bundle is the runtime for Kiota-generated SDK clients
+         (e.g. orderflow.sdk.utils) -->
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.22.0" />
+    <!-- DEPENDENCY INJECTION
+         Used in shared/SDK library projects that expose service registrations
+         without depending on the full ASP.NET Core host -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+    <!-- EMAIL
+         MailKit is used by the EmailLibrary / EmailService projects
+         for sending and receiving email over SMTP/IMAP -->
+    <PackageVersion Include="MailKit" Version="4.15.1" />
+    <!-- OPENTELEMETRY
+         Distributed tracing, metrics, and logging. Used in ServiceDefaults
+         and individual services to export telemetry to the Aspire dashboard
+         or any OTEL-compatible collector -->
+    <PackageVersion Include="OpenTelemetry" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
+    <!-- TESTING - FRAMEWORK & RUNNERS
+         xunit.v3 is the test framework. xunit.runner.visualstudio enables
+         discovery in Visual Studio / Rider. Microsoft.NET.Test.Sdk is required
+         by the .NET test host. MSTest.TestFramework for MSTest-based tests -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.1.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <!-- TESTING - MOCKING & COVERAGE
+         NSubstitute is the mocking library used in unit test projects.
+         coverlet.collector hooks into the test run to collect code coverage -->
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.0" />
+    <!-- TESTING - END-TO-END / INTEGRATION
+         Microsoft.Playwright.Xunit.v3 is used for browser-based E2E tests.
+         Aspire.Hosting.Testing spins up the full Aspire AppHost in test runs -->
+    <PackageVersion Include="Microsoft.Playwright.Xunit.v3" Version="1.58.0" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
+  </ItemGroup>
+</Project>

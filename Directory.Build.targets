@@ -1,0 +1,74 @@
+<Project>
+	<PropertyGroup>
+		<KiotaCommand>kiota</KiotaCommand>
+		<!-- Ensure targets do not block parallelism -->
+		<BuildInParallel>true</BuildInParallel>
+	</PropertyGroup>
+
+	<!-- Allow projects to configure generation via a small set of properties.
+       Projects can set one of: OpenApiDoc, OpenApiDocs, IdentityDocs (path to OpenAPI JSON)
+       and either OpenApiSdkOut or IdentitySdkOut (output folder).
+       Optionally set KiotaSdkName and KiotaClientClass. If not set, sensible defaults
+       based on the project name are used. -->
+	<PropertyGroup>
+		<!-- map input doc properties into KiotaInputDoc if not provided -->
+		<KiotaInputDoc Condition="'$(KiotaInputDoc)'=='' and '$(OpenApiDoc)'!=''">$(OpenApiDoc)</KiotaInputDoc>
+		<KiotaInputDoc Condition="'$(KiotaInputDoc)'=='' and '$(OpenApiDocs)'!=''">$(OpenApiDocs)</KiotaInputDoc>
+		<KiotaInputDoc Condition="'$(KiotaInputDoc)'=='' and '$(IdentityDocs)'!=''">$(IdentityDocs)</KiotaInputDoc>
+
+		<!-- map output dir properties into KiotaOutputDir if not provided -->
+		<KiotaOutputDir Condition="'$(KiotaOutputDir)'=='' and '$(OpenApiSdkOut)'!=''">
+			$(OpenApiSdkOut)</KiotaOutputDir>
+		<KiotaOutputDir Condition="'$(KiotaOutputDir)'=='' and '$(IdentitySdkOut)'!=''">
+			$(IdentitySdkOut)</KiotaOutputDir>
+
+		<!-- defaults for SDK name and client class if not provided by project -->
+		<KiotaSdkName Condition="'$(KiotaSdkName)'==''">$(MSBuildProjectName).Sdk</KiotaSdkName>
+		<KiotaClientClass Condition="'$(KiotaClientClass)'==''">$(MSBuildProjectName)Client</KiotaClientClass>
+
+		<!-- default kiota command properties -->
+		<KiotaTypeAccessModifier>Internal</KiotaTypeAccessModifier>
+	</PropertyGroup>
+
+	<Target Name="Generate_Kiota_Sdk"
+		BeforeTargets="Build"
+		Condition="'$(KiotaInputDoc)' != '' and Exists('$(KiotaInputDoc)') and '$(KiotaOutputDir)' != ''"
+		Inputs="$(KiotaInputDoc)"
+		Outputs="$(KiotaOutputDir)\kiota-lock.json"
+		>
+
+		<Message Importance="High"
+			Text="=== Kiota SDK generation target starting for $(MSBuildProjectName) ===" />
+		<Message Importance="High" Text="Kiota command: $(KiotaCommand)" />
+		<Message Importance="High" Text="OpenAPI doc: $(KiotaInputDoc)" />
+		<Message Importance="High" Text="Output folder: $(KiotaOutputDir)" />
+		<Message Importance="High" Text="SDK namespace: $(KiotaSdkName)" />
+		<Message Importance="High" Text="Client class: $(KiotaClientClass)" />
+		<Message Importance="High" Text="Type access modifier: $(KiotaTypeAccessModifier)" />
+
+		<MakeDir Directories="$(KiotaOutputDir)" Condition="!Exists('$(KiotaOutputDir)')" />
+
+		<Exec
+			Command='"$(KiotaCommand)" generate -d "$(KiotaInputDoc)" -l csharp -o "$(KiotaOutputDir)" -n "$(KiotaSdkName)" -c "$(KiotaClientClass)" --co true --tam "$(KiotaTypeAccessModifier)"'
+			ConsoleToMSBuild="true"
+			IgnoreExitCode="true">
+			<Output TaskParameter="ExitCode" PropertyName="KiotaExitCode" />
+		</Exec>
+		<Message
+			Text='"$(KiotaCommand)" generate -d "$(KiotaInputDoc)" -l csharp -o "$(KiotaOutputDir)" -n "$(KiotaSdkName)" -c "$(KiotaClientClass)" --co true'
+			Importance='high' />
+
+		<Message Importance="High" Text="Kiota exit code: $(KiotaExitCode)" />
+		<Error
+			Text="Kiota generation failed with exit code $(KiotaExitCode). See the build log for details."
+			Condition="'$(KiotaExitCode)' != '0'" />
+
+		<!-- update stamp so subsequent builds skip unless input changes -->
+		<!-- <WriteLinesToFile File="$(KiotaOutputDir)\.kiota_stamp" Lines="$(KiotaInputDoc)"
+		Overwrite="true" Condition="'$(KiotaExitCode)' == '0'" /> -->
+
+		<Message Importance="High"
+			Text="=== Kiota SDK generation target finished for $(MSBuildProjectName) ==="
+			Condition="'$(KiotaExitCode)' == '0'" />
+	</Target>
+</Project>

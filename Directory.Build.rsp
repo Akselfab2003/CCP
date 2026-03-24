@@ -1,0 +1,7 @@
+# Build performance
+/maxCpuCount
+/nr:true
+/p:BuildInParallel=true
+/p:Deterministic=true
+/p:ContinuousIntegrationBuild=true
+/p:RestorePackagesWithLockFile=false

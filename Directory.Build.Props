@@ -1,0 +1,31 @@
+<Project>
+	<PropertyGroup>
+		<OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\Docs\</OpenApiDocumentsDirectory>
+		<!-- Build performance -->
+		<Deterministic>true</Deterministic>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<BuildInParallel>true</BuildInParallel>
+		<RestorePackagesConfig>true</RestorePackagesConfig>
+		<EnableMultiTargeting>true</EnableMultiTargeting>
+		<UseSharedCompilation>true</UseSharedCompilation>
+		<!-- Test performance -->
+		<DisableAppDomain>true</DisableAppDomain>
+		<CollectCoverage>false</CollectCoverage>
+
+		<!-- Package lock file -->
+		<RestoreWithLockFile>false</RestoreWithLockFile>
+
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+		<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+		<CollectCoverage>true</CollectCoverage>
+	</PropertyGroup>
+	<PropertyGroup>
+		<RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+		<RestoreLockedMode>false</RestoreLockedMode>
+		<DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ParallelizeAssemblies>true</ParallelizeAssemblies>
+	</PropertyGroup>
+</Project>
