@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/apphost/">
     <Project Path="apphost/CCP.AppHost/CCP.AppHost.csproj" />
+    <Project Path="apphost/CCP.ServiceDefaults/CCP.ServiceDefaults.csproj" Id="6a4b4e75-771f-4029-a7ae-ec9586ea0bff" />
   </Folder>
   <Folder Name="/src/services/" />
   <Folder Name="/src/shared/">
