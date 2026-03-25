@@ -2,9 +2,16 @@
   <Folder Name="/src/" />
   <Folder Name="/src/apphost/">
     <Project Path="apphost/CCP.AppHost/CCP.AppHost.csproj" />
+    <Project Path="apphost/CCP.ServiceDefaults/CCP.ServiceDefaults.csproj" Id="6a4b4e75-771f-4029-a7ae-ec9586ea0bff" />
   </Folder>
   <Folder Name="/src/services/" />
-  <Folder Name="/src/shared/" />
+  <Folder Name="/src/shared/">
+    <Project Path="shared/CCP.Sdk.utils/CCP.Sdk.utils.csproj" Id="ba572a48-0b55-4f2f-a0ae-e53d7a7b0751" />
+    <Project Path="shared/CCP.Shared/CCP.Shared.csproj" Id="88c47ede-90bf-431c-8900-a836c6efbb98" />
+  </Folder>
   <Folder Name="/src/tests/" />
-  <Folder Name="/src/ui/" />
+  <Folder Name="/src/ui/">
+    <Project Path="ui/CCP.UI/CCP.UI.csproj" />
+    <Project Path="ui/CCP.Website/CCP.Website.csproj" />
+  </Folder>
 </Solution>

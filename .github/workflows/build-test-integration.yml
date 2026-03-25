@@ -1,0 +1,30 @@
+name: Build and Test integration
+description: Build and test the solution on push
+on:
+  workflow_dispatch:
+
+jobs:
+  Build_Test_Integration:
+    name: Build and Test for Release
+    runs-on: ubuntu-latest
+    env:
+      configuration: Release
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Solution
+        uses: ./.github/actions/dotnet-steps
+        with:
+          configuration: ${{ env.configuration }}
+          solution-file: ./src/CCP.slnx
+          shell: bash
+
+      - name: UI Tests
+        uses: ./.github/actions/dotnet-tests
+        with:
+          configuration: ${{ env.configuration }}
+          solution-file: ./src/CCP.slnx
+          steps: '["ui-tests"]'
+          shell: bash

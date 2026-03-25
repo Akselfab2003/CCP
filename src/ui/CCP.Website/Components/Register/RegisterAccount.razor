@@ -1,0 +1,70 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+<FluentEditForm EditContext="editContext" FormName="Register" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label"
+                   for="first-name">
+                First name <span>*</span>
+            </label>
+            <InputText @bind-Value="Model!.FirstName"
+                       id="first-name"
+                       class="form-input"
+                       autocomplete="given-name"
+                       placeholder="Jamie" />
+        
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="last-name">
+                Last name
+                <span>*</span>
+            </label>
+            <InputText @bind-Value="@Model!.LastName"
+                       id="last-name"
+                       class='form-input '
+                       autocomplete="family-name"
+                       placeholder="Rivera" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label"
+               for="email">
+            Email <span>*</span>
+        </label>
+        <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <InputText @bind-Value="Model!.Email"
+                       id="email"
+                       type="email"
+                       class="form-input"
+                       placeholder='jamie@yourcompany.com'
+                       autocomplete="email" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label"
+               for="password">
+            Password <span>*</span>
+        </label>
+        <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <InputText Value="@Model!.Password"
+                       id="password"
+                       type="password"
+                       class="@passwordValid"
+                       placeholder="••••••••" @oninput="PasswordUpdated" ValueExpression="() => Model.Password" />
+        </div>
+        <div class="@PasswordStrengthCssClass" id="pw-strength">
+            <div class="pw-bars">
+                <div class="pw-bar"></div>
+                <div class="pw-bar"></div>
+                <div class="pw-bar"></div>
+                <div class="pw-bar"></div>
+            </div>
+            <div class="pw-label" id="pw-label">@PasswordStrengthLabel</div>
+        </div>
+    </div>
+
+
+</FluentEditForm>

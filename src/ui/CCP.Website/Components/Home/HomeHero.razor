@@ -1,0 +1,64 @@
+﻿@inject WebsiteReferencesService References
+<section class="home-hero">
+    <div class="home-hero-grid" aria-hidden="true"></div>
+    <div class="home-hero-glow" aria-hidden="true"></div>
+
+    <div class="home-hero-body">
+        <div class="home-hero-eyebrow">
+            <span class="home-pulse-dot"></span>
+            Platform online · all systems operational
+        </div>
+
+        <h1 class="home-hero-title">
+            Support that scales<br />
+            <span class="home-hero-accent">with your team.</span>
+        </h1>
+
+        <p class="home-hero-sub">
+            CCP brings your tickets, team conversations, and customer history into one
+            place — so nothing falls through the cracks and every issue gets resolved fast.
+        </p>
+
+        <div class="home-hero-actions">
+            <a href="@References.Register" class="home-btn home-btn-primary">
+                Get Started Free
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </a>
+            <a href="/" class="home-btn home-btn-ghost">Request a Demo</a>
+        </div>
+    </div>
+
+    <div class="home-hero-card-cluster" aria-hidden="true">
+        <div class="home-mock-card home-mock-card--a">
+            <div class="home-mock-row">
+                <div class="home-mock-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">JD</div>
+                <div>
+                    <div class="home-mock-name">Jordan Davis</div>
+                    <div class="home-mock-sub">replied to #TK-8821</div>
+                </div>
+                <span class="home-mock-badge" style="background:rgba(248,113,113,0.15);color:#fca5a5">Urgent</span>
+            </div>
+            <div class="home-mock-body">Payment gateway returning 500 error on checkout — investigating now.</div>
+            <div class="home-mock-time">Just now</div>
+        </div>
+
+        <div class="home-mock-card home-mock-card--b">
+            <div class="home-mock-label">RESOLVED TODAY</div>
+            <div class="home-mock-big" style="color:#34d399">42</div>
+            <div class="home-mock-delta" style="color:#34d399">↑ Team on fire</div>
+        </div>
+
+        <div class="home-mock-card home-mock-card--c">
+            <div class="home-mock-label">AVG. RESPONSE</div>
+            <div class="home-mock-big" style="color:#818cf8">2.4h</div>
+            <div class="home-mock-delta">↓ Improving</div>
+        </div>
+    </div>
+</section>
+
+@code {
+
+}

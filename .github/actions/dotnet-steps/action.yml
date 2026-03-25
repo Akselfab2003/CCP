@@ -1,0 +1,53 @@
+name: Dotnet Steps
+description: Reusable steps for building .NET projects and solutions
+inputs:
+  configuration:
+    description: "Build configuration (e.g., Release, Debug)"
+    required: true
+    default: "Release"
+  solution-file:
+    description: "Path to the solution file to build and test"
+    required: true
+    default: "ChatApp.slnx"
+  project-file:
+    description: "Path to the project file to build and test"
+    required: false
+    default: ""
+  shell:
+    description: "Shell to use for running the steps (e.g., bash, pwsh)"
+    required: false
+    default: "bash"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+        cache: false
+        
+    - name: Install Required .NET Tools for Build
+      shell: ${{ inputs.shell }}
+      run: |
+        dotnet tool install --global Microsoft.OpenApi.Kiota
+
+    - name: Restore solution dependencies
+      shell: ${{ inputs.shell }}
+      if: ${{ inputs.project-file == '' }}
+      run: dotnet restore ${{ inputs.solution-file }}
+
+    - name: Restore project dependencies
+      shell: ${{ inputs.shell }}
+      if: ${{ inputs.project-file != '' }}
+      run: dotnet restore ${{ inputs.project-file }}
+
+    - name: Build the solution
+      shell: ${{ inputs.shell }}
+      if: ${{ inputs.project-file == '' }}
+      run: dotnet build ${{ inputs.solution-file }} --configuration ${{ inputs.configuration }} --no-restore
+
+    - name: Build the project
+      shell: ${{ inputs.shell }}
+      if: ${{ inputs.project-file != '' }}
+      run: dotnet build ${{ inputs.project-file }} --configuration ${{ inputs.configuration }} --no-restore

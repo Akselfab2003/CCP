@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@inherits LayoutComponentBase
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+</HeadContent>
+
+<div class="layout-wrapper @ThemeClass">
+    <!-- TOP NAV -->
+    <nav class="topnav">
+        <a href="#" class="nav-logo">
+            <div class="logo-gem">H</div>
+            <span class="logo-name">Helix</span>
+        </a>
+        <div class="nav-breadcrumb">
+            <span class="sep">/</span>
+            <a href="#">My Tickets</a>
+            <span class="sep">/</span>
+            <span style="color:var(--text-2)">#TK-8821</span>
+        </div>
+        <div class="nav-right">
+            <a href="#" class="nav-btn">+ New Ticket</a>
+            <button class="theme-btn" @onclick="ToggleTheme" id="themeBtn">@ThemeIcon</button>
+            <div class="nav-avatar">AK</div>
+        </div>
+    </nav>
+
+    @Body
+</div>
+
+@code {
+    private bool _isDarkTheme = true;
+    private string ThemeIcon => _isDarkTheme ? "☀️" : "🌙";
+    private string ThemeClass => _isDarkTheme ? "theme-dark" : "theme-light";
+
+    private void ToggleTheme()
+    {
+        _isDarkTheme = !_isDarkTheme;
+    }
+}
