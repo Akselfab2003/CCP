@@ -5,11 +5,24 @@
     <Project Path="apphost/CCP.ServiceDefaults/CCP.ServiceDefaults.csproj" Id="6a4b4e75-771f-4029-a7ae-ec9586ea0bff" />
   </Folder>
   <Folder Name="/src/services/" />
+  <Folder Name="/src/services/IdentityService/">
+    <Project Path="services/IdentityService/IdentityService.API/IdentityService.API.csproj" />
+    <Project Path="services/IdentityService/IdentityService.Application/IdentityService.Application.csproj" />
+    <Project Path="services/IdentityService/IdentityService.Sdk/IdentityService.Sdk.csproj" />
+    <Project Path="services/IdentityService/Keycloak.Sdk/Keycloak.Sdk.csproj" />
+  </Folder>
   <Folder Name="/src/shared/">
     <Project Path="shared/CCP.Sdk.utils/CCP.Sdk.utils.csproj" Id="ba572a48-0b55-4f2f-a0ae-e53d7a7b0751" />
     <Project Path="shared/CCP.Shared/CCP.Shared.csproj" Id="88c47ede-90bf-431c-8900-a836c6efbb98" />
   </Folder>
   <Folder Name="/src/tests/" />
+  <Folder Name="/src/tests/IdentityService/">
+    <Project Path="tests/IdentityService/Identity.Api.IntegrationTests/Identity.Api.IntegrationTests.csproj" />
+    <Project Path="tests/IdentityService/Identity.Application.Tests/Identity.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/src/tests/TestUtils/">
+    <Project Path="tests/TestUtils/TestUtils/TestUtils.csproj" />
+  </Folder>
   <Folder Name="/src/ui/">
     <Project Path="ui/CCP.UI/CCP.UI.csproj" />
     <Project Path="ui/CCP.Website/CCP.Website.csproj" />

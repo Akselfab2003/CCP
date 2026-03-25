@@ -42,10 +42,10 @@ runs:
       run: |
         dotnet dev-certs https --trust
 
-    - name: Ensure Browser is installed for Playwright tests
-      shell: ${{ inputs.shell }}
-      if: contains(fromJson(inputs.steps), 'integration-tests') || contains(fromJson(inputs.steps), 'ui-tests')
-      run: ${{github.workspace}}/tests/UI/CPP.UI.Tests/bin/${{env.configuration}}/net10.0/playwright.ps1 install --with-deps
+    # - name: Ensure Browser is installed for Playwright tests
+    #   shell: ${{ inputs.shell }}
+    #   if: contains(fromJson(inputs.steps), 'integration-tests') || contains(fromJson(inputs.steps), 'ui-tests')
+    #   run: ${{github.workspace}}/tests/UI/CPP.UI.Tests/bin/${{env.configuration}}/net10.0/playwright.ps1 install --with-deps
 
     - name: Unit Tests Solution
       shell: ${{ inputs.shell }}
