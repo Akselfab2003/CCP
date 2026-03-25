@@ -18,13 +18,13 @@ jobs:
         uses: ./.github/actions/dotnet-steps
         with:
           configuration: ${{ env.configuration }}
-          solution-file: CCP.slnx
+          solution-file: ./src/CCP.slnx
           shell: bash
 
       - name: UI Tests
         uses: ./.github/actions/dotnet-tests
         with:
           configuration: ${{ env.configuration }}
-          solution-file: CCP.slnx
+          solution-file: ./src/CCP.slnx
           steps: '["ui-tests"]'
           shell: bash
