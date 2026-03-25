@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated\" />
+    <Folder Include="openapi\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
+    <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
+  </ItemGroup>
+
+
+
+  <PropertyGroup>
+    <KiotaInputDoc>.\openapi\openapi.json</KiotaInputDoc>
+    <KiotaOutputDir>.\Generated</KiotaOutputDir>
+    <KiotaSdkName>Keycloak.Sdk</KiotaSdkName>
+    <KiotaClientClass>KeycloakClient</KiotaClientClass>
+  </PropertyGroup>
+
+</Project>
