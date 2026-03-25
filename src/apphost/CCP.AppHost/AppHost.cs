@@ -91,6 +91,24 @@ IResourceBuilder<PostgresDatabaseResource> CustomerDB = Postgres.AddDatabase(nam
 IResourceBuilder<PostgresDatabaseResource> TicketDB = Postgres.AddDatabase(name: "ticketdb", databaseName: "ticketdb");
 
 // Add Projects and their dependencies
+IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.IdentityService_API>("identityservice-api");
+
+
+IdentityService
+    .WithReference(Keycloak)
+    .WaitFor(Keycloak)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("KeycloakAdminApiClient", "KeycloakAdminApiClient");
+        env.EnvironmentVariables.Add("KeycloakAdminApiClientSecret", KeycloakApiClientSecret);
+    })
+    .WithUrlForEndpoint("https", endpoint =>
+    {
+        endpoint.Url = "/swagger";
+        endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+        endpoint.DisplayText = "API Swagger";
+    })
+    .WithOtlpExporter();
 
 
 if (Environment == "DEV")
@@ -114,6 +132,8 @@ if (Environment == "DEV")
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data")
             .WithLifetime(LifeTimeMode);
 }
+
+
 
 
 builder.Build().Run();
