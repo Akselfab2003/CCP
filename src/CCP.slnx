@@ -5,6 +5,7 @@
     <Project Path="apphost/CCP.ServiceDefaults/CCP.ServiceDefaults.csproj" Id="6a4b4e75-771f-4029-a7ae-ec9586ea0bff" />
   </Folder>
   <Folder Name="/src/services/" />
+  <Folder Name="/src/services/EmailService/" />
   <Folder Name="/src/services/IdentityService/">
     <Project Path="services/IdentityService/IdentityService.API/IdentityService.API.csproj" />
     <Project Path="services/IdentityService/IdentityService.Application/IdentityService.Application.csproj" />
