@@ -2,7 +2,7 @@
 using EmailService.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EmailService.API.Controllers
+namespace EmailService.Api.Controllers
 {
     public class EmailSentController : ControllerBase
     {

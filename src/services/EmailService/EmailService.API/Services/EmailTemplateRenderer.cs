@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using EmailService.Domain.Models;
 
-namespace EmailService.Services
+namespace EmailService.Api.Services
 {
     public class EmailTemplateRenderer
     {

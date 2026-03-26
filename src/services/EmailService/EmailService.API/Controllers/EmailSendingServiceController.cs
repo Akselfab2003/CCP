@@ -8,7 +8,7 @@
 // YOU NEED TO GET THE TEMPLATES BEFOR WORKING ON IT AGAIN
 
 
-//namespace EmailService.API.Controllers
+//namespace EmailService.Api.Controllers
 //{
 //    [Route("api/[controller]")]
 //    [ApiController]
