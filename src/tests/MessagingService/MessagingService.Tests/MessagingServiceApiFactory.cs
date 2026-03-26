@@ -104,6 +104,8 @@ public class MessagingServiceApiFactory : WebApplicationFactory<TestProgramNameS
     "emailWorkerServiceUsername=test@test.test",
      $"Encryption_Key={GenerateEncryptionKey()}",
     "emailWorkerServicePassword=test",
+                    "ROUNDCUBE_DEFAULT_USER_EMAIL=test@test.test",
+                "ROUNDCUBE_DEFAULT_USER_PASSWORD=test",
         // REALM_IMPORT_PATH intentionally omitted — Keycloak removed during tests
         ], CancellationToken.None).Result;
 

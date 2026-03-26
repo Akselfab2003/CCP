@@ -27,9 +27,11 @@ IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube"
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithBindMount("./init-db", "/docker-entrypoint-initdb.d")
+        .WithLifetime(LifeTimeMode)
         .WithOtlpExporter();
 
-Ollama.WithOtlpExporter();
+Ollama.WithOtlpExporter()
+      .WithLifetime(LifeTimeMode);
 
 DockerEmailServer
     .WithEnvironment(env =>
@@ -53,7 +55,9 @@ DockerEmailServer
     {
         config.TargetPort = 465;
         config.Port = 465;
-    });
+    })
+    .WithLifetime(LifeTimeMode);
+
 
 Roundcube
        .WithEnvironment(env =>
@@ -71,7 +75,8 @@ Roundcube
            config.TargetPort = 80;
            config.Port = 8081;
        })
-       .WaitFor(DockerEmailServer);
+       .WaitFor(DockerEmailServer)
+       .WithLifetime(LifeTimeMode);
 
 Keycloak.WithRealmImport(RealmImportPath)
         .WithArgs("--hostname=localhost")
@@ -81,7 +86,9 @@ Keycloak.WithRealmImport(RealmImportPath)
             env.EnvironmentVariables.Add("KeycloakAdminApiClient", KeycloakApiClientSecret);
             env.EnvironmentVariables.Add("CCP.ServiceAccount", ServiceAccountSecret);
         })
-        .WithOtlpExporter();
+        .WithOtlpExporter()
+        .WithLifetime(LifeTimeMode);
+
 
 // Add Databases
 IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
@@ -92,6 +99,7 @@ IResourceBuilder<PostgresDatabaseResource> TicketDB = Postgres.AddDatabase(name:
 
 // Add Projects and their dependencies
 IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.IdentityService_API>("identityservice-api");
+IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects.MessagingService_Api>("messagingservice-api");
 
 
 IdentityService
@@ -110,28 +118,38 @@ IdentityService
     })
     .WithOtlpExporter();
 
+MessagingService.WaitFor(Keycloak)
+    .WaitFor(MessagingDB)
+    .WithReference(Keycloak)
+    .WithReference(MessagingDB)
+    .WithUrlForEndpoint("https", endpoint =>
+    {
+        endpoint.Url = "/swagger";
+        endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+        endpoint.DisplayText = "API Swagger";
+    })
+    .WithOtlpExporter();
+
 
 if (Environment == "DEV")
 {
-    Ollama.WithLifetime(LifeTimeMode)
-          .WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
-            .WithLifetime(LifeTimeMode)
             .WithVolume("pgdata", "/var/lib/postgresql/data");
-
-    Roundcube.WithLifetime(LifeTimeMode);
 
     DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
                      .WithVolume("dms_mail_state", "/var/mail-state")
                      .WithVolume("dms_mail_logs", "/var/log/mail")
                      .WithVolume("dms_config", "/tmp/docker-mailserver")
-                     .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true)
-                     .WithLifetime(LifeTimeMode);
+                     .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true);
 
-    Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data")
-            .WithLifetime(LifeTimeMode);
+    Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
+
+
+
+
 
 
 

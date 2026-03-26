@@ -8,7 +8,7 @@ namespace MessagingService.Api.IntegrationTests.Fixtures
 {
     public class MessagingServiceFixture : GenericIntegrationSdkAndDbTestFixture<MessagingDbContext>, IAsyncLifetime
     {
-        public override string APIResourceName => "chatapp-messagingservice";
+        public override string APIResourceName => "messagingservice-api";
         public override string DBResourceName => "MessagingDatabase";
         public override List<string> RequiredResources => [APIResourceName, DBResourceName, "keycloak", "postgres", "MailHog"];
 
