@@ -1,5 +1,4 @@
-﻿using ChatApp.Shared.ResultAbstraction;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;

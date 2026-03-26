@@ -1,7 +1,4 @@
-﻿using CCP.Shared.ResultAbstraction;
-using CCP.Shared.ValueObjects;
-
-using TicketService.Domain.ResponseObjects;
+﻿using TicketService.Domain.ResponseObjects;
 
 namespace TicketService.Application.Services.Ticket
 {

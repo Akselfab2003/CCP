@@ -1,7 +1,5 @@
-﻿using ChatApp.Shared.ResultAbstraction;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
-using OrderFlow.Sdk.Utils.Abstractions;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Models;
 

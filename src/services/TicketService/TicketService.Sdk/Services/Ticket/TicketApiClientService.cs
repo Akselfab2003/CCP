@@ -1,8 +1,5 @@
-﻿using ChatApp.Shared.ResultAbstraction;
-using ChatApp.Shared.ValueObjects;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
-using OrderFlow.Sdk.Utils.Abstractions;
 using TicketService.Sdk.Models;
 
 namespace TicketService.Sdk.Services.Ticket

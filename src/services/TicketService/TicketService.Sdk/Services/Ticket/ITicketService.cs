@@ -1,5 +1,4 @@
-﻿using ChatApp.Shared.ResultAbstraction;
-using TicketService.Sdk.Models;
+﻿using TicketService.Sdk.Models;
 
 namespace TicketService.Sdk.Services.Ticket
 {

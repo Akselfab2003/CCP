@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ChatApp.Shared.ResultAbstraction;
-using TicketService.Sdk.Dtos;
+﻿using TicketService.Sdk.Dtos;
 
 namespace TicketService.Sdk.Services.TicketSdk
 {

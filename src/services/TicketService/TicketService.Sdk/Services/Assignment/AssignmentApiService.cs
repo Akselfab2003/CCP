@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using OrderFlow.Sdk.Utils.Abstractions;
 
 namespace TicketService.Sdk.Services.Assignment
 {

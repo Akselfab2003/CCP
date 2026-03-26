@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TicketService.Api.Extensions;
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.RequestObjects;
 

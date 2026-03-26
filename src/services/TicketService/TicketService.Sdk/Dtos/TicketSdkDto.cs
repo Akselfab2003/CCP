@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TicketService.Sdk.Dtos
+﻿namespace TicketService.Sdk.Dtos
 {
     public class TicketSdkDto
     {

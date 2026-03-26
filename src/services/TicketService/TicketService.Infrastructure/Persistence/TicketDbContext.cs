@@ -1,5 +1,4 @@
-﻿using ChatApp.Shared.AuthContext;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using TicketService.Domain.Entities;
 using TicketService.Infrastructure.Persistence.Configurations;

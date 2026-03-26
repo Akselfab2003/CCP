@@ -1,6 +1,4 @@
-﻿using ChatApp.Shared.ValueObjects;
-
-namespace TicketService.Domain.Entities
+﻿namespace TicketService.Domain.Entities
 {
     public class Ticket
     {

@@ -1,6 +1,4 @@
-﻿using ChatApp.Shared.AuthContext;
-using ChatApp.Shared.ResultAbstraction;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using TicketService.Domain.Interfaces;
 
 namespace TicketService.Application.Services.Assignment

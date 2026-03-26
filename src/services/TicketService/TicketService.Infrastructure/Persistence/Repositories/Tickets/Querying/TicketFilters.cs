@@ -1,6 +1,4 @@
-﻿using ChatApp.Shared.ValueObjects;
-
-namespace TicketService.Infrastructure.Persistence.Repositories.Tickets.Querying
+﻿namespace TicketService.Infrastructure.Persistence.Repositories.Tickets.Querying
 {
     internal static class TicketFilters
     {

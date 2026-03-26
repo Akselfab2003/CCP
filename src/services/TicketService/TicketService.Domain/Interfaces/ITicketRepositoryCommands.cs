@@ -1,6 +1,4 @@
-﻿using ChatApp.Shared.ResultAbstraction;
-using ChatApp.Shared.ValueObjects;
-using TicketService.Domain.Entities;
+﻿using TicketService.Domain.Entities;
 
 namespace TicketService.Domain.Interfaces
 {

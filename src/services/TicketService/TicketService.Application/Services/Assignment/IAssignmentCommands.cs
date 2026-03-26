@@ -1,6 +1,4 @@
-﻿using ChatApp.Shared.ResultAbstraction;
-
-namespace TicketService.Application.Services.Assignment
+﻿namespace TicketService.Application.Services.Assignment
 {
     public interface IAssignmentCommands
     {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using OrderFlow.Sdk.Utils.Abstractions;
-using OrderFlow.Sdk.Utils.Authentication;
+
 using TicketService.Sdk.Services.Assignment;
 using TicketService.Sdk.Services.Ticket;
 using TicketService.Sdk.Services.TicketSdk;

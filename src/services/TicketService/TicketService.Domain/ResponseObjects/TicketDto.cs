@@ -1,6 +1,4 @@
-﻿using ChatApp.Shared.ValueObjects;
-
-namespace TicketService.Domain.ResponseObjects
+﻿namespace TicketService.Domain.ResponseObjects
 {
     public class TicketDto
     {
