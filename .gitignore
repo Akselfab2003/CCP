@@ -429,3 +429,4 @@ FodyWeavers.xsd
 .claude/*
 coverage/*
 coverage/report/*
+/src/services/IdentityService/Keycloak.Sdk/Generated/kiota-lock.json
