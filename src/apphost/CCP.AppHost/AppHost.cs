@@ -14,6 +14,8 @@ string RoundCubeDefaultUserEmail = builder.Configuration.GetValue<string>("ROUND
     ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_EMAIL configuration value is required when mail infrastructure is enabled.");
 string RoundCubeDefaultUserPassword = builder.Configuration.GetValue<string>("ROUNDCUBE_DEFAULT_USER_PASSWORD")
     ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_PASSWORD configuration value is required when mail infrastructure is enabled.");
+string EncryptionKey = builder.Configuration.GetValue<string>("Encryption_Key")
+    ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
 
@@ -146,6 +148,21 @@ MessagingService.WaitFor(Keycloak)
     })
     .WithOtlpExporter();
 
+CustomerService.WaitFor(Keycloak)
+        .WithReference(Keycloak)
+        .WaitFor(CustomerDB)
+        .WithReference(CustomerDB)
+        .WithOtlpExporter()
+        .WithEnvironment(env =>
+        {
+            env.EnvironmentVariables.Add("Encryption_Key", EncryptionKey);
+        })
+        .WithUrlForEndpoint("https", (endpoint) =>
+        {
+            endpoint.Url = "/swagger";
+            endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+            endpoint.DisplayText = "API Swagger";
+        });
 
 ChatService
     .WaitFor(Keycloak)
