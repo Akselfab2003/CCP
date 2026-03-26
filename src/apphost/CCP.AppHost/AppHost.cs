@@ -102,6 +102,7 @@ IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.
 IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects.MessagingService_Api>("messagingservice-api");
 IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
 IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
+IResourceBuilder<ProjectResource> CustomerService = builder.AddProject<Projects.CustomerService_Api>("customerservice-api");
 
 
 IdentityService
@@ -173,5 +174,6 @@ if (Environment == "DEV")
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
+
 
 builder.Build().Run();
