@@ -1,0 +1,29 @@
+﻿@page "/ticketdetails"
+@rendermode InteractiveServer
+
+<PageTitle>Helix — Ticket Details</PageTitle>
+<div class="Body">
+    <div class="TicketDetail">
+        <h1>Helix - Ticket Detail</h1>
+        <h1>Ticket: Issue with login</h1> @* Ticket Name*@
+        <h2>Status: In progress</h2> @* Ticket Status*@
+        <h2>Priority: Medium</h2> @*Ticket Priority*@
+        <h2>Support: John Doe</h2> @* Assigned Support*@
+        <h2>Date: 06/03/2026</h2> @* Ticket Creation Date*@
+    </div>
+    <div class="DisplayBox">
+        <div class="CommentedBox">
+            <p class="Writer">John Doe</p>
+            <p class="Text">You should now have access to logging in</p>
+            <p class="Timestamp">09:12</p>
+        </div>
+        <div class="CommentedBox">
+            <p class="Writer">You</p>
+            <p class="Text">Thank you for the help</p>
+            <p class="Timestamp">09:14</p>
+        </div>
+    </div>
+</div>
+@code {
+
+}

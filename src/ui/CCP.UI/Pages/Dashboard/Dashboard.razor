@@ -1,0 +1,24 @@
+﻿@using CCP.Shared.ValueObjects
+@using CCP.UI.Components.Dashboard
+@using CCP.Shared.UIContext
+@using Microsoft.AspNetCore.Authorization
+@using CCP.UI.Layout
+
+@page "/Dashboard"
+@layout CCPLayout
+@inject IUIUserContext UserContext
+@attribute [Authorize]
+
+
+@if (Role == UserRole.Admin || Role == UserRole.Manager)
+{
+    <SaasDashboardManager />
+}
+else if (Role == UserRole.Supporter)
+{
+    <SaasDashboardStaff />
+}
+
+@code {
+    private UserRole Role => UserContext.Role;
+}

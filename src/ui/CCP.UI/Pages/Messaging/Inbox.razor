@@ -1,0 +1,203 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using CCP.UI.Layout
+@page "/inbox"
+@attribute [Authorize]
+@layout CCPLayout
+
+<div class="inbox-wrap">
+
+    <!-- LEFT PANEL conversation list -->
+    <aside class="inbox-list">
+
+        <div class="inbox-list-header">
+            <span class="inbox-list-title">Inbox</span>
+            <span class="inbox-count-badge">@_tickets.Count</span>
+        </div>
+
+        <div class="inbox-search-wrap">
+            <svg class="inbox-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" class="inbox-search-input" placeholder="Search conversations..." />
+        </div>
+
+        <div class="inbox-conv-list">
+
+            @if (_isLoadingTickets)
+            {
+                <div style="padding: 20px; text-align: center; color: var(--ccp-text-lo); font-size: 13px;">
+                    Loading tickets...
+                </div>
+            }
+            else if (!_tickets.Any())
+            {
+                <div style="padding: 20px; text-align: center; color: var(--ccp-text-lo); font-size: 13px;">
+                    No tickets assigned to you
+                </div>
+            }
+            else
+            {
+                @foreach (var ticket in _tickets)
+                {
+                    <div class="inbox-conv @(_activeTicketId == ticket.Id ? "inbox-conv--active" : "")"
+                         @onclick="() => ActiveTicketId = ticket.Id">
+                        <div class="inbox-conv-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                            #@ticket.Id
+                        </div>
+                        <div class="inbox-conv-body">
+                            <div class="inbox-conv-top">
+                                <span class="inbox-conv-name">@ticket.Title</span>
+                                <span class="inbox-conv-time">@(ticket.CreatedAt?.ToLocalTime().ToString("MMM d"))</span>
+                            </div>
+                            <div class="inbox-conv-preview">Ticket #@ticket.Id</div>
+                            <div class="inbox-conv-tags">
+                                <span class="inbox-tag @GetStatusTagClass(ticket.Status)">@GetStatusLabel(ticket.Status)</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+        </div>
+    </aside>
+
+    <!-- RIGHT PANEL active conversation -->
+    <div class="inbox-chat">
+
+        @if (_activeTicketId is null)
+        {
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--ccp-text-lo); font-size:14px;">
+                Select a conversation to start chatting
+            </div>
+        }
+        else
+        {
+            <!-- Chat header -->
+            <div class="inbox-chat-header">
+                <div class="inbox-chat-header-left">
+                    <div>
+                        <div class="inbox-chat-name">@(ActiveTicket?.Title ?? "Ticket")</div>
+                        <div class="inbox-chat-sub">#TK-@_activeTicketId · @GetStatusLabel(ActiveTicket?.Status ?? 0)</div>
+                    </div>
+                </div>
+                <div class="inbox-chat-header-right">
+                    <span class="inbox-tag @GetStatusTagClass(ActiveTicket?.Status ?? 0)" style="font-size:11px;padding:3px 9px;">
+                        @GetStatusLabel(ActiveTicket?.Status ?? 0)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Message thread -->
+            <div class="inbox-messages">
+                @if (!_messages.Any())
+                {
+                    @if (_isLoadingMessages)
+                    {
+                        <div style="flex:1; display:flex; align-items:center; justify-content:center; gap:10px; color:var(--ccp-text-lo); font-size:13px;">
+                            <svg class="inbox-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                            </svg>
+                            Loading messages...
+                        </div>
+                    }
+                    else if (!_messages.Any())
+                    {
+                        <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--ccp-text-lo); font-size:13px;">
+                            No messages yet — start the conversation!
+                        </div>
+                    }
+                }
+                else
+                {
+                    @foreach (var msg in _messages)
+                    {
+                        @if (msg.IsInternalNote)
+                        {
+                            <!-- Only show internal notes to internal users -->
+                            @if (UserContext.IsInternalUser)
+                            {
+                                <div class="inbox-msg inbox-msg--note">
+                                    <div class="inbox-msg-note-label">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                        Internal note — @GetDisplayName(msg.UserId)
+                                    </div>
+                                    <div class="inbox-msg-bubble inbox-msg-bubble--note">
+                                        @msg.Content
+                                    </div>
+                                    <div class="inbox-msg-meta" style="padding-left: 0;">
+                                        @msg.CreatedAtUtc?.ToLocalTime().ToString("HH:mm")
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="inbox-msg @(IsOwnMessage(msg) ? "inbox-msg--out" : "inbox-msg--in")">
+                                @if (!IsOwnMessage(msg))
+                                {
+                                    <div class="inbox-conv-avatar inbox-msg-avatar"
+                                         style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                                        @GetInitials(msg.UserId)
+                                    </div>
+                                }
+                                <div class="inbox-msg-body @(IsOwnMessage(msg) ? "inbox-msg-body--out" : "")">
+                                    <div class="inbox-msg-meta @(IsOwnMessage(msg) ? "inbox-msg-meta--out" : "")">
+                                        @GetDisplayName(msg.UserId)
+                                        <span>·</span>
+                                        @msg.CreatedAtUtc?.ToLocalTime().ToString("HH:mm")
+                                    </div>
+                                    <div class="inbox-msg-bubble @(IsOwnMessage(msg) ? "inbox-msg-bubble--out" : "inbox-msg-bubble--in")">
+                                        @msg.Content
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+
+            <!-- Reply composer -->
+            <div class="inbox-composer">
+                <div class="inbox-composer-tabs">
+                    <button class="inbox-composer-tab @(!_isInternalNoteMode ? "active" : "")"
+                            @onclick="() => _isInternalNoteMode = false">
+                        Reply
+                    </button>
+                    @if (UserContext.IsInternalUser)
+                    {
+                        <button class="inbox-composer-tab @(_isInternalNoteMode ? "active" : "")"
+                                @onclick="() => _isInternalNoteMode = true">
+                            Internal Note
+                        </button>
+                    }
+                </div>
+                <div class="inbox-composer-body">
+                    <textarea class="inbox-composer-input"
+                              placeholder="@(_isInternalNoteMode ? "Write an internal note..." : "Write a reply...")"
+                              rows="3"
+                              style="@(_isInternalNoteMode ? "border-color: #f59e0b; background: rgba(245,158,11,0.04);" : "")"
+                              @bind="_newMessageContent"
+                              @onkeydown="HandleKeyDown" />
+                    <div class="inbox-composer-footer">
+                        <div class="inbox-composer-tools"></div>
+                        <button class="inbox-send-btn"
+                                style="@(_isInternalNoteMode ? "background: #f59e0b; box-shadow: 0 0 14px rgba(245,158,11,0.3);" : "")"
+                                @onclick="SendMessageAsync" disabled="@_isSending">
+                            @(_isInternalNoteMode ? "Add Note" : "Send")
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+</div>

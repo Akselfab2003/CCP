@@ -1,0 +1,24 @@
+﻿@page "/"
+@using CCP.Shared.UIContext
+@using CCP.Shared.ValueObjects
+@using CCP.UI.Components.Homepage
+@using CCP.UI.Layout
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject IUIUserContext UserContext
+
+@layout CCPLayout
+@if (Role == UserRole.Admin || Role == UserRole.Manager)
+{
+    <HomepageUsers />
+}
+else if (Role == UserRole.Supporter)
+{
+    <HomepageSupporters />
+}
+
+@code {
+    private UserRole Role => UserContext.Role;
+
+}
+

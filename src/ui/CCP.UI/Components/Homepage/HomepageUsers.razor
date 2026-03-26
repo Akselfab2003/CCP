@@ -1,0 +1,262 @@
+﻿@using CCP.Shared.UIContext
+@using Microsoft.AspNetCore.Authorization
+@inject IUIUserContext UserContext
+@attribute [Authorize]
+
+<div class="hu-wrap">
+
+    <!-- Greeting + new ticket CTA -->
+    <header class="hu-greeting">
+        <div class="hu-greeting-glow" aria-hidden="true"></div>
+
+        <div class="hu-greeting-left">
+            <h1 class="hu-greeting-title">Welcome back, <span class="hu-greeting-name">@UserContext.FirstName</span></h1>
+            <p class="hu-greeting-sub">
+                You have <strong>1 open ticket</strong> with a new reply.
+            </p>
+        </div>
+
+        <div class="hu-greeting-actions">
+            <a href="/ticket/new" class="hu-btn hu-btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                New Ticket
+            </a>
+            <a href="/tickets/mine" class="hu-btn hu-btn-ghost">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                </svg>
+                All My Tickets
+            </a>
+        </div>
+    </header>
+
+    <!-- Status summary chips -->
+    <section class="hu-status-row">
+        <div class="hu-status-chip">
+            <div class="hu-status-dot hu-dot--open"></div>
+            <div class="hu-status-data">
+                <span class="hu-status-val">2</span>
+                <span class="hu-status-label">Open</span>
+            </div>
+        </div>
+        <div class="hu-status-divider"></div>
+        <div class="hu-status-chip">
+            <div class="hu-status-dot hu-dot--pending"></div>
+            <div class="hu-status-data">
+                <span class="hu-status-val">1</span>
+                <span class="hu-status-label">Awaiting Reply</span>
+            </div>
+        </div>
+        <div class="hu-status-divider"></div>
+        <div class="hu-status-chip">
+            <div class="hu-status-dot hu-dot--resolved"></div>
+            <div class="hu-status-data">
+                <span class="hu-status-val">7</span>
+                <span class="hu-status-label">Resolved</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Your tickets list -->
+    <section class="hu-tickets-section">
+        <div class="hu-section-head">
+            <h2 class="hu-section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                </svg>
+                Your Tickets
+            </h2>
+            <a href="/tickets/mine" class="hu-section-link">View all →</a>
+        </div>
+
+        <div class="hu-ticket-list">
+
+            <!-- Ticket with new reply highlight -->
+            <a href="/ticket/9042" class="hu-ticket-row hu-ticket-row--unread">
+                <div class="hu-ticket-status-col">
+                    <span class="hu-ticket-status-badge hu-badge--open">Open</span>
+                </div>
+                <div class="hu-ticket-main">
+                    <div class="hu-ticket-top">
+                        <span class="hu-ticket-id">#TK-9042</span>
+                        <span class="hu-ticket-new-reply">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="12" height="12">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                            </svg>
+                            New reply
+                        </span>
+                    </div>
+                    <span class="hu-ticket-subject">Cannot access billing page after upgrading plan</span>
+                    <span class="hu-ticket-excerpt">Support replied: "Hi Sarah, I've looked into this and the issue was related to a caching..."</span>
+                </div>
+                <span class="hu-ticket-time">25m ago</span>
+            </a>
+
+            <!-- Open ticket, no new reply -->
+            <a href="/ticket/9038" class="hu-ticket-row">
+                <div class="hu-ticket-status-col">
+                    <span class="hu-ticket-status-badge hu-badge--open">Open</span>
+                </div>
+                <div class="hu-ticket-main">
+                    <div class="hu-ticket-top">
+                        <span class="hu-ticket-id">#TK-9038</span>
+                    </div>
+                    <span class="hu-ticket-subject">Export to CSV not including all columns</span>
+                    <span class="hu-ticket-excerpt">You wrote: "When I export the report for Q1, the 'Region' and 'Source' columns are missing..."</span>
+                </div>
+                <span class="hu-ticket-time">2 days ago</span>
+            </a>
+
+            <!-- Resolved ticket -->
+            <a href="/ticket/9021" class="hu-ticket-row">
+                <div class="hu-ticket-status-col">
+                    <span class="hu-ticket-status-badge hu-badge--resolved">Resolved</span>
+                </div>
+                <div class="hu-ticket-main">
+                    <div class="hu-ticket-top">
+                        <span class="hu-ticket-id">#TK-9021</span>
+                    </div>
+                    <span class="hu-ticket-subject">Two-factor authentication not sending SMS code</span>
+                    <span class="hu-ticket-excerpt">Resolved by support · Closed 4 days ago</span>
+                </div>
+                <span class="hu-ticket-time">Mar 8</span>
+            </a>
+
+            <!-- Another resolved ticket -->
+            <a href="/ticket/8994" class="hu-ticket-row">
+                <div class="hu-ticket-status-col">
+                    <span class="hu-ticket-status-badge hu-badge--resolved">Resolved</span>
+                </div>
+                <div class="hu-ticket-main">
+                    <div class="hu-ticket-top">
+                        <span class="hu-ticket-id">#TK-8994</span>
+                    </div>
+                    <span class="hu-ticket-subject">Profile picture upload fails on Safari</span>
+                    <span class="hu-ticket-excerpt">Resolved by support · Closed 1 week ago</span>
+                </div>
+                <span class="hu-ticket-time">Mar 5</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Two-column: Recent updates + Help -->
+    <div class="hu-columns">
+
+        <!-- Recent updates / timeline -->
+        <section class="hu-panel hu-panel--updates">
+            <div class="hu-panel-head">
+                <h2 class="hu-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    Recent Updates
+                </h2>
+            </div>
+
+            <div class="hu-updates-feed">
+                <div class="hu-update-item">
+                    <div class="hu-update-dot" style="background:#6366f1"></div>
+                    <div class="hu-update-body">
+                        <p><strong>Support</strong> replied to <strong>#TK-9042</strong></p>
+                        <span class="hu-update-time">25 minutes ago</span>
+                    </div>
+                </div>
+
+                <div class="hu-update-item">
+                    <div class="hu-update-dot" style="background:#818cf8"></div>
+                    <div class="hu-update-body">
+                        <p>You created ticket <strong>#TK-9038</strong></p>
+                        <span class="hu-update-time">2 days ago</span>
+                    </div>
+                </div>
+
+                <div class="hu-update-item">
+                    <div class="hu-update-dot" style="background:#10b981"></div>
+                    <div class="hu-update-body">
+                        <p><strong>#TK-9021</strong> was marked as <strong>Resolved</strong></p>
+                        <span class="hu-update-time">4 days ago</span>
+                    </div>
+                </div>
+
+                <div class="hu-update-item">
+                    <div class="hu-update-dot" style="background:#10b981"></div>
+                    <div class="hu-update-body">
+                        <p><strong>#TK-8994</strong> was marked as <strong>Resolved</strong></p>
+                        <span class="hu-update-time">1 week ago</span>
+                    </div>
+                </div>
+
+                <div class="hu-update-item">
+                    <div class="hu-update-dot" style="background:#818cf8"></div>
+                    <div class="hu-update-body">
+                        <p>You created ticket <strong>#TK-9021</strong></p>
+                        <span class="hu-update-time">1 week ago</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Help / quick actions sidebar -->
+        <section class="hu-panel hu-panel--help">
+            <div class="hu-panel-head">
+                <h2 class="hu-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    Need Help?
+                </h2>
+            </div>
+
+            <div class="hu-help-cards">
+                <a href="/ticket/new" class="hu-help-card">
+                    <div class="hu-help-icon" style="--hc:#6366f1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </div>
+                    <div class="hu-help-text">
+                        <span class="hu-help-title">Submit a Ticket</span>
+                        <span class="hu-help-desc">Describe your issue and we'll get back to you</span>
+                    </div>
+                </a>
+
+                <a href="/knowledge-base" class="hu-help-card">
+                    <div class="hu-help-icon" style="--hc:#2dd4bf">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                        </svg>
+                    </div>
+                    <div class="hu-help-text">
+                        <span class="hu-help-title">Knowledge Base</span>
+                        <span class="hu-help-desc">Browse guides and common solutions</span>
+                    </div>
+                </a>
+
+                <a href="/faq" class="hu-help-card">
+                    <div class="hu-help-icon" style="--hc:#f59e0b">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                    </div>
+                    <div class="hu-help-text">
+                        <span class="hu-help-title">FAQ</span>
+                        <span class="hu-help-desc">Answers to frequently asked questions</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+</div>
