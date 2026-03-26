@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\services\ChatService\ChatService.Api\ChatService.Api.csproj" />
+    <ProjectReference Include="..\..\services\CustomerService\CustomerService.Api\CustomerService.Api.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.API\IdentityService.API.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Api\MessagingService.Api.csproj" />
     <ProjectReference Include="..\..\services\TicketService\TicketService.Api\TicketService.Api.csproj" />

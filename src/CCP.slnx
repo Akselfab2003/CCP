@@ -9,6 +9,13 @@
     <Project Path="services/ChatService/ChatService.Api/ChatService.Api.csproj" />
     <Project Path="services/ChatService/ChatService.Infrastructure/ChatService.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/services/CustomerService/">
+    <Project Path="services/CustomerService/CustomerService.Api/CustomerService.Api.csproj" Id="ac041ea3-0d13-416f-bdfd-3204ec40793d" />
+    <Project Path="services/CustomerService/CustomerService.Application/CustomerService.Application.csproj" Id="0e4473c2-62cf-47a2-8354-066320d54ebf" />
+    <Project Path="services/CustomerService/CustomerService.Domain/CustomerService.Domain.csproj" Id="4779705f-371e-4713-b5a7-0ab76fb4fd72" />
+    <Project Path="services/CustomerService/CustomerService.Infrastructure/CustomerService.Infrastructure.csproj" Id="89a63df1-ea30-49fd-a24e-79567250d400" />
+    <Project Path="services/CustomerService/CustomerService.Sdk/CustomerService.Sdk.csproj" />
+  </Folder>
   <Folder Name="/src/services/IdentityService/">
     <Project Path="services/IdentityService/IdentityService.API/IdentityService.API.csproj" />
     <Project Path="services/IdentityService/IdentityService.Application/IdentityService.Application.csproj" />
@@ -30,10 +37,18 @@
     <Project Path="services/TicketService/TicketService.Sdk/TicketService.Sdk.csproj" />
   </Folder>
   <Folder Name="/src/shared/">
+    <Project Path="shared/CCP.Encryption/CCP.Encryption.csproj" />
     <Project Path="shared/CCP.Sdk.utils/CCP.Sdk.utils.csproj" Id="ba572a48-0b55-4f2f-a0ae-e53d7a7b0751" />
     <Project Path="shared/CCP.Shared/CCP.Shared.csproj" Id="88c47ede-90bf-431c-8900-a836c6efbb98" />
   </Folder>
   <Folder Name="/src/tests/" />
+  <Folder Name="/src/tests/CustomerService/">
+    <Project Path="tests/CustomerService/CustomerService.Api.Integration.Tests/CustomerService.Api.Integration.Tests.csproj" />
+    <Project Path="tests/CustomerService/CustomerService.Tests/CustomerService.Tests.csproj" />
+  </Folder>
+  <Folder Name="/src/tests/Encryption/">
+    <Project Path="tests/Encryption/Encryption.Tests/Encryption.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/tests/IdentityService/">
     <Project Path="tests/IdentityService/Identity.Api.IntegrationTests/Identity.Api.IntegrationTests.csproj" />
     <Project Path="tests/IdentityService/Identity.Application.Tests/Identity.Application.Tests.csproj" />
