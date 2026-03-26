@@ -11,6 +11,13 @@
     <Project Path="services/IdentityService/IdentityService.Sdk/IdentityService.Sdk.csproj" />
     <Project Path="services/IdentityService/Keycloak.Sdk/Keycloak.Sdk.csproj" />
   </Folder>
+  <Folder Name="/src/services/MessagingService/">
+    <Project Path="services/MessagingService/MessagingService.Api/MessagingService.Api.csproj" />
+    <Project Path="services/MessagingService/MessagingService.Application/MessagingService.Application.csproj" />
+    <Project Path="services/MessagingService/MessagingService.Domain/MessagingService.Domain.csproj" />
+    <Project Path="services/MessagingService/MessagingService.Infrastructure/MessagingService.Infrastructure.csproj" />
+    <Project Path="services/MessagingService/MessagingService.Sdk/MessagingService.Sdk.csproj" />
+  </Folder>
   <Folder Name="/src/services/TicketService/">
     <Project Path="services/TicketService/TicketService.Api/TicketService.Api.csproj" />
     <Project Path="services/TicketService/TicketService.Application/TicketService.Application.csproj" />
@@ -26,6 +33,10 @@
   <Folder Name="/src/tests/IdentityService/">
     <Project Path="tests/IdentityService/Identity.Api.IntegrationTests/Identity.Api.IntegrationTests.csproj" />
     <Project Path="tests/IdentityService/Identity.Application.Tests/Identity.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/src/tests/MessagingService/">
+    <Project Path="tests/MessagingService/MessagingService.Api.IntegrationTests/MessagingService.Api.IntegrationTests.csproj" />
+    <Project Path="tests/MessagingService/MessagingService.Tests/MessagingService.Tests.csproj" />
   </Folder>
   <Folder Name="/src/tests/TestUtils/">
     <Project Path="tests/TestUtils/TestUtils/TestUtils.csproj" />

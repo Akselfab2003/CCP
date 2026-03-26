@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.API\IdentityService.API.csproj" />
+    <ProjectReference Include="..\..\services\MessagingService\MessagingService.Api\MessagingService.Api.csproj" />
   </ItemGroup>
 
 </Project>
