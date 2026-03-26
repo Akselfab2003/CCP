@@ -100,6 +100,8 @@ IResourceBuilder<PostgresDatabaseResource> TicketDB = Postgres.AddDatabase(name:
 // Add Projects and their dependencies
 IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.IdentityService_API>("identityservice-api");
 IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects.MessagingService_Api>("messagingservice-api");
+IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
+IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
 
 
 IdentityService
@@ -110,6 +112,19 @@ IdentityService
         env.EnvironmentVariables.Add("KeycloakAdminApiClient", "KeycloakAdminApiClient");
         env.EnvironmentVariables.Add("KeycloakAdminApiClientSecret", KeycloakApiClientSecret);
     })
+    .WithUrlForEndpoint("https", endpoint =>
+    {
+        endpoint.Url = "/swagger";
+        endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+        endpoint.DisplayText = "API Swagger";
+    })
+    .WithOtlpExporter();
+
+TicketService
+    .WithReference(Keycloak)
+    .WaitFor(Keycloak)
+    .WithReference(TicketDB)
+    .WaitFor(TicketDB)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
@@ -131,6 +146,18 @@ MessagingService.WaitFor(Keycloak)
     .WithOtlpExporter();
 
 
+ChatService
+    .WaitFor(Keycloak)
+    .WaitFor(ChatDB)
+    .WaitFor(Ollama)
+    .WaitFor(TicketService)
+    .WithReference(Keycloak)
+    .WithReference(TicketService)
+    .WithReference(ChatDB)
+    .WithReference(Ollama)
+    .WithOtlpExporter();
+
+
 if (Environment == "DEV")
 {
     Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
@@ -146,12 +173,5 @@ if (Environment == "DEV")
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
-
-
-
-
-
-
-
 
 builder.Build().Run();
