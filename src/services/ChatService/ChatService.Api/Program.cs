@@ -1,4 +1,7 @@
+using System.Reflection;
 using CCP.ServiceDefaults;
+using CCP.ServiceDefaults.Startup;
+using CCP.ServiceDefaults.swagger;
 using ChatService.Data;
 using ChatService.Interfaces;
 using ChatService.Models;
@@ -16,7 +19,7 @@ builder.Services.Configure<ChatOptions>(
 // EF Core med pgvector via Aspire
 builder.Services.AddDbContext<ChatDbContext>(opts =>
     opts.UseNpgsql(
-        builder.Configuration.GetConnectionString("chatservicedb"),
+        builder.Configuration.GetConnectionString("chatDB"),
         o =>
         {
             o.UseVector();
@@ -49,10 +52,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
-    var db = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
-    db.Database.Migrate();
+    app.AppMapSwaggerExtensions();
+    AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
 }
 
 app.UseSwagger();

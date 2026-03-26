@@ -1,0 +1,54 @@
+﻿@page "/register"
+@using CCP.Website.Components.Register
+@layout RegisterLayout
+
+<FluentWizard StepperPosition="StepperPosition.Top" Id="signup-wizard" ValueChanged="stepChanged" OnFinish="Submit">
+    <Steps>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div class="si-step @(context.Active ? "active" : "")">
+                    <div class="si-step-wrap">
+                        <div class="si-dot @(context.Active ? "active" : "")  @(IsStepCompleted(context.Index) ? "done" : "")">@(IsStepCompleted(context.Index) ? DoneIcon : "1")</div>
+                        <div class="si-label @(context.Active ? "active" : "") @(IsStepCompleted(context.Index) ? "done" : "") ">Organization</div>
+                    </div>
+                </div>
+                <div class="si-connector @(IsStepCompleted(context.Index) ? "done" : "")">
+                </div>
+            </StepTemplate>
+            <ChildContent>
+                <div class="form-header">
+                    <div class="form-title">
+                        Create your <em>Organization</em>
+                    </div>
+                    <div class="form-subtitle">
+                        lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec suscipit auctor dui, sed efficitur.
+                    </div>
+                </div>
+                <div class="divider" />
+                <RegisterOrganization OnValidSubmit="RegisterOrganization" />
+            </ChildContent>
+        </FluentWizardStep>
+        <FluentWizardStep>
+            <StepTemplate>
+                <div class="si-step @(context.Active ? "active" : "")">
+                    <div class="si-step-wrap">
+                        <div class="si-dot @(context.Active ? "active" : "")  @(IsStepCompleted(context.Index) ? "done" : "")"> @(IsStepCompleted(context.Index) ? DoneIcon : "2") </div>
+                        <div class="si-label @(context.Active ? "active" : "") @(IsStepCompleted(context.Index) ? "done" : "") ">Account</div>
+                    </div>
+                </div>
+            </StepTemplate>
+            <ChildContent>
+                <div class="form-header">
+                    <div class="form-title">
+                        Create your <em>Account</em>
+                    </div>
+                    <div class="form-subtitle">
+                        lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec suscipit auctor dui, sed efficitur.
+                    </div>
+                </div>
+                <RegisterAccount OnValidSubmit="RegisterAccount" />
+            </ChildContent>
+        </FluentWizardStep>
+    </Steps>
+</FluentWizard>
+
