@@ -11,6 +11,13 @@
     <Project Path="services/IdentityService/IdentityService.Sdk/IdentityService.Sdk.csproj" />
     <Project Path="services/IdentityService/Keycloak.Sdk/Keycloak.Sdk.csproj" />
   </Folder>
+  <Folder Name="/src/services/TicketService/">
+    <Project Path="services/TicketService/TicketService.Api/TicketService.Api.csproj" />
+    <Project Path="services/TicketService/TicketService.Application/TicketService.Application.csproj" />
+    <Project Path="services/TicketService/TicketService.Domain/TicketService.Domain.csproj" />
+    <Project Path="services/TicketService/TicketService.Infrastructure/TicketService.Infrastructure.csproj" />
+    <Project Path="services/TicketService/TicketService.Sdk/TicketService.Sdk.csproj" />
+  </Folder>
   <Folder Name="/src/shared/">
     <Project Path="shared/CCP.Sdk.utils/CCP.Sdk.utils.csproj" Id="ba572a48-0b55-4f2f-a0ae-e53d7a7b0751" />
     <Project Path="shared/CCP.Shared/CCP.Shared.csproj" Id="88c47ede-90bf-431c-8900-a836c6efbb98" />

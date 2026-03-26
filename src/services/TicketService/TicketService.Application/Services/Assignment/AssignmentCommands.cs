@@ -1,0 +1,83 @@
+﻿using ChatApp.Shared.AuthContext;
+using ChatApp.Shared.ResultAbstraction;
+using Microsoft.Extensions.Logging;
+using TicketService.Domain.Interfaces;
+
+namespace TicketService.Application.Services.Assignment
+{
+    public class AssignmentCommands : IAssignmentCommands
+    {
+        private readonly ILogger<AssignmentCommands> _logger;
+        private readonly IAssignmentRepository _assignmentRepository;
+        private readonly ICurrentUser _currentUser;
+
+        public AssignmentCommands(ILogger<AssignmentCommands> logger, IAssignmentRepository assignmentRepository, ICurrentUser currentUser)
+        {
+            _logger = logger;
+            _assignmentRepository = assignmentRepository;
+            _currentUser = currentUser;
+        }
+
+        public async Task<Result<Guid>> CreateAssignmentAsync(int ticketId, Guid AssignUserId)
+        {
+            try
+            {
+                var assignment = new Domain.Entities.Assignment();
+                assignment.AddRequiredInfo(ticketId, AssignUserId, _currentUser.UserId);
+                var result = await _assignmentRepository.AddAsync(assignment);
+
+                if (result.IsFailure)
+                {
+                    _logger.LogError("Failed to create assignment: {Error}", result.Error);
+                    return Result.Failure<Guid>(result.Error);
+                }
+
+                await _assignmentRepository.SaveChangesAsync();
+
+                return Result.Success(result.Value.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating the assignment.");
+                return Result.Failure<Guid>(Error.Failure(code: "AssignmentCreationFailed", description: "An error occurred while creating the assignment."));
+            }
+        }
+
+        public async Task<Result<Guid>> CreateOrUpdateAssignment(int ticketId, Guid assignUserId)
+        {
+            try
+            {
+                Result<Domain.Entities.Assignment> assignment = await _assignmentRepository.GetAssignmentByTicketIdAsync(ticketId);
+
+                if (assignment.IsFailure)
+                {
+                    _logger.LogInformation("No existing assignment found for ticket {TicketId}. Creating a new assignment.", ticketId);
+                    return await CreateAssignmentAsync(ticketId, assignUserId);
+                }
+                else
+                {
+                    Domain.Entities.Assignment existingAssignment = assignment.Value;
+
+                    existingAssignment.UpdateAssignment(assignUserId, _currentUser.UserId);
+
+                    Result<Domain.Entities.Assignment> updateResult = await _assignmentRepository.UpdateAsync(existingAssignment);
+
+                    if (updateResult.IsFailure)
+                    {
+                        _logger.LogError("Failed to update assignment for ticket {TicketId}: {Error}", ticketId, updateResult.Error);
+                        return Result.Failure<Guid>(updateResult.Error);
+                    }
+
+                    await _assignmentRepository.SaveChangesAsync();
+
+                    return Result.Success(existingAssignment.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating or updating the assignment.");
+                return Result.Failure<Guid>(Error.Failure(code: "AssignmentCreationOrUpdateFailed", description: "An error occurred while creating or updating the assignment."));
+            }
+        }
+    }
+}

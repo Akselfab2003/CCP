@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+
+
+  <PropertyGroup>
+    <KiotaInputDoc>..\TicketService.Api\Docs\TicketService.Api.json</KiotaInputDoc>
+    <KiotaOutputDir>.\Generated</KiotaOutputDir>
+    <KiotaSdkName>TicketService.Sdk</KiotaSdkName>
+    <KiotaClientClass>TicketServiceClient</KiotaClientClass>
+  </PropertyGroup>
+
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
+    <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
+  </ItemGroup>
+  
+</Project>
