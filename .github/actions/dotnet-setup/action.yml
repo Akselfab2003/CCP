@@ -22,6 +22,7 @@ runs:
     - name: Install Required .NET Tools for Build
       shell: ${{ inputs.shell }}
       run: |
+        export PATH="$PATH:/github/home/.dotnet/tools"
         dotnet tool install --global Microsoft.OpenApi.Kiota
         dotnet tool install --global dotnet-coverage
         dotnet tool install --global dotnet-reportgenerator-globaltool
