@@ -161,22 +161,16 @@ namespace CPP.UI.Tests.Tests.Usecase
 
         private async Task FillOutCompanyDetailsForm(CustomerFormSubmission form)
         {
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).FillAsync(form.OrganizationName);
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).FillAsync(form.Domain);
+            await Page.GetByTestId("company-name-input").FillAsync(form.OrganizationName);
+            await Page.GetByTestId("domain-name-input").FillAsync(form.Domain);
             await Page.GetByRole(AriaRole.Button, new() { Name = "Next" }).ClickAsync();
         }
         private async Task FillOutAccountDetailsForm(CustomerFormSubmission form)
         {
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).FillAsync(form.FirstName);
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).FillAsync(form.LastName);
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).FillAsync(form.Email);
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).FillAsync(form.Password);
+            await Page.GetByTestId("first-name-input").FillAsync(form.FirstName);
+            await Page.GetByTestId("last-name-input").FillAsync(form.LastName);
+            await Page.GetByTestId("email-input").FillAsync(form.Email);
+            await Page.GetByTestId("password-input").FillAsync(form.Password);
             await Page.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
         }
     }
