@@ -83,7 +83,7 @@ public class Worker(ILogger<Worker> logger, IConfiguration configuration) : Back
 
             var folders = await client.GetFoldersAsync(client.PersonalNamespaces[0]);
 
-            var folder = folders.FirstOrDefault(f => f.FullName == FolderWithChange.FullName);
+            var folder = folders.FirstOrDefault(f => f.Id == FolderWithChange.Id);
 
             if (folder == null)
             {

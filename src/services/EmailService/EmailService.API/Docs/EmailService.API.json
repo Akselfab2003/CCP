@@ -5,6 +5,38 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/TenantEmailConfiguration/create": {
+      "post": {
+        "tags": [
+          "TenantEmailConfiguration"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/EmailSendingService/send-ticket-created": {
       "post": {
         "tags": [
@@ -329,6 +361,21 @@
   },
   "components": {
     "schemas": {
+      "AddTenantEmailConfigurationRequest": {
+        "required": [
+          "domain",
+          "defaultSenderEmail"
+        ],
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "defaultSenderEmail": {
+            "type": "string"
+          }
+        }
+      },
       "CreateMessageRequest": {
         "type": "object",
         "properties": {
@@ -716,6 +763,9 @@
     }
   },
   "tags": [
+    {
+      "name": "TenantEmailConfiguration"
+    },
     {
       "name": "EmailSendingService"
     },
