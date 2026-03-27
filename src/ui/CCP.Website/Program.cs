@@ -1,5 +1,6 @@
 using CCP.Website.Components;
 using CCP.Website.Services;
+using IdentityService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -54,14 +55,13 @@ namespace CCP.Website
             });
 
 
-            var SassServiceUrl = builder.Configuration.GetValue<string>("services:chatapp-ui:https:0");
-            builder.Services.AddScoped<WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("ChatAppUIUrl configuration value is required.")));
+            var SassServiceUrl = builder.Configuration.GetValue<string>("services:ccp-ui:https:0");
+            builder.Services.AddScoped<WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("CCP_UI configuration value is required.")));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddFluentUIComponents();
 
-
-
-
+            var IdentityServiceUrl = builder.Configuration.GetValue<string>("services:identityservice-api:https:0") ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required.");
+            builder.Services.AddIdentityServiceSdk(IdentityServiceUrl);
 
             var app = builder.Build();
 

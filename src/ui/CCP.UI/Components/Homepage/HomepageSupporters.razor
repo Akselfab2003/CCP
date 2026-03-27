@@ -1,0 +1,278 @@
+﻿@using CCP.Shared.UIContext
+@using Microsoft.AspNetCore.Authorization
+@inject IUIUserContext UserContext
+@attribute [Authorize]
+@layout CCPLayout
+
+<div class="hs-wrap">
+
+    <!-- Greeting bar -->
+    <header class="hs-greeting">
+        <div class="hs-greeting-glow" aria-hidden="true"></div>
+
+        <div class="hs-greeting-left">
+            <h1 class="hs-greeting-title">Good morning, <span class="hs-greeting-name">@UserContext.FirstName</span></h1>
+            <p class="hs-greeting-sub">
+                You have <strong>4 tickets</strong> assigned and <strong>2 unread</strong> inbox messages.
+            </p>
+        </div>
+
+        <div class="hs-greeting-actions">
+            <a href="/Ticketportal" class="hs-btn hs-btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="15" height="15">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                </svg>
+                My Tickets
+            </a>
+            <a href="/inbox" class="hs-btn hs-btn-ghost">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="15" height="15">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                </svg>
+                Inbox
+            </a>
+        </div>
+    </header>
+
+    <!-- Personal stats -->
+    <section class="hs-stats">
+        <div class="hs-stat-card">
+            <div class="hs-stat-icon" style="--sc:#6366f1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                </svg>
+            </div>
+            <div class="hs-stat-data">
+                <span class="hs-stat-val">4</span>
+                <span class="hs-stat-label">Assigned to you</span>
+            </div>
+        </div>
+
+        <div class="hs-stat-card">
+            <div class="hs-stat-icon" style="--sc:#f59e0b">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </div>
+            <div class="hs-stat-data">
+                <span class="hs-stat-val">1.8h</span>
+                <span class="hs-stat-label">Your avg. response</span>
+            </div>
+        </div>
+
+        <div class="hs-stat-card">
+            <div class="hs-stat-icon" style="--sc:#10b981">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </div>
+            <div class="hs-stat-data">
+                <span class="hs-stat-val">23</span>
+                <span class="hs-stat-label">Resolved this week</span>
+            </div>
+        </div>
+
+        <div class="hs-stat-card">
+            <div class="hs-stat-icon" style="--sc:#a78bfa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M14 9V5a3 3 0 00-6 0v4" />
+                    <path d="M18.8 21H5.2c-.7 0-1.2-.6-1.2-1.2v-7.6c0-.7.5-1.2 1.2-1.2h13.6c.7 0 1.2.5 1.2 1.2v7.6c0 .6-.5 1.2-1.2 1.2z" />
+                </svg>
+            </div>
+            <div class="hs-stat-data">
+                <span class="hs-stat-val">96%</span>
+                <span class="hs-stat-label">Your satisfaction</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Two-column: Tickets + Activity -->
+    <div class="hs-columns">
+
+        <!-- Assigned Tickets -->
+        <section class="hs-panel hs-panel--tickets">
+            <div class="hs-panel-head">
+                <h2 class="hs-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                    </svg>
+                    Assigned to You
+                </h2>
+                <a href="/Ticketportal" class="hs-panel-link">View all →</a>
+            </div>
+
+            <div class="hs-ticket-list">
+                <!-- Ticket row -->
+                <a href="/ticket/8821" class="hs-ticket-row">
+                    <span class="hs-ticket-priority hs-priority--urgent" title="Urgent"></span>
+                    <div class="hs-ticket-info">
+                        <span class="hs-ticket-id">#TK-8821</span>
+                        <span class="hs-ticket-subject">Payment gateway returning 500 on checkout</span>
+                    </div>
+                    <span class="hs-ticket-tag hs-tag--urgent">Urgent</span>
+                    <span class="hs-ticket-time">12m ago</span>
+                </a>
+
+                <a href="/ticket/8819" class="hs-ticket-row">
+                    <span class="hs-ticket-priority hs-priority--high" title="High"></span>
+                    <div class="hs-ticket-info">
+                        <span class="hs-ticket-id">#TK-8819</span>
+                        <span class="hs-ticket-subject">User unable to reset password via email link</span>
+                    </div>
+                    <span class="hs-ticket-tag hs-tag--high">High</span>
+                    <span class="hs-ticket-time">1h ago</span>
+                </a>
+
+                <a href="/ticket/8815" class="hs-ticket-row">
+                    <span class="hs-ticket-priority hs-priority--medium" title="Medium"></span>
+                    <div class="hs-ticket-info">
+                        <span class="hs-ticket-id">#TK-8815</span>
+                        <span class="hs-ticket-subject">Dashboard charts not loading on Firefox 128</span>
+                    </div>
+                    <span class="hs-ticket-tag hs-tag--medium">Medium</span>
+                    <span class="hs-ticket-time">3h ago</span>
+                </a>
+
+                <a href="/ticket/8810" class="hs-ticket-row">
+                    <span class="hs-ticket-priority hs-priority--low" title="Low"></span>
+                    <div class="hs-ticket-info">
+                        <span class="hs-ticket-id">#TK-8810</span>
+                        <span class="hs-ticket-subject">Feature request: dark mode for customer portal</span>
+                    </div>
+                    <span class="hs-ticket-tag hs-tag--low">Low</span>
+                    <span class="hs-ticket-time">Yesterday</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Activity feed -->
+        <section class="hs-panel hs-panel--activity">
+            <div class="hs-panel-head">
+                <h2 class="hs-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    Recent Activity
+                </h2>
+            </div>
+
+            <div class="hs-activity-feed">
+                <div class="hs-activity-item">
+                    <div class="hs-activity-dot" style="background:#6366f1"></div>
+                    <div class="hs-activity-body">
+                        <p><strong>You</strong> replied to <strong>#TK-8821</strong></p>
+                        <span class="hs-activity-time">12 minutes ago</span>
+                    </div>
+                </div>
+
+                <div class="hs-activity-item">
+                    <div class="hs-activity-dot" style="background:#10b981"></div>
+                    <div class="hs-activity-body">
+                        <p><strong>You</strong> resolved <strong>#TK-8807</strong></p>
+                        <span class="hs-activity-time">45 minutes ago</span>
+                    </div>
+                </div>
+
+                <div class="hs-activity-item">
+                    <div class="hs-activity-dot" style="background:#f59e0b"></div>
+                    <div class="hs-activity-body">
+                        <p><strong>Alex Chen</strong> assigned <strong>#TK-8819</strong> to you</p>
+                        <span class="hs-activity-time">1 hour ago</span>
+                    </div>
+                </div>
+
+                <div class="hs-activity-item">
+                    <div class="hs-activity-dot" style="background:#a78bfa"></div>
+                    <div class="hs-activity-body">
+                        <p><strong>Maria Lopez</strong> left a note on <strong>#TK-8815</strong></p>
+                        <span class="hs-activity-time">2 hours ago</span>
+                    </div>
+                </div>
+
+                <div class="hs-activity-item">
+                    <div class="hs-activity-dot" style="background:#10b981"></div>
+                    <div class="hs-activity-body">
+                        <p><strong>You</strong> resolved <strong>#TK-8802</strong></p>
+                        <span class="hs-activity-time">3 hours ago</span>
+                    </div>
+                </div>
+
+                <div class="hs-activity-item">
+                    <div class="hs-activity-dot" style="background:#6366f1"></div>
+                    <div class="hs-activity-body">
+                        <p><strong>You</strong> replied to <strong>#TK-8810</strong></p>
+                        <span class="hs-activity-time">Yesterday</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Quick access -->
+    <section class="hs-quick">
+        <h2 class="hs-section-label">Quick Access</h2>
+        <div class="hs-quick-grid">
+            <a href="/Ticketportal" class="hs-quick-tile">
+                <span class="hs-quick-icon" style="color:#818cf8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                        <path d="M9 12h6M9 16h4" />
+                    </svg>
+                </span>
+                <span class="hs-quick-label">All Tickets</span>
+            </a>
+            <a href="/inbox" class="hs-quick-tile">
+                <span class="hs-quick-icon" style="color:#94a3b8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                </span>
+                <span class="hs-quick-label">Inbox</span>
+            </a>
+            <a href="/customers" class="hs-quick-tile">
+                <span class="hs-quick-icon" style="color:#a78bfa">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                </span>
+                <span class="hs-quick-label">Customers</span>
+            </a>
+            <a href="/reports" class="hs-quick-tile">
+                <span class="hs-quick-icon" style="color:#34d399">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                </span>
+                <span class="hs-quick-label">Reports</span>
+            </a>
+            <a href="/knowledge-base" class="hs-quick-tile">
+                <span class="hs-quick-icon" style="color:#2dd4bf">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                    </svg>
+                </span>
+                <span class="hs-quick-label">Knowledge Base</span>
+            </a>
+            <a href="/settings" class="hs-quick-tile">
+                <span class="hs-quick-icon" style="color:#94a3b8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+                    </svg>
+                </span>
+                <span class="hs-quick-label">Settings</span>
+            </a>
+        </div>
+    </section>
+
+</div>

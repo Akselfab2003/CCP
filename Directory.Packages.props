@@ -31,6 +31,7 @@
     <!-- POSTGRESQL / NPGSQL
          Postgres EF Core provider. Pgvector adds vector similarity search
          support used for AI/embeddings features -->
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.5.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />

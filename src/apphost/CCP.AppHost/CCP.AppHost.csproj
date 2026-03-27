@@ -17,8 +17,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\services\EmailService\EmailService.API\EmailService.Api.csproj" />
     <ProjectReference Include="..\..\services\EmailService\EmailService.Worker.Host\EmailService.Worker.Host.csproj" />
+    <ProjectReference Include="..\..\services\ChatService\ChatService.Api\ChatService.Api.csproj" />
+    <ProjectReference Include="..\..\services\CustomerService\CustomerService.Api\CustomerService.Api.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.API\IdentityService.API.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Api\MessagingService.Api.csproj" />
+    <ProjectReference Include="..\..\services\TicketService\TicketService.Api\TicketService.Api.csproj" />
+    <ProjectReference Include="..\..\ui\CCP.UI\CCP.UI.csproj" />
+    <ProjectReference Include="..\..\ui\CCP.Website\CCP.Website.csproj" />
   </ItemGroup>
 
 </Project>

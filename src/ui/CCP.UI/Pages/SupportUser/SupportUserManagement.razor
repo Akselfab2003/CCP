@@ -1,0 +1,319 @@
+﻿@using IdentityService.Sdk.Services.User
+
+@page "/support-users"
+@layout CCPLayout
+@inject IJSRuntime JS
+@inject IUserService UserService
+
+<PageTitle>Support User Management</PageTitle>
+
+<!-- Top Header -->
+<div class="dash-greeting">
+    <div>
+        <h2 class="dash-greeting-title">Support User Management</h2>
+        <p class="dash-greeting-sub">Manage and monitor your support team performance.</p>
+    </div>
+    <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
+</div>
+
+<!-- Main Grid: Liste til venstre, Detaljer til højre -->
+<div class="support-user-grid">
+
+    <!-- VENSTRE SIDE: Liste over support users -->
+    <div class="support-user-list-container">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <span class="dash-card-title">Support Team (@supportUsers.Count)</span>
+            </div>
+
+            @if (isLoading)
+            {
+                <div class="support-user-list" style="text-align:center; padding: 2rem; color: var(--ccp-text-mid);">
+                    <p>Loading support users...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="support-user-list" style="text-align:center; padding: 2rem; color: #ef4444;">
+                    <p>@errorMessage</p>
+                    <button @onclick="LoadSupportUsers" class="retry-button">
+                        Retry
+                    </button>
+                </div>
+            }
+            else if (supportUsers.Count == 0)
+            {
+                <div class="support-user-list" style="text-align:center; padding: 2rem; color: var(--ccp-text-mid);">
+                    <p>No support users found.</p>
+                </div>
+            }
+            else
+            {
+                <div class="support-user-list">
+                    @foreach (var user in supportUsers)
+                    {
+                        <div class="support-user-item @(selectedUser?.Id == user.Id ? "active" : "")"
+                             @onclick="() => SelectedUser(user)">
+
+                            <!-- Avatar -->
+                            <div class="support-user-avatar" style="background:@GetAvatarGradient(user.Id)">
+                                @GetInitials(user.Name)
+                            </div>
+
+                            <!-- Info -->
+                            <div class="support-user-info">
+                                <div class="support-user-name">@user.Name</div>
+                                <div class="support-user-email">@user.Email</div>
+                            </div>
+
+                            <!-- Badges -->
+                            <div class="support-user-badges">
+                                <span class="support-badge @(user.Role == "Admin" ? "badge-purple" : "badge-blue")">
+                                    @user.Role
+                                </span>
+                                @if (!user.IsActive)
+                                {
+                                    <span class="support-badge badge-gray">Inactive</span>
+                                }
+                            </div>
+
+                            <!-- Arrow -->
+                            <svg class="support-user-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- HØJRE SIDE: User Detaljer -->
+    <div class="support-user-details-container">
+        @if (selectedUser == null)
+        {
+            <!-- Ingen bruger valgt -->
+            <div class="dash-card empty-details">
+                <div class="empty-details-content">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                    <p>Select a support user to view details</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Bruger er valgt - vis detaljer -->
+            <div class="dash-card">
+
+                <!-- User Header -->
+                <div class="user-details-header">
+                    <div class="user-details-avatar" style="background:@GetAvatarGradient(selectedUser.Id)">
+                        @GetInitials(selectedUser.Name)
+                    </div>
+                    <div>
+                        <h3 class="user-details-name">@selectedUser.Name</h3>
+                        <p class="user-details-role">@selectedUser.Role</p>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="user-section">
+                    <h4 class="user-section-title">Contact Information</h4>
+                    <div class="user-info-grid">
+                        <div class="user-info-item">
+                            <span class="user-info-label">Email</span>
+                            <span class="user-info-value">@selectedUser.Email</span>
+                        </div>
+                        <div class="user-info-item">
+                            <span class="user-info-label">Phone</span>
+                            <span class="user-info-value">@selectedUser.PhoneNumber</span>
+                        </div>
+                        <div class="user-info-item">
+                            <span class="user-info-label">Member since</span>
+                            <span class="user-info-value">@selectedUser.CreatedAt.ToString("MMMM d, yyyy")</span>
+                        </div>
+                        <div class="user-info-item">
+                            <span class="user-info-label">Status</span>
+                            <span class="user-info-value">
+                                <span class="status-indicator @(selectedUser.IsActive ? "active" : "inactive")">
+                                    @(selectedUser.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Statistics -->
+                <div class="user-section">
+                    <h4 class="user-section-title">Performance Statistics</h4>
+                    <div class="user-stats-grid">
+
+                        <div class="user-stat-card">
+                            <div class="user-stat-icon" style="color:#818cf8;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                                </svg>
+                            </div>
+                            <div class="user-stat-label">Total Tickets</div>
+                            <div class="user-stat-value">@selectedUser.TotalTickets</div>
+                        </div>
+
+                        <div class="user-stat-card">
+                            <div class="user-stat-icon" style="color:#34d399;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <div class="user-stat-label">Solved Last Week</div>
+                            <div class="user-stat-value">@selectedUser.SolvedLastWeek</div>
+                        </div>
+
+                        <div class="user-stat-card">
+                            <div class="user-stat-icon" style="color:#f59e0b;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                            </div>
+                            <div class="user-stat-label">Avg. Response</div>
+                            <div class="user-stat-value">@selectedUser.AvgResponseTime</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    // Model for en support bruger med kontaktinfo og statistik
+    public class SupportUser
+    {
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+        public required string Email { get; set; }
+        public required string PhoneNumber { get; set; }
+        public required string Role { get; set; } // "Support" eller "Admin"
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        // Statistik om brugerens performance
+        public int TotalTickets { get; set; }
+        public int SolvedLastWeek { get; set; }
+        public required string AvgResponseTime { get; set; }
+    }
+
+    // Liste over alle support brugere
+    private List<SupportUser> supportUsers = new();
+
+    // Den bruger der er valgt i venstre side (null = ingen valgt)
+    private SupportUser? selectedUser = null;
+
+    //Loading state
+    private bool isLoading = true;
+    private string? errorMessage = null;
+
+    //Henter support brugere fra IdentityService API
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSupportUsers();
+    }
+
+    private async Task LoadSupportUsers()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await UserService.SearchUsers("", CancellationToken.None);
+
+            if (result.IsSuccess)
+            {
+                supportUsers = result.Value.Select(user => new SupportUser
+                {
+                    Id = user.userId,
+                    Name = user.name,
+                    Email = user.email,
+                    PhoneNumber = "N/A", // Keycloak har ikke phone number by default
+                    Role = user.realmRoles.FirstOrDefault() ?? "Support",
+                    IsActive = user.enabled,
+                    CreatedAt = user.CreatedAt,
+                    TotalTickets = 0,        // TODO: Hent fra TicketService
+                    SolvedLastWeek = 0,      // TODO: Hent fra TicketService
+                    AvgResponseTime = "N/A"  // TODO: Hent fra TicketService
+                }).ToList();
+            }
+            else
+            {
+                errorMessage = "Kunne ikke hente support brugere: " + result.Error.Description;
+                supportUsers = new List<SupportUser>();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl ved hentning af support brugere: {ex.Message}";
+            supportUsers = new List<SupportUser>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Kaldes når en bruger klikkes i listen - viser detaljer i højre side
+    private void SelectedUser(SupportUser user)
+    {
+        selectedUser = user;
+    }
+
+    // Laver initialer fra navn (f.eks. "Alex Johnson" → "AJ")
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "?";
+
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length >= 2)
+        {
+            // Fulde navn - tag første bogstav fra fornavn og efternavn
+            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        }
+        else if (parts.Length == 1 && parts[0].Length >= 2)
+        {
+            // Kun ét navn - tag de første 2 bogstaver
+            return parts[0].Substring(0, 2).ToUpper();
+        }
+        else if (parts.Length == 1 && parts[0].Length == 1)
+        {
+            // Kun ét bogstav
+            return parts[0].ToUpper();
+        }
+
+        return "?";
+    }
+
+    // Returnerer en farve gradient baseret på brugerens ID
+    // Samme bruger får altid samme farve
+    private string GetAvatarGradient(Guid userId)
+    {
+        var gradients = new[]
+        {
+            "linear-gradient(135deg,#6366f1,#8b5cf6)", // Indigo → Lilla
+            "linear-gradient(135deg,#ec4899,#f43f5e)", // Pink → Rød
+            "linear-gradient(135deg,#10b981,#059669)", // Grøn → Mørkegrøn
+            "linear-gradient(135deg,#0ea5e9,#6366f1)", // Blå → Indigo
+            "linear-gradient(135deg,#8b5cf6,#a78bfa)"  // Lilla → Lys lilla
+        };
+
+        // Brug hash af ID til at vælge farve (deterministisk)
+        var index = Math.Abs(userId.GetHashCode()) % gradients.Length;
+        return gradients[index];
+    }
+}
