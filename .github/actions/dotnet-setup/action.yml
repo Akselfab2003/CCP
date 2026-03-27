@@ -25,9 +25,5 @@ runs:
         dotnet tool install --global Microsoft.OpenApi.Kiota
         dotnet tool install --global dotnet-coverage
         dotnet tool install --global dotnet-reportgenerator-globaltool
-        dotnet tool update -g linux-dev-certs
-
-    - name: Trust ASP.NET Core HTTPS Development Certificate
-      shell: ${{ inputs.shell }}
-      run: |
+        dotnet tool install --global linux-dev-certs
         dotnet linux-dev-certs install
