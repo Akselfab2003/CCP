@@ -40,29 +40,40 @@ Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
 
 DockerEmailServer
-    .WithEnvironment(env =>
-    {
-        env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
-        env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
-        env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
-        env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
-    })
-    .WithEndpoint("smtp", config =>
-    {
-        config.TargetPort = 25;
-        config.Port = 25;
-    })
-    .WithEndpoint("submission", config =>
-    {
-        config.TargetPort = 587;
-        config.Port = 587;
-    })
-    .WithEndpoint("smtps", config =>
-    {
-        config.TargetPort = 465;
-        config.Port = 465;
-    })
-    .WithLifetime(LifeTimeMode);
+        .WithEnvironment(env =>
+        {
+            env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
+            env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
+            env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
+            env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
+            env.EnvironmentVariables.Add("ENABLE_IMAP", "1");
+        })
+        .WithEndpoint("smtp", config =>
+        {
+            config.TargetPort = 25;
+            config.Port = 25;
+        })
+        .WithEndpoint("submission", config =>
+        {
+            config.TargetPort = 587;
+            config.Port = 587;
+        })
+        .WithEndpoint("smtps", config =>
+        {
+            config.TargetPort = 465;
+            config.Port = 465;
+        })
+        .WithEndpoint("imap", config =>
+        {
+            config.TargetPort = 143;
+            config.Port = 143;
+        })
+        .WithEndpoint("imaps", config =>
+        {
+            config.TargetPort = 993;
+            config.Port = 993;
+        })
+        .WithLifetime(LifeTimeMode);
 
 
 Roundcube

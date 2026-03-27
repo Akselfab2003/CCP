@@ -9,7 +9,7 @@ public class Worker(ILogger<Worker> logger, ImapMailReciver imapMailReciver) : B
         while (!stoppingToken.IsCancellationRequested)
         {
             imapMailReciver.ConnectAsync().GetAwaiter().GetResult();
-            imapMailReciver.ListenerAsync().GetAwaiter().GetResult();
+            //  imapMailReciver.ListenerAsync().GetAwaiter().GetResult();
             if (logger.IsEnabled(LogLevel.Information))
             {
                 logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
