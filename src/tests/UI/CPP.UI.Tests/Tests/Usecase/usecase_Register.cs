@@ -85,12 +85,7 @@ namespace CPP.UI.Tests.Tests.Usecase
 
             await Page.GetByRole(AriaRole.Link, new() { Name = "Sign up" }).ClickAsync();
 
-            await Page.WaitForURLAsync(new Regex("/register.*"), new PageWaitForURLOptions()
-            {
-                WaitUntil = WaitUntilState.DOMContentLoaded,
-                Timeout = _defaultTimeout
-            });
-
+            await Expect(Page).ToHaveURLAsync(new Regex("/register"), new() { Timeout = _defaultTimeout });
 
             await FillOutCompanyDetailsForm(formSubmission);
             await FillOutAccountDetailsForm(formSubmission);
