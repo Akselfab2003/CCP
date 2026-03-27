@@ -220,4 +220,26 @@ if (Environment == "DEV")
 
 
 
+
+
+
+
+builder.AddProject<Projects.EmailService_API>("emailservice-api");
+
+
+
+
+
+
+
+
+builder.AddProject<Projects.EmailService_Worker_Host>("emailservice-worker-host");
+
+
+
+
+
+
+
+
 builder.Build().Run();

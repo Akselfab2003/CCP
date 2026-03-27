@@ -27,6 +27,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <!-- POSTGRESQL / NPGSQL
          Postgres EF Core provider. Pgvector adds vector similarity search
          support used for AI/embeddings features -->

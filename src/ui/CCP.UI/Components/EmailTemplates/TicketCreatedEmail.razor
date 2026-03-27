@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Created – #@Email.Id</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background-color: #090c12; font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif; color: #e8ecf5; }
+        .wrapper { width: 100%; background-color: #090c12; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #141820; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); border: 1px solid rgba(79, 148, 232, 0.15); }
+        .header { background-color: #1b2030; padding: 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-text h1 { margin: 0 0 8px 0; color: #4f94e8; font-size: 20px; font-weight: 600; font-family: 'Syne', sans-serif; }
+        .header-text p { margin: 0; color: #8b95b0; font-size: 13px; }
+        .ticket-banner { background-color: rgba(27, 32, 48, 0.5); padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .ticket-id { font-size: 13px; color: #8b95b0; font-family: 'DM Mono', monospace; }
+        .ticket-id span { color: #4f94e8; font-weight: 700; }
+        .status-badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 6px; text-transform: uppercase; background: rgba(79, 148, 232, 0.2); color: #4f94e8; border: 1px solid rgba(79, 148, 232, 0.3); }
+        .body { padding: 28px; }
+        .confirm-title { font-size: 18px; font-weight: 600; color: #e8ecf5; text-align: center; margin: 0 0 8px 0; font-family: 'Syne', sans-serif; }
+        .confirm-sub { font-size: 14px; color: #8b95b0; text-align: center; margin: 0 0 24px 0; }
+        .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .detail-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .detail-table td.label { color: #8b95b0; font-weight: 500; }
+        .detail-table td.value { color: #e8ecf5; }
+        .message-preview { background: #1b2030; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 16px 20px; font-size: 14px; color: #e8ecf5; line-height: 1.6; margin-bottom: 20px; }
+        .message-preview .label { font-size: 11px; font-weight: 600; color: #8b95b0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .cta { display: block; text-align: center; background-color: #4f94e8; color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .sla-note { background: rgba(79, 148, 232, 0.08); border-left: 3px solid #4f94e8; border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #e8ecf5; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="header-text">
+                    <h1>Your Ticket Has Been Created</h1>
+                    <p>@OrganizationName · Support Center</p>
+                </div>
+            </div>
+
+            <div class="ticket-banner">
+                <div class="ticket-id">Ticket: <span>#@Email.Id</span></div>
+                <span class="status-badge">Open</span>
+            </div>
+
+            <div class="body">
+                <p class="confirm-title">We've received your request</p>
+                <p class="confirm-sub">You will receive an email when our team responds.</p>
+
+                <table class="detail-table">
+                    <tr>
+                        <td class="label">Ticket ID</td>
+                        <td class="value" style="font-family: monospace; font-weight: 700;">#@Email.Id</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Subject</td>
+                        <td class="value">@Email.Subject</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Created by</td>
+                        <td class="value">@Email.RecipientAddress</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Created</td>
+                        <td class="value">@Email.SentAt.ToString("MMM dd, yyyy 'at' h:mm tt")</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Status</td>
+                        <td class="value" style="color: #1d4ed8; font-weight: 600;">Open</td>
+                    </tr>
+                </table>
+
+                @if (!string.IsNullOrWhiteSpace(Email.Body))
+                {
+                    <div class="message-preview">
+                        <div class="label">Your Message</div>
+                        @Email.Body
+                    </div>
+                }
+
+                <a href="@PortalUrl" class="cta">View Your Ticket in Portal</a>
+
+                <div class="sla-note">
+                    We strive to respond within <strong>@ExpectedResponseTime</strong>.
+                    You can track the status and add comments through the portal at any time.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+@code {
+    // ───────────────────────────────────────────────────────────────────────────────
+    // Component Parameters
+    // ───────────────────────────────────────────────────────────────────────────────
+    // These [Parameter] properties allow data to be passed INTO this Blazor component
+    // when it's rendered by EmailTemplateRenderer.cs
+    //
+    // Why we need this:
+    // - Blazor components work like reusable templates with "slots" for data
+    // - The EmailTemplateRenderer fills in these parameters with real ticket data
+    // - The HTML above uses these values (e.g., @Email.Id, @OrganizationName)
+    //
+    // How it works:
+    // 1. EmailSenderController receives a request with ticket data
+    // 2. EmailTemplateRenderer.RenderTicketCreatedEmailAsync() is called
+    // 3. The renderer passes data to THESE parameters
+    // 4. The HTML template above renders with the actual values
+    // 5. The result is a complete HTML email string sent to the customer
+    // ───────────────────────────────────────────────────────────────────────────────
+    [Parameter, EditorRequired] 
+    public EmailService.Domain.Models.EmailSent Email { get; set; } = default!;
+    [Parameter] 
+    public string OrganizationName { get; set; } = "Support";
+    [Parameter] 
+    public string ExpectedResponseTime { get; set; } = "24 hours";
+    [Parameter] 
+    public string PortalUrl { get; set; } = "#";
+}
