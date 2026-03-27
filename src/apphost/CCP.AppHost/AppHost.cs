@@ -105,6 +105,8 @@ IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects
 IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
 IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
 IResourceBuilder<ProjectResource> CustomerService = builder.AddProject<Projects.CustomerService_Api>("customerservice-api");
+IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_Website>("ccp-website");
+IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
 
 
 IdentityService
@@ -175,6 +177,29 @@ ChatService
     .WithReference(Ollama)
     .WithOtlpExporter();
 
+UI
+    .WaitFor(MessagingService)
+    .WaitFor(Keycloak)
+    .WaitFor(IdentityService)
+    .WaitFor(CustomerService)
+    .WaitFor(TicketService)
+    .WithReference(MessagingService)
+    .WithReference(Keycloak)
+    .WithReference(CustomerService)
+    .WithReference(IdentityService)
+    .WithReference(TicketService)
+    .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+    .WithOtlpExporter();
+
+CCPWebsite
+    .WaitFor(UI)
+    .WaitFor(Keycloak)
+    .WaitFor(IdentityService)
+    .WithReference(UI)
+    .WithReference(IdentityService)
+    .WithReference(Keycloak)
+    .WithOtlpExporter();
+
 
 if (Environment == "DEV")
 {
@@ -191,6 +216,8 @@ if (Environment == "DEV")
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
+
+
 
 
 builder.Build().Run();

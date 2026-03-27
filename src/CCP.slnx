@@ -60,6 +60,9 @@
   <Folder Name="/src/tests/TestUtils/">
     <Project Path="tests/TestUtils/TestUtils/TestUtils.csproj" />
   </Folder>
+  <Folder Name="/src/tests/UI/">
+    <Project Path="tests/UI/CPP.UI.Tests/CPP.UI.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/ui/">
     <Project Path="ui/CCP.UI/CCP.UI.csproj" />
     <Project Path="ui/CCP.Website/CCP.Website.csproj" />
