@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using EmailService.Domain.Models;
 
 namespace EmailService.Sdk.Services
 {
     public interface IEmailService
     {
+
         Task SendTicketCreatedEmailAsync(
-    int ticketId,
-    string subject,
-    string body,
-    string recipientEmail,
-    string organizationName = "Support",
-    string expectedResponseTime = "24 hours",
-    string portalUrl = "#");
+            int ticketId,
+            string subject,
+            string body,
+            string recipientEmail,
+            string organizationName = "Support",
+            string expectedResponseTime = "24 hours",
+            string portalUrl = "#");
 
         Task SendTicketReplyEmailAsync(
             int ticketId,
