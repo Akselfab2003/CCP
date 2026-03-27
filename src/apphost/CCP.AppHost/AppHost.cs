@@ -224,7 +224,7 @@ if (Environment == "DEV")
 
 
 
-builder.AddProject<Projects.EmailService_API>("emailservice-api");
+builder.AddProject<Projects.EmailService_Api>("emailservice-api");
 
 
 
