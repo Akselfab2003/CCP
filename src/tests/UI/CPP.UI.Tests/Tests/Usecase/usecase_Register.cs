@@ -57,7 +57,7 @@ namespace CPP.UI.Tests.Tests.Usecase
             await Expect(Page).ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
         }
 
-        [Fact(Skip = true)]
+        [Fact(Skip = "test")]
         public async Task Invalid_Email_Register_Submission_Should_Not_Redirect()
         {
             // Arrange
