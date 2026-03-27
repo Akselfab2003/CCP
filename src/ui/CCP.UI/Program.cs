@@ -1,8 +1,15 @@
+using CCP.ServiceDefaults;
+using CCP.Shared.AuthContext;
+using CCP.Shared.UIContext;
 using CCP.UI.Components;
+using CCP.UI.Services;
+using IdentityService.Sdk.ServiceDefaults;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using TicketService.Sdk.ServiceDefaults;
 
 namespace CCP.UI
 {
@@ -52,6 +59,31 @@ namespace CCP.UI
                 options.SignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
             });
 
+            builder.Services.AddScoped<ChatHubService>();
+            builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+            builder.Services.AddScoped<IUIUserContext, UIUserContext>();
+            builder.Services.AddServiceDefaults("CCP.UI");
+            /*
+            builder.Services.AddEmailServiceSdk(
+                builder.Configuration.GetValue<string>("services:EmailService:http:0")
+                ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
+            */
+            builder.Services.AddMessageServiceSDK(
+                builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+                ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
+            /*
+            builder.Services.AddCustomerviceSdk(
+                builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
+                ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
+            */
+            builder.Services.AddIdentityServiceSdk(
+                builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+                ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
+
+            builder.Services.AddTicketServiceSdk(
+                builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+                ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
+                );
 
             var app = builder.Build();
 

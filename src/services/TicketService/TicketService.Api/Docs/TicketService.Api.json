@@ -4,6 +4,11 @@
     "title": "TicketService.Api | v1",
     "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "https://localhost:7090/"
+    }
+  ],
   "paths": {
     "/ticket/create": {
       "post": {
@@ -54,8 +59,8 @@
         ],
         "parameters": [
           {
-            "name": "TicketId",
-            "in": "query",
+            "name": "ticketId",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
@@ -348,14 +353,7 @@
             "format": "uuid"
           },
           "assignment": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/AssignmentDto"
-              }
-            ]
+            "$ref": "#/components/schemas/AssignmentDto"
           },
           "customerId": {
             "type": [
@@ -392,8 +390,21 @@
           }
         }
       }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "JWT",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     }
   },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
   "tags": [
     {
       "name": "Ticket"
