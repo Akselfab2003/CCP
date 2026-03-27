@@ -1,0 +1,41 @@
+name: Build
+description: Build the solution
+on:
+  workflow_call:
+    inputs:
+      solution-file:
+        description: "Path to the solution file to build and test"
+        required: true
+        type: string
+      configuration:
+        description: "Build configuration (e.g., Debug, Release)"
+        required: false
+        type: string
+        default: "Release"
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
+jobs:
+  BUILD:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK and Tools
+        uses: ./.github/actions/dotnet-setup
+        with:
+          dotnet-version: 10.0.x
+          shell: ${{ inputs.shell }}
+
+      - name: Build Solution
+        uses: ./.github/actions/dotnet-steps
+        with:
+          solution-file: ${{ inputs.solution-file }}
+          configuration: ${{ inputs.configuration }}
+          shell: ${{ inputs.shell }}
