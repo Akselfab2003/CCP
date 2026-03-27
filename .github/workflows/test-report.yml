@@ -24,6 +24,9 @@ jobs:
     name: Generate Test Report
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: Setup .NET SDK and Tools
         uses: ./.github/actions/dotnet-setup
         with:
