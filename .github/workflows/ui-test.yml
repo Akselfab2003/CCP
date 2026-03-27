@@ -22,6 +22,9 @@ jobs:
   UI_TESTS:
     name: UI Tests
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright/dotnet:v1.58.0-noble
+      options: --user 1001
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
@@ -39,6 +42,7 @@ jobs:
         with:
           solution-file: ./src/CCP.slnx
           shell: ${{ inputs.shell }}
+          
       - name: Install Playwright Browsers
         run: ${{github.workspace}}/src/tests/UI/CPP.UI.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps
         shell: pwsh
