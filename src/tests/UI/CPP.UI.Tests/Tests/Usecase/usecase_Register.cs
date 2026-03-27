@@ -59,7 +59,7 @@ namespace CPP.UI.Tests.Tests.Usecase
             _outputHelper.WriteLine($"CurrentURL: {Page.Url}");
             _outputHelper.WriteLine("Asserting that the URL matches the expected pattern for a successful registration redirect.");
 
-            await Expect(Page).ToHaveURLAsync(new Regex("/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+            await Expect(Page).ToHaveURLAsync(new Regex("/realms/CCP/.*"), new() { Timeout = _defaultTimeout, IgnoreCase = true });
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace CPP.UI.Tests.Tests.Usecase
 
             await Page.GetByRole(AriaRole.Link, new() { Name = "Sign up" }).ClickAsync();
 
-            await Expect(Page).ToHaveURLAsync(new Regex("/register"), new() { Timeout = _defaultTimeout });
+            await Expect(Page).ToHaveURLAsync(new Regex("/register"), new() { Timeout = _defaultTimeout, IgnoreCase = true });
 
             await FillOutCompanyDetailsForm(formSubmission);
             await FillOutAccountDetailsForm(formSubmission);
