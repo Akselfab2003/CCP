@@ -1,0 +1,59 @@
+name: UI Tests
+description: Run UI tests for the solution
+on:
+  workflow_call:
+    inputs:
+      solution-file:
+        description: "Path to the solution file to build and test"
+        required: true
+        type: string
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
+      test-output-directory:
+        description: "Directory to output test results and coverage reports"
+        required: false
+        type: string
+        default: "./TestResults"
+
+jobs:
+  UI_TESTS:
+    name: UI Tests
+    runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK and Tools
+        uses: ./.github/actions/dotnet-setup
+        with:
+          dotnet-version: 10.0.x
+          shell: ${{ inputs.shell }}
+
+      - name: Build Solution
+        uses: ./.github/actions/dotnet-steps
+        with:
+          solution-file: ./src/CCP.slnx
+          shell: ${{ inputs.shell }}
+
+      - name: Run UI Tests
+        run: dotnet test --solution ${{ inputs.solution-file }} --configuration Release --max-parallel-test-modules 1 --no-build -filter-query "/[category=UI]" --ignore-exit-code 8 --max-threads 8 --output normal --stop-on-fail on --coverage --coverage-output-format cobertura --results-directory ${{ inputs.test-output-directory }}
+        env:
+          REALM_IMPORT_PATH: ${{github.workspace}}/config/CCP_Realm.json
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: UI-Test-Results
+          path: ${{ inputs.test-output-directory }}/*
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: ${{github.workspace}}/src/tests/UI/CPP.UI.Tests/bin/Release/net10.0/playwright-traces

@@ -1,32 +1,56 @@
 name: Build Release
 description: Build and test the solution for release
-
 on:
+  workflow_dispatch:
+    inputs:
+      solution-file:
+        description: "Path to the solution file to build and test"
+        required: true
+        type: string
+        default: "./src/CCP.slnx"
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
   pull_request:
     branches: [main]
 
 jobs:
-  Build_Release:
-    name: Build and Test for Release
-    runs-on: ubuntu-latest
-    env:
+  BUILD:
+    uses: ./.github/workflows/build.yml
+    with:
+      solution-file: ./src/CCP.slnx
       configuration: Release
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      shell: bash
 
-      - name: Build Solution
-        uses: ./.github/actions/dotnet-steps
-        with:
-          configuration: ${{ env.configuration }}
-          solution-file: ./src/CCP.slnx
-          shell: bash
+  UNIT_TESTS:
+    name: Unit Tests
+    needs: BUILD
+    uses: ./.github/workflows/unit-test.yml
+    with:
+      solution-file: ./src/CCP.slnx
+      shell: bash
 
-      - name: Unit Tests
-        uses: ./.github/actions/dotnet-tests
-        with:
-          configuration: ${{ env.configuration }}
-          solution-file: ./src/CCP.slnx
-          steps: '["unit-tests", "integration-tests"]'
-          shell: bash
+  INTEGRATION_TESTS:
+    name: Integration Tests
+    needs: BUILD
+    uses: ./.github/workflows/integration-test.yml
+    with:
+      solution-file: ./src/CCP.slnx
+      shell: bash
+
+  UI_TESTS:
+    name: UI Tests
+    needs: BUILD
+    uses: ./.github/workflows/ui-test.yml
+    with:
+      solution-file: ./src/CCP.slnx
+      shell: bash
+
+  TEST_REPORT:
+    name: Test Report
+    needs: [UNIT_TESTS, INTEGRATION_TESTS, UI_TESTS]
+    uses: ./.github/workflows/test-report.yml
+    with:
+      test-results-directory: ./TestResults

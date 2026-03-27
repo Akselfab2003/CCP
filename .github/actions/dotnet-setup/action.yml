@@ -1,0 +1,33 @@
+name: Dotnet Setup
+description: Reusable steps for building .NET projects and solutions
+inputs:
+  dotnet-version:
+    description: "Version of the .NET SDK to install (e.g., 10.0.x)"
+    required: false
+    default: "10.0.x"
+  shell:
+    description: "Shell to use for running the steps (e.g., bash, pwsh)"
+    required: false
+    default: "bash"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+        cache: false
+
+    - name: Install Required .NET Tools for Build
+      shell: ${{ inputs.shell }}
+      run: |
+        dotnet tool install --global Microsoft.OpenApi.Kiota
+        dotnet tool install --global dotnet-coverage
+        dotnet tool install --global dotnet-reportgenerator-globaltool
+        dotnet tool update -g linux-dev-certs
+
+    - name: Trust ASP.NET Core HTTPS Development Certificate
+      shell: ${{ inputs.shell }}
+      run: |
+        dotnet linux-dev-certs install

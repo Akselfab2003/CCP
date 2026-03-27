@@ -1,0 +1,51 @@
+name: test-report
+description: Generates test reports and code coverage reports for .NET tests
+on:
+  workflow_call:
+    inputs:
+      test-results-directory:
+        description: "Directory where test results are stored"
+        required: true
+        type: string
+        default: "./TestResults"
+      CoverageReportDirectory:
+        description: "Directory where code coverage reports will be generated"
+        required: false
+        type: string
+        default: "./CoverageReports"
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
+
+jobs:
+  TEST_REPORT:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup .NET SDK and Tools
+        uses: ./.github/actions/dotnet-setup
+        with:
+          dotnet-version: 10.0.x
+          shell: ${{ inputs.shell }}
+      - name: Download Test Results Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-Test-Results"
+          merge-multiple: true
+          path: ${{ inputs.test-results-directory }}
+
+      - name: Merge Coverage Reports
+        run: |
+          dotnet-coverage merge ${{ inputs.test-results-directory }}/**/*.cobertura.xml -f cobertura -o ${{ inputs.CoverageReportDirectory }}/merged.cobertura.xml
+
+      - name: Generate Test Report
+        run: |
+          reportgenerator -reports:"${{ inputs.CoverageReportDirectory }}/merged.cobertura.xml" -targetdir:"${{ inputs.CoverageReportDirectory }}/report" -filefilters:"-**\Generated\**\*.cs;-**\Migrations\**\*.cs"  -classfilters:"-Microsoft.*;-System.*"
+
+      - name: Upload Test Report as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ${{ inputs.CoverageReportDirectory }}/report
