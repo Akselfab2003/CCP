@@ -1,0 +1,85 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+.Body {
+    margin: 0;
+    font-family: 'Instrument Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #090c12;
+    padding: 20px;
+}
+
+.TicketPortal {
+    margin-top: 2vh;
+    background-color: #141820;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    color: whitesmoke;
+    border: 1px solid rgba(79, 148, 232, 0.15);
+    position: relative;
+}
+
+.Nav-Btn {
+    background: #4f6beb;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(79, 148, 232, 0.3);
+    font-family: 'Syne', sans-serif;
+}
+
+    .Nav-Btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(79, 148, 232, 0.4);
+        background: #2d50ec;
+    }
+
+.DisplayBox {
+    margin-top: 2vh;
+    background-color: #141820;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    max-width: 1080px;
+    width: 100%;
+    color: whitesmoke;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.Ticket {
+    background-color: #1b2030;
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+    .Ticket:hover {
+        border-color: rgba(79, 148, 232, 0.3);
+        box-shadow: 0 4px 12px rgba(79, 148, 232, 0.15);
+        transform: translateY(-2px);
+        background-color: #1e2538;
+    }
+
+        .Ticket:hover::before {
+            opacity: 1;
+        }

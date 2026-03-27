@@ -1,0 +1,184 @@
+﻿@using CCP.Shared.UIContext
+
+
+@inject IUIUserContext UserContext
+
+<!-- Greeting -->
+<div class="dash-greeting">
+    <div>
+        <h2 class="dash-greeting-title">Good morning, @UserContext.FirstName 👋</h2>
+        <p class="dash-greeting-sub">Here's a summary of your assigned tickets and recent activity.</p>
+    </div>
+    <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
+</div>
+
+<!-- Stat Cards -->
+<div class="dash-stats staff-stats">
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-header">
+            <span class="dash-stat-label">Open Tickets</span>
+            <span class="dash-stat-icon" style="color:#818cf8;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                </svg>
+            </span>
+        </div>
+        <div class="dash-stat-value">247</div>
+        <div class="dash-stat-delta delta-up">↑ 8% vs last week</div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-header">
+            <span class="dash-stat-label">Awaiting You</span>
+            <span class="dash-stat-icon" style="color:#f87171;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 01-3.46 0" />
+                </svg>
+            </span>
+        </div>
+        <div class="dash-stat-value">12</div>
+        <div class="dash-stat-delta delta-neutral">needs your attention</div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-header">
+            <span class="dash-stat-label">Assigned to You</span>
+            <span class="dash-stat-icon" style="color:#34d399;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </span>
+        </div>
+        <div class="dash-stat-value">31</div>
+        <div class="dash-stat-delta delta-down">↑ 3 since yesterday</div>
+    </div>
+
+</div>
+
+<!-- Full-width updates feed -->
+<div class="dash-card dash-updates staff-updates">
+    <div class="dash-card-header">
+        <span class="dash-card-title">Your Ticket Activity</span>
+        <a href="/tickets" class="dash-card-link">View all →</a>
+    </div>
+
+    <div class="dash-feed">
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">AK</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8821</span>
+                    <span class="dash-feed-time">12 min ago</span>
+                </div>
+                <p class="dash-feed-text"><strong>Alex Kim</strong> replied to your ticket — Payment gateway returning 500 error on checkout</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-red">Urgent</span>
+                    <span class="dash-tag tag-slate">Bug</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-red"></span>
+        </div>
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">SM</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8820</span>
+                    <span class="dash-feed-time">1 hr ago</span>
+                </div>
+                <p class="dash-feed-text"><strong>Sam Miller</strong> changed status to <span class="dash-tag tag-teal" style="display:inline;padding:1px 6px;font-size:10px;">Open</span> on your ticket — Unable to export data to CSV</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-teal">Open</span>
+                    <span class="dash-tag tag-indigo">Feature</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-amber"></span>
+        </div>
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">RP</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8818</span>
+                    <span class="dash-feed-time">3 hrs ago</span>
+                </div>
+                <p class="dash-feed-text"><strong>Riley Park</strong> added an internal note to your ticket — Wrong amount charged on Pro plan renewal</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-amber">Pending</span>
+                    <span class="dash-tag tag-slate">Billing</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-amber"></span>
+        </div>
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">CL</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8817</span>
+                    <span class="dash-feed-time">5 hrs ago</span>
+                </div>
+                <p class="dash-feed-text"><strong>Chris Lee</strong> was assigned to your ticket — SSO login fails with Okta integration</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-teal">Open</span>
+                    <span class="dash-tag tag-slate">Bug</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-green"></span>
+        </div>
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">MJ</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8814</span>
+                    <span class="dash-feed-time">Yesterday</span>
+                </div>
+                <p class="dash-feed-text"><strong>Morgan J.</strong> closed your ticket — Request for custom webhook endpoint configuration</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-slate">Closed</span>
+                    <span class="dash-tag tag-indigo">Feature</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-slate"></span>
+        </div>
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">JW</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8810</span>
+                    <span class="dash-feed-time">Yesterday</span>
+                </div>
+                <p class="dash-feed-text"><strong>Jamie W.</strong> replied to your ticket — Dashboard charts not rendering after latest update</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-red">Urgent</span>
+                    <span class="dash-tag tag-slate">Bug</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-red"></span>
+        </div>
+
+        <div class="dash-feed-item">
+            <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#2dd4bf,#0ea5e9)">NK</div>
+            <div class="dash-feed-body">
+                <div class="dash-feed-top">
+                    <span class="dash-feed-ticket">#TK-8807</span>
+                    <span class="dash-feed-time">2 days ago</span>
+                </div>
+                <p class="dash-feed-text"><strong>Nina K.</strong> updated priority to High on your ticket — Email notifications not triggering on ticket close</p>
+                <div class="dash-feed-tags">
+                    <span class="dash-tag tag-amber">Pending</span>
+                    <span class="dash-tag tag-indigo">Feature</span>
+                </div>
+            </div>
+            <span class="dash-feed-dot dot-slate"></span>
+        </div>
+
+    </div>
+</div>

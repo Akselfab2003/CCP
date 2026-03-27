@@ -1,0 +1,32 @@
+﻿@page "/ticketportal"
+@rendermode InteractiveServer
+
+<PageTitle>Helix — Support Portal</PageTitle>
+<div class="Body">
+    <div class="TicketPortal">
+        <h1>Support Portal</h1>
+        <p>Welcome to the Helix Support Portal! Here you can create new support tickets, view your existing tickets, and track their progress. Our support team is here to assist you with any issues or questions you may have.</p>
+        <a href="#" class="Nav-Btn">+ New Ticket</a>
+    </div>
+    <div class="DisplayBox">
+        <h2>Your Support Tickets</h2>
+        <div class="Ticket">
+            <h3>Issue with Login</h3> @*Ticket Name*@
+            <p>Status: Open</p> @*Status*@
+            <p>Priority: Low</p> @*Priporty*@
+            <p>Support: John Doe</p> @*Support*@
+            <p>Created: 06/03/2026</p> @*Date created*@
+            <p>Description: I am unable to log into my account. It keeps saying "Invalid credentials" even though I am sure I am entering the correct password.</p>
+        </div>
+        <div class="Ticket">
+            <h3>Issue with Payment</h3>
+            <p>Status: Open</p>
+            <p>Priority: Medium</p>
+            <p>Support: Jane Smith</p>
+            <p>Created: 05/03/2026</p>
+            <p>Description: I am unable to complete a payment transaction. The system is not accepting my card details.</p>
+        </div>
+    </div>
+</div>
+
+
