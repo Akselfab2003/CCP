@@ -27,7 +27,7 @@ namespace CPP.UI.Tests.Fixtures
             "MailServer"
         ];
 
-        public override string APIResourceName => "ccp-website";
+        public override string APIResourceName => "ccp-ui";
 
         public async ValueTask InitializeAsync()
         {
