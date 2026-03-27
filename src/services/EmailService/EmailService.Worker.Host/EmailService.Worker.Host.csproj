@@ -11,5 +11,9 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="MailKit" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EmailService.Infrastructure\EmailService.Infrastructure.csproj" />
+  </ItemGroup>
   
 </Project>

@@ -238,6 +238,8 @@ CCPWebsite
 
 EmailWorkerService
     .WaitFor(DockerEmailServer)
+    .WaitFor(EmailDB)
+    .WithReference(EmailDB)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
