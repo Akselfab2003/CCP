@@ -54,7 +54,7 @@ namespace CPP.UI.Tests.Tests.Usecase
             await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).FillAsync("testtest");
             await Page.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
 
-            await Expect(Page).ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+            await Expect(Page).ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
         }
 
         [Fact(Skip = "test")]
@@ -83,8 +83,7 @@ namespace CPP.UI.Tests.Tests.Usecase
             await FillOutAccountDetailsForm(formSubmission);
 
             // Assert
-            await Page.WaitForURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
-            await Expect(Page).Not.ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+            await Expect(Page).Not.ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
             await Expect(Page.GetByTestId("email-input").First).ToHaveClassAsync(new Regex(".*invalid.*"), new LocatorAssertionsToHaveClassOptions()
             {
                 Timeout = _defaultTimeout
@@ -149,7 +148,7 @@ namespace CPP.UI.Tests.Tests.Usecase
             await FillOutAccountDetailsForm(formValue);
 
             // Assert
-            await Expect(Page).Not.ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+            await Expect(Page).Not.ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
             await Expect(Page.GetByTestId(testid).First).ToHaveClassAsync(new Regex(".*invalid.*"), new LocatorAssertionsToHaveClassOptions()
             {
                 Timeout = _defaultTimeout

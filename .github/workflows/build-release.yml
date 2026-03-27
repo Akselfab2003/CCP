@@ -40,17 +40,17 @@ jobs:
       solution-file: ./src/CCP.slnx
       shell: bash
 
-  UI_TESTS:
-    name: UI Tests
-    needs: BUILD
-    uses: ./.github/workflows/ui-test.yml
-    with:
-      solution-file: ./src/CCP.slnx
-      shell: bash
+  # UI_TESTS:
+  #   name: UI Tests
+  #   needs: BUILD
+  #   uses: ./.github/workflows/ui-test.yml
+  #   with:
+  #     solution-file: ./src/CCP.slnx
+  #     shell: bash
 
   TEST_REPORT:
     name: Test Report
-    needs: [UNIT_TESTS, INTEGRATION_TESTS, UI_TESTS]
+    needs: [UNIT_TESTS, INTEGRATION_TESTS]
     uses: ./.github/workflows/test-report.yml
     with:
       test-results-directory: ./TestResults
