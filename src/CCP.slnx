@@ -17,11 +17,10 @@
     <Project Path="services/CustomerService/CustomerService.Sdk/CustomerService.Sdk.csproj" />
   </Folder>
   <Folder Name="/src/services/EmailService/">
-    <Project Path="services/EmailService/EmailService.API/EmailService.API.csproj" DisplayName="EmailService.Api" />
+    <Project Path="services/EmailService/EmailService.API/EmailService.API.csproj" />
     <Project Path="services/EmailService/EmailService.Application/EmailService.Application.csproj" Id="96010c8e-4318-417b-9fa8-971c1c1f9699" />
     <Project Path="services/EmailService/EmailService.Domain/EmailService.Domain.csproj" Id="6530c5c9-3f8e-402d-b315-db0d05824d2b" />
     <Project Path="services/EmailService/EmailService.Infrastructure/EmailService.Infrastructure.csproj" Id="fb559eea-ca47-42f7-9464-b1d95344e0a6" />
-    <Project Path="services/EmailService/EmailService.Sdk/EmailService.Sdk.csproj" Id="6cd33caf-7b8a-4e87-b06c-58e14353b7d1" />
     <Project Path="services/EmailService/EmailService.Worker.Host/EmailService.Worker.Host.csproj" />
   </Folder>
   <Folder Name="/src/services/IdentityService/">

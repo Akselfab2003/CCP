@@ -3,11 +3,11 @@ using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
+using EmailService.Api.Services;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
-using EmailService.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

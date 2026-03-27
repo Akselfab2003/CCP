@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\services\EmailService\EmailService.Domain\EmailService.Domain.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Api\MessagingService.Api.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Application\MessagingService.Application.csproj" />

@@ -1,5 +1,6 @@
-﻿using System;
-using CCP.Sdk.utils.Abstractions;
+﻿using CCP.Sdk.utils.Abstractions;
+using EmailService.Domain.Models;
+using EmailService.Sdk.Services;
 
 namespace EmailService.Sdk.Services
 {
@@ -21,16 +22,25 @@ namespace EmailService.Sdk.Services
             string expectedResponseTime = "24 hours",
             string portalUrl = "#")
         {
-            try
+            var request = new TicketCreatedRequest
             {
-                // TODO: Implement API call once Models and API endpoints are defined
-                // await _client.Client.Api.EmailSender.SendTicketCreated.PostAsync(...)
-                await Task.CompletedTask;
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to send ticket created email.", ex);
-            }
+                Email = new EmailSent
+                {
+                    Id = ticketId,
+                    OrganizationId = Guid.NewGuid(),
+                    Subject = subject,
+                    Body = body,
+                    SenderAddress = $"support@{organizationName.Replace(" ", "").ToLowerInvariant()}.com",
+                    RecipientAddress = recipientEmail,
+                    SentAt = DateTime.UtcNow
+                },
+                RecipientName = recipientEmail,
+                OrganizationName = organizationName,
+                ExpectedResponseTime = expectedResponseTime,
+                PortalUrl = portalUrl
+            };
+
+            await _client.Client.Api.EmailSendingService.SendTicketCreated.PostAsync(request);
         }
 
         public async Task SendTicketReplyEmailAsync(
@@ -49,16 +59,33 @@ namespace EmailService.Sdk.Services
             string viewHistoryUrl = "#",
             string reopenUrl = "#")
         {
-            try
+            var firstName = string.IsNullOrWhiteSpace(agentName) ? "support" : agentName.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToLowerInvariant();
+
+            var request = new TicketReplyRequest
             {
-                // TODO: Implement API call once Models and API endpoints are defined
-                // await _client.Client.Api.EmailSender.SendTicketReply.PostAsync(...)
-                await Task.CompletedTask;
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to send ticket reply email.", ex);
-            }
+                Email = new EmailReceived
+                {
+                    Id = ticketId,
+                    OrganizationId = Guid.NewGuid(),
+                    Subject = subject,
+                    Body = body,
+                    SenderAddress = $"{firstName}@{organizationName.Replace(" ", "").ToLowerInvariant()}.com",
+                    RecipientAddress = recipientEmail,
+                    ReceivedAt = DateTime.UtcNow
+                },
+                RecipientName = recipientName,
+                OrganizationName = organizationName,
+                AgentName = agentName,
+                AgentRole = agentRole,
+                TicketStatus = ticketStatus,
+                TicketStatusLabel = ticketStatusLabel,
+                ReplyUrl = replyUrl,
+                PortalUrl = portalUrl,
+                ViewHistoryUrl = viewHistoryUrl,
+                ReopenUrl = reopenUrl
+            };
+
+            await _client.Client.Api.EmailSendingService.SendTicketReply.PostAsync(request);
         }
 
         public async Task SendTicketStatusEmailAsync(
@@ -74,31 +101,30 @@ namespace EmailService.Sdk.Services
             string portalUrl = "#",
             string reopenUrl = "#")
         {
-            try
+            var request = new TicketStatusRequest
             {
-                // TODO: Implement API call once Models and API endpoints are defined
-                // await _client.Client.Api.EmailSender.SendTicketStatus.PostAsync(...)
-                await Task.CompletedTask;
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to send ticket status email.", ex);
-            }
-        }
+                Email = new EmailSent
+                {
+                    Id = ticketId,
+                    OrganizationId = Guid.NewGuid(),
+                    Subject = subject,
+                    Body = string.Empty,
+                    SenderAddress = $"support@{organizationName.Replace(" ", "").ToLowerInvariant()}.com",
+                    RecipientAddress = recipientEmail,
+                    SentAt = DateTime.UtcNow
+                },
+                RecipientName = recipientEmail,
+                OrganizationName = organizationName,
+                NewStatus = newStatus,
+                NewStatusLabel = newStatusLabel,
+                OldStatusLabel = oldStatusLabel,
+                UpdatedByAgent = updatedByAgent,
+                AgentNote = agentNote,
+                PortalUrl = portalUrl,
+                ReopenUrl = reopenUrl
+            };
 
-        private static string GenerateSenderAddress(string prefix, string organizationName)
-        {
-            var sanitizedOrg = organizationName.Replace(" ", "").ToLower();
-            return $"{prefix}@{sanitizedOrg}.com";
-        }
-
-        private static string ExtractFirstName(string fullName)
-        {
-            if (string.IsNullOrWhiteSpace(fullName))
-                return "support";
-
-            var parts = fullName.Split(' ');
-            return parts.Length > 0 ? parts[0].ToLower() : "support";
+            await _client.Client.Api.EmailSendingService.SendTicketStatus.PostAsync(request);
         }
     }
 }
