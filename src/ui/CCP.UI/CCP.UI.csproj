@@ -16,6 +16,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
+    <ProjectReference Include="..\..\services\MessagingService\MessagingService.Api\MessagingService.Api.csproj" />
+    <ProjectReference Include="..\..\services\MessagingService\MessagingService.Application\MessagingService.Application.csproj" />
+    <ProjectReference Include="..\..\services\MessagingService\MessagingService.Domain\MessagingService.Domain.csproj" />
+    <ProjectReference Include="..\..\services\MessagingService\MessagingService.Infrastructure\MessagingService.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\services\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
+    <ProjectReference Include="..\..\services\TicketService\TicketService.Api\TicketService.Api.csproj" />
+    <ProjectReference Include="..\..\services\TicketService\TicketService.Application\TicketService.Application.csproj" />
+    <ProjectReference Include="..\..\services\TicketService\TicketService.Domain\TicketService.Domain.csproj" />
+    <ProjectReference Include="..\..\services\TicketService\TicketService.Infrastructure\TicketService.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\services\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
     <ProjectReference Include="..\..\shared\CCP.Shared\CCP.Shared.csproj" />
   </ItemGroup>
 
