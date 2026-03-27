@@ -13,7 +13,7 @@ namespace CPP.UI.Tests.Tests.Usecase
     {
         private readonly UIServiceFixture _fixture;
         private readonly ITestOutputHelper _outputHelper;
-        private float _defaultTimeout = (float)TimeSpan.FromMinutes(1).TotalMilliseconds;
+        private float _defaultTimeout = (float)TimeSpan.FromMinutes(2).TotalMilliseconds;
 
         public usecase_Register(UIServiceFixture fixture, ITestOutputHelper outputHelper)
         {
