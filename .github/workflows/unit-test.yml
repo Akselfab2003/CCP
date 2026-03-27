@@ -1,0 +1,50 @@
+name: Unit Test
+description: Run unit tests for the solution
+on:
+  workflow_call:
+    inputs:
+      solution-file:
+        description: "Path to the solution file to build and test"
+        required: true
+        type: string
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
+      test-output-directory:
+        description: "Directory to output test results and coverage reports"
+        required: false
+        type: string
+        default: "./TestResults"
+
+jobs:
+  UNIT_TESTS:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK and Tools
+        uses: ./.github/actions/dotnet-setup
+        with:
+          dotnet-version: 10.0.x
+          shell: ${{ inputs.shell }}
+
+      - name: Build Solution
+        uses: ./.github/actions/dotnet-steps
+        with:
+          solution-file: ./src/CCP.slnx
+          shell: ${{ inputs.shell }}
+
+      - name: Run Unit Tests
+        run: dotnet test --solution ${{ inputs.solution-file }} --configuration Release -filter-query "/[((category!=Integration)&(category!=UI))]" --ignore-exit-code 8 --no-build --coverage --coverage-output-format cobertura --results-directory ${{ inputs.test-output-directory }}
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unit-Test-Results
+          path: ${{ inputs.test-output-directory }}/*

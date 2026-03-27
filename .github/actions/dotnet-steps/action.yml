@@ -21,17 +21,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-        cache: false
-        
-    - name: Install Required .NET Tools for Build
-      shell: ${{ inputs.shell }}
-      run: |
-        dotnet tool install --global Microsoft.OpenApi.Kiota
-
     - name: Restore solution dependencies
       shell: ${{ inputs.shell }}
       if: ${{ inputs.project-file == '' }}
