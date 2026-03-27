@@ -5,8 +5,8 @@ namespace CPP.UI.Tests.Fixtures
 {
     public class UIServiceFixture : GenericIntegrationTestFixture, IAsyncLifetime
     {
-        public string UIEndpoint => GetServiceUrl("ccp-ui", "http");
-        public string WebsiteEndpoint => GetServiceUrl("ccp-website", "http");
+        public string UIEndpoint => GetServiceUrl("ccp-ui", "https");
+        public string WebsiteEndpoint => GetServiceUrl("ccp-website", "https");
         public override List<string> RequiredResources =>
         [
             APIResourceName,

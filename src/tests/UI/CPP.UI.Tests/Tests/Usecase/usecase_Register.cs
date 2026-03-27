@@ -59,7 +59,6 @@ namespace CPP.UI.Tests.Tests.Usecase
             _outputHelper.WriteLine($"CurrentURL: {Page.Url}");
             _outputHelper.WriteLine("Asserting that the URL matches the expected pattern for a successful registration redirect.");
 
-
             await Expect(Page).ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
         }
 
