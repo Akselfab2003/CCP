@@ -1,6 +1,23 @@
 name: UI Tests
 description: Run UI tests for the solution
 on:
+  workflow_dispatch:
+    inputs:
+      solution-file:
+        description: "Path to the solution file to build and test"
+        required: true
+        type: string
+        default: "./src/CCP.slnx"
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
+      test-output-directory:
+        description: "Directory to output test results and coverage reports"
+        required: false
+        type: string
+        default: "./TestResults"
   workflow_call:
     inputs:
       solution-file:
