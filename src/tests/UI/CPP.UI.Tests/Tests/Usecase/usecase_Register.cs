@@ -38,21 +38,38 @@ namespace CPP.UI.Tests.Tests.Usecase
             await Page.GotoAsync(_fixture.WebsiteEndpoint);
             await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "CCP" })).ToBeVisibleAsync();
 
+            CustomerFormSubmission customerFormSubmission = new CustomerFormSubmission()
+            {
+                OrganizationName = "test",
+                Domain = "test.com",
+                FirstName = "test",
+                LastName = "test",
+                Email = $"test{Guid.NewGuid()}@test.com",
+                Password = "testtest",
+            };
             await Page.GetByRole(AriaRole.Link, new() { Name = "Sign up" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).FillAsync("test");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).FillAsync("test.com");
-            await Page.GetByRole(AriaRole.Button, new() { Name = "Next" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).FillAsync("test");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).FillAsync("test");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).FillAsync("test@test.com");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).FillAsync("testtest");
-            await Page.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
+
+
+            await FillOutCompanyDetailsForm(customerFormSubmission);
+            await FillOutAccountDetailsForm(customerFormSubmission);
+
+
+
+            //await Page.GetByRole(AriaRole.Link, new() { Name = "Sign up" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).FillAsync("test");
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).FillAsync("test.com");
+            //await Page.GetByRole(AriaRole.Button, new() { Name = "Next" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).FillAsync("test");
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).FillAsync("test");
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).FillAsync("test@test.com");
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).ClickAsync();
+            //await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).FillAsync("testtest");
+            //await Page.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
 
 
             _outputHelper.WriteLine($"CPP_UI: {_fixture.UIEndpoint},CPP_WEBSITE: {_fixture.WebsiteEndpoint}");
@@ -60,6 +77,9 @@ namespace CPP.UI.Tests.Tests.Usecase
             _outputHelper.WriteLine("Asserting that the URL matches the expected pattern for a successful registration redirect.");
 
             await Expect(Page).ToHaveURLAsync(new Regex("/realms/CCP/.*"), new() { Timeout = _defaultTimeout, IgnoreCase = true });
+
+            _outputHelper.WriteLine("Assertion passed: The URL matches the expected pattern, indicating a successful registration redirect.");
+            _outputHelper.WriteLine($"CurrentUrl: {Page.Url}");
         }
 
         [Fact]
