@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Mail;
-using System.Text;
-using MailKit;
+﻿using MailKit;
 using MailKit.Net.Imap;
 
 namespace EmailService.Worker.Host.Services
@@ -37,7 +33,6 @@ namespace EmailService.Worker.Host.Services
                     Console.WriteLine(item.NormalizedSubject);
                 }
             };
-            await Task.Delay(-1);
         }
 
         public async Task ConnectAsync()
