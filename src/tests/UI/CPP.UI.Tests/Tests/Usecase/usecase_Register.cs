@@ -54,6 +54,12 @@ namespace CPP.UI.Tests.Tests.Usecase
             await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).FillAsync("testtest");
             await Page.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
 
+
+            _outputHelper.WriteLine($"CPP_UI: {_fixture.UIEndpoint},CPP_WEBSITE: {_fixture.WebsiteEndpoint}");
+            _outputHelper.WriteLine($"CurrentURL: {Page.Url}");
+            _outputHelper.WriteLine("Asserting that the URL matches the expected pattern for a successful registration redirect.");
+
+
             await Expect(Page).ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
         }
 
