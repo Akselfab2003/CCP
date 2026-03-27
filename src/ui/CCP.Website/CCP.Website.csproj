@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
+  </ItemGroup>
+
 </Project>

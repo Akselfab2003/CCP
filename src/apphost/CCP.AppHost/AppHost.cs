@@ -14,6 +14,8 @@ string RoundCubeDefaultUserEmail = builder.Configuration.GetValue<string>("ROUND
     ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_EMAIL configuration value is required when mail infrastructure is enabled.");
 string RoundCubeDefaultUserPassword = builder.Configuration.GetValue<string>("ROUNDCUBE_DEFAULT_USER_PASSWORD")
     ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_PASSWORD configuration value is required when mail infrastructure is enabled.");
+string EncryptionKey = builder.Configuration.GetValue<string>("Encryption_Key")
+    ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
 
@@ -102,6 +104,9 @@ IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.
 IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects.MessagingService_Api>("messagingservice-api");
 IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
 IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
+IResourceBuilder<ProjectResource> CustomerService = builder.AddProject<Projects.CustomerService_Api>("customerservice-api");
+IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_Website>("ccp-website");
+IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
 
 
 IdentityService
@@ -145,6 +150,21 @@ MessagingService.WaitFor(Keycloak)
     })
     .WithOtlpExporter();
 
+CustomerService.WaitFor(Keycloak)
+        .WithReference(Keycloak)
+        .WaitFor(CustomerDB)
+        .WithReference(CustomerDB)
+        .WithOtlpExporter()
+        .WithEnvironment(env =>
+        {
+            env.EnvironmentVariables.Add("Encryption_Key", EncryptionKey);
+        })
+        .WithUrlForEndpoint("https", (endpoint) =>
+        {
+            endpoint.Url = "/swagger";
+            endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+            endpoint.DisplayText = "API Swagger";
+        });
 
 ChatService
     .WaitFor(Keycloak)
@@ -155,6 +175,29 @@ ChatService
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
+    .WithOtlpExporter();
+
+UI
+    .WaitFor(MessagingService)
+    .WaitFor(Keycloak)
+    .WaitFor(IdentityService)
+    .WaitFor(CustomerService)
+    .WaitFor(TicketService)
+    .WithReference(MessagingService)
+    .WithReference(Keycloak)
+    .WithReference(CustomerService)
+    .WithReference(IdentityService)
+    .WithReference(TicketService)
+    .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+    .WithOtlpExporter();
+
+CCPWebsite
+    .WaitFor(UI)
+    .WaitFor(Keycloak)
+    .WaitFor(IdentityService)
+    .WithReference(UI)
+    .WithReference(IdentityService)
+    .WithReference(Keycloak)
     .WithOtlpExporter();
 
 
@@ -173,5 +216,8 @@ if (Environment == "DEV")
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
+
+
+
 
 builder.Build().Run();
