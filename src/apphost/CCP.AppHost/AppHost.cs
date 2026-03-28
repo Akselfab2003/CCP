@@ -27,8 +27,11 @@ ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persis
 IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
-IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
+//IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
+
+IResourceBuilder<ContainerResource> Stalwart = builder.AddContainer("stalwart", "stalwartlabs/stalwart:latest-alpine");
+
 
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
@@ -39,20 +42,21 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
 
-DockerEmailServer
-        .WithEnvironment(env =>
-        {
-            env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
-            env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
-            env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
-            env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
-            env.EnvironmentVariables.Add("ENABLE_IMAP", "1");
-        })
-        .WithEndpoint("smtp", config =>
-        {
-            config.TargetPort = 25;
-            config.Port = 25;
-        })
+Stalwart.WithEndpoint("smtp", config =>
+{
+    config.TargetPort = 25;
+    config.Port = 25;
+})
+    .WithEndpoint("https", config =>
+    {
+        config.TargetPort = 443;
+        config.Port = 8443;
+    })
+    .WithEndpoint("http", config =>
+    {
+        config.TargetPort = 8080;
+        config.Port = 8888;
+    })
         .WithEndpoint("submission", config =>
         {
             config.TargetPort = 587;
@@ -76,12 +80,50 @@ DockerEmailServer
         .WithLifetime(LifeTimeMode);
 
 
+
+//DockerEmailServer
+//        .WithEnvironment(env =>
+//        {
+//            env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
+//            env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
+//            env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
+//            env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
+//            env.EnvironmentVariables.Add("ENABLE_IMAP", "1");
+//        })
+//        .WithEndpoint("smtp", config =>
+//        {
+//            config.TargetPort = 25;
+//            config.Port = 25;
+//        })
+//        .WithEndpoint("submission", config =>
+//        {
+//            config.TargetPort = 587;
+//            config.Port = 587;
+//        })
+//        .WithEndpoint("smtps", config =>
+//        {
+//            config.TargetPort = 465;
+//            config.Port = 465;
+//        })
+//        .WithEndpoint("imap", config =>
+//        {
+//            config.TargetPort = 143;
+//            config.Port = 143;
+//        })
+//        .WithEndpoint("imaps", config =>
+//        {
+//            config.TargetPort = 993;
+//            config.Port = 993;
+//        })
+//        .WithLifetime(LifeTimeMode);
+
+
 Roundcube
        .WithEnvironment(env =>
        {
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", "MailServer");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", "MailServer");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "587");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", "stalwart");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", "stalwart");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "25");
            env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "143");
            env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "143");
        })
@@ -92,7 +134,7 @@ Roundcube
            config.TargetPort = 80;
            config.Port = 8081;
        })
-       .WaitFor(DockerEmailServer)
+       .WaitFor(Stalwart)
        .WithLifetime(LifeTimeMode);
 
 Keycloak.WithRealmImport(RealmImportPath)
@@ -237,7 +279,7 @@ CCPWebsite
     .WithOtlpExporter();
 
 EmailWorkerService
-    .WaitFor(DockerEmailServer)
+    .WaitFor(Stalwart)
     .WaitFor(EmailDB)
     .WithReference(EmailDB)
     .WithEnvironment(env =>
@@ -245,7 +287,8 @@ EmailWorkerService
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
     })
-    .WithOtlpExporter();
+    .WithOtlpExporter()
+    .WithExplicitStart();
 
 
 if (Environment == "DEV")
@@ -255,11 +298,12 @@ if (Environment == "DEV")
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-    DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
-                     .WithVolume("dms_mail_state", "/var/mail-state")
-                     .WithVolume("dms_mail_logs", "/var/log/mail")
-                     .WithVolume("dms_config", "/tmp/docker-mailserver")
-                     .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true);
+    Stalwart.WithVolume("stalewart_data", "/opt/stalwart-mail");
+    //DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
+    //                 .WithVolume("dms_mail_state", "/var/mail-state")
+    //                 .WithVolume("dms_mail_logs", "/var/log/mail")
+    //                 .WithVolume("dms_config", "/tmp/docker-mailserver")
+    //                 .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true);
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
