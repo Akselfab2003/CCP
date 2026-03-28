@@ -1,0 +1,17 @@
+# Base image
+FROM stalwartlabs/stalwart:latest-alpine
+
+# Create directories for mail data, logs, and TLS certificates
+RUN mkdir -p /opt/stalwart \
+    /opt/stalwart/logs \
+    /opt/stalwart/certs \
+    && chown -R stalwart:stalwart /opt/stalwart
+
+# Set working directory to mail storage
+WORKDIR /opt/stalwart
+
+# Use the non-root user from the base image
+USER stalwart
+
+# Expose essential ports
+EXPOSE 25 587 993 8080 465 443
