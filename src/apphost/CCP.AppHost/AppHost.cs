@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+builder.AddDockerComposeEnvironment("env");
 // Load environment-specific configuration
 string Environment = builder.Configuration.GetValue("ENVIORMENT", "DEV");
 string KeycloakApiClientSecret = builder.Configuration.GetValue<string>("KeycloakAdminApiClientSecret")
