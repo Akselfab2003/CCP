@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,6 +7,7 @@
     <UserSecretsId>dotnet-EmailService.Worker.Host-fa456dfb-850e-4b3a-8fff-14103cd648a3</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..\..</DockerfileContext>
+    <ContainerRepository>$(Registry)/emailworker-service</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>

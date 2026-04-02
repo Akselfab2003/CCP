@@ -7,6 +7,7 @@
     <UserSecretsId>5889a331-81fd-4ccd-9600-e548147cae59</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..\..</DockerfileContext>
+    <ContainerRepository>$(Registry)/identityservice-api</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>

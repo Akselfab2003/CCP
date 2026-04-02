@@ -8,6 +8,7 @@
     <UserSecretsId>c8939fdf-56e6-4c54-a3b8-0993e42ca932</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
+    <ContainerRepository>$(Registry)/ccp-ui</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>
