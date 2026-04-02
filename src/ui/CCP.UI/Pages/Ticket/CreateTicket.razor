@@ -1,126 +1,22 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@using CCP.Shared.UIContext
+@using CCP.Shared.ValueObjects
+@using CCP.UI.Components.CreateTicket
 @using CCP.UI.Layout
 @page "/tickets/create"
 @attribute [Authorize]
 @layout CCPLayout
+@inject IUIUserContext UserContext
 
-<link rel="stylesheet" href="css/create-ticket.css" />
-
-<div class="ct-wrap">
-
-    <div class="ct-header">
-        <div class="ct-header-left">
-            <a href="/inbox" class="ct-back-btn" title="Back to Inbox">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                    <polyline points="15 18 9 12 15 6" />
-                </svg>
-            </a>
-            <div>
-                <h1 class="ct-title">New Ticket</h1>
-                <p class="ct-subtitle">Describe your issue and we'll get back to you</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="ct-body">
-
-        <div class="ct-card">
-
-            @if (_successMessage is not null)
-            {
-                <div class="ct-alert ct-alert--success">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    @_successMessage
-                </div>
-            }
-
-            @if (_errorMessage is not null)
-            {
-                <div class="ct-alert ct-alert--error">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                    @_errorMessage
-                </div>
-            }
-
-            <div class="ct-field">
-                <label class="ct-label" for="ticket-title">
-                    Title
-                    <span class="ct-required">*</span>
-                </label>
-                <input id="ticket-title"
-                       type="text"
-                       class="ct-input @(_titleTouched && string.IsNullOrWhiteSpace(_title) ? "ct-input--error" : "")"
-                       placeholder="Brief summary of your issue..."
-                       maxlength="200"
-                       @bind="_title"
-                       @bind:event="oninput"
-                       @onblur="() => _titleTouched = true"
-                       disabled="@_isSubmitting" />
-                @if (_titleTouched && string.IsNullOrWhiteSpace(_title))
-                {
-                    <span class="ct-field-error">Title is required</span>
-                }
-                <span class="ct-char-count">@(_title?.Length ?? 0) / 200</span>
-            </div>
-
-            <div class="ct-actions">
-                <a href="/inbox" class="ct-btn ct-btn--ghost">Cancel</a>
-                <button class="ct-btn ct-btn--primary"
-                        @onclick="HandleSubmitAsync"
-                        disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_title))">
-                    @if (_isSubmitting)
-                    {
-                        <svg class="ct-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                        </svg>
-                        <span>Submitting...</span>
-                    }
-                    else
-                    {
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                            <line x1="22" y1="2" x2="11" y2="13" />
-                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                        </svg>
-                        <span>Submit Ticket</span>
-                    }
-                </button>
-            </div>
-
-        </div>
-
-        <!-- Info aside -->
-        <aside class="ct-aside">
-            <div class="ct-aside-card">
-                <div class="ct-aside-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                    What happens next?
-                </div>
-                <ul class="ct-aside-steps">
-                    <li>
-                        <span class="ct-step-dot"></span>
-                        Your ticket is created and assigned a tracking number
-                    </li>
-                    <li>
-                        <span class="ct-step-dot"></span>
-                        A support agent will review and respond
-                    </li>
-                    <li>
-                        <span class="ct-step-dot"></span>
-                        You can follow up any time from your Inbox
-                    </li>
-                </ul>
-            </div>
-        </aside>
-
-    </div>
-</div>
+@if (UserContext.Role == UserRole.Customer)
+{
+    <CreateTicketCustomer />
+}
+else if (UserContext.Role == UserRole.Supporter)
+{
+    <CreateTicketSupporter />
+}
+else if (UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin)
+{
+    <CreateTicketManager />
+}
