@@ -34,3 +34,30 @@ jobs:
           registry: ${{ secrets.REGISTRY_HOST }}
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASS }}
+
+      - name: Setup .NET SDK and Tools
+        uses: ./.github/actions/dotnet-setup
+        with:
+          dotnet-version: 10.0.x
+          shell: ${{ inputs.shell }}
+
+      - name: Restore and Build Solution
+        uses: ./.github/actions/dotnet-steps
+        with:
+          solution-file: ./src/CCP.slnx
+          configuration: Release
+          shell: ${{ inputs.shell }}
+
+      - name: Publish Micro Services
+        run: |
+          dotnet publish ./src/services/IdentityService/IdentityService.API/IdentityService.API.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-identity-service -p ContainerTag=${{ github.sha }} --no-restore
+          dotnet publish ./src/services/CustomerService/CustomerService.Api/CustomerService.Api.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-customer-service -p ContainerTag=${{ github.sha }} --no-restore
+          dotnet publish ./src/services/EmailService/EmailService.API/EmailService.API.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-email-service -p ContainerTag=${{ github.sha }} --no-restore
+          dotnet publish ./src/services/EmailService/EmailService.Worker.Host/EmailService.Worker.Host.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-email-service -p ContainerTag=${{ github.sha }} --no-restore
+          dotnet publish ./src/services/MessagingService/MessagingService.Api/MessagingService.Api.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-messaging-service -p ContainerTag=${{ github.sha }} --no-restore
+          dotnet publish ./src/services/TicketService/TicketService.Api/TicketService.Api.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-ticket-service -p ContainerTag=${{ github.sha }} --no-restore
+
+      - name: Publish Web
+        run: |
+          dotnet publish ./src/ui/CCP.UI/CCP.UI.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-ui -p ContainerTag=${{ github.sha }} --no-restore
+          dotnet publish ./src/ui/CCP.Website/CCP.Website.csproj -c Release -t:PublishContainer  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }} -p ContainerRepository=ccp-website -p ContainerTag=${{ github.sha }} --no-restore

@@ -1,0 +1,21 @@
+FROM quay.io/keycloak/keycloak:26.5 AS builder
+
+# Copy realm import file
+COPY ../../config/CCP_Realm.json /opt/keycloak/data/import/CCP_Realm.json
+
+# Build optimized Keycloak for production
+RUN /opt/keycloak/bin/kc.sh build \
+    --db=postgres \
+    --cache=ispn \
+    --health-enabled=true \
+    --metrics-enabled=true
+
+FROM quay.io/keycloak/keycloak:26.5
+
+# Copy the optimized build
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+
+# Copy realm into final image
+COPY ../../config/CCP_Realm.json /opt/keycloak/data/import/CCP_Realm.json
+
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]

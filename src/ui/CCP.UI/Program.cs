@@ -12,6 +12,8 @@ namespace CCP.UI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration.AddEnvironmentVariables();
+
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
