@@ -2,6 +2,7 @@ using CCP.UI.Components;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace CCP.UI
@@ -20,6 +21,15 @@ namespace CCP.UI
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddHttpClient();
             builder.Services.AddCascadingAuthenticationState();
+
+            // Trust proxy headers from Traefik
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownIPNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
 
             var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
             var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"http://localhost:8080/realms/CCP/.well-known/openid-configuration";
@@ -54,10 +64,30 @@ namespace CCP.UI
                 options.SignedOutRedirectUri = keycloakURL;
                 options.SignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+
+                options.BackchannelHttpHandler = new HttpClientHandler
+                {
+
+                };
+
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnRedirectToIdentityProvider = context =>
+                    {
+                        context.ProtocolMessage.RedirectUri = "https://ccp.northflow.dev/signin-oidc";
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
 
             var app = builder.Build();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions()
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
 
             app.UseAuthentication();
             app.UseAuthorization();
