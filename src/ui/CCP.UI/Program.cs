@@ -22,7 +22,7 @@ namespace CCP.UI
             builder.Services.AddCascadingAuthenticationState();
 
             var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
-
+            var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"http://localhost:8080/realms/CCP/.well-known/openid-configuration";
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -34,9 +34,10 @@ namespace CCP.UI
                 options.SlidingExpiration = false;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
             })
-            .AddKeycloakOpenIdConnect(serviceName: "Keycloak", realm: "CCP", options =>
+            .AddOpenIdConnect(options =>
             {
                 options.Authority = $"{keycloakURL}/realms/CCP";
+                options.MetadataAddress = metadataAddress;
                 options.ClientId = "CCP";
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.RequireHttpsMetadata = false;
@@ -52,6 +53,7 @@ namespace CCP.UI
                 options.SignedOutCallbackPath = "/signout-callback-oidc";
                 options.SignedOutRedirectUri = keycloakURL;
                 options.SignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
             });
 
 
