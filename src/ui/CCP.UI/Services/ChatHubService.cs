@@ -16,7 +16,7 @@ public class ChatHubService : IAsyncDisposable
     public ChatHubService(IConfiguration configuration)
     {
         var messagingServiceUrl = configuration.GetValue<string>(
-            "services:chatapp-messagingservice:http:0")
+            "services:messagingservice-api:http:0")
             ?? throw new InvalidOperationException(
                 "MessagingServiceUrl configuration value is required.");
 

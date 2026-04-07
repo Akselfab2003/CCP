@@ -20,7 +20,7 @@ ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persis
 
 
 // External Services
-IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
+//IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
 IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
@@ -32,8 +32,8 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithLifetime(LifeTimeMode)
         .WithOtlpExporter();
 
-Ollama.WithOtlpExporter()
-      .WithLifetime(LifeTimeMode);
+//Ollama.WithOtlpExporter()
+      //.WithLifetime(LifeTimeMode);
 
 DockerEmailServer
     .WithEnvironment(env =>
@@ -169,13 +169,14 @@ CustomerService.WaitFor(Keycloak)
 ChatService
     .WaitFor(Keycloak)
     .WaitFor(ChatDB)
-    .WaitFor(Ollama)
+    // .WaitFor(Ollama)
     .WaitFor(TicketService)
     .WithReference(Keycloak)
     .WithReference(TicketService)
     .WithReference(ChatDB)
-    .WithReference(Ollama)
-    .WithOtlpExporter();
+    //  .WithReference(Ollama)
+    .WithOtlpExporter().WithExplicitStart();
+
 
 UI
     .WaitFor(MessagingService)
@@ -203,7 +204,7 @@ CCPWebsite
 
 if (Environment == "DEV")
 {
-    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+   // Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");

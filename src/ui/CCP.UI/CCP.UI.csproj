@@ -37,8 +37,4 @@
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\" />
-  </ItemGroup>
-
 </Project>
