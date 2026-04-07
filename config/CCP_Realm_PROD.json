@@ -2140,19 +2140,22 @@
     "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
-  "smtpServer": {
+ "smtpServer": {
     "allowutf8": "",
-    "replyToDisplayName": "",
     "debug": "false",
+    "replyToDisplayName": "",
     "starttls": "false",
     "auth": "",
+    "writeTimeout": "10000",
+    "envelopeFrom": "",
+    "ssl": "false",
+    "timeout": "10000",
     "port": "25",
+    "host": "mail.northflow.dev",
     "replyTo": "",
-    "host": "mailserver",
     "from": "info@northflow.dev",
     "fromDisplayName": "",
-    "envelopeFrom": "",
-    "ssl": "false"
+    "connectionTimeout": "10000"
   },
   "eventsEnabled": true,
   "eventsListeners": [
