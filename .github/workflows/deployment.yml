@@ -48,7 +48,7 @@ jobs:
           shell: ${{ inputs.shell }}
 
       - name: Publish the solution
-        run: dotnet publish ./src/CCP.slnx -t:PublishContainer  --configuration Release --no-restore  -p Registry=${{ secrets.REGISTRY_HOST }}
+        run: dotnet publish ./src/CCP.slnx -t:PublishContainer  --configuration Release --no-restore  -p Registry=${{ secrets.REGISTRY_HOST }} -p ContainerImageTags='"${{github.sha}};latest"'
 
       - name: Build Custom Images
         uses: docker/build-push-action@v7
@@ -56,15 +56,26 @@ jobs:
           context: .
           file: ./docker/keycloak/dockerfile
           push: true
-          tags: ${{ secrets.REGISTRY_HOST }}/keycloak:latest
+          tags: |
+            ${{ secrets.REGISTRY_HOST }}/keycloak:latest
+            ${{ secrets.REGISTRY_HOST }}/keycloak:${{ github.sha }}
 
       - name: Docker Push Images
         run: |
-            docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
-            docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
+
+          docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:${{ github.sha }}
