@@ -35,7 +35,7 @@ namespace IdentityService.Application.Services.Tenant
 
                 if (organizationResult.IsFailure)
                 {
-                    _logger.LogError("Failed to create organization: {Error}", organizationResult.Error);
+                    _logger.LogError("Failed to create organization: {Error}", organizationResult.Error.ToLogString());
                     return Result.Failure(Error.Failure(code: "OrganizationCreationFailed", description: "Failed to create organization for the tenant."));
                 }
 
@@ -46,7 +46,7 @@ namespace IdentityService.Application.Services.Tenant
 
                 if (groupResult.IsFailure)
                 {
-                    _logger.LogError("Failed to create default groups: {Error}", groupResult.Error);
+                    _logger.LogError("Failed to create default groups: {Error}", groupResult.Error.ToLogString());
                     return Result.Failure(Error.Failure(code: "GroupCreationFailed", description: "Failed to create default groups for the tenant."));
                 }
 
@@ -54,7 +54,7 @@ namespace IdentityService.Application.Services.Tenant
                 var createAdminUserResult = await _userService.CreateUser(request.AdminUser.Email, request.AdminUser.FirstName, request.AdminUser.LastName, request.AdminUser.Password, ct: CancellationToken.None);
                 if (createAdminUserResult.IsFailure)
                 {
-                    _logger.LogError("Failed to create admin user: {Error}", createAdminUserResult.Error);
+                    _logger.LogError("Failed to create admin user: {Error}", createAdminUserResult.Error.ToLogString());
                     return Result.Failure(Error.Failure(code: "AdminUserCreationFailed", description: "Failed to create admin user for the tenant."));
                 }
 

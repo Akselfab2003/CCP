@@ -16,6 +16,10 @@ string RoundCubeDefaultUserPassword = builder.Configuration.GetValue<string>("RO
     ?? throw new InvalidOperationException("ROUNDCUBE_DEFAULT_USER_PASSWORD configuration value is required when mail infrastructure is enabled.");
 string EncryptionKey = builder.Configuration.GetValue<string>("Encryption_Key")
     ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
+string EmailWorkerServiceUsername = builder.Configuration.GetValue<string>("emailWorkerServiceUsername")
+    ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
+string EmailWorkerServicePassword = builder.Configuration.GetValue<string>("emailWorkerServicePassword")
+    ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
 
@@ -107,6 +111,8 @@ IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.Ti
 IResourceBuilder<ProjectResource> CustomerService = builder.AddProject<Projects.CustomerService_Api>("customerservice-api");
 IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_Website>("ccp-website");
 IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
+IResourceBuilder<ProjectResource> EmailService = builder.AddProject<Projects.EmailService_API>("emailservice-api");
+IResourceBuilder<ProjectResource> EmailWorkerService = builder.AddProject<Projects.EmailService_Worker_Host>("emailservice-worker-host");
 
 
 IdentityService
@@ -124,6 +130,25 @@ IdentityService
         endpoint.DisplayText = "API Swagger";
     })
     .WithOtlpExporter();
+
+EmailService
+    .WithReference(EmailDB)
+    .WaitFor(EmailDB)
+    .WaitFor(Keycloak)
+    .WithReference(Keycloak)
+    .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+    .WithUrlForEndpoint("https", endpoint =>
+    {
+        endpoint.Url = "/swagger";
+        endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+        endpoint.DisplayText = "API Swagger";
+    })
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("CCP.ServiceAccount", ServiceAccountSecret);
+    })
+    .WithOtlpExporter();
+
 
 TicketService
     .WithReference(Keycloak)
@@ -201,6 +226,15 @@ CCPWebsite
     .WithReference(Keycloak)
     .WithOtlpExporter();
 
+EmailWorkerService
+    .WaitFor(DockerEmailServer)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
+        env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+    })
+    .WithOtlpExporter();
+
 
 if (Environment == "DEV")
 {
@@ -217,8 +251,5 @@ if (Environment == "DEV")
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
-
-
-
 
 builder.Build().Run();
