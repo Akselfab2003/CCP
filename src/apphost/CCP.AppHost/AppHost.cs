@@ -2,14 +2,6 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var registryEndpoint = builder.AddParameterFromConfiguration("registryEndpoint", "REGISTRY_ENDPOINT");
-var registryRepository = builder.AddParameterFromConfiguration("registryRepository", "REGISTRY_REPOSITORY");
-
-builder.AddDockerComposeEnvironment("env");
-
-#pragma warning disable ASPIRECOMPUTE003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-IResourceBuilder<ContainerRegistryResource> registry = builder.AddContainerRegistry("CCP", registryEndpoint, registryRepository);
-
 // Load environment-specific configuration
 string Environment = builder.Configuration.GetValue("ENVIORMENT", "DEV");
 string KeycloakApiClientSecret = builder.Configuration.GetValue<string>("KeycloakAdminApiClientSecret")
@@ -112,9 +104,7 @@ IResourceBuilder<PostgresDatabaseResource> CustomerDB = Postgres.AddDatabase(nam
 IResourceBuilder<PostgresDatabaseResource> TicketDB = Postgres.AddDatabase(name: "ticketdb", databaseName: "ticketdb");
 
 // Add Projects and their dependencies
-#pragma warning disable ASPIREPIPELINES003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.IdentityService_API>("identityservice-api").WithContainerRegistry(registry).PublishAsDockerFile(args => { }).WithRemoteImageTag("test");
-#pragma warning restore ASPIREPIPELINES003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+IResourceBuilder<ProjectResource> IdentityService = builder.AddProject<Projects.IdentityService_API>("identityservice-api");
 IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects.MessagingService_Api>("messagingservice-api");
 IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
 IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
@@ -262,4 +252,3 @@ if (Environment == "DEV")
 }
 
 builder.Build().Run();
-#pragma warning restore ASPIRECOMPUTE003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
