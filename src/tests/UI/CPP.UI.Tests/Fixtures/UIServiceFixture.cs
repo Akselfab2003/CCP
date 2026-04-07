@@ -12,22 +12,22 @@ namespace CPP.UI.Tests.Fixtures
             APIResourceName,
             "keycloak",
             "postgres",
-            "MailHog",
-
+            "ollama",
+            "Roundcube",
             "emaildb",
             "chatdb",
             "customerdb",
             "MessagingDatabase",
             "chatdb",
             "ticketdb",
-
             "emailservice",
             "identityservice-api",
             "chatapp-messagingservice",
             "customerservice-api",
+            "MailServer"
         ];
 
-        public override string APIResourceName => "ccp-website";
+        public override string APIResourceName => "ccp-ui";
 
         public async ValueTask InitializeAsync()
         {

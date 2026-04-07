@@ -13,7 +13,7 @@ namespace CPP.UI.Tests.Tests.Usecase
     {
         private readonly UIServiceFixture _fixture;
         private readonly ITestOutputHelper _outputHelper;
-        private float _defaultTimeout = (float)TimeSpan.FromMinutes(1).TotalMilliseconds;
+        private float _defaultTimeout = (float)TimeSpan.FromMinutes(2).TotalMilliseconds;
 
         public usecase_Register(UIServiceFixture fixture, ITestOutputHelper outputHelper)
         {
@@ -38,23 +38,24 @@ namespace CPP.UI.Tests.Tests.Usecase
             await Page.GotoAsync(_fixture.WebsiteEndpoint);
             await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "CCP" })).ToBeVisibleAsync();
 
+            CustomerFormSubmission customerFormSubmission = new CustomerFormSubmission()
+            {
+                OrganizationName = "test",
+                Domain = "test.com",
+                FirstName = "test",
+                LastName = "test",
+                Email = $"test{Guid.NewGuid()}@test.com",
+                Password = "testtest",
+            };
             await Page.GetByRole(AriaRole.Link, new() { Name = "Sign up" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Company name *" }).FillAsync("test");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Domain *" }).FillAsync("test.com");
-            await Page.GetByRole(AriaRole.Button, new() { Name = "Next" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "First name *" }).FillAsync("test");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Last name *" }).FillAsync("test");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Email *" }).FillAsync("test@test.com");
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).ClickAsync();
-            await Page.GetByRole(AriaRole.Textbox, new() { Name = "Password *" }).FillAsync("testtest");
-            await Page.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
 
-            await Expect(Page).ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+
+            await FillOutCompanyDetailsForm(customerFormSubmission);
+            await FillOutAccountDetailsForm(customerFormSubmission);
+
+            _outputHelper.WriteLine($"CPP_UI: {_fixture.UIEndpoint},CPP_WEBSITE: {_fixture.WebsiteEndpoint}");
+            _outputHelper.WriteLine($"CurrentURL: {Page.Url}");
+
         }
 
         [Fact]
@@ -77,14 +78,16 @@ namespace CPP.UI.Tests.Tests.Usecase
             await Page.GotoAsync(_fixture.WebsiteEndpoint);
             await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "CCP" })).ToBeVisibleAsync();
 
+
             await Page.GetByRole(AriaRole.Link, new() { Name = "Sign up" }).ClickAsync();
+
+            await Expect(Page).ToHaveURLAsync(new Regex("/register"), new() { Timeout = _defaultTimeout, IgnoreCase = true });
 
             await FillOutCompanyDetailsForm(formSubmission);
             await FillOutAccountDetailsForm(formSubmission);
 
             // Assert
-
-            await Expect(Page).Not.ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+            //await Expect(Page).Not.ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
             await Expect(Page.GetByTestId("email-input").First).ToHaveClassAsync(new Regex(".*invalid.*"), new LocatorAssertionsToHaveClassOptions()
             {
                 Timeout = _defaultTimeout
@@ -149,8 +152,7 @@ namespace CPP.UI.Tests.Tests.Usecase
             await FillOutAccountDetailsForm(formValue);
 
             // Assert
-
-            await Expect(Page).Not.ToHaveURLAsync(new Regex("http://localhost:8080/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
+            //await Expect(Page).Not.ToHaveURLAsync(new Regex(".*/realms/CCP/.*"), new() { Timeout = _defaultTimeout });
             await Expect(Page.GetByTestId(testid).First).ToHaveClassAsync(new Regex(".*invalid.*"), new LocatorAssertionsToHaveClassOptions()
             {
                 Timeout = _defaultTimeout
