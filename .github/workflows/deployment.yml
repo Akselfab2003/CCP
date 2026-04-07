@@ -59,16 +59,12 @@ jobs:
           tags: ${{ secrets.REGISTRY_HOST }}/keycloak:latest
 
       - name: Docker Push Images
-        uses: docker/build-push-action@v7
-        with:
-          push: true
-          tags: |
-            ${{ secrets.REGISTRY_HOST }}/identityservice-api:latest
-            ${{ secrets.REGISTRY_HOST }}/customerservice-api:latest
-            ${{ secrets.REGISTRY_HOST }}/chatservice-api:latest
-            ${{ secrets.REGISTRY_HOST }}/emailservice-api:latest
-            ${{ secrets.REGISTRY_HOST }}/messagingservice-api:latest
-            ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
-            ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
-            ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
-            
+        run: |
+            docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
+            docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
