@@ -48,7 +48,7 @@ jobs:
           shell: ${{ inputs.shell }}
 
       - name: Publish the solution
-        run: dotnet publish ./src/CCP.slnx -t:PublishContainer  --configuration Release --no-restore  -p ContainerRegistry=${{ secrets.REGISTRY_HOST }}
+        run: dotnet publish ./src/CCP.slnx -t:PublishContainer  --configuration Release --no-restore  -p Registry=${{ secrets.REGISTRY_HOST }}
 
       - name: Build Custom Images
         uses: docker/build-push-action@v7
