@@ -47,11 +47,11 @@ namespace TicketService.Api.Endpoints
             }
         }
 
-        private static async Task<IResult> GetTicketById([FromServices] ITicketQueries ticketQueries, [FromQuery] int TicketId)
+        private static async Task<IResult> GetTicketById([FromServices] ITicketQueries ticketQueries, [FromRoute] int ticketId)
         {
             try
             {
-                var result = await ticketQueries.GetTicket(TicketId);
+                var result = await ticketQueries.GetTicket(ticketId);
                 return result.IsSuccess
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();

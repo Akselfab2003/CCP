@@ -22,7 +22,7 @@ namespace TicketService.Sdk.Services.TicketSdk
         {
             try
             {
-                var ticket = await Client.Ticket.GetTicket[ticketId.ToString()].GetAsync(cancellationToken: ct);
+                var ticket = await Client.Ticket.GetTicket[ticketId].GetAsync(cancellationToken: ct);
 
                 if (ticket is null)
                     return Result.Failure<TicketSdkDto>(Error.NotFound("TicketNotFound", $"Ticket with id {ticketId} not found."));
@@ -116,8 +116,8 @@ namespace TicketService.Sdk.Services.TicketSdk
                 OrganizationId = ticket.OrganizationId ?? Guid.Empty,
                 CustomerId = ticket.CustomerId,
                 CreatedAt = ticket.CreatedAt,
-                AssignedUserId = ticket.Assignment?.AssignmentDto?.UserId,
-                AssignedByUserId = ticket.Assignment?.AssignmentDto?.AssignedByUserId
+                AssignedUserId = ticket.Assignment?.UserId,
+                AssignedByUserId = ticket.Assignment?.AssignedByUserId
             };
         }
     }

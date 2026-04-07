@@ -26,6 +26,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     private bool _isLoadingMessages = false;
     private bool _isInternalNoteMode = false;
     private readonly Dictionary<Guid, string> _userNameCache = new();
+    private readonly HashSet<int> _recentlyAssignedTicketIds = new();
 
     private TicketSdkDto? ActiveTicket => _tickets.FirstOrDefault(t => t.Id == _activeTicketId);
 
@@ -51,6 +52,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         HubService.OnMessageReceived += HandleMessageReceived;
         HubService.OnMessageUpdated += HandleMessageUpdated;
         HubService.OnMessageDeleted += HandleMessageDeleted;
+        HubService.OnTicketAssigned += HandleTicketAssigned;
 
         // Start the SignalR connection independently — a hub failure must not prevent tickets from loading
         _ = HubService.StartAsync().ContinueWith(t =>
@@ -103,6 +105,36 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
         _tickets = allTickets.OrderByDescending(t => t.CreatedAt).ToList();
         _isLoadingTickets = false;
+
+        // Wait for hub connection before joining groups
+        // Poll briefly — hub start is fire-and-forget so we can't await it directly
+        var waited = 0;
+        while (!HubService.IsConnected && waited < 5000)
+        {
+            await Task.Delay(100);
+            waited += 100;
+        }
+
+        if (HubService.IsConnected)
+        {
+            Logger.LogInformation("Hub connected: {IsConnected} after {Waited}ms", HubService.IsConnected, waited);
+
+            foreach (var ticket in _tickets)
+            {
+                Logger.LogInformation("Joining group for ticket {TicketId}", ticket.Id);
+                _ = HubService.JoinTicketGroupAsync(ticket.Id).ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        Logger.LogWarning("Failed to join group for ticket {TicketId}: {Error}", ticket.Id, t.Exception?.Message);
+                    else
+                        Logger.LogInformation("Successfully joined group for ticket {TicketId}", ticket.Id);
+                }, TaskScheduler.Default);
+            }
+        }
+        else
+        {
+            Logger.LogWarning("Hub not connected after waiting — ticket group subscriptions skipped");
+        }
     }
 
     private async Task OnTicketSelectedAsync(int? ticketId)
@@ -204,11 +236,35 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         }
     }
 
+    private void HandleTicketAssigned(int ticketId, Guid assignedUserId)
+    {
+        Logger.LogInformation("HandleTicketAssigned fired for ticket {TicketId}", ticketId);
+        var ticket = _tickets.FirstOrDefault(t => t.Id == ticketId);
+        if (ticket is not null)
+        {
+            ticket.AssignedUserId = assignedUserId;
+            _recentlyAssignedTicketIds.Add(ticketId);
+            InvokeAsync(StateHasChanged);
+
+            // Remove the pulse highlight after 4 seconds
+            _ = Task.Delay(4000).ContinueWith(_ =>
+            {
+                _recentlyAssignedTicketIds.Remove(ticketId);
+                InvokeAsync(StateHasChanged);
+            }, TaskScheduler.Default);
+        }
+        else
+        {
+            Logger.LogWarning("HandleTicketAssigned: ticket {TicketId} not found in _tickets", ticketId);
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         HubService.OnMessageReceived -= HandleMessageReceived;
         HubService.OnMessageUpdated -= HandleMessageUpdated;
         HubService.OnMessageDeleted -= HandleMessageDeleted;
+        HubService.OnTicketAssigned -= HandleTicketAssigned;
 
         await HubService.DisposeAsync();
     }

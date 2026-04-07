@@ -233,6 +233,38 @@
           }
         }
       }
+    },
+    "/api/ticket-notifications/assignment-updated": {
+      "post": {
+        "tags": [
+          "TicketNotification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketAssignmentNotificationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketAssignmentNotificationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketAssignmentNotificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -351,6 +383,23 @@
           }
         }
       },
+      "TicketAssignmentNotificationRequest": {
+        "required": [
+          "ticketId",
+          "assignedUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "ticketId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assignedUserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "UpdateMessageRequest": {
         "type": "object",
         "properties": {
@@ -387,6 +436,9 @@
   "tags": [
     {
       "name": "Messages"
+    },
+    {
+      "name": "TicketNotification"
     }
   ]
 }
