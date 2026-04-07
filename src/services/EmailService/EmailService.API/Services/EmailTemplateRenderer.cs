@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using EmailService.Domain.Models;
+using EmailTemplates.EmailTemplates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.Logging;
-using EmailService.Domain.Models;
-using CCP.UI.Components.EmailTemplates;
-
 namespace EmailService.Api.Services
 {
     public class EmailTemplateRenderer
