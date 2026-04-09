@@ -1,7 +1,7 @@
 ﻿namespace TicketService.Infrastructure.Tests.Fixtures
 {
     [CollectionDefinition("TicketServiceInfrastructure")]
-    [Trait("Category", "Integration")]
+    // [Trait("Category", "Integration")]
     public class TicketServiceCollection : ICollectionFixture<TicketServiceFixture>
     {
     }
