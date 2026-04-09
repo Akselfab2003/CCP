@@ -415,12 +415,11 @@
         ],
         "parameters": [
           {
-            "name": "customerId",
+            "name": "email",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],

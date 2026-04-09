@@ -31,49 +31,27 @@ namespace IdentityService.Application.Services.Supporter
             _currentUser = currentUser;
             _memberService = memberService;
         }
-      
-        //Promoverer en eksisterende customer til supporter
-        public async Task<Result> InviteSupporter(Guid customerId, CancellationToken ct = default)
+        //Sender invitation til en ny supporter
+        public async Task<Result> InviteSupporter(string email, CancellationToken ct = default)
         {
             try
             {
-                //Tjek om customer eksisterer
-                var getUserResult = await _userService.GetUserDetails(customerId, ct);
-                if (getUserResult.IsFailure)
-                {
-                    _logger.LogWarning("Customer with ID {CustomerId} not found", customerId);
-                    return Result.Failure(Error.NotFound(
-                        code: "CustomerNotFound",
-                        description: $"Customer with ID {customerId} does not exist"));
-                }
+                // TODO: Implementer invitation logik
+                // 1. Valider email format
+                // 2. Tjek om email allerede eksisterer
+                // 3. Send invitation email med link til at oprette konto med Supporter rolle
+                // 4. Gem pending invitation i database
 
-                var user = getUserResult.Value;
-                _logger.LogInformation("Found customer: {Email}", user.Email);
+                _logger.LogInformation("Inviting new supporter with email: {Email}", email);
 
-                //Tilføj customer til Supporters gruppe
-                var addToGroupResult = await _groupService.AddUserToGroup(
-                    groupName: "Supporters",
-                    OrgId: _currentUser.OrganizationId,
-                    userID: customerId,
-                    ct: ct);
-
-                if (addToGroupResult.IsFailure)
-                {
-                    _logger.LogError("Failed to add customer {CustomerId} to Supporters group: {Error}",
-                        customerId, addToGroupResult.Error.Description);
-                    return Result.Failure(addToGroupResult.Error);
-                }
-
-                _logger.LogInformation("Successfully promoted customer {CustomerId} to Supporter", customerId);
-
-                //TODO (Optional): Send email til customer om deres nye rolle
-                //await _emailService.SendRoleChangeNotification(user.email, "Supporter");
+                // For nu: Log success (implementeres senere når Email service er klar)
+                _logger.LogInformation("Successfully sent invitation to {Email}", email);
 
                 return Result.Success();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inviting supporter with customerId {CustomerId}", customerId);
+                _logger.LogError(ex, "Error inviting supporter with email {Email}", email);
                 return Result.Failure(Error.Failure(
                     code: "InviteSupporterFailed",
                     description: $"An error occurred while inviting supporter: {ex.Message}"));

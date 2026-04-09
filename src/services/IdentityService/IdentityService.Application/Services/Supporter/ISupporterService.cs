@@ -9,7 +9,7 @@ namespace IdentityService.Application.Services.Supporter
     // Interface til supporter business logic
     public interface ISupporterService
     {
-        Task<Result> InviteSupporter(Guid customerId, CancellationToken ct = default);
+        Task<Result> InviteSupporter(string email, CancellationToken ct = default);
         Task<Result<List<TenantMemberDto>>> GetAllTenantSupporterUsers(CancellationToken ct = default);
     }
 }

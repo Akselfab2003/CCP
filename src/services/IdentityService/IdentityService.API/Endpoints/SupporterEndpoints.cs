@@ -34,16 +34,16 @@ namespace IdentityService.API.Endpoints
         }
 
         /// <summary>
-        /// POST /supporter/Invite?customerId={guid}
-        /// Promoverer en customer til supporter rolle
+        /// POST /supporter/Invite?email={email}
+        /// Sender invitation til en ny supporter
         /// </summary>
         private static async Task<IResult> InviteSupporter(
             [FromServices] ISupporterService supporterService, 
-            [FromQuery] Guid customerId)
+            [FromQuery] string email)
         {
             try
             {
-                Result inviteResult = await supporterService.InviteSupporter(customerId);
+                Result inviteResult = await supporterService.InviteSupporter(email);
 
                 return inviteResult.IsSuccess
                     ? Results.Ok()

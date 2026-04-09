@@ -22,7 +22,7 @@ namespace IdentityService.Sdk.Supporter.Invite
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public InviteRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/Invite?customerId={customerId}", pathParameters)
+        public InviteRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/Invite?email={email}", pathParameters)
         {
         }
         /// <summary>
@@ -30,7 +30,7 @@ namespace IdentityService.Sdk.Supporter.Invite
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public InviteRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/Invite?customerId={customerId}", rawUrl)
+        public InviteRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/Invite?email={email}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -87,8 +87,15 @@ namespace IdentityService.Sdk.Supporter.Invite
         internal partial class InviteRequestBuilderPostQueryParameters 
         #pragma warning restore CS1591
         {
-            [QueryParameter("customerId")]
-            public Guid? CustomerId { get; set; }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            [QueryParameter("email")]
+            public string? Email { get; set; }
+#nullable restore
+#else
+            [QueryParameter("email")]
+            public string Email { get; set; }
+#endif
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

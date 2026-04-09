@@ -20,21 +20,21 @@ namespace IdentityService.Sdk.Services.Supporter
             _client = client;
         }
 
-        public async Task<Result> InviteSupporter(Guid customerId, CancellationToken ct = default)
+        public async Task<Result> InviteSupporter(string email, CancellationToken ct = default)
         {
             try
             {
-                // Sender POST request til API'et
+                // Sender POST request til API'et med email parameter
                 await _client.Client.Supporter.Invite.PostAsync(req =>
                 {
-                    req.QueryParameters.CustomerId = customerId;
+                    req.QueryParameters.Email = email;
                 }, cancellationToken: ct);
 
                 return Result.Success();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to invite supporter with customerId {CustomerId}", customerId);
+                _logger.LogError(ex, "Failed to invite supporter with email {Email}", email);
                 return Result.Failure(Error.Failure(
                     code: "InviteSupporterFailed",
                     description: $"Failed to invite supporter: {ex.Message}"));

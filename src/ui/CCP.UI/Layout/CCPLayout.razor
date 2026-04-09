@@ -179,6 +179,28 @@
                             <span class="ccp-nav-text">Invite Customer</span>
                         </NavLink>
                     </li>
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/InviteSupporters">
+                            <span class="ccp-nav-icon icon-purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                    <circle cx="8.5" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Invite Supporter</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/PromoteSupporterToManager">
+                            <span class="ccp-nav-icon icon-amber">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Promote Supporter</span>
+                        </NavLink>
+                    </li>
                 </ul>
             </div>
 
@@ -260,7 +282,18 @@
 
         <!-- Content -->
         <main class="ccp-content">
-            @Body
+            @if (isLoading)
+            {
+                <div class="loading-spinner">Loading...</div>
+            }
+            else if (errorMessage != null)
+            {
+                <div class="error-message">@errorMessage</div>
+            }
+            else
+            {
+                @Body
+            }
         </main>
 
     </div>
@@ -268,6 +301,8 @@
 
 @code {
     private bool _isDarkMode = true;
+    private bool isLoading = false;
+    private string? errorMessage = null;
 
     private void ToggleTheme()
     {

@@ -1,111 +1,81 @@
+using System.ComponentModel.DataAnnotations;
+using IdentityService.Sdk.Services.Supporter;
 using Microsoft.AspNetCore.Components;
 
 namespace CCP.UI.Pages.InviteSupporter
 {
     public partial class InviteSupporter : ComponentBase
     {
-        // Model til form
+        [Inject] private ISupporterService SupporterService { get; set; } = default!;
+        [Inject] private ILogger<InviteSupporter> Logger { get; set; } = default!;
+
         private InviteSupporterModel InviteSupporterModel { get; set; } = new InviteSupporterModel();
 
-        // Mock data - liste over customers til dropdown
-        private List<CustomerDto> customers = new();
-
-        // Mock data - liste over supporters til højre side
-        private List<SupporterDto> supporters = new();
-
-        protected override async Task OnInitializedAsync()
-        {
-            // TODO: Senere skal dette hente data fra ICustomerService og ISupporterService
-            // For nu laver vi bare mock data så UI'en virker
-
-            // Mock customers til dropdown
-            customers = new List<CustomerDto>
-            {
-                new CustomerDto { Id = Guid.NewGuid(), Name = "John Doe", Email = "john@example.com" },
-                new CustomerDto { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane@example.com" },
-                new CustomerDto { Id = Guid.NewGuid(), Name = "Bob Johnson", Email = "bob@example.com" },
-                new CustomerDto { Id = Guid.NewGuid(), Name = "Alice Williams", Email = "alice@example.com" }
-            };
-
-            // Mock supporters til højre side (starter tom)
-            supporters = new List<SupporterDto>();
-
-            await Task.CompletedTask;
-        }
+        private bool isSubmitting = false;
+        private string? successMessage = null;
+        private string? submitErrorMessage = null;
 
         private async Task Submit()
         {
-            // TODO: Senere skal dette kalde ISupporterService.InviteSupporter()
-            // For nu logger vi bare til console
+            Logger.LogInformation("🚀 Submit started - Email: {Email}", InviteSupporterModel.Email);
 
-            if (InviteSupporterModel.CustomerId == Guid.Empty)
+            isSubmitting = true;
+            successMessage = null;
+            submitErrorMessage = null;
+            StateHasChanged(); // Force UI update
+
+            try
             {
-                Console.WriteLine("⚠️ No customer selected!");
-                return;
-            }
+                Logger.LogInformation("📞 Calling SupporterService.InviteSupporter...");
+                var result = await SupporterService.InviteSupporter(InviteSupporterModel.Email);
+                Logger.LogInformation("✅ API call completed - IsSuccess: {IsSuccess}", result.IsSuccess);
 
-            var selectedCustomer = customers.FirstOrDefault(c => c.Id == InviteSupporterModel.CustomerId);
-            
-            if (selectedCustomer != null)
-            {
-                Console.WriteLine($"✅ Inviting customer: {selectedCustomer.Name} ({selectedCustomer.Email})");
-                Console.WriteLine($"📧 Welcome message: {InviteSupporterModel.WelcomeMessage ?? "No message"}");
-
-                // Simuler at customer bliver supporter (flyt til supporters listen)
-                supporters.Add(new SupporterDto
+                if (result.IsSuccess)
                 {
-                    Id = selectedCustomer.Id,
-                    Name = selectedCustomer.Name,
-                    Email = selectedCustomer.Email
-                });
+                    Logger.LogInformation("Successfully invited supporter with email {Email}", InviteSupporterModel.Email);
+                    successMessage = $"Invitation sent to {InviteSupporterModel.Email}!";
+                    Logger.LogInformation("✉️ Success message set: {Message}", successMessage);
 
-                // Fjern fra customers listen
-                customers.Remove(selectedCustomer);
-
-                // Reset form
-                InviteSupporterModel = new InviteSupporterModel();
-                
-                StateHasChanged();
+                    // Reset form
+                    InviteSupporterModel = new InviteSupporterModel();
+                }
+                else
+                {
+                    Logger.LogError("Failed to invite supporter: {Error}", result.Error);
+                    submitErrorMessage = $"Failed to send invitation: {result.Error.Description}";
+                    Logger.LogError("❌ Error message set: {Message}", submitErrorMessage);
+                }
             }
-
-            await Task.CompletedTask;
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "💥 Exception in Submit: {Message}", ex.Message);
+                submitErrorMessage = "An unexpected error occurred. Please try again.";
+            }
+            finally
+            {
+                isSubmitting = false;
+                Logger.LogInformation("🏁 Submit completed - isSubmitting: {IsSubmitting}, successMessage: {Success}, errorMessage: {Error}", 
+                    isSubmitting, successMessage, submitErrorMessage);
+                StateHasChanged(); // Force UI update
+            }
         }
 
-        // Lav initialer fra navn (f.eks. "John Doe" → "JD")
-        private string GetInitials(string name)
+        private void OnInvalidSubmit()
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return "?";
-
-            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            
-            if (parts.Length == 1)
-                return parts[0][0].ToString().ToUpper();
-            
-            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+            Logger.LogWarning("⚠️ Form validation failed!");
+            submitErrorMessage = "Please fill in all required fields correctly.";
+            StateHasChanged();
         }
     }
 
     // Model til form data
     public class InviteSupporterModel
     {
-        public Guid CustomerId { get; set; }
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        public string Email { get; set; } = string.Empty;
+
+        [MaxLength(500, ErrorMessage = "Welcome message cannot exceed 500 characters")]
         public string? WelcomeMessage { get; set; }
-    }
-
-    // DTO til customer data (midlertidig - skal senere komme fra IdentityService.Sdk)
-    public class CustomerDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-    }
-
-    // DTO til supporter data (midlertidig - skal senere komme fra IdentityService.Sdk)
-    public class SupporterDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
     }
 }

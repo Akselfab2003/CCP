@@ -9,7 +9,7 @@ namespace IdentityService.Sdk.Services.Supporter
     //Interface til supporter operator i SDK laget
     public interface ISupporterService
     {
-        Task<Result> InviteSupporter(Guid customerId, CancellationToken ct = default);
+        Task<Result> InviteSupporter(string email, CancellationToken ct = default);
         Task<Result<List<TenantMember>>> GetAllSupporters(CancellationToken ct = default);
     }
 }
