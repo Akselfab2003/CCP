@@ -39,7 +39,9 @@ namespace CCP.UI
 
 
             var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
-            var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"http://localhost:8080/realms/CCP/.well-known/openid-configuration";
+            var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"{keycloakURL}/realms/CCP/.well-known/openid-configuration";
+
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -77,14 +79,17 @@ namespace CCP.UI
 
                 };
 
-                options.Events = new OpenIdConnectEvents
+                if (builder.Environment.IsProduction())
                 {
-                    OnRedirectToIdentityProvider = context =>
+                    options.Events = new OpenIdConnectEvents
                     {
-                        context.ProtocolMessage.RedirectUri = "https://ccp.northflow.dev/signin-oidc";
-                        return Task.CompletedTask;
-                    }
-                };
+                        OnRedirectToIdentityProvider = context =>
+                        {
+                            context.ProtocolMessage.RedirectUri = "https://ccp.northflow.dev/signin-oidc";
+                            return Task.CompletedTask;
+                        }
+                    };
+                }
             });
 
             builder.Services.AddScoped<ChatHubService>();

@@ -58,7 +58,10 @@
   <Folder Name="/src/tests/Encryption/">
     <Project Path="tests/Encryption/Encryption.Tests/Encryption.Tests.csproj" />
   </Folder>
-  <Folder Name="/src/tests/EmailService/" />
+  <Folder Name="/src/tests/EmailService/">
+    <Project Path="tests/EmailService/Email.Api.Integration.Tests/Email.Api.Integration.Tests.csproj" />
+    <Project Path="tests/EmailService/Email.Application.Tests/Email.Application.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/tests/IdentityService/">
     <Project Path="tests/IdentityService/Identity.Api.IntegrationTests/Identity.Api.IntegrationTests.csproj" />
     <Project Path="tests/IdentityService/Identity.Application.Tests/Identity.Application.Tests.csproj" />
@@ -69,6 +72,11 @@
   </Folder>
   <Folder Name="/src/tests/TestUtils/">
     <Project Path="tests/TestUtils/TestUtils/TestUtils.csproj" />
+  </Folder>
+  <Folder Name="/src/tests/TicketService/">
+    <Project Path="tests/TicketService/TicketService.Api.IntegrationTests/TicketService.Api.IntegrationTests.csproj" />
+    <Project Path="tests/TicketService/TicketService.Application.Tests/TicketService.Application.Tests.csproj" />
+    <Project Path="tests/TicketService/TicketService.Infrastructure.Tests/TicketService.Infrastructure.Tests.csproj" />
   </Folder>
   <Folder Name="/src/tests/UI/">
     <Project Path="tests/UI/CPP.UI.Tests/CPP.UI.Tests.csproj" />
