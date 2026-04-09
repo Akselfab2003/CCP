@@ -131,6 +131,7 @@ namespace TicketService.Application.Tests.Tests
 
             //Mock at assignmet ikke findes
             var notFoundError = Error.Failure(code: "NotFound", description: "No assignment found for the given ticket ID.");
+            _ticketRepository.GetTicket(ticketId).Returns(Result.Success(new Domain.Entities.Ticket { Id = ticketId }));
             _assignmentRepository.GetAssignmentByTicketIdAsync(ticketId).Returns(Result.Failure<Assignment>(notFoundError));
 
             //Mock create flow
@@ -145,6 +146,7 @@ namespace TicketService.Application.Tests.Tests
             };
             _assignmentRepository.AddAsync(Arg.Any<Assignment>()).Returns(Result.Success(mockAssignment));
             _assignmentRepository.SaveChangesAsync().Returns(Task.CompletedTask);
+            _ticketRepository.SaveChangesAsync().Returns(Task.CompletedTask);
 
             //Act
             var result = await _sut.CreateOrUpdateAssignment(ticketId, assignUserId);
@@ -184,11 +186,13 @@ namespace TicketService.Application.Tests.Tests
             };
 
             //Mock at assignment FINDES (GetAssignmentByTicketIdAsync returnerer success)
+            _ticketRepository.GetTicket(ticketId).Returns(Result.Success(new Domain.Entities.Ticket { Id = ticketId }));
             _assignmentRepository.GetAssignmentByTicketIdAsync(ticketId).Returns(Result.Success(existingAssignment));
 
             //Mock UPDATE flow
-            _assignmentRepository.UpdateAsync(Arg.Any<Assignment>()).Returns(Result.Success(existingAssignment));
+            _assignmentRepository.UpdateAsync(existingAssignment).Returns(Result.Success(existingAssignment));
             _assignmentRepository.SaveChangesAsync().Returns(Task.CompletedTask);
+            _ticketRepository.SaveChangesAsync().Returns(Task.CompletedTask);
 
             //Act
             var result = await _sut.CreateOrUpdateAssignment(ticketId, newAssignUserId);
@@ -201,10 +205,10 @@ namespace TicketService.Application.Tests.Tests
             await _assignmentRepository.Received(1).GetAssignmentByTicketIdAsync(ticketId);
 
             //Verificer at vi kaldte UpdateAsync
-            await _assignmentRepository.Received(1).UpdateAsync(Arg.Any<Assignment>());
+            await _assignmentRepository.Received(1).UpdateAsync(existingAssignment);
 
             //Verificer at vi ikke kaldte AddAsync
-            await _assignmentRepository.DidNotReceive().AddAsync(Arg.Any<Assignment>());
+            await _assignmentRepository.DidNotReceive().AddAsync(existingAssignment);
 
             //SaveChangesAsync blev kaldt
             await _assignmentRepository.Received(1).SaveChangesAsync();
