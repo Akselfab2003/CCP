@@ -20,50 +20,10 @@ string EmailWorkerServiceUsername = builder.Configuration.GetValue<string>("emai
     ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
 string EmailWorkerServicePassword = builder.Configuration.GetValue<string>("emailWorkerServicePassword")
     ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
+string EmailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl")
+    ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
-IResourceBuilder<ContainerResource> EmailServer = builder.AddContainer("mailcow-dovecot", "mailcow/dovecot:latest");
-IResourceBuilder<ContainerResource> PostFixServer = builder.AddContainer("mailcow-postfix", "mailcow/postfix:latest");
-
-
-IResourceBuilder<ContainerResource> Redis = builder.AddContainer("mailcow-redis", "redis:6")
-    .WithLifetime(LifeTimeMode);
-
-IResourceBuilder<ContainerResource> MailCowDB = builder.AddContainer("mailcow-mysql", "mariadb:10.9")
-    .WithEnvironment(env =>
-    {
-        env.EnvironmentVariables.Add("MYSQL_ROOT_PASSWORD", "mailcow");
-        env.EnvironmentVariables.Add("MYSQL_DATABASE", "mailcow");
-        env.EnvironmentVariables.Add("MYSQL_USER", "mailcow");
-        env.EnvironmentVariables.Add("MYSQL_PASSWORD", "mailcow");
-    }).WithLifetime(LifeTimeMode);
-
-
-
-EmailServer
-    .WithEnvironment(env =>
-    {
-        env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
-        env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
-        env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
-        env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
-    })
-    .WithEndpoint("smtp", config =>
-    {
-        config.TargetPort = 25;
-        config.Port = 25;
-    })
-    .WithEndpoint("submission", config =>
-    {
-        config.TargetPort = 587;
-        config.Port = 587;
-    })
-    .WithEndpoint("smtps", config =>
-    {
-        config.TargetPort = 465;
-        config.Port = 465;
-    })
-    .WithLifetime(LifeTimeMode);
 
 // External Services
 IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
@@ -86,11 +46,11 @@ Ollama.WithOtlpExporter()
 Roundcube
        .WithEnvironment(env =>
        {
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", "MailServer");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", "MailServer");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", EmailHostUrl);
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", EmailHostUrl);
            env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "587");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "143");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "143");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "993");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "993");
        })
        .WithEndpoint("webmail", config =>
        {
@@ -99,7 +59,6 @@ Roundcube
            config.TargetPort = 80;
            config.Port = 8081;
        })
-       .WaitFor(EmailServer)
        .WithLifetime(LifeTimeMode);
 
 Keycloak.WithRealmImport(RealmImportPath)
@@ -163,7 +122,9 @@ EmailService
     })
     .WithEnvironment(env =>
     {
-        env.EnvironmentVariables.Add("CCP.ServiceAccount", ServiceAccountSecret);
+        env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
+        env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+        env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
     .WithOtlpExporter();
 
@@ -247,11 +208,11 @@ CCPWebsite
     .WithOtlpExporter();
 
 EmailWorkerService
-    .WaitFor(EmailServer)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+        env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
     .WithOtlpExporter();
 
@@ -265,7 +226,6 @@ if (Environment == "DEV")
 
 
 
-    MailCowDB.WithVolume("mysql-data", "/var/lib/mysql");
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
