@@ -6,6 +6,7 @@ namespace EmailService.Worker.Host.Services
 {
     public interface IInboxListener
     {
-        Task ListenAsync(CancellationToken cancellationToken);
+        Task ListenSingleInboxAsync(EmailAccount account, CancellationToken cancellationToken);
+        Task ListenToAllInboxesAsync(IEnumerable<EmailAccount> accounts, CancellationToken cancellationToken);
     }
 }
