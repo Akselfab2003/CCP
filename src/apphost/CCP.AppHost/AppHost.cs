@@ -22,26 +22,25 @@ string EmailWorkerServicePassword = builder.Configuration.GetValue<string>("emai
     ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
-
-// External Services
-IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
-IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
-IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
-IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
-IResourceBuilder<ContainerResource> EmailServer = builder.AddContainer("MailServer", "");
-IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
-
-// Configure External Services
-Postgres.WithImage("pgvector/pgvector", "pg16")
-        .WithBindMount("./init-db", "/docker-entrypoint-initdb.d")
-        .WithLifetime(LifeTimeMode)
-        .WithOtlpExporter();
-
-Ollama.WithOtlpExporter()
-      .WithLifetime(LifeTimeMode);
+IResourceBuilder<ContainerResource> EmailServer = builder.AddContainer("mailcow-dovecot", "mailcow/dovecot:latest");
+IResourceBuilder<ContainerResource> PostFixServer = builder.AddContainer("mailcow-postfix", "mailcow/postfix:latest");
 
 
-DockerEmailServer
+IResourceBuilder<ContainerResource> Redis = builder.AddContainer("mailcow-redis", "redis:6")
+    .WithLifetime(LifeTimeMode);
+
+IResourceBuilder<ContainerResource> MailCowDB = builder.AddContainer("mailcow-mysql", "mariadb:10.9")
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("MYSQL_ROOT_PASSWORD", "mailcow");
+        env.EnvironmentVariables.Add("MYSQL_DATABASE", "mailcow");
+        env.EnvironmentVariables.Add("MYSQL_USER", "mailcow");
+        env.EnvironmentVariables.Add("MYSQL_PASSWORD", "mailcow");
+    }).WithLifetime(LifeTimeMode);
+
+
+
+EmailServer
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
@@ -66,6 +65,23 @@ DockerEmailServer
     })
     .WithLifetime(LifeTimeMode);
 
+// External Services
+IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
+IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
+IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
+IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
+
+// Configure External Services
+Postgres.WithImage("pgvector/pgvector", "pg16")
+        .WithBindMount("./init-db", "/docker-entrypoint-initdb.d")
+        .WithLifetime(LifeTimeMode)
+        .WithOtlpExporter();
+
+Ollama.WithOtlpExporter()
+      .WithLifetime(LifeTimeMode);
+
+
+
 
 Roundcube
        .WithEnvironment(env =>
@@ -83,7 +99,7 @@ Roundcube
            config.TargetPort = 80;
            config.Port = 8081;
        })
-       .WaitFor(DockerEmailServer)
+       .WaitFor(EmailServer)
        .WithLifetime(LifeTimeMode);
 
 Keycloak.WithRealmImport(RealmImportPath)
@@ -231,7 +247,7 @@ CCPWebsite
     .WithOtlpExporter();
 
 EmailWorkerService
-    .WaitFor(DockerEmailServer)
+    .WaitFor(EmailServer)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
@@ -247,11 +263,9 @@ if (Environment == "DEV")
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-    DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
-                     .WithVolume("dms_mail_state", "/var/mail-state")
-                     .WithVolume("dms_mail_logs", "/var/log/mail")
-                     .WithVolume("dms_config", "/tmp/docker-mailserver")
-                     .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true);
+
+
+    MailCowDB.WithVolume("mysql-data", "/var/lib/mysql");
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
