@@ -43,6 +43,11 @@ namespace TicketService.Sdk
             ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
             ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
             ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
+            if (string.IsNullOrEmpty(RequestAdapter.BaseUrl))
+            {
+                RequestAdapter.BaseUrl = "https://localhost:7090";
+            }
+            PathParameters.TryAdd("baseurl", RequestAdapter.BaseUrl);
         }
     }
 }
