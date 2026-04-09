@@ -208,6 +208,8 @@ TicketService
     .WaitFor(Keycloak)
     .WithReference(TicketDB)
     .WaitFor(TicketDB)
+    .WithReference(MessagingService)
+    .WaitFor(MessagingService)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
@@ -253,7 +255,8 @@ ChatService
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
-    .WithOtlpExporter();
+    .WithOtlpExporter().WithExplicitStart();
+
 
 UI
     .WaitFor(MessagingService)
@@ -293,7 +296,7 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+   Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");

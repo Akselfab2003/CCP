@@ -54,8 +54,8 @@
         ],
         "parameters": [
           {
-            "name": "TicketId",
-            "in": "query",
+            "name": "ticketId",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "integer",

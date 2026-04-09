@@ -1,0 +1,97 @@
+name: Deployment
+description: Deploys the application to the specified environment
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      shell:
+        description: "Shell to use for running the steps (e.g., bash, pwsh)"
+        required: false
+        type: string
+        default: "bash"
+
+jobs:
+  Build-and-Push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{secrets.TAILSCALE_OAUTH_CLIENT_SECRET}}
+          tags: tag:ci
+
+      - name: Login to Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY_HOST }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASS }}
+
+      - name: Setup .NET SDK and Tools
+        uses: ./.github/actions/dotnet-setup
+        with:
+          dotnet-version: 10.0.x
+          shell: ${{ inputs.shell }}
+
+      - name: Restore and Build Solution
+        uses: ./.github/actions/dotnet-steps
+        with:
+          solution-file: ./src/CCP.slnx
+          configuration: Release
+          shell: ${{ inputs.shell }}
+
+      - name: Publish the solution
+        run: dotnet publish ./src/CCP.slnx -t:PublishContainer  --configuration Release --no-restore  -p Registry=${{ secrets.REGISTRY_HOST }} -p ContainerImageTags='"${{github.sha}};latest"'
+
+      - name: Build Custom Images
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/keycloak/dockerfile
+          push: true
+          tags: |
+            ${{ secrets.REGISTRY_HOST }}/keycloak:latest
+            ${{ secrets.REGISTRY_HOST }}/keycloak:${{ github.sha }}
+
+      - name: Docker Push Images
+        run: |
+          docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
+
+          docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:${{ github.sha }}
+
+
+  Deploy:
+      name: Deploy
+      needs: Build-and-Push
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          SERVICES_TO_DEPLOY: [IdentityService, CustomerService, ChatService, EmailService, MessagingService, TicketService, CCP_SAAS_UI, CCP_WEBSITE]
+      steps:
+      - name: Deploy
+        env:
+          DEPLOYMENT_WEBHOOK_URL: ${{ secrets[matrix.SERVICES_TO_DEPLOY]}}
+        run: |
+          echo "Deploying to ${{ matrix.SERVICES_TO_DEPLOY }} "
+          curl -X POST "$DEPLOYMENT_WEBHOOK_URL"

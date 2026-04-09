@@ -35,9 +35,9 @@ builder.Services.ConfigureDefaultOpenTelemetry("EmailService.Api");
 
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
-    builder.Services.AddDbContext<DBcontext>(option =>
+    builder.Services.AddDbContext<DBcontext>(options =>
     {
-        option.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
     });
     builder.Services.AddApiAuthenticationServices("EmailService.Api", "CCP");
     builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));

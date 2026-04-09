@@ -22,7 +22,7 @@ namespace TicketService.Sdk.Services.TicketSdk
         {
             try
             {
-                var ticket = await Client.Ticket.GetTicket[ticketId.ToString()].GetAsync(cancellationToken: ct);
+                var ticket = await Client.Ticket.GetTicket[ticketId].GetAsync(cancellationToken: ct);
 
                 if (ticket is null)
                     return Result.Failure<TicketSdkDto>(Error.NotFound("TicketNotFound", $"Ticket with id {ticketId} not found."));

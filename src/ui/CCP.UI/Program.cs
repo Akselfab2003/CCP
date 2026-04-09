@@ -1,8 +1,16 @@
+using CCP.ServiceDefaults;
+using CCP.Shared.AuthContext;
+using CCP.Shared.UIContext;
 using CCP.UI.Components;
+using CCP.UI.Services;
+using IdentityService.Sdk.ServiceDefaults;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using TicketService.Sdk.ServiceDefaults;
 
 namespace CCP.UI
 {
@@ -12,6 +20,8 @@ namespace CCP.UI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration.AddEnvironmentVariables();
+
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
@@ -19,7 +29,18 @@ namespace CCP.UI
             builder.Services.AddHttpClient();
             builder.Services.AddCascadingAuthenticationState();
 
+            // Trust proxy headers from Traefik
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownIPNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
+
             var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+            var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"{keycloakURL}/realms/CCP/.well-known/openid-configuration";
+
 
             builder.Services.AddAuthentication(options =>
             {
@@ -32,9 +53,10 @@ namespace CCP.UI
                 options.SlidingExpiration = false;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
             })
-            .AddKeycloakOpenIdConnect(serviceName: "Keycloak", realm: "CCP", options =>
+            .AddOpenIdConnect(options =>
             {
                 options.Authority = $"{keycloakURL}/realms/CCP";
+                options.MetadataAddress = metadataAddress;
                 options.ClientId = "CCP";
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.RequireHttpsMetadata = false;
@@ -50,10 +72,59 @@ namespace CCP.UI
                 options.SignedOutCallbackPath = "/signout-callback-oidc";
                 options.SignedOutRedirectUri = keycloakURL;
                 options.SignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+
+                options.BackchannelHttpHandler = new HttpClientHandler
+                {
+
+                };
+
+                if (builder.Environment.IsProduction())
+                {
+                    options.Events = new OpenIdConnectEvents
+                    {
+                        OnRedirectToIdentityProvider = context =>
+                        {
+                            context.ProtocolMessage.RedirectUri = "https://ccp.northflow.dev/signin-oidc";
+                            return Task.CompletedTask;
+                        }
+                    };
+                }
             });
 
+            builder.Services.AddScoped<ChatHubService>();
+            builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+            builder.Services.AddScoped<IUIUserContext, UIUserContext>();
+            builder.Services.AddServiceDefaults("CCP.UI");
+            /*
+            builder.Services.AddEmailServiceSdk(
+                builder.Configuration.GetValue<string>("services:EmailService:http:0")
+                ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
+            */
+            builder.Services.AddMessageServiceSDK(
+                builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+                ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
+            /*
+            builder.Services.AddCustomerviceSdk(
+                builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
+                ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
+            */
+            builder.Services.AddIdentityServiceSdk(
+                builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+                ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
+
+            builder.Services.AddTicketServiceSdk(
+                builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+                ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
+                );
 
             var app = builder.Build();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions()
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
 
             app.UseAuthentication();
             app.UseAuthorization();
