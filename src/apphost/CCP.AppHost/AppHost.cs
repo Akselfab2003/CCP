@@ -202,7 +202,8 @@ ChatService
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
-    .WithOtlpExporter();
+    .WithOtlpExporter().WithExplicitStart();
+
 
 UI
     .WaitFor(MessagingService)
@@ -239,7 +240,7 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+   Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");

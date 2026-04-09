@@ -15,7 +15,7 @@ namespace CustomerService.Api.Controllers
             _customerService = customerService;
         }
 
-        // Henter alle customers fra databasen
+        //Henter alle customers fra databasen
         [HttpGet]
         public async Task<IActionResult> GetAllCustomers()
         {
@@ -23,7 +23,7 @@ namespace CustomerService.Api.Controllers
             return Ok(customers);
         }
 
-        // Henter en specifik customer via ID
+        //Henter en specifik customer via ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomerById(Guid id)
         {
@@ -31,13 +31,13 @@ namespace CustomerService.Api.Controllers
 
             if (customer == null)
             {
-                return NotFound(); // HTTP 404
+                return NotFound(); //HTTP 404
             }
 
-            return Ok(customer); // HTTP 200
+            return Ok(customer); //HTTP 200
         }
 
-        // Opretter en ny customer
+        //Opretter en ny customer
         [HttpPost]
         public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
         {
@@ -50,11 +50,11 @@ namespace CustomerService.Api.Controllers
             );
         }
 
-        // Opdaterer en eksisterende customer
+        //Opdaterer en eksisterende customer
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] Customer customer)
         {
-            // Kald servicen for at opdatere kunden
+            //Kald servicen for at opdatere kunden
             var updatedCustomer = await _customerService.UpdateCustomer(customer);
 
             //Hvis kunden ikke blev fundet, retuner 404
@@ -67,11 +67,11 @@ namespace CustomerService.Api.Controllers
             return Ok(updatedCustomer);
         }
 
-        // Sletter en customer permanent
+        //Sletter en customer permanent
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
-            // Kald servicen for at slette kunden
+            //Kald servicen for at slette kunden
             var wasDeleted = await _customerService.DeleteCustomer(id);
 
             if (!wasDeleted)
@@ -79,7 +79,7 @@ namespace CustomerService.Api.Controllers
                 return NotFound(); //returner 404
             }
 
-            return NoContent(); // Returner 204
+            return NoContent(); //Returner 204
         }
     }
 }
