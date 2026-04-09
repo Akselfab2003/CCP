@@ -116,8 +116,8 @@ namespace TicketService.Sdk.Services.TicketSdk
                 OrganizationId = ticket.OrganizationId ?? Guid.Empty,
                 CustomerId = ticket.CustomerId,
                 CreatedAt = ticket.CreatedAt,
-                AssignedUserId = ticket.Assignment?.UserId,
-                AssignedByUserId = ticket.Assignment?.AssignedByUserId
+                AssignedUserId = ticket.Assignment?.AssignmentDto?.UserId,
+                AssignedByUserId = ticket.Assignment?.AssignmentDto?.AssignedByUserId
             };
         }
     }
