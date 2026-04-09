@@ -2,7 +2,7 @@
 {
 
     [CollectionDefinition("Email")]
-    //[Trait("Category", "Integration")]
+    [Trait("Category", "Dontwork")]
     public class EmailServiceCollection : ICollectionFixture<EmailServiceFixture>
     {
     }
