@@ -1,0 +1,195 @@
+﻿@using CCP.UI.Layout
+@using Microsoft.AspNetCore.Authorization
+@using IdentityService.Sdk.Models
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<div class="ct-wrap">
+
+    <div class="ct-header">
+        <div class="ct-header-left">
+            <a href="/inbox" class="ct-back-btn" title="Back to Inbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </a>
+            <div>
+                <h1 class="ct-title">New Ticket</h1>
+                <p class="ct-subtitle">Create a ticket on behalf of a customer</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="ct-body">
+        <div class="ct-card">
+
+            @if (_successMessage is not null)
+            {
+                <div class="ct-alert ct-alert--success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    @_successMessage
+                </div>
+            }
+
+            @if (_errorMessage is not null)
+            {
+                <div class="ct-alert ct-alert--error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    @_errorMessage
+                </div>
+            }
+
+            <!-- Title -->
+            <div class="ct-field">
+                <label class="ct-label" for="ct-title">
+                    Title <span class="ct-required">*</span>
+                </label>
+                <input id="ct-title"
+                       type="text"
+                       class="ct-input @(_titleTouched && string.IsNullOrWhiteSpace(_title) ? "ct-input--error" : "")"
+                       placeholder="Brief summary of the issue..."
+                       maxlength="200"
+                       @bind="_title"
+                       @bind:event="oninput"
+                       @onblur="() => _titleTouched = true"
+                       disabled="@_isSubmitting" />
+                @if (_titleTouched && string.IsNullOrWhiteSpace(_title))
+                {
+                    <span class="ct-field-error">Title is required</span>
+                }
+                <span class="ct-char-count">@(_title?.Length ?? 0) / 200</span>
+            </div>
+
+            <!-- Customer search -->
+            <div class="ct-field">
+                <label class="ct-label" for="ct-customer">
+                    Customer <span class="ct-required">*</span>
+                </label>
+                @if (_selectedCustomer is not null)
+                {
+                    <div class="ct-selected-user">
+                        <div class="ct-selected-avatar">@GetInitials(_selectedCustomer.name)</div>
+                        <div class="ct-selected-info">
+                            <span class="ct-selected-name">@_selectedCustomer.name</span>
+                            <span class="ct-selected-email">@_selectedCustomer.email</span>
+                        </div>
+                        <button class="ct-selected-clear" @onclick="ClearCustomer" title="Remove">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="ct-search-wrap">
+                        <input id="ct-customer"
+                               type="text"
+                               class="ct-input @(_customerTouched && _selectedCustomer is null ? "ct-input--error" : "")"
+                               placeholder="Search by name or email..."
+                               value="@_customerSearch"
+                               @oninput="OnCustomerSearchInput"
+                               @onblur="() => _customerTouched = true"
+                               disabled="@_isSubmitting" />
+                        @if (_isSearching)
+                        {
+                            <div class="ct-search-results">
+                                <div class="ct-search-loading">
+                                    <svg class="ct-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                                    </svg>
+                                    Searching...
+                                </div>
+                            </div>
+                        }
+                        else if (_searchResults.Any())
+                        {
+                            <div class="ct-search-results">
+                                @foreach (var user in _searchResults)
+                                {
+                                    <button class="ct-search-result" @onclick="() => SelectCustomer(user)">
+                                        <div class="ct-result-avatar">@GetInitials(user.name)</div>
+                                        <div class="ct-result-info">
+                                            <span class="ct-result-name">@user.name</span>
+                                            <span class="ct-result-email">@user.email</span>
+                                        </div>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else if (_customerSearch.Length > 1 && !_isSearching)
+                        {
+                            <div class="ct-search-results">
+                                <div class="ct-search-empty">No users found</div>
+                            </div>
+                        }
+                    </div>
+                    @if (_customerTouched && _selectedCustomer is null)
+                    {
+                        <span class="ct-field-error">Please select a customer</span>
+                    }
+                }
+            </div>
+
+            <!-- Assign to self -->
+            <div class="ct-field">
+                <label class="ct-label ct-label--checkbox">
+                    <input type="checkbox"
+                           class="ct-checkbox"
+                           @bind="_assignToSelf"
+                           disabled="@_isSubmitting" />
+                    Assign this ticket to myself
+                </label>
+                <span class="ct-field-hint">You'll be set as the supporting agent on this ticket</span>
+            </div>
+
+            <div class="ct-actions">
+                <a href="/inbox" class="ct-btn ct-btn--ghost">Cancel</a>
+                <button class="ct-btn ct-btn--primary"
+                        @onclick="HandleSubmitAsync"
+                        disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_title) || _selectedCustomer is null)">
+                    @if (_isSubmitting)
+                    {
+                        <svg class="ct-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                        </svg>
+                        <span>Creating...</span>
+                    }
+                    else
+                    {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
+                        <span>Create Ticket</span>
+                    }
+                </button>
+            </div>
+        </div>
+
+        <aside class="ct-aside">
+            <div class="ct-aside-card">
+                <div class="ct-aside-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    Creating on behalf
+                </div>
+                <ul class="ct-aside-steps">
+                    <li><span class="ct-step-dot"></span>Search for the customer by name or email</li>
+                    <li><span class="ct-step-dot"></span>The ticket will be linked to that customer's account</li>
+                    <li><span class="ct-step-dot"></span>Optionally assign yourself as the supporting agent</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>

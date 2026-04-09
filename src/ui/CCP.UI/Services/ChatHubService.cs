@@ -12,6 +12,7 @@ public class ChatHubService : IAsyncDisposable
     public event Action<MessageDto>? OnMessageReceived;
     public event Action<MessageDto>? OnMessageUpdated;
     public event Action<int>? OnMessageDeleted;
+    public event Action<int, Guid>? OnTicketAssigned;
 
     public ChatHubService(IConfiguration configuration)
     {
@@ -39,6 +40,11 @@ public class ChatHubService : IAsyncDisposable
         {
             OnMessageDeleted?.Invoke(messageId);
         });
+
+        _hubConnection.On<int, Guid>("TicketAssigned", (ticketId, assignedUserId) =>
+        {
+            OnTicketAssigned?.Invoke(ticketId, assignedUserId);
+        });
     }
 
     public async Task StartAsync()
@@ -59,6 +65,12 @@ public class ChatHubService : IAsyncDisposable
 
         await _hubConnection.InvokeAsync("JoinTicketGroup", ticketId);
         _currentTicketId = ticketId;
+    }
+
+    public async Task JoinTicketGroupAsync(int ticketId)
+    {
+        // Join without leaving the current active ticket — used for background subscriptions
+        await _hubConnection.InvokeAsync("JoinTicketGroup", ticketId);
     }
 
     public async Task LeaveTicketAsync(int ticketId)

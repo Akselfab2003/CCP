@@ -155,6 +155,8 @@ TicketService
     .WaitFor(Keycloak)
     .WithReference(TicketDB)
     .WaitFor(TicketDB)
+    .WithReference(MessagingService)
+    .WaitFor(MessagingService)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

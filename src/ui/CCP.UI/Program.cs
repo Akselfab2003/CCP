@@ -4,6 +4,7 @@ using CCP.Shared.UIContext;
 using CCP.UI.Components;
 using CCP.UI.Services;
 using IdentityService.Sdk.ServiceDefaults;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -94,11 +95,11 @@ namespace CCP.UI
             builder.Services.AddEmailServiceSdk(
                 builder.Configuration.GetValue<string>("services:EmailService:http:0")
                 ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
-            /
+            */
             builder.Services.AddMessageServiceSDK(
                 builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
                 ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
-            /
+            /*
             builder.Services.AddCustomerviceSdk(
                 builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
                 ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
@@ -111,7 +112,6 @@ namespace CCP.UI
                 builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
                 ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
                 );
-
 
             var app = builder.Build();
 

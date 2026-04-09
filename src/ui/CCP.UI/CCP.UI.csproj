@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\services\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
@@ -33,16 +34,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Pages\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="appsettings.Development.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

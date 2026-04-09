@@ -18,12 +18,25 @@ namespace TicketService.Sdk.Ticket.GetTicket
         /// <summary>Gets an item from the TicketService.Sdk.ticket.GetTicket.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
         /// <returns>A <see cref="global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder"/></returns>
-        public global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder this[string position]
+        public global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder this[int position]
         {
             get
             {
                 var urlTplParams = new Dictionary<string, object>(PathParameters);
                 urlTplParams.Add("ticketId", position);
+                return new global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder(urlTplParams, RequestAdapter);
+            }
+        }
+        /// <summary>Gets an item from the TicketService.Sdk.ticket.GetTicket.item collection</summary>
+        /// <param name="position">Unique identifier of the item</param>
+        /// <returns>A <see cref="global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder"/></returns>
+        [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
+        public global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder this[string position]
+        {
+            get
+            {
+                var urlTplParams = new Dictionary<string, object>(PathParameters);
+                if (!string.IsNullOrWhiteSpace(position)) urlTplParams.Add("ticketId", position);
                 return new global::TicketService.Sdk.Ticket.GetTicket.Item.WithTicketItemRequestBuilder(urlTplParams, RequestAdapter);
             }
         }

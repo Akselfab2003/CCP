@@ -21,5 +21,11 @@
     <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
   </ItemGroup>
+
+
+
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
   
 </Project>
