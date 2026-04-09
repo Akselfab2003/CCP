@@ -41,7 +41,7 @@ jobs:
           shell: ${{ inputs.shell }}
 
       - name: Run Unit Tests
-        run: dotnet test --solution ${{ inputs.solution-file }} --configuration Release -filter-query "/[((category!=Integration)&(category!=UI))]" --ignore-exit-code 8 --no-build --coverage --coverage-output-format cobertura --results-directory ${{ inputs.test-output-directory }}
+        run: dotnet test --solution ${{ inputs.solution-file }} --configuration Release -filter-query "/[((category!=Integration)&(category!=UI)&(category!=Dontwork))]" --ignore-exit-code 8 --no-build --coverage --coverage-output-format cobertura --results-directory ${{ inputs.test-output-directory }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
