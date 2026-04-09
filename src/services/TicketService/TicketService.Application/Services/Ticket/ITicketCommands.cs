@@ -4,6 +4,6 @@ namespace TicketService.Application.Services.Ticket
 {
     public interface ITicketCommands
     {
-        Task<Result> CreateTicketAsync(CreateTicketRequest request);
+        Task<Result<int>> CreateTicketAsync(CreateTicketRequest request);
     }
 }

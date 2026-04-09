@@ -113,6 +113,12 @@
     margin-left: 3px;
 }
 
+.ct-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
 .ct-input {
     background: rgba(255,255,255,0.04);
     border: 1.5px solid var(--ccp-border);
