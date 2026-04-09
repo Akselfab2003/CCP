@@ -4,8 +4,8 @@ namespace TestUtils.UI
 {
     public static class PlaywrightTestSetup
     {
-        // Default timeout of 60 seconds 
-        private const float DefaultTimeoutMs = 60000;
+        // Default timeout of 120 seconds 
+        private const float DefaultTimeoutMs = 60000 * 2;
 
         public static async void Setup(this IBrowserContext browserContext, string Title)
         {

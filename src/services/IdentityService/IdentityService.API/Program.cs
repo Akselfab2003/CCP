@@ -31,6 +31,7 @@ namespace IdentityService.API
                 var keycloakServiceUrl = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddKeycloakSdk(keycloakServiceUrl);
 
+
                 builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
                 builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
                 builder.Services.AddApplication();
@@ -38,7 +39,7 @@ namespace IdentityService.API
                 builder.Services.AddClientCredentialsTokenManagement()
                                 .AddClient(ClientCredentialsClientName.Parse("KeyCloak.Admin"), client =>
                                 {
-                                    client.TokenEndpoint = new Uri("http://localhost:8080/realms/CCP/protocol/openid-connect/token");
+                                    client.TokenEndpoint = new Uri($"{keycloakServiceUrl}/realms/CCP/protocol/openid-connect/token");
                                     client.ClientId = ClientId.Parse("KeycloakAdminApiClient");
                                     client.ClientSecret = ClientSecret.Parse(builder.Configuration["KeycloakAdminApiClientSecret"] ?? throw new InvalidOperationException("KeycloakAdminApiClientSecret configuration value is required."));
                                     client.Scope = Scope.ParseOrDefault("openid");

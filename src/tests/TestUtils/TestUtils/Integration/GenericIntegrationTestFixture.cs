@@ -67,7 +67,10 @@ namespace TestUtils.Integration
                 "emailWorkerServiceUsername=test@test.test",
                 "emailWorkerServicePassword=test",
                 $"Encryption_Key={encryption_key}"
-            ], ct);
+            ], configureBuilder: (config, host) =>
+            {
+                config.TrustDeveloperCertificate = true;
+            }, ct);
 
             if (IsRemoveNotNeededResourcesForTestingEnabled)
             {

@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.1.2">
+<Project Sdk="Aspire.AppHost.Sdk/13.2.0">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,12 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Docker" />
     <PackageReference Include="Aspire.Hosting.Keycloak" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\services\EmailService\EmailService.API\EmailService.API.csproj" />
+    <ProjectReference Include="..\..\services\EmailService\EmailService.Worker.Host\EmailService.Worker.Host.csproj" />
     <ProjectReference Include="..\..\services\ChatService\ChatService.Api\ChatService.Api.csproj" />
     <ProjectReference Include="..\..\services\CustomerService\CustomerService.Api\CustomerService.Api.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.API\IdentityService.API.csproj" />

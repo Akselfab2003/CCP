@@ -7,6 +7,7 @@ using IdentityService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TicketService.Sdk.ServiceDefaults;
 
@@ -18,6 +19,8 @@ namespace CCP.UI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration.AddEnvironmentVariables();
+
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
@@ -25,8 +28,17 @@ namespace CCP.UI
             builder.Services.AddHttpClient();
             builder.Services.AddCascadingAuthenticationState();
 
-            var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+            // Trust proxy headers from Traefik
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownIPNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
 
+
+            var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+            var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"http://localhost:8080/realms/CCP/.well-known/openid-configuration";
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -38,9 +50,10 @@ namespace CCP.UI
                 options.SlidingExpiration = false;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
             })
-            .AddKeycloakOpenIdConnect(serviceName: "Keycloak", realm: "CCP", options =>
+            .AddOpenIdConnect(options =>
             {
                 options.Authority = $"{keycloakURL}/realms/CCP";
+                options.MetadataAddress = metadataAddress;
                 options.ClientId = "CCP";
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.RequireHttpsMetadata = false;
@@ -56,6 +69,21 @@ namespace CCP.UI
                 options.SignedOutCallbackPath = "/signout-callback-oidc";
                 options.SignedOutRedirectUri = keycloakURL;
                 options.SignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+
+                options.BackchannelHttpHandler = new HttpClientHandler
+                {
+
+                };
+
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnRedirectToIdentityProvider = context =>
+                    {
+                        context.ProtocolMessage.RedirectUri = "https://ccp.northflow.dev/signin-oidc";
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             builder.Services.AddScoped<ChatHubService>();
@@ -86,6 +114,12 @@ namespace CCP.UI
 
 
             var app = builder.Build();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions()
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
 
             app.UseAuthentication();
             app.UseAuthorization();
