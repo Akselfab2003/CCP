@@ -40,7 +40,6 @@ namespace IdentityService.Sdk.Services.User
                 }
 
                 // Extract createdTimestamp from UntypedNode
-                // Extract createdTimestamp from UntypedNode
                 long? timestamp = null;
                 if (userDetails.CreatedTimestamp != null)
                 {

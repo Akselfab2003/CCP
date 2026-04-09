@@ -116,29 +116,6 @@ namespace TicketService.Sdk.Services.TicketSdk
 
         private static TicketSdkDto MapToDto(TicketDto ticket)
         {
-            var assignedUserId = ticket.Assignment?.AssignmentDto?.UserId;
-            var assignedByUserId = ticket.Assignment?.AssignmentDto?.AssignedByUserId;
-
-            if (assignedUserId is null)
-            {
-                var fallbackData = ticket.Assignment?.TicketDtoAssignmentMember1?.AdditionalData;
-                if (fallbackData is { Count: > 0 })
-                {
-                    if (fallbackData.TryGetValue("userId", out var rawUserId))
-                    {
-                        var userIdStr = rawUserId?.ToString();
-                        if (Guid.TryParse(userIdStr, out var uid))
-                            assignedUserId = uid;
-                    }
-                    if (fallbackData.TryGetValue("assignedByUserId", out var rawAssignedBy))
-                    {
-                        var assignedByStr = rawAssignedBy?.ToString();
-                        if (Guid.TryParse(assignedByStr, out var abid))
-                            assignedByUserId = abid;
-                    }
-                }
-            }
-
             return new TicketSdkDto
             {
                 Id = ticket.Id ?? 0,
@@ -147,8 +124,8 @@ namespace TicketService.Sdk.Services.TicketSdk
                 OrganizationId = ticket.OrganizationId ?? Guid.Empty,
                 CustomerId = ticket.CustomerId,
                 CreatedAt = ticket.CreatedAt,
-                AssignedUserId = assignedUserId,
-                AssignedByUserId = assignedByUserId
+                AssignedUserId = ticket.Assignment?.UserId,
+                AssignedByUserId = ticket.Assignment?.AssignedByUserId
             };
         }
     }
