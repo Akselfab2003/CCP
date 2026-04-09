@@ -36,7 +36,7 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithLifetime(LifeTimeMode)
         .WithOtlpExporter();
 
-Ollama.WithOtlpExporter()
+Ollama.WithOtlpExporter().WithExplicitStart()
       .WithLifetime(LifeTimeMode);
 
 DockerEmailServer
@@ -132,6 +132,7 @@ IdentityService
     .WithOtlpExporter();
 
 EmailService
+    .WithExplicitStart()
     .WithReference(EmailDB)
     .WaitFor(EmailDB)
     .WaitFor(Keycloak)
@@ -240,7 +241,7 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-   Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode)).WithGPUSupport();
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
