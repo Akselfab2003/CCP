@@ -4,64 +4,38 @@ using System.Net.Mail;
 using System.Text;
 using MailKit;
 using MailKit.Net.Imap;
+using MailKit.Security;
 
 namespace EmailService.Worker.Host.Services
 {
-    public class ImapMailReciver
+    public class ImapMailReciver(IConfiguration configuration,ILogger<ImapMailReciver> logger) : IInboxListener
     {
-        private readonly string hostUrl;
-        private readonly IConfiguration configuration;
-        private readonly int port = 143;
-
-        public ImapMailReciver(string hostUrl, IConfiguration configuration)
+        public async Task ListenAsync(CancellationToken cancellationToken)
         {
-            this.hostUrl = hostUrl;
-            this.configuration = configuration;
-        }
-        public async Task ListenerAsync()
-        {
-            using var client = new ImapClient();
+            var host = configuration["Mail:Host"] ?? "localhost";
+            var port = configuration.GetValue("Mail:Port", 143);
+            var useSsl = configuration.GetValue("Mail:UseSsl", false);
+            var username = configuration["emailWorkerServiceUsername"];
+            var password = configuration["emailWorkerServicePassword"];
 
-            await client.ConnectAsync(hostUrl, port, false);
-            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
-
-            await client.Inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
-            client.Inbox.CountChanged += async (sender, e) =>
+            while (!cancellationToken.IsCancellationRequested)
             {
-                var inbox = sender as IMailFolder;
-                var mails = await inbox.FetchAsync(0, -1, MailKit.MessageSummaryItems.Full | MailKit.MessageSummaryItems.UniqueId);
+                using var client = new ImapClient();
+
+                await client.ConnectAsync(host, port, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
+                await client.AuthenticateAsync(username, password, cancellationToken);
+                await client.Inbox.OpenAsync(FolderAccess.ReadOnly, cancellationToken);
+
+                logger.LogInformation("Connected to IMAP {Host}:{Port}", host, port);
+
+                var mails = await client.Inbox.FetchAsync(0, -1, MessageSummaryItems.Envelope | MessageSummaryItems.UniqueId, cancellationToken);
                 foreach (var item in mails)
                 {
-                    Console.WriteLine(item.Body);
-                    Console.WriteLine(item.Date);
-                    Console.WriteLine(item.NormalizedSubject);
+                    logger.LogInformation("Mail subject: {Subject}", item.Envelope?.Subject);
                 }
-            };
-            await Task.Delay(-1);
-        }
 
-        public async Task ConnectAsync()
-        {
-            using var client = new ImapClient();
-
-            await client.ConnectAsync(hostUrl, port, false);
-            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
-
-            var inbox = client.Inbox;
-            inbox.Open(MailKit.FolderAccess.ReadOnly);
-
-            Console.WriteLine("Total messages: {0}", inbox.Count);
-            Console.WriteLine("Recent messages: {0}", inbox.Recent);
-
-            var mails = await inbox.FetchAsync(0, -1, MailKit.MessageSummaryItems.Full | MailKit.MessageSummaryItems.UniqueId);
-
-            foreach (var item in mails)
-            {
-                Console.WriteLine(item.Body);
-                Console.WriteLine(item.Date);
-                Console.WriteLine(item.NormalizedSubject);
+                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
             }
-
         }
     }
 }

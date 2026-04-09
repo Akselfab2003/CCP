@@ -229,11 +229,15 @@ CCPWebsite
     .WithOtlpExporter();
 
 EmailWorkerService
-    .WaitFor(DockerEmailServer)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+
+        // switch these when moving to Mailcow
+        //env.EnvironmentVariables.Add("Mail__Host", "MailServer"); e.g. "mail.yourdomain.com" for Mailcow
+        //env.EnvironmentVariables.Add("Mail__Port", "143");        Mailcow often 993 with SSL
+        //env.EnvironmentVariables.Add("Mail__UseSsl", "false");
     })
     .WithOtlpExporter();
 
