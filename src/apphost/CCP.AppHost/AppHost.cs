@@ -28,6 +28,7 @@ IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
 IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
+IResourceBuilder<ContainerResource> EmailServer = builder.AddContainer("MailServer", "");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
 
 // Configure External Services
@@ -38,6 +39,7 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 
 Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
+
 
 DockerEmailServer
     .WithEnvironment(env =>
@@ -240,7 +242,7 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-   Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
