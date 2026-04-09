@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using TicketService.Domain.Interfaces;
 
@@ -10,20 +9,17 @@ namespace TicketService.Application.Services.Assignment
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly ICurrentUser _currentUser;
-        private readonly IHttpClientFactory _httpClientFactory;
 
         public AssignmentCommands(
             ILogger<AssignmentCommands> logger,
             IAssignmentRepository assignmentRepository,
             ITicketRepositoryCommands ticketRepository,
-            ICurrentUser currentUser,
-            IHttpClientFactory httpClientFactory)
+            ICurrentUser currentUser)
         {
             _logger = logger;
             _assignmentRepository = assignmentRepository;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
-            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<Result<Guid>> CreateAssignmentAsync(int ticketId, Guid AssignUserId)
@@ -93,8 +89,6 @@ namespace TicketService.Application.Services.Assignment
                     {
                         _logger.LogWarning("Assignment saved but could not update AssignmentId on ticket {TicketId}: {Error}", ticketId, ticketResult.Error);
                     }
-
-                    await NotifyAssignmentAsync(ticketId, assignUserId);
                 }
 
                 return result;
@@ -103,19 +97,6 @@ namespace TicketService.Application.Services.Assignment
             {
                 _logger.LogError(ex, "An error occurred while creating or updating the assignment.");
                 return Result.Failure<Guid>(Error.Failure(code: "AssignmentCreationOrUpdateFailed", description: "An error occurred while creating or updating the assignment."));
-            }
-        }
-
-        private async Task NotifyAssignmentAsync(int ticketId, Guid assignedUserId)
-        {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("MessagingService");
-                await client.PostAsJsonAsync("api/ticket-notifications/assignment-updated", new { ticketId, assignedUserId });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to notify MessagingService of assignment update for ticket {TicketId}", ticketId);
             }
         }
     }
