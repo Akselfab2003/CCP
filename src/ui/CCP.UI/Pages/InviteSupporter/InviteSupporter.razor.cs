@@ -17,8 +17,6 @@ namespace CCP.UI.Pages.InviteSupporter
 
         private async Task Submit()
         {
-            Logger.LogInformation("🚀 Submit started - Email: {Email}", InviteSupporterModel.Email);
-
             isSubmitting = true;
             successMessage = null;
             submitErrorMessage = null;
@@ -26,24 +24,18 @@ namespace CCP.UI.Pages.InviteSupporter
 
             try
             {
-                Logger.LogInformation("📞 Calling SupporterService.InviteSupporter...");
                 var result = await SupporterService.InviteSupporter(InviteSupporterModel.Email);
-                Logger.LogInformation("✅ API call completed - IsSuccess: {IsSuccess}", result.IsSuccess);
 
                 if (result.IsSuccess)
                 {
-                    Logger.LogInformation("Successfully invited supporter with email {Email}", InviteSupporterModel.Email);
                     successMessage = $"Invitation sent to {InviteSupporterModel.Email}!";
-                    Logger.LogInformation("✉️ Success message set: {Message}", successMessage);
 
                     // Reset form
                     InviteSupporterModel = new InviteSupporterModel();
                 }
                 else
                 {
-                    Logger.LogError("Failed to invite supporter: {Error}", result.Error);
                     submitErrorMessage = $"Failed to send invitation: {result.Error.Description}";
-                    Logger.LogError("❌ Error message set: {Message}", submitErrorMessage);
                 }
             }
             catch (Exception ex)
@@ -54,15 +46,12 @@ namespace CCP.UI.Pages.InviteSupporter
             finally
             {
                 isSubmitting = false;
-                Logger.LogInformation("🏁 Submit completed - isSubmitting: {IsSubmitting}, successMessage: {Success}, errorMessage: {Error}", 
-                    isSubmitting, successMessage, submitErrorMessage);
                 StateHasChanged(); // Force UI update
             }
         }
 
         private void OnInvalidSubmit()
         {
-            Logger.LogWarning("⚠️ Form validation failed!");
             submitErrorMessage = "Please fill in all required fields correctly.";
             StateHasChanged();
         }
