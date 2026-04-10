@@ -1,0 +1,580 @@
+/*Layout CSS*/
+/* Tokens */
+:root {
+    --ccp-sidebar-w: 228px;
+    --ccp-topbar-h: 54px;
+    --ccp-bg-app: #0d0f14;
+    --ccp-bg-sidebar: #111318;
+    --ccp-bg-topbar: #111318;
+    --ccp-bg-content: #0d0f14;
+    --ccp-border: rgba(255, 255, 255, 0.09);
+    --ccp-border-mid: rgba(255, 255, 255, 0.13);
+    --ccp-text-hi: #dde1eb;
+    --ccp-text-mid: #7b8496;
+    --ccp-text-lo: #3a3f50;
+    --ccp-accent: #6366f1;
+    --ccp-accent-mute: rgba(99, 102, 241, 0.15);
+    --ccp-accent-glow: rgba(99, 102, 241, 0.4);
+    --ccp-hover: rgba(255, 255, 255, 0.055);
+    --ccp-active-bg: rgba(99, 102, 241, 0.16);
+    --ccp-active-bar: #6366f1;
+}
+
+/* Shell */
+.ccp-shell {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background: var(--ccp-bg-app);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--ccp-text-hi);
+    font-size: 14px;
+}
+
+/* Shell override (FOR INBOX has to be placed here due to css isolation): inbox needs full height, no padding */
+.ccp-content:has(.inbox-wrap) {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* SIDEBAR */
+.ccp-sidebar {
+    width: var(--ccp-sidebar-w);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--ccp-bg-sidebar);
+    border-right: 1.5px solid var(--ccp-border-mid);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+    .ccp-sidebar::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .ccp-sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .ccp-sidebar::-webkit-scrollbar-thumb {
+        background: var(--ccp-border);
+        border-radius: 4px;
+    }
+
+/* Brand */
+.ccp-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--ccp-topbar-h);
+    flex-shrink: 0;
+    padding: 0 16px;
+    border-bottom: 1.5px solid var(--ccp-border-mid);
+}
+
+.ccp-brand-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ccp-accent);
+    border-radius: 7px;
+    color: #fff;
+    box-shadow: 0 0 14px var(--ccp-accent-glow);
+}
+
+.ccp-brand-name {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--ccp-text-hi);
+}
+
+/* Nav */
+.ccp-nav {
+    flex: 1;
+    padding: 10px 0 6px;
+}
+
+    .ccp-nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0 8px;
+    }
+
+.ccp-nav-section {
+    margin-bottom: 4px;
+}
+
+.ccp-nav-label {
+    display: block;
+    padding: 10px 12px 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ccp-text-lo);
+    user-select: none;
+}
+
+/* Nav Items override ALL browser link defaults */
+a.ccp-nav-item,
+a.ccp-nav-item:link,
+a.ccp-nav-item:visited {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 7px 10px !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    color: var(--ccp-text-mid) !important;
+    font-weight: 500 !important;
+    font-size: 13.5px !important;
+    margin-bottom: 2px !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+    position: relative !important;
+    outline: none !important;
+}
+
+    a.ccp-nav-item:hover {
+        background: var(--ccp-hover) !important;
+        color: var(--ccp-text-hi) !important;
+    }
+
+    /* Blazor adds .active to matching NavLink */
+    a.ccp-nav-item.active {
+        background: var(--ccp-active-bg) !important;
+        color: var(--ccp-text-hi) !important;
+    }
+
+        /* Accent left bar on active item */
+        a.ccp-nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--ccp-active-bar);
+            border-radius: 0 3px 3px 0;
+        }
+
+/* Nav Icons */
+.ccp-nav-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+}
+
+    .ccp-nav-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+a.ccp-nav-item:hover .ccp-nav-icon,
+a.ccp-nav-item.active .ccp-nav-icon {
+    opacity: 1;
+}
+
+.ccp-nav-icon.icon-indigo {
+    color: #818cf8;
+}
+
+.ccp-nav-icon.icon-amber {
+    color: var(--ccp-text-mid);
+}
+
+.ccp-nav-icon.icon-slate {
+    color: #94a3b8;
+}
+
+.ccp-nav-icon.icon-green {
+    color: #34d399;
+}
+
+.ccp-nav-icon.icon-purple {
+    color: #a78bfa;
+}
+
+.ccp-nav-icon.icon-orange {
+    color: #fb923c;
+}
+
+.ccp-nav-icon.icon-yellow {
+    color: #facc15;
+}
+
+.ccp-nav-icon.icon-teal {
+    color: #2dd4bf;
+}
+
+/* Nav Text & Badges */
+.ccp-nav-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ccp-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1.5px 7px;
+    border-radius: 20px;
+    line-height: 1.7;
+    flex-shrink: 0;
+    letter-spacing: 0.01em;
+}
+
+    .ccp-badge.badge-indigo {
+        background: rgba(99,102,241,0.2);
+        color: #a5b4fc;
+    }
+
+    .ccp-badge.badge-amber {
+        background: rgba(245,158,11,0.2);
+        color: var(--ccp-text-hi);
+    }
+
+    .ccp-badge.badge-violet {
+        background: rgba(167,139,250,0.2);
+        color: #c4b5fd;
+    }
+
+/* User */
+.ccp-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px 16px;
+    border-top: 1.5px solid var(--ccp-border-mid);
+    margin-top: auto;
+}
+
+.ccp-user-avatar {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+}
+
+.ccp-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ccp-user-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ccp-text-hi);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ccp-user-role {
+    font-size: 11px;
+    color: var(--ccp-text-mid);
+}
+
+.ccp-user-more {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ccp-text-lo);
+    padding: 4px 5px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+    .ccp-user-more:hover {
+        background: var(--ccp-hover);
+        color: var(--ccp-text-mid);
+    }
+
+/*MAIN */
+.ccp-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* TOPBAR */
+.ccp-topbar {
+    height: var(--ccp-topbar-h);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: var(--ccp-bg-topbar);
+    border-bottom: 1.5px solid var(--ccp-border-mid);
+    gap: 16px;
+}
+
+.ccp-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ccp-page-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ccp-text-hi);
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+/* Search */
+.ccp-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--ccp-border);
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 32px;
+    max-width: 260px;
+    width: 100%;
+    transition: border-color 0.18s, background 0.18s;
+}
+
+    .ccp-search:focus-within {
+        border-color: var(--ccp-accent);
+        background: rgba(99,102,241,0.06);
+    }
+
+.ccp-search-icon {
+    width: 13px;
+    height: 13px;
+    color: var(--ccp-text-mid);
+    flex-shrink: 0;
+}
+
+.ccp-search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 12.5px;
+    color: var(--ccp-text-hi);
+    min-width: 0;
+    font-family: inherit;
+}
+
+    .ccp-search-input::placeholder {
+        color: var(--ccp-text-mid);
+    }
+
+/* Topbar right */
+.ccp-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.ccp-topbar-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--ccp-text-mid);
+    position: relative;
+    transition: background 0.15s, color 0.15s;
+}
+
+    .ccp-topbar-btn:hover {
+        background: var(--ccp-hover);
+        color: var(--ccp-text-hi);
+    }
+
+.ccp-topbar-btn--bell .ccp-bell-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 7px;
+    height: 7px;
+    background: #facc15;
+    border: 1.5px solid var(--ccp-bg-topbar);
+    border-radius: 50%;
+}
+
+.ccp-topbar-btn--theme {
+    color: var(--ccp-text-mid);
+}
+
+    .ccp-topbar-btn--theme:hover {
+        color: var(--ccp-text-hi);
+    }
+
+.ccp-topbar-avatar {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 50%;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    margin-left: 6px;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+    user-select: none;
+}
+
+    .ccp-topbar-avatar:hover {
+        opacity: 0.85;
+    }
+
+/* CONTENT */
+.ccp-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    background: var(--ccp-bg-content);
+}
+
+    .ccp-content::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .ccp-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .ccp-content::-webkit-scrollbar-thumb {
+        background: var(--ccp-border);
+        border-radius: 4px;
+    }
+
+        .ccp-content::-webkit-scrollbar-thumb:hover {
+            background: var(--ccp-border-mid);
+        }
+
+/* Light mode override */
+/* Applied when .light class is on .ccp-shell */
+.ccp-shell.light {
+    --ccp-bg-app: #f4f5f7;
+    --ccp-bg-sidebar: #ffffff;
+    --ccp-bg-topbar: #ffffff;
+    --ccp-bg-content: #f4f5f7;
+    --ccp-border: rgba(0, 0, 0, 0.08);
+    --ccp-border-mid: rgba(0, 0, 0, 0.12);
+    --ccp-text-hi: #111318;
+    --ccp-text-mid: #5c6370;
+    --ccp-text-lo: #b0b7c3;
+    --ccp-hover: rgba(0, 0, 0, 0.045);
+    --ccp-active-bg: rgba(99, 102, 241, 0.1);
+}
+
+/* Brand name link */
+a.ccp-brand-name,
+a.ccp-brand-name:link,
+a.ccp-brand-name:visited {
+    color: var(--ccp-text-hi);
+    text-decoration: none;
+}
+
+    a.ccp-brand-name:hover {
+        opacity: 0.8;
+    }
+
+
+
+/* Public Layout (no sidebar). Used by CCPPublicLayout.razor for unauthenticated pages */
+/* Remove sidebar gap — main takes full width */
+.ccp-shell--public {
+}
+
+    .ccp-shell--public .ccp-main {
+        width: 100%;
+    }
+
+/* Public brand in topbar */
+.ccp-public-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+    .ccp-public-brand:hover {
+        opacity: 0.85;
+    }
+
+    .ccp-public-brand .ccp-brand-name {
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        color: var(--ccp-text-hi);
+    }
+
+/* Auth buttons in topbar */
+.ccp-public-login {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ccp-text-mid);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 7px;
+    transition: color 0.15s, background 0.15s;
+}
+
+    .ccp-public-login:hover {
+        color: var(--ccp-text-hi);
+        background: var(--ccp-hover);
+    }
+
+.ccp-public-signup {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    padding: 6px 16px;
+    border-radius: 7px;
+    background: var(--ccp-accent);
+    box-shadow: 0 0 12px rgba(99,102,241,0.3);
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+    .ccp-public-signup:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+    }
