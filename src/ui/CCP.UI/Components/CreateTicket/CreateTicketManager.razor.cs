@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.UIContext;
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
+using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Services.TicketSdk;
 
@@ -9,12 +10,14 @@ namespace CCP.UI.Components.CreateTicket;
 public partial class CreateTicketManager : ComponentBase
 {
     [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ILogger<CreateTicketManager> Logger { get; set; } = default!;
 
     private string _title = string.Empty;
+    private string _description = string.Empty;
     private bool _titleTouched;
     private bool _customerTouched;
     private bool _isSubmitting;
@@ -92,11 +95,8 @@ public partial class CreateTicketManager : ComponentBase
             if (token.IsCancellationRequested) return;
 
             var result = await UserService.SearchUsers(_supporterSearch, token);
-            //Add in some role filtering later currently it searches all users
             if (result.IsSuccess && result.Value is not null)
-            {
                 _supporterResults = result.Value;
-            }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
@@ -157,6 +157,19 @@ public partial class CreateTicketManager : ComponentBase
 
         if (result.IsSuccess)
         {
+            if (!string.IsNullOrWhiteSpace(_description))
+            {
+                var messageResult = await MessageSdkService.CreateMessageAsync(
+                    ticketId: result.Value,
+                    organizationId: UserContext.OrganizationId,
+                    userId: UserContext.UserId,
+                    content: _description.Trim());
+
+                if (messageResult.IsFailure)
+                    Logger.LogWarning("Ticket created but failed to send description as message: {Error}",
+                        messageResult.Error.Description);
+            }
+
             _successMessage = "Ticket created! Redirecting to your inbox...";
             StateHasChanged();
             await Task.Delay(1200);
