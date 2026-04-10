@@ -129,6 +129,8 @@ EmailService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
     .WithOtlpExporter();
 
 EmailWorkerBridgeService.WaitFor(RabbitMq)

@@ -1,10 +1,10 @@
-﻿using System.Text.Json;
-using CCP.Shared.Events;
+﻿using CCP.Shared.Events;
 using CCP.Shared.ResultAbstraction;
-using JasperFx.Core;
+using EmailService.Application.Interfaces;
+using Microsoft.Extensions.Logging;
 using Wolverine;
 
-namespace EmailService.Worker.BridgeService.Services
+namespace EmailService.Application.Services
 {
     public class QueuePublisherService : IQueuePublisherService
     {
@@ -17,24 +17,22 @@ namespace EmailService.Worker.BridgeService.Services
             _messageBus = messageBus;
         }
 
-        public async Task<Result> PublishEmailMessageAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task<Result> PublishEmailMessageAsync(DovecotEvent emailEvent, CancellationToken cancellationToken = default)
         {
             try
             {
-                if (stream == null)
+                if (emailEvent == null)
                 {
                     _logger.LogWarning("Attempted to publish an empty email message");
                     return Result.Failure(Error.Failure(code: "EmptyEmailMessage", description: "Email message cannot be empty"));
                 }
 
-                var json = await stream.ReadAllTextAsync();
-                mail_received? emailMessage = JsonSerializer.Deserialize<mail_received>(json);
-
-                if (emailMessage == null)
+                var emailMessage = new mail_received
                 {
-                    _logger.LogWarning("Failed to deserialize email message");
-                    return Result.Failure(Error.Failure(code: "InvalidEmailMessage", description: "Email message is invalid"));
-                }
+                    @event = emailEvent.Event,
+                    hostname = emailEvent.Hostname,
+                    user = emailEvent.GetString("user"),
+                };
 
                 await _messageBus.PublishAsync<mail_received>(emailMessage);
 

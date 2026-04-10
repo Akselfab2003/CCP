@@ -25,7 +25,6 @@
     <Project Path="services/EmailService/EmailTemplates/EmailTemplates.csproj" Id="40b34755-f455-469f-b1d2-2759ba89a77b" />
   </Folder>
   <Folder Name="/src/services/EmailService/Worker/">
-    <Project Path="services/EmailService/EmailService.Worker.BridgeService/EmailService.Worker.BridgeService.csproj" Id="e3f49d1d-22d7-4791-8a8e-d7330e8cb547" />
     <Project Path="services/EmailService/EmailService.Worker.Host/EmailService.Worker.Host.csproj" />
   </Folder>
   <Folder Name="/src/services/IdentityService/">
