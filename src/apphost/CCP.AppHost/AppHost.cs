@@ -37,7 +37,7 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithLifetime(LifeTimeMode)
         .WithOtlpExporter();
 
-Ollama.WithOtlpExporter()
+Ollama.WithOtlpExporter().WithExplicitStart()
       .WithLifetime(LifeTimeMode);
 
 
@@ -109,6 +109,7 @@ IdentityService
     .WithOtlpExporter();
 
 EmailService
+    .WithExplicitStart()
     .WithReference(EmailDB)
     .WaitFor(EmailDB)
     .WaitFor(Keycloak)
@@ -214,12 +215,13 @@ EmailWorkerService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
+    .WithExplicitStart()
     .WithOtlpExporter();
 
 
 if (Environment == "DEV")
 {
-    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode)).WithGPUSupport();
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");

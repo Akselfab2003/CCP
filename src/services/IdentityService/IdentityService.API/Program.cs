@@ -68,7 +68,8 @@ namespace IdentityService.API
 
             app.MapUserEndpoints()
                .MapTenantEndpoints()
-               .MapCustomerEndpoints();
+               .MapCustomerEndpoints()
+               .MapSupporterEndpoints();
 
             app.Run();
         }
