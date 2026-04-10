@@ -92,7 +92,6 @@ IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_W
 IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
 IResourceBuilder<ProjectResource> EmailService = builder.AddProject<Projects.EmailService_API>("emailservice-api");
 IResourceBuilder<ProjectResource> EmailWorkerService = builder.AddProject<Projects.EmailService_Worker_Host>("emailservice-worker-host");
-IResourceBuilder<ProjectResource> EmailWorkerBridgeService = builder.AddProject<Projects.EmailService_Worker_BridgeService>("emailservice-worker-bridgeservice");
 
 
 IdentityService
@@ -133,15 +132,6 @@ EmailService
     .WithReference(RabbitMq)
     .WithOtlpExporter();
 
-EmailWorkerBridgeService.WaitFor(RabbitMq)
-                        .WithReference(RabbitMq)
-                        .WithEndpoint("tcp", endpoint =>
-                        {
-                            endpoint.Port = 5000;
-                            endpoint.Protocol = System.Net.Sockets.ProtocolType.Tcp;
-                            endpoint.IsProxied = false;
-                        })
-                        .WithOtlpExporter();
 
 TicketService
     .WithReference(Keycloak)
