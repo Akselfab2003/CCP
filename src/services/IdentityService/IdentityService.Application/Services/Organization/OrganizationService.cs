@@ -102,5 +102,27 @@ namespace IdentityService.Application.Services.Organization
                 return Result.Failure(Error.Failure("InviteNewUser.Error", $"An error occurred while inviting the new user to the organization: {ex.Message}"));
             }
         }
+        public async Task<Result<string>> GetOrganizationNameById(Guid orgId, CancellationToken ct = default)
+        {
+            try
+            {
+                var result = await _organizationKeycloakService.GetOrganizationNameByIdAsync(orgId, ct);
+
+                if (result.IsFailure)
+                {
+                    _logger.LogWarning("Failed to get organization name for ID: {OrgId}. Error: {Error}", orgId, result.Error);
+                    return Result.Failure<string>(result.Error);
+                }
+
+                _logger.LogInformation("Successfully got organization name for ID: {OrgId}", orgId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting organization name for ID: {OrgId}", orgId);
+                return Result.Failure<string>(
+                    Error.Failure("GetOrganizationNameById.Error", $"An error occurred while getting organization name: {ex.Message}"));
+            }
+        }
     }
 }

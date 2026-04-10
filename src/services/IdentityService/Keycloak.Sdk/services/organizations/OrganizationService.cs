@@ -172,7 +172,47 @@ namespace Keycloak.Sdk.services.organizations
                 return Result.Failure(Error.Failure("InviteMemberToOrg.failed", $"An error occurred while inviting member to the organization: {ex.Message}"));
             }
         }
+        public async Task<Result<string>> GetOrganizationNameByIdAsync(Guid orgId, CancellationToken ct = default)
+        {
+            try
+            {
+                var organization = await Client.Admin.Realms[Constants.REALM]
+                                               .Organizations[orgId.ToString()]
+                                               .GetAsync(cancellationToken: ct);
 
+                if (organization is null)
+                {
+                    return Result.Failure<string>(
+                        Error.NotFound("GetOrganizationNameByIdAsync.notFound", $"Organization with id '{orgId}' was not found."));
+                }
+
+                if (string.IsNullOrWhiteSpace(organization.Name))
+                {
+                    return Result.Failure<string>(
+                        Error.Failure("GetOrganizationNameByIdAsync.emptyName", $"Organization '{orgId}' has no name."));
+                }
+
+                return Result.Success(organization.Name);
+            }
+            catch (ApiException ex)
+            {
+                return ex.ResponseStatusCode switch
+                {
+                    404 => Result.Failure<string>(
+                        Error.NotFound("GetOrganizationNameByIdAsync.notFound", $"Organization with id '{orgId}' was not found.")),
+                    400 => Result.Failure<string>(
+                        Error.Validation("GetOrganizationNameByIdAsync.validationError", $"Invalid organization id '{orgId}'. {ex.Message}")),
+                    _ => Result.Failure<string>(
+                        Error.Failure("GetOrganizationNameByIdAsync.apiError", $"API error while retrieving organization name: {ex.Message}"))
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving organization name for org id {OrgId}", orgId);
+                return Result.Failure<string>(
+                    Error.Failure("GetOrganizationNameByIdAsync.failed", $"An error occurred while retrieving organization name: {ex.Message}"));
+            }
+        }
 
     }
 }

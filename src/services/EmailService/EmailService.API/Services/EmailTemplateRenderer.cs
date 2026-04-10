@@ -1,10 +1,11 @@
-﻿using EmailService.Domain.Models;
+﻿using EmailService.API.Services;
+using EmailService.Domain.Models;
 using EmailTemplates.EmailTemplates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 namespace EmailService.Api.Services
 {
-    public class EmailTemplateRenderer
+    public class EmailTemplateRenderer : IEmailTemplateRenderer
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
