@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.Supporter;
 using Microsoft.AspNetCore.Components;
 
@@ -14,6 +15,8 @@ namespace CCP.UI.Pages.InviteSupporter
         private bool isSubmitting = false;
         private string? successMessage = null;
         private string? submitErrorMessage = null;
+
+        private List<TenantMember> supporters = new List<TenantMember>();
 
         private async Task Submit()
         {
@@ -55,10 +58,23 @@ namespace CCP.UI.Pages.InviteSupporter
             submitErrorMessage = "Please fill in all required fields correctly.";
             StateHasChanged();
         }
+
+        //protected override void OnInitialized()
+        //{
+        //    var supportResult = SupporterService.GetAllSupporters().GetAwaiter().GetResult();
+        //    if (supportResult.IsSuccess)
+        //    {
+        //        supporters = supportResult.Value;
+        //    }
+        //    else
+        //    {
+        //        Logger.LogError("Failed to load supporters: {Error}", supportResult.Error.Description);
+        //    }
+        //}
     }
 
-    // Model til form data
-    public class InviteSupporterModel
+        // Model til form data
+        public class InviteSupporterModel
     {
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Please enter a valid email address")]

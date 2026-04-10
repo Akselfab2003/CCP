@@ -37,10 +37,28 @@ namespace IdentityService.Application.Services.Supporter
             try
             {
                 // TODO: Implementer invitation logik
-                // 1. Valider email format
-                // 2. Tjek om email allerede eksisterer
                 // 3. Send invitation email med link til at oprette konto med Supporter rolle
                 // 4. Gem pending invitation i database
+                var serchResult = await _userService.SearchUsers(email, ct);
+
+                //returnere fejl, hvis der ikke kan validers
+                if(serchResult.IsFailure)
+                {
+                    _logger.LogWarning("Failed to search for user with email {Email}: {Error}", email, serchResult.Error);
+                    return Result.Failure(serchResult.Error);
+                }
+
+                //Checker efter samme email
+                var existingUser = serchResult.Value.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+
+                if (existingUser != null)
+                {
+                    _logger.LogWarning("User with email {Email} already exists", email);
+                    return Result.Failure(Error.Conflict(
+                        code: "UserAlreadyExists",
+                        description: $"A user with email {email} already exists."));
+                }
+                _logger.LogInformation("Email {Email} is valid and not in use, proceeding with invitation", email);
 
                 _logger.LogInformation("Inviting new supporter with email: {Email}", email);
 

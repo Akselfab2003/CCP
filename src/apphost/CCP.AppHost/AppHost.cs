@@ -215,6 +215,7 @@ EmailWorkerService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
+    .WithExplicitStart()
     .WithOtlpExporter();
 
 

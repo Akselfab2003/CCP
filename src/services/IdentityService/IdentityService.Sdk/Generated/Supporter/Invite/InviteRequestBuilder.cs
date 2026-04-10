@@ -53,6 +53,7 @@ namespace IdentityService.Sdk.Supporter.Invite
             {
                 { "400", global::IdentityService.Sdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::IdentityService.Sdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "409", global::IdentityService.Sdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::IdentityService.Sdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendPrimitiveAsync<Stream>(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
