@@ -1,6 +1,6 @@
 ﻿using EmailService.Domain.Models;
 
-namespace EmailService.API.Services
+namespace EmailTemplates.Renderes
 {
     public interface IEmailTemplateRenderer
     {

@@ -1,7 +1,7 @@
-﻿using EmailService.Api.Services;
-using EmailService.Application.Interfaces;
+﻿using EmailService.Application.Interfaces;
 using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
+using EmailTemplates.Renderes;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 

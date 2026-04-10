@@ -3,7 +3,8 @@ using EmailService.Domain.Models;
 using EmailTemplates.EmailTemplates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-namespace EmailService.Api.Services
+using Microsoft.Extensions.Logging;
+namespace EmailTemplates.Renderes
 {
     public class EmailTemplateRenderer : IEmailTemplateRenderer
     {
