@@ -84,8 +84,24 @@
         }
         else
         {
+            <!-- Chat header -->
+            <div class="inbox-chat-header">
+                <div class="inbox-chat-header-left">
+                    <div>
+                        <div class="inbox-chat-name">@(ActiveTicket?.Title ?? "Ticket")</div>
+                        <div class="inbox-chat-sub">#TK-@_activeTicketId · @GetStatusLabel(ActiveTicket?.Status ?? 0)</div>
+                    </div>
+                </div>
+                <div class="inbox-chat-header-right">
+                    <span class="inbox-tag @GetStatusTagClass(ActiveTicket?.Status ?? 0)" style="font-size:11px;padding:3px 9px;">
+                        @GetStatusLabel(ActiveTicket?.Status ?? 0)
+                    </span>
+                </div>
+            </div>
+
             <!-- Message thread -->
             <div class="inbox-messages">
+
                 @if (!_messages.Any())
                 {
                     @if (_isLoadingMessages)
@@ -95,31 +111,6 @@
                                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                             </svg>
                             Loading messages...
-                        </div>
-                    }
-                    else if (ActiveTicket?.AssignedUserId is null && !UserContext.IsInternalUser)
-                    {
-                        <!-- Unassigned empty state — shown to customers only -->
-                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:32px; text-align:center;">
-                            <div style="width:44px; height:44px; border-radius:50%; background:rgba(99,102,241,0.12); border:1.5px solid rgba(99,102,241,0.25); display:flex; align-items:center; justify-content:center; color:#818cf8;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="20" height="20">
-                                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <line x1="23" y1="11" x2="17" y2="11" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div style="font-size:14px; font-weight:600; color:var(--ccp-text-hi); margin-bottom:6px;">
-                                    Waiting for a supporter
-                                </div>
-                                <div style="font-size:12.5px; color:var(--ccp-text-mid); max-width:280px; line-height:1.6;">
-                                    Your ticket has been received. A support agent will be assigned shortly and reach out here.
-                                </div>
-                            </div>
-                            <div style="font-size:11.5px; color:var(--ccp-text-lo); display:flex; align-items:center; gap:6px;">
-                                <span style="width:6px; height:6px; border-radius:50%; background:#facc15; display:inline-block; box-shadow:0 0 6px rgba(250,204,21,0.5);"></span>
-                                Pending assignment
-                            </div>
                         </div>
                     }
                     else
@@ -135,7 +126,6 @@
                     {
                         @if (msg.IsInternalNote)
                         {
-                            <!-- Only show internal notes to internal users -->
                             @if (UserContext.IsInternalUser)
                             {
                                 <div class="inbox-msg inbox-msg--note">
@@ -179,7 +169,30 @@
                         }
                     }
                 }
+
             </div>
+
+            @* Waiting for supporter banner — sits between messages and composer *@
+            @if (!UserContext.IsInternalUser && ActiveTicket?.AssignedUserId is null && !_isLoadingMessages)
+            {
+                <div class="inbox-waiting-banner">
+                    <div class="inbox-waiting-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <line x1="23" y1="11" x2="17" y2="11" />
+                        </svg>
+                    </div>
+                    <div class="inbox-waiting-text">
+                        <div class="inbox-waiting-title">Waiting for a supporter</div>
+                        <div class="inbox-waiting-sub">Your ticket has been received. A support agent will be assigned shortly and reach out here.</div>
+                    </div>
+                    <div class="inbox-waiting-status">
+                        <span class="inbox-waiting-dot"></span>
+                        Pending assignment
+                    </div>
+                </div>
+            }
 
             <!-- Reply composer -->
             <div class="inbox-composer">

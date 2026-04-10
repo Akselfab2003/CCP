@@ -69,7 +69,7 @@ namespace TicketService.Api.Endpoints
             {
                 var result = await ticketCommands.CreateTicketAsync(request);
                 return result.IsSuccess
-                    ? Results.Ok()
+                    ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.UIContext;
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
+using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Services.TicketSdk;
 
@@ -9,12 +10,14 @@ namespace CCP.UI.Components.CreateTicket;
 public partial class CreateTicketSupporter : ComponentBase
 {
     [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ILogger<CreateTicketSupporter> Logger { get; set; } = default!;
 
     private string _title = string.Empty;
+    private string _description = string.Empty;
     private bool _titleTouched;
     private bool _customerTouched;
     private bool _assignToSelf;
@@ -35,7 +38,6 @@ public partial class CreateTicketSupporter : ComponentBase
         if (_customerSearch.Length < 2)
             return;
 
-        // Debounce — cancel previous search if still running
         _searchCts?.Cancel();
         _searchCts = new CancellationTokenSource();
         var token = _searchCts.Token;
@@ -46,18 +48,13 @@ public partial class CreateTicketSupporter : ComponentBase
         try
         {
             await Task.Delay(300, token);
-
-            if (token.IsCancellationRequested)
-                return;
+            if (token.IsCancellationRequested) return;
 
             var result = await UserService.SearchUsers(_customerSearch, token);
             if (result.IsSuccess && result.Value is not null)
                 _searchResults = result.Value;
         }
-        catch (OperationCanceledException)
-        {
-            // Search was cancelled by a newer keystroke — ignore
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Customer search failed for term {Term}", _customerSearch);
@@ -102,6 +99,19 @@ public partial class CreateTicketSupporter : ComponentBase
 
         if (result.IsSuccess)
         {
+            if (!string.IsNullOrWhiteSpace(_description))
+            {
+                var messageResult = await MessageSdkService.CreateMessageAsync(
+                    ticketId: result.Value,
+                    organizationId: UserContext.OrganizationId,
+                    userId: UserContext.UserId,
+                    content: _description.Trim());
+
+                if (messageResult.IsFailure)
+                    Logger.LogWarning("Ticket created but failed to send description as message: {Error}",
+                        messageResult.Error.Description);
+            }
+
             _successMessage = "Ticket created! Redirecting to your inbox...";
             StateHasChanged();
             await Task.Delay(1200);
