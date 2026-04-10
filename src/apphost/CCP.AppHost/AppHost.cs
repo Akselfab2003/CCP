@@ -27,12 +27,8 @@ ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persis
 IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
-//IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
-
 IResourceBuilder<ContainerResource> Stalwart = builder.AddContainer("stalwart", "stalwartlabs/stalwart:latest-alpine");
-
-
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithBindMount("./init-db", "/docker-entrypoint-initdb.d")
@@ -79,43 +75,6 @@ Stalwart.WithEndpoint("smtp", config =>
         })
         .WithLifetime(LifeTimeMode);
 
-
-
-//DockerEmailServer
-//        .WithEnvironment(env =>
-//        {
-//            env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
-//            env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
-//            env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
-//            env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
-//            env.EnvironmentVariables.Add("ENABLE_IMAP", "1");
-//        })
-//        .WithEndpoint("smtp", config =>
-//        {
-//            config.TargetPort = 25;
-//            config.Port = 25;
-//        })
-//        .WithEndpoint("submission", config =>
-//        {
-//            config.TargetPort = 587;
-//            config.Port = 587;
-//        })
-//        .WithEndpoint("smtps", config =>
-//        {
-//            config.TargetPort = 465;
-//            config.Port = 465;
-//        })
-//        .WithEndpoint("imap", config =>
-//        {
-//            config.TargetPort = 143;
-//            config.Port = 143;
-//        })
-//        .WithEndpoint("imaps", config =>
-//        {
-//            config.TargetPort = 993;
-//            config.Port = 993;
-//        })
-//        .WithLifetime(LifeTimeMode);
 
 
 Roundcube
@@ -166,6 +125,7 @@ IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_W
 IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
 IResourceBuilder<ProjectResource> EmailService = builder.AddProject<Projects.EmailService_API>("emailservice-api");
 IResourceBuilder<ProjectResource> EmailWorkerService = builder.AddProject<Projects.EmailService_Worker_Host>("emailservice-worker-host");
+IResourceBuilder<ProjectResource> EmailWorkerBridgeService = builder.AddProject<Projects.EmailService_Worker_BridgeService>("emailservice-worker-bridgeservice");
 
 
 IdentityService
@@ -202,6 +162,7 @@ EmailService
     })
     .WithOtlpExporter();
 
+EmailWorkerBridgeService.WithOtlpExporter();
 
 TicketService
     .WithReference(Keycloak)
@@ -296,7 +257,7 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-   Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
@@ -310,5 +271,6 @@ if (Environment == "DEV")
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }
+
 
 builder.Build().Run();
