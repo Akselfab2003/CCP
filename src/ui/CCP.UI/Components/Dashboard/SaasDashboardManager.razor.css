@@ -1,4 +1,5 @@
-﻿/* Greeting */
+﻿/* ── Greeting ───────────────────────────────────────────────── */
+
 .dash-greeting {
     display: flex;
     align-items: flex-start;
@@ -27,7 +28,8 @@
     white-space: nowrap;
 }
 
-/* Stat Cards */
+/* ── Stat cards ─────────────────────────────────────────────── */
+
 .dash-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -87,14 +89,16 @@
     color: var(--ccp-text-mid);
 }
 
-/* Main Grid */
+/* ── Main grid ──────────────────────────────────────────────── */
+
 .dash-grid {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 14px;
 }
 
-/* Shared Card */
+/* ── Shared card ────────────────────────────────────────────── */
+
 .dash-card {
     background: var(--ccp-bg-sidebar);
     border: 1px solid var(--ccp-border-mid);
@@ -132,7 +136,8 @@
     color: var(--ccp-text-mid);
 }
 
-/* Feed */
+/* ── Feed ───────────────────────────────────────────────────── */
+
 .dash-feed {
     display: flex;
     flex-direction: column;
@@ -234,7 +239,8 @@
     background: var(--ccp-text-lo);
 }
 
-/* Tags */
+/* ── Tags ───────────────────────────────────────────────────── */
+
 .dash-tag {
     display: inline-block;
     font-size: 10.5px;
@@ -268,7 +274,8 @@
     color: #94a3b8;
 }
 
-/* Team Performance */
+/* ── Team performance ───────────────────────────────────────── */
+
 .dash-team-list {
     display: flex;
     flex-direction: column;
@@ -316,7 +323,8 @@
     transition: width 0.4s ease;
 }
 
-/* Responsive */
+/* ── Responsive ─────────────────────────────────────────────── */
+
 @media (max-width: 900px) {
     .dash-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -326,16 +334,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-/* Staff dashboard overrides */
-.staff-stats {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.staff-updates {
-    margin-top: 0;
-}
-
-    .staff-updates .dash-feed-text {
-        white-space: normal;
-    }

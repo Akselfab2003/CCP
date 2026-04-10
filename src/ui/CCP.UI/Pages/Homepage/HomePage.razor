@@ -8,11 +8,11 @@
 @inject IUIUserContext UserContext
 
 @layout CCPLayout
-@if (Role == UserRole.Admin || Role == UserRole.Manager)
+@if (Role == UserRole.Customer)
 {
     <HomepageUsers />
 }
-else if (Role == UserRole.Supporter)
+else if (Role == UserRole.Admin || Role == UserRole.Manager || Role == UserRole.Supporter)
 {
     <HomepageSupporters />
 }

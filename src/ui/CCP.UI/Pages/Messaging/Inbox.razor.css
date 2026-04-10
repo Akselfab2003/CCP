@@ -1,10 +1,4 @@
-﻿/* Shell override: inbox needs full height, no padding */
-.ccp-content:has(.inbox-wrap) {
-    padding: 0;
-    overflow: hidden;
-}
-
-/* Two-panel layout */
+﻿/* Two-panel layout */
 .inbox-wrap {
     display: grid;
     grid-template-columns: 300px 1fr;
