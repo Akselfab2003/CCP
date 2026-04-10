@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using IdentityService.Sdk.Supporter.GetAllSupporters;
 using IdentityService.Sdk.Supporter.Invite;
+using IdentityService.Sdk.Supporter.Item;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -25,6 +26,31 @@ namespace IdentityService.Sdk.Supporter
         public global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder Invite
         {
             get => new global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>Gets an item from the IdentityService.Sdk.supporter.item collection</summary>
+        /// <param name="position">Unique identifier of the item</param>
+        /// <returns>A <see cref="global::IdentityService.Sdk.Supporter.Item.WithSupporterItemRequestBuilder"/></returns>
+        public global::IdentityService.Sdk.Supporter.Item.WithSupporterItemRequestBuilder this[Guid position]
+        {
+            get
+            {
+                var urlTplParams = new Dictionary<string, object>(PathParameters);
+                urlTplParams.Add("supporterId", position);
+                return new global::IdentityService.Sdk.Supporter.Item.WithSupporterItemRequestBuilder(urlTplParams, RequestAdapter);
+            }
+        }
+        /// <summary>Gets an item from the IdentityService.Sdk.supporter.item collection</summary>
+        /// <param name="position">Unique identifier of the item</param>
+        /// <returns>A <see cref="global::IdentityService.Sdk.Supporter.Item.WithSupporterItemRequestBuilder"/></returns>
+        [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
+        public global::IdentityService.Sdk.Supporter.Item.WithSupporterItemRequestBuilder this[string position]
+        {
+            get
+            {
+                var urlTplParams = new Dictionary<string, object>(PathParameters);
+                if (!string.IsNullOrWhiteSpace(position)) urlTplParams.Add("supporterId", position);
+                return new global::IdentityService.Sdk.Supporter.Item.WithSupporterItemRequestBuilder(urlTplParams, RequestAdapter);
+            }
         }
         /// <summary>
         /// Instantiates a new <see cref="global::IdentityService.Sdk.Supporter.SupporterRequestBuilder"/> and sets the default values.

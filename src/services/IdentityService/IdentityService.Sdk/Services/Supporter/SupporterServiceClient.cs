@@ -61,7 +61,9 @@ namespace IdentityService.Sdk.Services.Supporter
                     Id = s.Id ?? Guid.Empty,
                     FirstName = s.FirstName ?? string.Empty,
                     LastName = s.LastName ?? string.Empty,
-                    Email = s.Email ?? string.Empty
+                    Email = s.Email ?? string.Empty,
+                    Roles = s.Roles ?? new List<string>(),
+                    Groups = s.Groups ?? new List<string>()
                 }).ToList();
 
                 return Result.Success(tenantMembers);
@@ -72,6 +74,27 @@ namespace IdentityService.Sdk.Services.Supporter
                 return Result.Failure<List<TenantMember>>(Error.Failure(
                     code: "GetSupportersFailed",
                     description: $"Failed to get supporters: {ex.Message}"));
+            }
+        }
+
+        public async Task<Result> PromoteToManager(Guid supporterId, CancellationToken ct = default)
+        {
+            try
+            {
+                _logger.LogInformation("SDK: Promoting supporter {SupporterId} to Manager", supporterId);
+
+                // Kiota indexer tager Guid direkte, ikke string!
+                await _client.Client.Supporter[supporterId].PromoteToManager.PostAsync(cancellationToken: ct);
+
+                _logger.LogInformation("SDK: Successfully promoted supporter {SupporterId}", supporterId);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SDK: Error promoting supporter {SupporterId} to Manager", supporterId);
+                return Result.Failure(Error.Failure(
+                    code: "PromoteToManagerFailed",
+                    description: $"Failed to promote supporter to manager: {ex.Message}"));
             }
         }
     }

@@ -11,5 +11,6 @@ namespace IdentityService.Application.Services.Supporter
     {
         Task<Result> InviteSupporter(string email, CancellationToken ct = default);
         Task<Result<List<TenantMemberDto>>> GetAllTenantSupporterUsers(CancellationToken ct = default);
+        Task<Result> PromoteToManager(Guid supporterId, CancellationToken ct = default);
     }
 }

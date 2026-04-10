@@ -82,6 +82,7 @@ namespace IdentityService.Application.Services.Supporter
             try
             {
                 Guid tenantId = _currentUser.OrganizationId;
+                _logger.LogInformation("🔍 Fetching all supporters for tenant {TenantId}", tenantId);
 
                 //Hent alle medlemmer af organisationen
                 var membersResult = await _memberService.GetAllMembersOfOrganization(tenantId, ct);
@@ -93,10 +94,12 @@ namespace IdentityService.Application.Services.Supporter
                     return Result.Failure<List<TenantMemberDto>>(membersResult.Error);
                 }
 
+                _logger.LogInformation("📊 Retrieved {Count} total members", membersResult.Value?.Count ?? 0);
+
                 //Filtrer på dem der er supporters
-                var supporters = membersResult.Value
+                var supporters = (membersResult.Value ?? new List<Keycloak.Sdk.Models.KeycloakTenantMember>())
                     .Where(member => member.Roles != null &&
-                                   member.Roles.Contains("Supporter", StringComparer.OrdinalIgnoreCase))
+                                   member.Roles.Any(role => role.Equals("org.Supporter", StringComparison.OrdinalIgnoreCase)))
                     .Select(member => new TenantMemberDto
                     {
                         Id = member.Id,
@@ -108,7 +111,14 @@ namespace IdentityService.Application.Services.Supporter
                     })
                     .ToList();
 
-                _logger.LogInformation("Found {Count} supporters in tenant {TenantId}", supporters.Count, tenantId);
+                _logger.LogInformation("✅ Found {Count} supporters in tenant {TenantId}", supporters.Count, tenantId);
+
+                // Log detaljer om hver medlem for debugging
+                foreach (var member in (membersResult.Value ?? new List<Keycloak.Sdk.Models.KeycloakTenantMember>()).Take(5))
+                {
+                    _logger.LogInformation("  Member: {FirstName} {LastName} - Roles: {Roles}", 
+                        member.FirstName, member.LastName, string.Join(", ", member.Roles ?? new List<string>()));
+                }
 
                 return Result.Success(supporters);
             }
@@ -118,6 +128,45 @@ namespace IdentityService.Application.Services.Supporter
                 return Result.Failure<List<TenantMemberDto>>(Error.Failure(
                     code: "GetSupportersFailed",
                     description: $"An error occurred while retrieving supporters: {ex.Message}"));
+            }
+        }
+
+        //Opgraderer en supporter til manager ved at flytte mellem grupper
+        public async Task<Result> PromoteToManager(Guid supporterId, CancellationToken ct = default)
+        {
+            try
+            {
+                _logger.LogInformation("Promoting supporter {SupporterId} to Manager", supporterId);
+
+                Guid tenantId = _currentUser.OrganizationId;
+
+                // Fjern fra Supporters gruppe
+                var removeResult = await _groupService.RemoveUserFromGroup("Supporters", tenantId, supporterId, ct);
+                if (removeResult.IsFailure)
+                {
+                    _logger.LogWarning("Failed to remove user {SupporterId} from Supporters group: {Error}", 
+                        supporterId, removeResult.Error);
+                    return Result.Failure(removeResult.Error);
+                }
+
+                // Tilføj til Managers gruppe
+                var addResult = await _groupService.AddUserToGroup("Managers", tenantId, supporterId, ct);
+                if (addResult.IsFailure)
+                {
+                    _logger.LogWarning("Failed to add user {SupporterId} to Managers group: {Error}", 
+                        supporterId, addResult.Error);
+                    return Result.Failure(addResult.Error);
+                }
+
+                _logger.LogInformation("Successfully promoted supporter {SupporterId} to Manager", supporterId);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error promoting supporter {SupporterId} to Manager", supporterId);
+                return Result.Failure(Error.Failure(
+                    code: "PromoteToManagerFailed",
+                    description: $"An error occurred while promoting supporter to manager: {ex.Message}"));
             }
         }
     }

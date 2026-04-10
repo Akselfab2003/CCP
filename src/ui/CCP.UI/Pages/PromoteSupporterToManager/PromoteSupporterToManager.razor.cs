@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.Supporter;
 using Microsoft.AspNetCore.Components;
 
@@ -24,21 +25,37 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
 
         protected override async Task OnInitializedAsync()
         {
+            Logger.LogInformation("🔍 Loading supporters...");
+
             // Hent supporters
             var supportersResult = await SupporterService.GetAllSupporters();
 
+            Logger.LogInformation("📊 Result IsSuccess: {IsSuccess}", supportersResult.IsSuccess);
+
             if (supportersResult.IsSuccess)
             {
-                supporters = supportersResult.Value.Select(s => new SupporterDto
+                Logger.LogInformation("✅ Retrieved {Count} supporters from API", supportersResult.Value?.Count ?? 0);
+
+                if (supportersResult.Value != null)
                 {
-                    Id = s.Id,
-                    Name = $"{s.FirstName} {s.LastName}",
-                    Email = s.Email
-                }).ToList();
+                    supporters = supportersResult.Value.Select(s => new SupporterDto
+                    {
+                        Id = s.Id,
+                        Name = $"{s.FirstName} {s.LastName}",
+                        Email = s.Email
+                    }).ToList();
+                }
+
+                Logger.LogInformation("📝 Final supporters list count: {Count}", supporters.Count);
+
+                foreach (var supporter in supporters)
+                {
+                    Logger.LogInformation("  - {Name} ({Email})", supporter.Name, supporter.Email);
+                }
             }
             else
             {
-                Logger.LogError("Failed to load supporters: {Error}", supportersResult.Error);
+                Logger.LogError("❌ Failed to load supporters: {Error}", supportersResult.Error);
             }
 
             // TODO: Hent managers når API endpoint er klar
@@ -56,32 +73,45 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
                     Logger.LogWarning("No supporter selected!");
                     return;
                 }
+                //Promote supporter to manager
+                Logger.LogInformation("Promoting supporter {SupporterId} to Manager", PromoteSupporterModel.SupporterId);
 
-                // TODO: Implementer PromoteToManager API kald når backend er klar
-                // var result = await SupporterService.PromoteToManager(PromoteSupporterModel.SupporterId);
-
-                // Simulering for nu:
-                var selectedSupporter = supporters.FirstOrDefault(s => s.Id == PromoteSupporterModel.SupporterId);
-                if (selectedSupporter != null)
+                var result = await SupporterService.PromoteToManager(PromoteSupporterModel.SupporterId);
+                if (result.IsSuccess)
                 {
-                    successMessage = $"{selectedSupporter.Name} promoted to Manager!";
-                    submitErrorMessage = null;
-
-                    // Fjern fra supporters list
-                    supporters.Remove(selectedSupporter);
-
-                    // Tilføj til managers list
-                    managers.Add(new ManagerDto
+                    var selectedSupporter = supporters.FirstOrDefault(s => s.Id == PromoteSupporterModel.SupporterId);
+                    if (selectedSupporter != null)
                     {
-                        Id = selectedSupporter.Id,
-                        Name = selectedSupporter.Name,
-                        Email = selectedSupporter.Email
-                    });
+                        successMessage = $"Successfully promoted {selectedSupporter.Name} to manager!";
+                        submitErrorMessage = null;
 
-                    // Reset form
-                    PromoteSupporterModel = new PromoteSupporterModel();
+                        // Fjern fra supporters list
+                        supporters.Remove(selectedSupporter);
+
+                        // Tilføj til managers list  
+                        managers.Add(new ManagerDto
+                        {
+                            Id = selectedSupporter.Id,
+                            Name = selectedSupporter.Name,
+                            Email = selectedSupporter.Email
+                        });
+
+                        // Reset form
+                        PromoteSupporterModel = new PromoteSupporterModel();
+                        Logger.LogInformation("Successfully promoted supporter to manager");
+                    }
+                    else
+                    {
+                        submitErrorMessage = result.Error.Description;
+                        successMessage = null;
+                        Logger.LogWarning("Failed to promote supporter: {Error}", result.Error);
+                    }
                     StateHasChanged();
                 }
+
+                // Reset form
+                PromoteSupporterModel = new PromoteSupporterModel();
+                    StateHasChanged();
             }
             catch (Exception ex)
             {

@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace IdentityService.Sdk.Supporter.Invite
+namespace IdentityService.Sdk.Supporter.Item.PromoteToManager
 {
     /// <summary>
-    /// Builds and executes requests for operations under \supporter\Invite
+    /// Builds and executes requests for operations under \supporter\{supporterId}\promote-to-manager
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    internal partial class InviteRequestBuilder : BaseRequestBuilder
+    internal partial class PromoteToManagerRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::IdentityService.Sdk.Supporter.Item.PromoteToManager.PromoteToManagerRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public InviteRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/Invite?email={email}", pathParameters)
+        public PromoteToManagerRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/{supporterId}/promote-to-manager", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::IdentityService.Sdk.Supporter.Item.PromoteToManager.PromoteToManagerRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public InviteRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/Invite?email={email}", rawUrl)
+        public PromoteToManagerRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/supporter/{supporterId}/promote-to-manager", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -41,11 +41,11 @@ namespace IdentityService.Sdk.Supporter.Invite
         /// <exception cref="global::IdentityService.Sdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<Stream?> PostAsync(Action<RequestConfiguration<global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder.InviteRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream?> PostAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<Stream> PostAsync(Action<RequestConfiguration<global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder.InviteRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream> PostAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToPostRequestInformation(requestConfiguration);
@@ -61,48 +61,33 @@ namespace IdentityService.Sdk.Supporter.Invite
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder.InviteRequestBuilderPostQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder.InviteRequestBuilderPostQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
-            requestInfo.Headers.TryAdd("Accept", "application/problem+json");
+            requestInfo.Headers.TryAdd("Accept", "application/json");
             return requestInfo;
         }
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::IdentityService.Sdk.Supporter.Item.PromoteToManager.PromoteToManagerRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder WithUrl(string rawUrl)
+        public global::IdentityService.Sdk.Supporter.Item.PromoteToManager.PromoteToManagerRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder(rawUrl, RequestAdapter);
-        }
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        #pragma warning disable CS1591
-        internal partial class InviteRequestBuilderPostQueryParameters 
-        #pragma warning restore CS1591
-        {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            [QueryParameter("email")]
-            public string? Email { get; set; }
-#nullable restore
-#else
-            [QueryParameter("email")]
-            public string Email { get; set; }
-#endif
+            return new global::IdentityService.Sdk.Supporter.Item.PromoteToManager.PromoteToManagerRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        internal partial class InviteRequestBuilderPostRequestConfiguration : RequestConfiguration<global::IdentityService.Sdk.Supporter.Invite.InviteRequestBuilder.InviteRequestBuilderPostQueryParameters>
+        internal partial class PromoteToManagerRequestBuilderPostRequestConfiguration : RequestConfiguration<DefaultQueryParameters>
         {
         }
     }
