@@ -20,6 +20,8 @@ string EmailWorkerServiceUsername = builder.Configuration.GetValue<string>("emai
     ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
 string EmailWorkerServicePassword = builder.Configuration.GetValue<string>("emailWorkerServicePassword")
     ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
+string EmailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl")
+    ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
 
@@ -38,53 +40,18 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
 
-Stalwart.WithEndpoint("smtp", config =>
-{
-    config.TargetPort = 25;
-    config.Port = 25;
-})
-    .WithEndpoint("https", config =>
-    {
-        config.TargetPort = 443;
-        config.Port = 8443;
-    })
-    .WithEndpoint("http", config =>
-    {
-        config.TargetPort = 8080;
-        config.Port = 8888;
-    })
-        .WithEndpoint("submission", config =>
-        {
-            config.TargetPort = 587;
-            config.Port = 587;
-        })
-        .WithEndpoint("smtps", config =>
-        {
-            config.TargetPort = 465;
-            config.Port = 465;
-        })
-        .WithEndpoint("imap", config =>
-        {
-            config.TargetPort = 143;
-            config.Port = 143;
-        })
-        .WithEndpoint("imaps", config =>
-        {
-            config.TargetPort = 993;
-            config.Port = 993;
-        })
-        .WithLifetime(LifeTimeMode);
+
 
 
 
 Roundcube
        .WithEnvironment(env =>
        {
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", "stalwart");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", "stalwart");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "25");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "143");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "143");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", EmailHostUrl);
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", EmailHostUrl);
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "587");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "993");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "993");
        })
        .WithEndpoint("webmail", config =>
        {
@@ -93,7 +60,6 @@ Roundcube
            config.TargetPort = 80;
            config.Port = 8081;
        })
-       .WaitFor(Stalwart)
        .WithLifetime(LifeTimeMode);
 
 Keycloak.WithRealmImport(RealmImportPath)
@@ -158,7 +124,9 @@ EmailService
     })
     .WithEnvironment(env =>
     {
-        env.EnvironmentVariables.Add("CCP.ServiceAccount", ServiceAccountSecret);
+        env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
+        env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+        env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
     .WithOtlpExporter();
 
@@ -243,13 +211,11 @@ CCPWebsite
     .WithOtlpExporter();
 
 EmailWorkerService
-    .WaitFor(Stalwart)
-    .WaitFor(EmailDB)
-    .WithReference(EmailDB)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+        env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
     .WithOtlpExporter()
     .WithExplicitStart();
@@ -262,12 +228,8 @@ if (Environment == "DEV")
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-    Stalwart.WithVolume("stalewart_data", "/opt/stalwart-mail");
-    //DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
-    //                 .WithVolume("dms_mail_state", "/var/mail-state")
-    //                 .WithVolume("dms_mail_logs", "/var/log/mail")
-    //                 .WithVolume("dms_config", "/tmp/docker-mailserver")
-    //                 .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true);
+
+
 
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
 }

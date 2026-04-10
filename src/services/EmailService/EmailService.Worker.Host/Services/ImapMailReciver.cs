@@ -7,7 +7,7 @@ namespace EmailService.Worker.Host.Services
     {
         private readonly string hostUrl;
         private readonly IConfiguration configuration;
-        private readonly int port = 143;
+        private readonly int port = 993;
 
         public ImapMailReciver(string hostUrl, IConfiguration configuration)
         {
@@ -17,8 +17,9 @@ namespace EmailService.Worker.Host.Services
         public async Task ListenerAsync()
         {
             using var client = new ImapClient();
+            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await client.ConnectAsync(hostUrl, port, false);
+            await client.ConnectAsync(hostUrl, port, true);
             await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
 
             await client.Inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
@@ -38,8 +39,9 @@ namespace EmailService.Worker.Host.Services
         public async Task ConnectAsync()
         {
             using var client = new ImapClient();
+            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await client.ConnectAsync(hostUrl, port, false);
+            await client.ConnectAsync(hostUrl, port, true);
             await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
 
             var inbox = client.Inbox;

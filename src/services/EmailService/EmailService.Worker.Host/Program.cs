@@ -6,7 +6,8 @@ using EmailService.Worker.Host.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddSingleton<ImapMailReciver>(_ => new ImapMailReciver("localhost", builder.Configuration));
+var emailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl") ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
+builder.Services.AddSingleton<ImapMailReciver>(_ => new ImapMailReciver(emailHostUrl, builder.Configuration));
 builder.Services.AddHostedService<Worker>();
 
 builder.Services.AddDbContext<DBcontext>(option =>
