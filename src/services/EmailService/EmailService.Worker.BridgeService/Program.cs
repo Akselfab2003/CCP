@@ -16,7 +16,7 @@ namespace EmailService.Worker.BridgeService
 
             builder.UseWolverine(opts =>
             {
-                opts.UseRabbitMqUsingNamedConnection("RabbitMQ")
+                opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
                     .AutoProvision();
 
                 opts.PublishAllMessages().ToRabbitQueue("mailbox.queue").UseDurableOutbox();

@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..\..</DockerfileContext>
+    <ContainerRepository>$(Registry)/emailworker-bridge</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>
