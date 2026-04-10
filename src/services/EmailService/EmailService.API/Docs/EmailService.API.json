@@ -136,6 +136,21 @@
   },
   "components": {
     "schemas": {
+      "AddTenantEmailConfigurationRequest": {
+        "required": [
+          "domain",
+          "defaultSenderEmail"
+        ],
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "defaultSenderEmail": {
+            "type": "string"
+          }
+        }
+      },
       "EmailReceived": {
         "required": [
           "subject",

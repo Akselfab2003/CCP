@@ -30,7 +30,8 @@ IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
-IResourceBuilder<ContainerResource> Stalwart = builder.AddContainer("stalwart", "stalwartlabs/stalwart:latest-alpine");
+IResourceBuilder<RabbitMQServerResource> RabbitMq = builder.AddRabbitMQ("RabbitMQ");
+
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithBindMount("./init-db", "/docker-entrypoint-initdb.d")
@@ -39,10 +40,6 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 
 Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
-
-
-
-
 
 Roundcube
        .WithEnvironment(env =>
@@ -72,6 +69,10 @@ Keycloak.WithRealmImport(RealmImportPath)
         })
         .WithOtlpExporter()
         .WithLifetime(LifeTimeMode);
+
+
+RabbitMq.WithOtlpExporter()
+    .WithLifetime(LifeTimeMode);
 
 
 // Add Databases
@@ -130,7 +131,15 @@ EmailService
     })
     .WithOtlpExporter();
 
-EmailWorkerBridgeService.WithOtlpExporter();
+EmailWorkerBridgeService.WaitFor(RabbitMq)
+                        .WithReference(RabbitMq)
+                        .WithEndpoint("tcp", endpoint =>
+                        {
+                            endpoint.Port = 5000;
+                            endpoint.Protocol = System.Net.Sockets.ProtocolType.Tcp;
+                            endpoint.IsProxied = false;
+                        })
+                        .WithOtlpExporter();
 
 TicketService
     .WithReference(Keycloak)
@@ -228,10 +237,9 @@ if (Environment == "DEV")
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-
-
-
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
+
+    RabbitMq.WithDataVolume("rabbitmq_data").WithOtlpExporter().WithManagementPlugin(port: 15672);
 }
 
 

@@ -1,16 +1,30 @@
+using System.Net.Sockets;
+using EmailService.Worker.BridgeService.Services;
+
 namespace EmailService.Worker.BridgeService
 {
-    public class Worker(ILogger<Worker> logger) : BackgroundService
+    public class Worker(ILogger<Worker> logger, IServiceProvider serviceProvider) : BackgroundService
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            using (var scope = serviceProvider.CreateScope())
             {
-                if (logger.IsEnabled(LogLevel.Information))
+                var queuePublisher = scope.ServiceProvider.GetRequiredService<IQueuePublisherService>();
+
+                using (var listener = new TcpListener(System.Net.IPAddress.Any, 5000))
                 {
-                    logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                    listener.Start();
+
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        var client = await listener.AcceptTcpClientAsync(stoppingToken);
+                        var publishResult = await queuePublisher.PublishEmailMessageAsync(client.GetStream(), stoppingToken);
+                        if (logger.IsEnabled(LogLevel.Information))
+                        {
+                            logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                        }
+                    }
                 }
-                await Task.Delay(1000, stoppingToken);
             }
         }
     }
