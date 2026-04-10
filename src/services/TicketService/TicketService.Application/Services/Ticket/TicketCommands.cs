@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using EmailService.NotifcationService.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
@@ -11,12 +12,14 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands)
+        private readonly ITicketNotificationService _ticketNotificationService;
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, ITicketNotificationService ticketNotificationService)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _assignmentCommands = assignmentCommands;
+            _ticketNotificationService = ticketNotificationService;
         }
 
         public async Task<Result> CreateTicketAsync(CreateTicketRequest request)
@@ -48,6 +51,20 @@ namespace TicketService.Application.Services.Ticket
                 }
 
                 await _ticketRepository.SaveChangesAsync();
+
+                // Send notification email (do not fail ticket creation if email fails)
+                var emailResult = await _ticketNotificationService.SendTicketCreatedNotificationsAsync(
+                    ticket: result.Value,
+                    assignedUserId: request.AssignedUserId,
+                    tenantEmail: "support@ccp.local");
+
+                if (emailResult.IsFailure)
+                {
+                    _logger.LogWarning(
+                        "Ticket {TicketId} created, but email notification failed: {Error}",
+                        result.Value.Id,
+                        emailResult.Error);
+                }
 
                 return Result.Success();
             }
