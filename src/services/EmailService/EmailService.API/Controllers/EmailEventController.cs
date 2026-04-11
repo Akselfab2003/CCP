@@ -22,7 +22,9 @@ namespace EmailService.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Received email event: {event}", emailEvent);
+                _logger.LogInformation($"Received email event: {emailEvent.Event} from {emailEvent.Hostname} at {emailEvent.StartTime}");
+                _logger.LogInformation("Event categories: {categories}", string.Join(", ", emailEvent.Categories));
+                _logger.LogInformation("Event fields: {fields}", string.Join(", ", emailEvent.Fields.Select(kv => $"{kv.Key}: {kv.Value}")));
                 var result = await _queuePublisherService.PublishEmailMessageAsync(emailEvent);
                 return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
             }
