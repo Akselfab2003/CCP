@@ -22,6 +22,16 @@ namespace EmailService.Sdk.Models
 #else
         public List<string> Categories { get; set; }
 #endif
+        /// <summary>The connectionId property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? ConnectionId { get; set; }
+#nullable restore
+#else
+        public string ConnectionId { get; set; }
+#endif
+        /// <summary>The duration property</summary>
+        public long? Duration { get; set; }
         /// <summary>The end_time property</summary>
         public DateTimeOffset? EndTime { get; set; }
         /// <summary>The event property</summary>
@@ -48,8 +58,106 @@ namespace EmailService.Sdk.Models
 #else
         public string Hostname { get; set; }
 #endif
+        /// <summary>The mailFrom property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? MailFrom { get; set; }
+#nullable restore
+#else
+        public string MailFrom { get; set; }
+#endif
+        /// <summary>The mailFromRaw property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? MailFromRaw { get; set; }
+#nullable restore
+#else
+        public string MailFromRaw { get; set; }
+#endif
+        /// <summary>The messageFrom property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? MessageFrom { get; set; }
+#nullable restore
+#else
+        public string MessageFrom { get; set; }
+#endif
+        /// <summary>The messageId property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? MessageId { get; set; }
+#nullable restore
+#else
+        public string MessageId { get; set; }
+#endif
+        /// <summary>The protocol property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Protocol { get; set; }
+#nullable restore
+#else
+        public string Protocol { get; set; }
+#endif
+        /// <summary>The rcptTo property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? RcptTo { get; set; }
+#nullable restore
+#else
+        public string RcptTo { get; set; }
+#endif
+        /// <summary>The reasonCode property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<string>? ReasonCode { get; set; }
+#nullable restore
+#else
+        public List<string> ReasonCode { get; set; }
+#endif
+        /// <summary>The remoteIp property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? RemoteIp { get; set; }
+#nullable restore
+#else
+        public string RemoteIp { get; set; }
+#endif
+        /// <summary>The remotePort property</summary>
+        public long? RemotePort { get; set; }
+        /// <summary>The session property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Session { get; set; }
+#nullable restore
+#else
+        public string Session { get; set; }
+#endif
         /// <summary>The start_time property</summary>
         public DateTimeOffset? StartTime { get; set; }
+        /// <summary>The subject property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Subject { get; set; }
+#nullable restore
+#else
+        public string Subject { get; set; }
+#endif
+        /// <summary>The transactionId property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? TransactionId { get; set; }
+#nullable restore
+#else
+        public string TransactionId { get; set; }
+#endif
+        /// <summary>The user property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? User { get; set; }
+#nullable restore
+#else
+        public string User { get; set; }
+#endif
         /// <summary>
         /// Instantiates a new <see cref="global::EmailService.Sdk.Models.DovecotEvent"/> and sets the default values.
         /// </summary>
@@ -76,11 +184,26 @@ namespace EmailService.Sdk.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "categories", n => { Categories = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
+                { "connectionId", n => { ConnectionId = n.GetStringValue(); } },
+                { "duration", n => { Duration = n.GetLongValue(); } },
                 { "end_time", n => { EndTime = n.GetDateTimeOffsetValue(); } },
                 { "event", n => { Event = n.GetStringValue(); } },
                 { "fields", n => { Fields = n.GetObjectValue<global::EmailService.Sdk.Models.DovecotEvent_fields>(global::EmailService.Sdk.Models.DovecotEvent_fields.CreateFromDiscriminatorValue); } },
                 { "hostname", n => { Hostname = n.GetStringValue(); } },
+                { "mailFrom", n => { MailFrom = n.GetStringValue(); } },
+                { "mailFromRaw", n => { MailFromRaw = n.GetStringValue(); } },
+                { "messageFrom", n => { MessageFrom = n.GetStringValue(); } },
+                { "messageId", n => { MessageId = n.GetStringValue(); } },
+                { "protocol", n => { Protocol = n.GetStringValue(); } },
+                { "rcptTo", n => { RcptTo = n.GetStringValue(); } },
+                { "reasonCode", n => { ReasonCode = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
+                { "remoteIp", n => { RemoteIp = n.GetStringValue(); } },
+                { "remotePort", n => { RemotePort = n.GetLongValue(); } },
+                { "session", n => { Session = n.GetStringValue(); } },
                 { "start_time", n => { StartTime = n.GetDateTimeOffsetValue(); } },
+                { "subject", n => { Subject = n.GetStringValue(); } },
+                { "transactionId", n => { TransactionId = n.GetStringValue(); } },
+                { "user", n => { User = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -91,11 +214,26 @@ namespace EmailService.Sdk.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteCollectionOfPrimitiveValues<string>("categories", Categories);
+            writer.WriteStringValue("connectionId", ConnectionId);
+            writer.WriteLongValue("duration", Duration);
             writer.WriteDateTimeOffsetValue("end_time", EndTime);
             writer.WriteStringValue("event", Event);
             writer.WriteObjectValue<global::EmailService.Sdk.Models.DovecotEvent_fields>("fields", Fields);
             writer.WriteStringValue("hostname", Hostname);
+            writer.WriteStringValue("mailFrom", MailFrom);
+            writer.WriteStringValue("mailFromRaw", MailFromRaw);
+            writer.WriteStringValue("messageFrom", MessageFrom);
+            writer.WriteStringValue("messageId", MessageId);
+            writer.WriteStringValue("protocol", Protocol);
+            writer.WriteStringValue("rcptTo", RcptTo);
+            writer.WriteCollectionOfPrimitiveValues<string>("reasonCode", ReasonCode);
+            writer.WriteStringValue("remoteIp", RemoteIp);
+            writer.WriteLongValue("remotePort", RemotePort);
+            writer.WriteStringValue("session", Session);
             writer.WriteDateTimeOffsetValue("start_time", StartTime);
+            writer.WriteStringValue("subject", Subject);
+            writer.WriteStringValue("transactionId", TransactionId);
+            writer.WriteStringValue("user", User);
             writer.WriteAdditionalData(AdditionalData);
         }
     }
