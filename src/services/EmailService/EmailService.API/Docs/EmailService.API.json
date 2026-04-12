@@ -208,6 +208,101 @@
           },
           "fields": {
             "type": "object"
+          },
+          "reasonCode": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "duration": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "protocol": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "remoteIp": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "remotePort": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "connectionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "session": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "transactionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mailFrom": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mailFromRaw": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rcptTo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "messageId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "messageFrom": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
