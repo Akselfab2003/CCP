@@ -54,7 +54,7 @@ namespace CCP.Website
 
 
             var SassServiceUrl = builder.Configuration.GetValue<string>("services:ccp-ui:https:0");
-            builder.Services.AddScoped<WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("CCP_UI configuration value is required.")));
+            builder.Services.AddScoped<IWebsiteReferencesService, WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("CCP_UI configuration value is required.")));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddFluentUIComponents();
 
