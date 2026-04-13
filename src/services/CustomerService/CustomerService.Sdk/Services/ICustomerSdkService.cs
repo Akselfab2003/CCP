@@ -1,4 +1,5 @@
-﻿using CustomerService.Sdk.Models;
+﻿using CCP.Shared.ResultAbstraction;
+using CustomerService.Sdk.Models;
 
 namespace CustomerService.Sdk.Services
 {
@@ -6,5 +7,7 @@ namespace CustomerService.Sdk.Services
     public interface ICustomerSdkService
     {
         Task CreateCustomer(CreateCustomerRequest customerRequest);
+        Task<List<CustomerDTO>> GetAllCustomers();
+        Task<Result<CustomerDTO>> GetCustomerById(Guid id);
     }
 }

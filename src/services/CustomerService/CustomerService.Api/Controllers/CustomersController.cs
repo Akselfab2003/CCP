@@ -17,6 +17,7 @@ namespace CustomerService.Api.Controllers
 
         //Henter alle customers fra databasen
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllCustomers()
         {
             var customers = await _customerService.GetAllCustomers();
@@ -24,7 +25,9 @@ namespace CustomerService.Api.Controllers
         }
 
         //Henter en specifik customer via ID
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCustomerById(Guid id)
         {
             var customer = await _customerService.GetCustomerById(id);
@@ -39,6 +42,7 @@ namespace CustomerService.Api.Controllers
 
         //Opretter en ny customer
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
         {
             var createdCustomer = await _customerService.CreateCustomer(customer);
@@ -51,7 +55,9 @@ namespace CustomerService.Api.Controllers
         }
 
         //Opdaterer en eksisterende customer
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
+        [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] Customer customer)
         {
             //Kald servicen for at opdatere kunden
@@ -68,7 +74,9 @@ namespace CustomerService.Api.Controllers
         }
 
         //Sletter en customer permanent
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
             //Kald servicen for at slette kunden

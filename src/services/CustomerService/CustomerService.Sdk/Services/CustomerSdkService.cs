@@ -1,4 +1,5 @@
 ﻿using CCP.Sdk.utils.Abstractions;
+using CCP.Shared.ResultAbstraction;
 using CustomerService.Sdk.Models;
 
 namespace CustomerService.Sdk.Services
@@ -28,11 +29,50 @@ namespace CustomerService.Sdk.Services
             }
             catch (Exception)
             {
-
-                throw;
             }
         }
 
+        public async Task<Result<CustomerDTO>> GetCustomerById(Guid id)
+        {
+            try
+            {
+                var response = await _apiClient.Client.Api.Customers[id].GetAsync();
 
+                if (response != null)
+                {
+                    return Result.Success(new CustomerDTO() { Email = response.Email!, Id = response.Id!.Value, Name = response.Name!, OrganizationId = response.OrganizationId!.Value });
+
+                }
+                else
+                {
+                    return Result.Failure<CustomerDTO>(Error.NotFound("CustomerNotFound", $"Customer with id {id} was not found."));
+                }
+
+            }
+            catch (Exception)
+            {
+                return Result.Failure<CustomerDTO>(Error.None);
+            }
+        }
+
+        public async Task<List<CustomerDTO>> GetAllCustomers()
+        {
+            try
+            {
+                var response = await _apiClient.Client.Api.Customers.GetAsync();
+                if (response != null)
+                {
+                    return response.Select(c => new CustomerDTO() { Email = c.Email!, Id = c.Id!.Value, Name = c.Name!, OrganizationId = c.OrganizationId!.Value }).ToList();
+                }
+                else
+                {
+                    return new List<CustomerDTO>();
+                }
+            }
+            catch (Exception)
+            {
+                return new List<CustomerDTO>();
+            }
+        }
     }
 }
