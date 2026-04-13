@@ -11,12 +11,19 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands)
+        private readonly ITicketEmailNotifier _emailNotifier;
+        public TicketCommands(
+             ILogger<TicketCommands> logger,
+             ITicketRepositoryCommands ticketRepository,
+             ICurrentUser currentUser,
+             IAssignmentCommands assignmentCommands,
+             ITicketEmailNotifier emailNotifier)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _assignmentCommands = assignmentCommands;
+            _emailNotifier = emailNotifier;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -48,6 +55,8 @@ namespace TicketService.Application.Services.Ticket
                 }
 
                 await _ticketRepository.SaveChangesAsync();
+
+                await _emailNotifier.NotifyTicketCreatedAsync(result.Value.Id);
 
                 return Result.Success(result.Value.Id); // ← return the ticket ID
             }
