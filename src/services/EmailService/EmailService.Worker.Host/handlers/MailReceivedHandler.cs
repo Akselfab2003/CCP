@@ -10,7 +10,7 @@ namespace EmailService.Worker.Host.handlers
 
         public void Handle(mail_received mail_Received)
         {
-            _logger.LogInformation("Received mail event for mailbox: {mailbox}, user: {user}, uid: {uid}", mail_Received.mailbox, mail_Received.user, mail_Received.uid);
+            _logger.LogInformation($"Handled mail_received event: Subject: {mail_Received.Subject}, From: {mail_Received.MailFrom}, To: {mail_Received.MailTo}, MessageId: {mail_Received.MessageId}");
         }
     }
 }
