@@ -11,15 +11,22 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands)
+        private readonly ITicketEmailNotifier _emailNotifier;
+        public TicketCommands(
+             ILogger<TicketCommands> logger,
+             ITicketRepositoryCommands ticketRepository,
+             ICurrentUser currentUser,
+             IAssignmentCommands assignmentCommands,
+             ITicketEmailNotifier emailNotifier)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _assignmentCommands = assignmentCommands;
+            _emailNotifier = emailNotifier;
         }
 
-        public async Task<Result> CreateTicketAsync(CreateTicketRequest request)
+        public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
         {
             try
             {
@@ -32,7 +39,7 @@ namespace TicketService.Application.Services.Ticket
                 if (result.IsFailure)
                 {
                     _logger.LogError("Failed to create ticket: {Error}", result.Error);
-                    return Result.Failure(result.Error);
+                    return Result.Failure<int>(result.Error);
                 }
 
                 if (request.AssignedUserId != null)
@@ -41,7 +48,7 @@ namespace TicketService.Application.Services.Ticket
                     if (assignmentResult.IsFailure)
                     {
                         _logger.LogError("Failed to create assignment for ticket {TicketId}: {Error}", result.Value.Id, assignmentResult.Error);
-                        return Result.Failure(assignmentResult.Error);
+                        return Result.Failure<int>(assignmentResult.Error);
                     }
 
                     ticket.UpdateAssignmentReference(assignmentResult.Value);
@@ -49,16 +56,15 @@ namespace TicketService.Application.Services.Ticket
 
                 await _ticketRepository.SaveChangesAsync();
 
-                return Result.Success();
+                await _emailNotifier.NotifyTicketCreatedAsync(result.Value.Id);
+
+                return Result.Success(result.Value.Id); // ← return the ticket ID
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating the ticket.");
-                return Result.Failure(Error.Failure(code: "TicketCreationFailed", description: "An error occurred while creating the ticket."));
+                return Result.Failure<int>(Error.Failure(code: "TicketCreationFailed", description: "An error occurred while creating the ticket."));
             }
         }
-
-
-
     }
 }

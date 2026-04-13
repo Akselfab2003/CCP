@@ -5,26 +5,26 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/EmailSendingService/send-ticket-created": {
+    "/api/EmailEvent": {
       "post": {
         "tags": [
-          "EmailSendingService"
+          "EmailEvent"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TicketCreatedRequest"
+                "$ref": "#/components/schemas/DovecotEvent"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/TicketCreatedRequest"
+                "$ref": "#/components/schemas/DovecotEvent"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/TicketCreatedRequest"
+                "$ref": "#/components/schemas/DovecotEvent"
               }
             }
           },
@@ -37,58 +37,26 @@
         }
       }
     },
-    "/api/EmailSendingService/send-ticket-reply": {
+    "/api/TenantEmailConfiguration/create": {
       "post": {
         "tags": [
-          "EmailSendingService"
+          "TenantEmailConfiguration"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TicketReplyRequest"
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/TicketReplyRequest"
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/TicketReplyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/EmailSendingService/send-ticket-status": {
-      "post": {
-        "tags": [
-          "EmailSendingService"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketStatusRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketStatusRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketStatusRequest"
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
               }
             }
           },
@@ -104,251 +72,137 @@
   },
   "components": {
     "schemas": {
-      "EmailReceived": {
+      "AddTenantEmailConfigurationRequest": {
         "required": [
-          "subject",
-          "body",
-          "senderAddress",
-          "recipientAddress",
-          "receivedAt"
+          "domain",
+          "defaultSenderEmail"
         ],
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "organizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "subject": {
+          "domain": {
             "type": "string"
           },
-          "body": {
+          "defaultSenderEmail": {
+            "type": "string"
+          }
+        }
+      },
+      "DovecotEvent": {
+        "type": "object",
+        "properties": {
+          "event": {
             "type": "string"
           },
-          "senderAddress": {
+          "hostname": {
             "type": "string"
           },
-          "recipientAddress": {
-            "type": "string"
-          },
-          "receivedAt": {
+          "start_time": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "EmailSent": {
-        "required": [
-          "subject",
-          "body",
-          "senderAddress",
-          "recipientAddress",
-          "sentAt"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
           },
-          "organizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "subject": {
-            "type": "string"
-          },
-          "body": {
-            "type": "string"
-          },
-          "senderAddress": {
-            "type": "string"
-          },
-          "recipientAddress": {
-            "type": "string"
-          },
-          "sentAt": {
+          "end_time": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "TicketCreatedRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/EmailSent"
           },
-          "recipientName": {
-            "type": "string"
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
-          "organizationName": {
+          "fields": {
+            "type": "object"
+          },
+          "reasonCode": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
             "type": [
               "null",
               "string"
             ]
           },
-          "expectedResponseTime": {
+          "duration": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "protocol": {
             "type": [
               "null",
               "string"
             ]
           },
-          "portalUrl": {
+          "remoteIp": {
             "type": [
               "null",
               "string"
             ]
           },
-          "supportTeamEmail": {
+          "remotePort": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "connectionId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "managementUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "TicketReplyRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/EmailReceived"
-          },
-          "recipientName": {
-            "type": "string"
-          },
-          "organizationName": {
+          "session": {
             "type": [
               "null",
               "string"
             ]
           },
-          "agentName": {
+          "transactionId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "agentRole": {
+          "mailFrom": {
             "type": [
               "null",
               "string"
             ]
           },
-          "ticketStatus": {
+          "mailFromRaw": {
             "type": [
               "null",
               "string"
             ]
           },
-          "ticketStatusLabel": {
+          "rcptTo": {
             "type": [
               "null",
               "string"
             ]
           },
-          "replyUrl": {
+          "messageId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "portalUrl": {
+          "subject": {
             "type": [
               "null",
               "string"
             ]
           },
-          "viewHistoryUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "reopenUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "supportTeamEmail": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "managementUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "isCustomerReply": {
-            "type": "boolean"
-          }
-        }
-      },
-      "TicketStatusRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/EmailSent"
-          },
-          "recipientName": {
-            "type": "string"
-          },
-          "organizationName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "newStatus": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "newStatusLabel": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "oldStatusLabel": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "updatedByAgent": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "agentNote": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "portalUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "reopenUrl": {
+          "messageFrom": {
             "type": [
               "null",
               "string"
@@ -360,7 +214,10 @@
   },
   "tags": [
     {
-      "name": "EmailSendingService"
+      "name": "EmailEvent"
+    },
+    {
+      "name": "TenantEmailConfiguration"
     }
   ]
 }

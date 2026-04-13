@@ -70,7 +70,9 @@ jobs:
           docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
+          docker push ${{ secrets.REGISTRY_HOST }}/emailworker-service:latest
 
+          
           docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:${{ github.sha }}
@@ -79,6 +81,8 @@ jobs:
           docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_HOST }}/emailworker-service:${{ github.sha }}
+
 
 
   Deploy:
@@ -87,7 +91,7 @@ jobs:
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          SERVICES_TO_DEPLOY: [IdentityService, CustomerService, ChatService, EmailService, MessagingService, TicketService, CCP_SAAS_UI, CCP_WEBSITE]
+          SERVICES_TO_DEPLOY: [IdentityService, CustomerService, ChatService, EmailService, MessagingService, TicketService, EmailWorkerService, CCP_SAAS_UI, CCP_WEBSITE]
       steps:
       - name: Deploy
         env:

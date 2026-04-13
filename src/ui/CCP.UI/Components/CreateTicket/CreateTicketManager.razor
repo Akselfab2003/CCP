@@ -53,7 +53,7 @@
                 <input id="ct-title"
                        type="text"
                        class="ct-input @(_titleTouched && string.IsNullOrWhiteSpace(_title) ? "ct-input--error" : "")"
-                       placeholder="Brief summary of the issue..."
+                       placeholder="Brief topic of the issue, e.g. 'Payment issue'..."
                        maxlength="200"
                        @bind="_title"
                        @bind:event="oninput"
@@ -204,6 +204,23 @@
                         }
                     </div>
                 }
+            </div>
+
+            <!-- Description -->
+            <div class="ct-field">
+                <label class="ct-label" for="ct-description">
+                    Description
+                    <span style="font-size:11px; font-weight:400; color:var(--ccp-text-mid); margin-left:6px;">optional</span>
+                </label>
+                <textarea id="ct-description"
+                          class="ct-input ct-textarea"
+                          placeholder="Describe the issue in detail — what happened, when, and any steps to reproduce..."
+                          maxlength="2000"
+                          rows="5"
+                          @bind="_description"
+                          @bind:event="oninput"
+                          disabled="@_isSubmitting"></textarea>
+                <span class="ct-char-count">@(_description?.Length ?? 0) / 2000</span>
             </div>
 
             <div class="ct-actions">

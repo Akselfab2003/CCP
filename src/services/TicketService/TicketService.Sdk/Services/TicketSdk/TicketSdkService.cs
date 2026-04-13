@@ -78,31 +78,39 @@ namespace TicketService.Sdk.Services.TicketSdk
             }
         }
 
-        public async Task<Result> CreateTicketAsync(string title, Guid? customerId, Guid? assignedUserId, CancellationToken ct = default)
+        public async Task<Result<int>> CreateTicketAsync(string title, Guid? customerId, Guid? assignedUserId, CancellationToken ct = default)
         {
             try
             {
-                await Client.Ticket.Create.PostAsync(new CreateTicketRequest
+                var stream = await Client.Ticket.Create.PostAsync(new CreateTicketRequest
                 {
                     Title = title,
                     CustomerId = customerId,
                     AssignedUserId = assignedUserId
                 }, cancellationToken: ct);
 
-                return Result.Success();
+                if (stream is null)
+                    return Result.Failure<int>(Error.Failure("TicketCreationFailed", "No response received."));
+
+                using var reader = new System.IO.StreamReader(stream);
+                var body = await reader.ReadToEndAsync(ct);
+                if (int.TryParse(body.Trim(), out var ticketId))
+                    return Result.Success(ticketId);
+
+                return Result.Failure<int>(Error.Failure("TicketCreationFailed", "Could not parse ticket ID from response."));
             }
             catch (ApiException ex)
             {
                 return ex.ResponseStatusCode switch
                 {
-                    400 => Result.Failure(Error.Validation("BadRequest", "Invalid ticket data.")),
-                    _ => Result.Failure(Error.Failure("TicketCreationFailed", $"Failed to create ticket. Status: {ex.ResponseStatusCode}"))
+                    400 => Result.Failure<int>(Error.Validation("BadRequest", "Invalid ticket data.")),
+                    _ => Result.Failure<int>(Error.Failure("TicketCreationFailed", $"Failed to create ticket. Status: {ex.ResponseStatusCode}"))
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating ticket");
-                return Result.Failure(Error.Failure("TicketCreationFailed", "An error occurred while creating the ticket."));
+                return Result.Failure<int>(Error.Failure("TicketCreationFailed", "An error occurred while creating the ticket."));
             }
         }
 
@@ -116,8 +124,8 @@ namespace TicketService.Sdk.Services.TicketSdk
                 OrganizationId = ticket.OrganizationId ?? Guid.Empty,
                 CustomerId = ticket.CustomerId,
                 CreatedAt = ticket.CreatedAt,
-                AssignedUserId = ticket.Assignment?.AssignmentDto?.UserId,
-                AssignedByUserId = ticket.Assignment?.AssignmentDto?.AssignedByUserId
+                AssignedUserId = ticket.Assignment?.UserId,
+                AssignedByUserId = ticket.Assignment?.AssignedByUserId
             };
         }
     }
