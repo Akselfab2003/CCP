@@ -30,6 +30,7 @@ IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
+IResourceBuilder<RabbitMQServerResource> RabbitMq = builder.AddRabbitMQ("RabbitMQ");
 
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
@@ -39,9 +40,6 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 
 Ollama.WithOtlpExporter().WithExplicitStart()
       .WithLifetime(LifeTimeMode);
-
-
-
 
 Roundcube
        .WithEnvironment(env =>
@@ -71,6 +69,10 @@ Keycloak.WithRealmImport(RealmImportPath)
         })
         .WithOtlpExporter()
         .WithLifetime(LifeTimeMode);
+
+
+RabbitMq.WithOtlpExporter()
+    .WithLifetime(LifeTimeMode);
 
 
 // Add Databases
@@ -127,6 +129,8 @@ EmailService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
     .WithOtlpExporter();
 
 
@@ -215,8 +219,10 @@ EmailWorkerService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
-    .WithExplicitStart()
-    .WithOtlpExporter();
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
+    .WithOtlpExporter()
+    .WithExplicitStart();
 
 
 if (Environment == "DEV")
@@ -226,10 +232,10 @@ if (Environment == "DEV")
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-
-
-
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
+
+    RabbitMq.WithDataVolume("rabbitmq_data").WithOtlpExporter().WithManagementPlugin(port: 15672);
 }
+
 
 builder.Build().Run();
