@@ -29,9 +29,10 @@ namespace EmailService.Application.Services
 
                 var emailMessage = new mail_received
                 {
-                    @event = emailEvent.Event,
-                    hostname = emailEvent.Hostname,
-                    user = emailEvent.GetString("user"),
+                    Subject = emailEvent.Subject ?? string.Empty,
+                    MailFrom = emailEvent.MessageFrom ?? string.Empty,
+                    MailTo = emailEvent.RcptTo ?? string.Empty,
+                    MessageId = emailEvent.MessageId ?? string.Empty,
                 };
 
                 await _messageBus.PublishAsync<mail_received>(emailMessage);
