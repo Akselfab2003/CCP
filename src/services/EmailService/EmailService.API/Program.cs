@@ -3,7 +3,7 @@ using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
-using EmailService.Api.Services;
+using EmailTemplates.Renderes;
 using EmailService.Application.Interfaces;
 using EmailService.Application.Services;
 using EmailService.Domain.Interfaces;
@@ -28,7 +28,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // Add Razor Components services for email template rendering
 builder.Services.AddRazorComponents();
 builder.Services.AddScoped<EmailTemplateRenderer>();
-
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
