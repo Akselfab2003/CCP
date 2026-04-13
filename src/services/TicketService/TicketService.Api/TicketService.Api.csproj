@@ -36,4 +36,8 @@
     <ProjectReference Include="..\TicketService.Infrastructure\TicketService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Docs\" />
+  </ItemGroup>
+
 </Project>

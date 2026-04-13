@@ -36,4 +36,8 @@
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\CSS\" />
+  </ItemGroup>
+
 </Project>
