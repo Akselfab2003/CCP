@@ -13,10 +13,10 @@ namespace TicketService.Api.IntegrationTests.Fixtures
         public override List<string> RequiredResources =>
         [
             APIResourceName,
+            DBResourceName,
             "keycloak",
             "postgres",
-            "messagingservice-api",
-            DBResourceName
+            "RabbitMQ"
         ];
 
         public async ValueTask InitializeAsync()
