@@ -82,7 +82,7 @@ namespace IdentityService.Application.Services.Supporter
                 string RedirectUrl = string.Empty;
                 if (_webHostEnvironment.IsDevelopment())
                 {
-                    RedirectUrl = "https://localhost:7033/";
+                    RedirectUrl = "https://localhost:7033";
                 }
                 else
                 {

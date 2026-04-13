@@ -24,12 +24,12 @@ namespace IdentityService.Sdk.Services.UserRights
         {
             try
             {
-                string groupName = role.ToGroupName();
+                string rolestring = role.ToString();
 
                 var requestBody = new AssignUserRightsRequest
                 {
                     UserId = UserId,
-                    Role = role.ToString()
+                    Role = rolestring
                 };
 
                 await Client.Userrights.Assign.PostAsync(requestBody,

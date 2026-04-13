@@ -30,7 +30,7 @@ namespace IdentityService.API.Endpoints
         {
             try
             {
-                if (Enum.TryParse(request.Role, true, out UserRole role))
+                if (!Enum.TryParse(request.Role, true, out UserRole role))
                 {
                     return Results.BadRequest($"Invalid role: {request.Role}. Valid roles are: {string.Join(", ", Enum.GetNames(typeof(UserRole)))}");
                 }
