@@ -3,13 +3,13 @@ using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
-using TicketService.Sdk.Services.TicketSdk;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Components.CreateTicket;
 
 public partial class CreateTicketSupporter : ComponentBase
 {
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
@@ -92,10 +92,12 @@ public partial class CreateTicketSupporter : ComponentBase
 
         _isSubmitting = true;
 
-        var result = await TicketSdkService.CreateTicketAsync(
-            title: _title.Trim(),
-            customerId: _selectedCustomer.userId,
-            assignedUserId: _assignToSelf ? UserContext.UserId : null);
+        var result = await TicketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
+        {
+            Title = _title.Trim(),
+            CustomerId = _selectedCustomer.userId,
+            AssignedUserId = _assignToSelf ? UserContext.UserId : null
+        });
 
         if (result.IsSuccess)
         {
