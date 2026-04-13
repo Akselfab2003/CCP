@@ -8,8 +8,14 @@
         Customer
     }
 
+
     public static class UserRolesExtensions
     {
+        public const string AdminRoleString = "CCP.Rolesorg.Admin";
+        public const string ManagerRoleString = "CCP.Rolesorg.Manager";
+        public const string SupporterRoleString = "CCP.Rolesorg.Supporter";
+        public const string CustomerRoleString = "CCP.Rolesorg.Customer";
+
         public static string ToRoleString(this UserRole role)
         {
             return role switch
