@@ -20,6 +20,7 @@
     </div>
 
     <div class="ct-body">
+
         <div class="ct-card">
 
             @if (_successMessage is not null)
@@ -51,7 +52,7 @@
                 <input id="ct-title"
                        type="text"
                        class="ct-input @(_titleTouched && string.IsNullOrWhiteSpace(_title) ? "ct-input--error" : "")"
-                       placeholder="Brief summary of your issue..."
+                       placeholder="Brief topic of your issue, e.g. 'Payment issue'..."
                        maxlength="200"
                        @bind="_title"
                        @bind:event="oninput"
@@ -62,6 +63,22 @@
                     <span class="ct-field-error">Title is required</span>
                 }
                 <span class="ct-char-count">@(_title?.Length ?? 0) / 200</span>
+            </div>
+
+            <div class="ct-field">
+                <label class="ct-label" for="ct-description">
+                    Description
+                    <span style="font-size:11px; font-weight:400; color:var(--ccp-text-mid); margin-left:6px;">optional</span>
+                </label>
+                <textarea id="ct-description"
+                          class="ct-input ct-textarea"
+                          placeholder="Describe your issue in detail — what happened, when, and any steps to reproduce..."
+                          maxlength="2000"
+                          rows="5"
+                          @bind="_description"
+                          @bind:event="oninput"
+                          disabled="@_isSubmitting"></textarea>
+                <span class="ct-char-count">@(_description?.Length ?? 0) / 2000</span>
             </div>
 
             <div class="ct-actions">
@@ -86,6 +103,7 @@
                     }
                 </button>
             </div>
+
         </div>
 
         <aside class="ct-aside">
@@ -105,5 +123,6 @@
                 </ul>
             </div>
         </aside>
+
     </div>
 </div>

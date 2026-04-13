@@ -6,6 +6,6 @@ namespace TicketService.Sdk.Services.TicketSdk
     {
         Task<Result<TicketSdkDto>> GetTicketAsync(int ticketId, CancellationToken ct = default);
         Task<Result<List<TicketSdkDto>>> GetTicketsAsync(Guid? assignedUserId = null, Guid? customerId = null, string? status = null, CancellationToken ct = default);
-        Task<Result> CreateTicketAsync(string title, Guid? customerId, Guid? assignedUserId, CancellationToken ct = default);
+        Task<Result<int>> CreateTicketAsync(string title, Guid? customerId, Guid? assignedUserId, CancellationToken ct = default);
     }
 }

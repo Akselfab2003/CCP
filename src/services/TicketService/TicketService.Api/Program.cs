@@ -18,9 +18,8 @@ namespace TicketService.Api
                 options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
             });
 
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
 
-            // Add services to the container.
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
             builder.Services.AddHttpContextAccessor();
@@ -35,7 +34,7 @@ namespace TicketService.Api
                     options.UseNpgsql(builder.Configuration.GetConnectionString("TicketDb"));
                 });
 
-                builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
+                // Keep this inside the guard — Swagger UI only needed at runtime
                 builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
             }
 
