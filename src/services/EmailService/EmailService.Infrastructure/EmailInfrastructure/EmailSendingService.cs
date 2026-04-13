@@ -1,43 +1,108 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MimeKit;
 using EmailService.Application.Interfaces;
+using EmailService.Domain.Models;
+using EmailTemplates.Renderes;
+using MimeKit;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
 {
     public class EmailSendingService :IEmail
     {
         private readonly ISmtpClient _smtpClient;
+        private readonly IEmailTemplateRenderer _emailTemplateRenderer;
 
-        public EmailSendingService(ISmtpClient smtpClient)
+        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer)
         {
             _smtpClient = smtpClient;
+            _emailTemplateRenderer = emailTemplateRenderer;
         }
 
-        public async Task SendEmailNotification(
-            Guid userId, string toEmail, string fromEmail,
-            string toUser, string text, string subject)
+        public async Task SendTicketCreatedEmailAsync(
+            string to,
+            string subject,
+            EmailSent email,
+            string organizationName,
+            string expectedResponseTime,
+            string portalUrl)
         {
-            var message = BuildMessage(fromEmail, userId.ToString(), toEmail, toUser, subject);
-            message.Body = new TextPart("plain") { Text = text };
+            var htmlContent = await _emailTemplateRenderer.RenderTicketCreatedEmailAsync(
+                email,organizationName,expectedResponseTime,portalUrl);
+
+            var message = BuildMessage(
+                fromAddress: email.SenderAddress,
+                fromName: organizationName,
+                toAddress: to,
+                toName: email.RecipientAddress,
+                subject: subject
+            );
+
+            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+
             await _smtpClient.SendAsync(message);
         }
 
-        public async Task SendHtmlEmail(
-            string fromAddress, string fromName,
-            string toAddress, string toName,
-            string subject, string htmlContent)
+        public async Task SendTicketReplyEmailAsync(
+            string to,
+            string subject,
+            EmailReceived email,
+            string organizationName,
+            string recipientName,
+            string agentName,
+            string agentRole,
+            string ticketStatus,
+            string ticketStatusLabel,
+            string replyUrl,
+            string portalUrl,
+            string viewHistoryUrl,
+            string reopenUrl)
         {
-            var message = BuildMessage(fromAddress, fromName, toAddress, toName, subject);
+            var htmlContent = await _emailTemplateRenderer.RenderTicketReplyEmailAsync(
+                email, organizationName, recipientName, agentName, agentRole, ticketStatus, ticketStatusLabel, replyUrl, portalUrl, viewHistoryUrl, reopenUrl);
+            var message = BuildMessage(
+                fromAddress: email.SenderAddress,
+                fromName: organizationName,
+                toAddress: to,
+                toName: email.RecipientAddress,
+                subject: subject
+            );
+            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            await _smtpClient.SendAsync(message);
+        }
+
+        public async Task SendTicketStatusEmailAsync(
+            string to,
+            string subject,
+            EmailSent email,
+            string organizationName,
+            string newStatus,
+            string newStatusLabel,
+            string oldStatusLabel,
+            string updatedByAgent,
+            string agentNote,
+            string portalUrl,
+            string reopenUrl)
+        {
+            var htmlContent = await _emailTemplateRenderer.RenderTicketStatusEmailAsync(
+                email, organizationName, newStatus, newStatusLabel, oldStatusLabel, updatedByAgent, agentNote, portalUrl, reopenUrl);
+            var message = BuildMessage(
+                fromAddress: email.SenderAddress,
+                fromName: organizationName,
+                toAddress: to,
+                toName: email.RecipientAddress,
+                subject: subject
+            );
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
             await _smtpClient.SendAsync(message);
         }
 
         private static MimeMessage BuildMessage(
-            string fromAddress, string fromName,
-            string toAddress, string toName,
-            string subject)
+        string fromAddress,
+        string fromName,
+        string toAddress,
+        string toName,
+        string subject)
         {
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromAddress));

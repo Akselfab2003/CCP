@@ -1,5 +1,4 @@
-﻿using EmailService.API.Services;
-using EmailService.Domain.Models;
+﻿using EmailService.Domain.Models;
 using EmailTemplates.EmailTemplates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;

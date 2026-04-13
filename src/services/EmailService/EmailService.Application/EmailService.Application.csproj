@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
