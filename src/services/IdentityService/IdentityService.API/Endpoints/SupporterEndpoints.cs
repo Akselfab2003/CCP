@@ -1,5 +1,6 @@
 using CCP.Shared.ResultAbstraction;
 using IdentityService.Application.Models;
+using IdentityService.Application.Services.Member;
 using IdentityService.Application.Services.Supporter;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,14 +31,6 @@ namespace IdentityService.API.Endpoints
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-            // Promote supporter til manager
-            supporterRoute.MapPost("/{supporterId:guid}/promote-to-manager", PromoteToManager)
-                .WithName("PromoteSupporterToManager")
-                .Produces(StatusCodes.Status200OK)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-                .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
-
             return routeBuilder;
         }
 
@@ -46,7 +39,7 @@ namespace IdentityService.API.Endpoints
         /// Sender invitation til en ny supporter
         /// </summary>
         private static async Task<IResult> InviteSupporter(
-            [FromServices] ISupporterService supporterService, 
+            [FromServices] ISupporterService supporterService,
             [FromQuery] string email)
         {
             try
@@ -68,12 +61,11 @@ namespace IdentityService.API.Endpoints
         /// Henter alle supporters i den nuværende organisation
         /// </summary>
         private static async Task<IResult> GetAllSupporters(
-            [FromServices] ISupporterService supporterService)
+            [FromServices] IMemberService memberService)
         {
             try
             {
-                Result<List<TenantMemberDto>> result = await supporterService.GetAllTenantSupporterUsers();
-
+                Result<List<TenantMemberDto>> result = await memberService.GetAllSupportUsersOfTenant();
                 return result.IsSuccess
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
@@ -84,24 +76,5 @@ namespace IdentityService.API.Endpoints
             }
         }
 
-        /// <summary>
-        /// POST /supporter/{supporterId}/promote-to-manager
-        /// Anmoder om at promovere en supporter til manager
-        /// </summary>
-        private static async Task<IResult> PromoteToManager(
-            [FromServices] ISupporterService supporterService, 
-            Guid supporterId)
-        {
-            try
-            {
-                Result promoteResult = await supporterService.PromoteToManager(supporterId);
-
-                return promoteResult.IsSuccess ? Results.Ok() : promoteResult.ToProblemDetails();
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message);
-            }
-        }
     }
 }

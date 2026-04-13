@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CCP.Sdk.utils.Abstractions;
+﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ResultAbstraction;
 using IdentityService.Sdk.Models;
 using Microsoft.Extensions.Logging;
@@ -14,7 +11,7 @@ namespace IdentityService.Sdk.Services.Supporter
         private readonly ILogger<SupporterServiceClient> _logger;
         private readonly IKiotaApiClient<IdentityServiceClient> _client;
 
-        public SupporterServiceClient(ILogger<SupporterServiceClient> logger,IKiotaApiClient<IdentityServiceClient> client)
+        public SupporterServiceClient(ILogger<SupporterServiceClient> logger, IKiotaApiClient<IdentityServiceClient> client)
         {
             _logger = logger;
             _client = client;
@@ -74,27 +71,6 @@ namespace IdentityService.Sdk.Services.Supporter
                 return Result.Failure<List<TenantMember>>(Error.Failure(
                     code: "GetSupportersFailed",
                     description: $"Failed to get supporters: {ex.Message}"));
-            }
-        }
-
-        public async Task<Result> PromoteToManager(Guid supporterId, CancellationToken ct = default)
-        {
-            try
-            {
-                _logger.LogInformation("SDK: Promoting supporter {SupporterId} to Manager", supporterId);
-
-                // Kiota indexer tager Guid direkte, ikke string!
-                await _client.Client.Supporter[supporterId].PromoteToManager.PostAsync(cancellationToken: ct);
-
-                _logger.LogInformation("SDK: Successfully promoted supporter {SupporterId}", supporterId);
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "SDK: Error promoting supporter {SupporterId} to Manager", supporterId);
-                return Result.Failure(Error.Failure(
-                    code: "PromoteToManagerFailed",
-                    description: $"Failed to promote supporter to manager: {ex.Message}"));
             }
         }
     }

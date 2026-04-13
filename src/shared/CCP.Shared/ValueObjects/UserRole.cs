@@ -33,5 +33,17 @@
                 _ => null
             };
         }
+
+        public static string ToGroupName(this UserRole role)
+        {
+            return role switch
+            {
+                UserRole.Admin => "Admins",
+                UserRole.Manager => "Managers",
+                UserRole.Supporter => "Supporters",
+                UserRole.Customer => "Customers",
+                _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+            };
+        }
     }
 }

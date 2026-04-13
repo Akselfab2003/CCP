@@ -1,5 +1,6 @@
 ﻿using CCP.Shared.AuthContext;
 using CCP.Shared.ResultAbstraction;
+using CCP.Shared.ValueObjects;
 using IdentityService.Application.Models;
 using Keycloak.Sdk.services.members;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ namespace IdentityService.Application.Services.Member
             _currentUser = currentUser;
         }
 
-        public async Task<Result<List<TenantMemberDto>>> GetAllTenantMembers()
+        private async Task<Result<List<TenantMemberDto>>> GetAllTenantMembers(List<string> groups, CancellationToken ct = default)
         {
             try
             {
@@ -47,14 +48,92 @@ namespace IdentityService.Application.Services.Member
                     Roles = m.Roles,
                 }).ToList();
 
-                var OnlyTenantUsers = tenantMembers.Where(m => !m.Groups.Contains("Customers")).ToList();
+                var filteredMembers = tenantMembers.Where(m => m.Groups != null && m.Groups.Intersect(groups).Any()).ToList();
 
-                return Result.Success(OnlyTenantUsers);
+                return Result.Success(filteredMembers);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving tenant members");
                 return Result.Failure<List<TenantMemberDto>>(Error.Failure(code: "GetTenantMembersFailed", description: "An error occurred while retrieving tenant members."));
+            }
+        }
+
+        /// <summary>
+        /// Gets all internal users of the Tenant: Admins, Managers and Supporters
+        /// </summary>
+        /// <returns>
+        /// A list of TenantMemberDto representing the internal users of the tenant, or an error if the operation fails.
+        /// </returns>
+        public async Task<Result<List<TenantMemberDto>>> GetAllInternalUsers()
+        {
+            try
+            {
+                return await GetAllTenantMembers(
+                [
+                    UserRole.Admin.ToGroupName(),
+                    UserRole.Manager.ToGroupName(),
+                    UserRole.Supporter.ToGroupName()
+                ]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving internal users of tenant");
+                return Result.Failure<List<TenantMemberDto>>(Error.Failure(code: "GetInternalUsersFailed", description: "An error occurred while retrieving internal users of tenant."));
+            }
+        }
+
+
+        public async Task<Result<List<TenantMemberDto>>> GetAllSupportUsersOfTenant()
+        {
+            try
+            {
+                return await GetAllTenantMembers([UserRole.Supporter.ToGroupName()]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving supporter users of tenant");
+                return Result.Failure<List<TenantMemberDto>>(Error.Failure(code: "GetSupporterUsersFailed", description: "An error occurred while retrieving supporter users of tenant."));
+            }
+        }
+        public async Task<Result<List<TenantMemberDto>>> GetAllCustomerUsersOfTenant()
+        {
+            try
+            {
+                return await GetAllTenantMembers([UserRole.Customer.ToGroupName()]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving customer users of tenant");
+                return Result.Failure<List<TenantMemberDto>>(Error.Failure(code: "GetCustomerUsersFailed", description: "An error occurred while retrieving customer users of tenant."));
+            }
+        }
+
+
+        public async Task<Result<List<TenantMemberDto>>> GetAllAdminUsersOfTenant()
+        {
+            try
+            {
+                return await GetAllTenantMembers([UserRole.Admin.ToGroupName()]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving admin users of tenant");
+                return Result.Failure<List<TenantMemberDto>>(Error.Failure(code: "GetAdminUsersFailed", description: "An error occurred while retrieving admin users of tenant."));
+            }
+        }
+
+
+        public async Task<Result<List<TenantMemberDto>>> GetAllManagerUsersOfTenant()
+        {
+            try
+            {
+                return await GetAllTenantMembers([UserRole.Manager.ToGroupName()]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving manager users of tenant");
+                return Result.Failure<List<TenantMemberDto>>(Error.Failure(code: "GetManagerUsersFailed", description: "An error occurred while retrieving manager users of tenant."));
             }
         }
     }

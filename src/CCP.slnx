@@ -22,7 +22,6 @@
     <Project Path="services/EmailService/EmailService.Domain/EmailService.Domain.csproj" Id="6530c5c9-3f8e-402d-b315-db0d05824d2b" />
     <Project Path="services/EmailService/EmailService.Infrastructure/EmailService.Infrastructure.csproj" Id="fb559eea-ca47-42f7-9464-b1d95344e0a6" />
     <Project Path="services/EmailService/EmailService.Sdk/EmailService.Sdk.csproj" Id="24c1b4b2-ec7d-499e-957a-0f9e721796ed" />
-    <Project Path="services/EmailService/EmailService.Worker.Host/EmailService.Worker.Host.csproj" />
     <Project Path="services/EmailService/EmailTemplates/EmailTemplates.csproj" Id="40b34755-f455-469f-b1d2-2759ba89a77b" />
   </Folder>
   <Folder Name="/src/services/IdentityService/">

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CCP.Shared.ResultAbstraction;
+﻿using CCP.Shared.ResultAbstraction;
 using IdentityService.Sdk.Models;
 
 namespace IdentityService.Sdk.Services.Supporter
@@ -11,6 +8,5 @@ namespace IdentityService.Sdk.Services.Supporter
     {
         Task<Result> InviteSupporter(string email, CancellationToken ct = default);
         Task<Result<List<TenantMember>>> GetAllSupporters(CancellationToken ct = default);
-        Task<Result> PromoteToManager(Guid supporterId, CancellationToken ct = default);
     }
 }
