@@ -135,12 +135,12 @@ EmailService
 
 
 TicketService
-    .WithReference(Keycloak)
     .WaitFor(Keycloak)
-    .WithReference(TicketDB)
     .WaitFor(TicketDB)
-    .WithReference(MessagingService)
-    .WaitFor(MessagingService)
+    .WaitFor(RabbitMq)
+    .WithReference(Keycloak)
+    .WithReference(TicketDB)
+    .WithReference(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
@@ -149,10 +149,13 @@ TicketService
     })
     .WithOtlpExporter();
 
-MessagingService.WaitFor(Keycloak)
+MessagingService
+    .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
+    .WaitFor(RabbitMq)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
+    .WithReference(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

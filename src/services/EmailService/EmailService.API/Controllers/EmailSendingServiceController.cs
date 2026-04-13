@@ -2,7 +2,6 @@
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -33,7 +32,14 @@ namespace EmailService.Api.Controllers
                 var portalUrl = request.PortalUrl ?? "#";
                 var recipientName = request.RecipientName ?? request.Email.RecipientAddress;
 
-                try { await _emailSentRepo.CreateAsync(request.Email); } catch { }
+                try
+                {
+                    await _emailSentRepo.CreateAsync(request.Email);
+                }
+                catch
+                {
+
+                }
 
                 var customerHtml = await _emailTemplateRenderer.RenderTicketCreatedEmailAsync(
                    request.Email, orgName, responseTime, portalUrl);

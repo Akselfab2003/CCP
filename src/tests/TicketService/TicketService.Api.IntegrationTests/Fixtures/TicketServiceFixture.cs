@@ -15,6 +15,7 @@ namespace TicketService.Api.IntegrationTests.Fixtures
             APIResourceName,
             "keycloak",
             "postgres",
+            "messagingservice-api",
             DBResourceName
         ];
 
