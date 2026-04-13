@@ -6,6 +6,7 @@
 
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IUIUserContext UserContext
+@inject NavigationManager Navigation
 
 <HeadContent>
     <link rel="stylesheet" href="css/app.css" />
@@ -207,13 +208,25 @@
                 <span class="ccp-user-name">@UserContext.FullName</span>
                 <span class="ccp-user-role">@UserContext.Role</span>
             </div>
-            <button class="ccp-user-more" title="More options">
+            <button class="ccp-user-more" title="More options" @onclick="ToggleUserMenu">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                     <circle cx="5" cy="12" r="1.5" />
                     <circle cx="12" cy="12" r="1.5" />
                     <circle cx="19" cy="12" r="1.5" />
                 </svg>
             </button>
+            @if (_isUserMenuOpen)
+            {
+                <div class="ccp-dropdown-overlay" @onclick="ToggleUserMenu"></div>
+                <div class="ccp-user-dropdown">
+                    <button class="ccp-user-dropdown-item" @onclick="LogoutAsync">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                        </svg>
+                        <span>Log Out</span>
+                    </button>
+                </div>
+            }
         </div>
 
     </aside>
@@ -295,11 +308,22 @@
 
 @code {
     private bool _isDarkMode = true;
+    private bool _isUserMenuOpen = false;
     private bool isLoading = false;
     private string? errorMessage = null;
 
     private void ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
+    }
+
+    private void ToggleUserMenu()
+    {
+        _isUserMenuOpen = !_isUserMenuOpen;
+    }
+
+    private async Task LogoutAsync()
+    {
+        Navigation.NavigateTo("/authentication/logout", forceLoad: true);
     }
 }
