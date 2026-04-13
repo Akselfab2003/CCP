@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using IdentityService.Sdk.Models;
+using CCP.Shared.ValueObjects;
 using IdentityService.Sdk.Services.Supporter;
+using IdentityService.Sdk.Services.UserRights;
 using Microsoft.AspNetCore.Components;
 
 namespace CCP.UI.Pages.PromoteSupporterToManager
@@ -8,6 +9,7 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
     public partial class PromoteSupporterToManager : ComponentBase
     {
         [Inject] private ISupporterService SupporterService { get; set; } = default!;
+        [Inject] private IUserRightsManagementService UserRightsManagementService { get; set; } = default!;
         [Inject] private ILogger<PromoteSupporterToManager> Logger { get; set; } = default!;
 
         // Model til form
@@ -76,7 +78,8 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
                 //Promote supporter to manager
                 Logger.LogInformation("Promoting supporter {SupporterId} to Manager", PromoteSupporterModel.SupporterId);
 
-                var result = await SupporterService.PromoteToManager(PromoteSupporterModel.SupporterId);
+                var result = await UserRightsManagementService.AssignRightsToUser(PromoteSupporterModel.SupporterId, UserRole.Manager, CancellationToken.None);
+
                 if (result.IsSuccess)
                 {
                     var selectedSupporter = supporters.FirstOrDefault(s => s.Id == PromoteSupporterModel.SupporterId);
@@ -111,7 +114,7 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
 
                 // Reset form
                 PromoteSupporterModel = new PromoteSupporterModel();
-                    StateHasChanged();
+                StateHasChanged();
             }
             catch (Exception ex)
             {
