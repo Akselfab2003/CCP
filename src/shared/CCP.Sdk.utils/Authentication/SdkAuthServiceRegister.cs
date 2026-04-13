@@ -73,5 +73,17 @@ namespace CCP.Sdk.utils.Authentication
             });
             return services;
         }
+
+
+        public static IServiceCollection AddApiKeyAuthentication(this IServiceCollection services, string ClientName, string ServiceUrl, string ApiKey)
+        {
+            services.AddHttpClient(ClientName, client =>
+            {
+                client.BaseAddress = new Uri(ServiceUrl);
+                client.DefaultRequestHeaders.Add("X-API-Key", ApiKey);
+            });
+            return services;
+
+        }
     }
 }

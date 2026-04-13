@@ -34,7 +34,6 @@ namespace EmailService.Worker.Host.Services
                     Console.WriteLine(item.NormalizedSubject);
                 }
             };
-            await Task.Delay(-1);
         }
 
         public async Task ConnectAsync()
