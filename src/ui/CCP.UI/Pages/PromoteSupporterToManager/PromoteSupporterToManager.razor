@@ -1,0 +1,125 @@
+@page "/PromoteSupporterToManager"
+@layout CCPLayout
+@inject IJSRuntime JS
+
+<PageTitle>Promote Supporter to Manager</PageTitle>
+
+<EditForm Model="PromoteSupporterModel" OnValidSubmit="@Submit">
+    <DataAnnotationsValidator />
+
+    <!-- Top Header -->
+    <div class="dash-greeting">
+        <div>
+            <h2 class="dash-greeting-title">Promote Supporter to Manager</h2>
+            <p class="dash-greeting-sub">Upgrade an existing supporter to manager role.</p>
+        </div>
+        <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
+    </div>
+
+    <!-- Main Grid: Promote form til venstre, Manager liste til højre -->
+    <div class="promote-grid">
+
+        <!-- VENSTRE SIDE: Promote Form -->
+        <div class="promote-form-container">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <span class="dash-card-title">Select Supporter to Promote</span>
+                </div>
+
+                <div class="promote-form">
+                    <div class="form-group">
+                        <label class="form-label">Select Supporter</label>
+                        <InputSelect @bind-Value="PromoteSupporterModel.SupporterId"
+                                     class="form-input">
+                            <option value="">-- Select a supporter to promote --</option>
+                            @foreach (var supporter in supporters)
+                            {
+                                <option value="@supporter.Id">@supporter.Name - @supporter.Email</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => PromoteSupporterModel.SupporterId)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Welcome Message (Optional)</label>
+                        <textarea class="form-textarea"
+                                  @bind="PromoteSupporterModel.WelcomeMessage"
+                                  rows="4"
+                                  placeholder="Write a message about the promotion..."></textarea>
+                        <ValidationMessage For="@(() => PromoteSupporterModel.WelcomeMessage)" />
+                    </div>
+
+                    <button class="btn-primary" type="submit" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner"></span>
+                            <span>Promoting...</span>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            <span>Promote to Manager</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HØJRE SIDE: Manager Liste -->
+        <div class="manager-list-container">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <span class="dash-card-title">Current Managers (@managers.Count)</span>
+                </div>
+
+                <div class="manager-list">
+                    @if (managers.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                            </svg>
+                            <p>No managers yet</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var manager in managers)
+                        {
+                            <div class="manager-item">
+                                <div class="manager-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
+                                    @GetInitials(manager.Name)
+                                </div>
+                                <div class="manager-info">
+                                    <div class="manager-name">@manager.Name</div>
+                                    <div class="manager-email">@manager.Email</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    @if (successMessage != null)
+    {
+        <div class="toast toast-success">
+            @successMessage
+            <button @onclick="@(() => successMessage = null)">×</button>
+        </div>
+    }
+
+    @if (submitErrorMessage != null)
+    {
+        <div class="toast toast-error">
+            @submitErrorMessage
+            <button @onclick="@(() => submitErrorMessage = null)">×</button>
+        </div>
+    }
+</EditForm>

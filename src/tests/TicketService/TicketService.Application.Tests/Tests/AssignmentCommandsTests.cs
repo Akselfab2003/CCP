@@ -16,6 +16,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly ICurrentUser _currentUser;
         private readonly ITicketRepositoryCommands _ticketRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly AssignmentCommands _sut; //System Under Test
 
         //Faste test værdier til genbrug
@@ -29,6 +30,7 @@ namespace TicketService.Application.Tests.Tests
             _assignmentRepository = Substitute.For<IAssignmentRepository>();
             _ticketRepository = Substitute.For<ITicketRepositoryCommands>();
             _currentUser = Substitute.For<ICurrentUser>();
+            _httpClientFactory = Substitute.For<IHttpClientFactory>();
 
             //Setup faste test værdier
             _testUserId = Guid.NewGuid();
@@ -39,7 +41,7 @@ namespace TicketService.Application.Tests.Tests
             _currentUser.OrganizationId.Returns(_testOrganizationId);
 
             //Lav System Under Test med mocked dependencies
-            _sut = new AssignmentCommands(_logger, _assignmentRepository, _ticketRepository, _currentUser);
+            _sut = new AssignmentCommands(_logger, _assignmentRepository, _ticketRepository, _currentUser, _httpClientFactory);
         }
 
         [Fact]

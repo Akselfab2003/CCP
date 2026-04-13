@@ -2,6 +2,7 @@
 using CCP.Sdk.utils.Authentication;
 using IdentityService.Sdk.Services.Customer;
 using IdentityService.Sdk.Services.Group;
+using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,8 @@ namespace IdentityService.Sdk.ServiceDefaults
             services.AddScoped<IGroupService, GroupServiceClient>()
                     .AddScoped<IUserService, UserServiceClient>()
                     .AddScoped<ITenantService, TenantServiceClient>()
-                    .AddScoped<ICustomerService, CustomerServiceClient>();
+                    .AddScoped<ICustomerService, CustomerServiceClient>()
+                    .AddScoped<ISupporterService, SupporterServiceClient>();
 
             return services;
         }
