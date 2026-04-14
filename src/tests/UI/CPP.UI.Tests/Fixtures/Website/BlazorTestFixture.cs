@@ -8,12 +8,13 @@ namespace CPP.UI.Tests.Fixtures.Website
         public TestFactory Factory { get; private set; } = default!;
 
         private IPlaywright _playwright = default!;
-
+        private string? _url = string.Empty;
         public async ValueTask InitializeAsync()
         {
             Factory = new TestFactory();
-            Factory.Start();
-
+            Factory.UseKestrel(0);
+            var test = Factory.CreateClient();
+            _url = test.BaseAddress?.ToString();
             _playwright = await Playwright.CreateAsync();
 
             Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -32,7 +33,7 @@ namespace CPP.UI.Tests.Fixtures.Website
 
             var context = await Browser.NewContextAsync(new BrowserNewContextOptions()
             {
-                BaseURL = Factory.BaseUrl,
+                BaseURL = _url,
                 IgnoreHTTPSErrors = true
             });
 
