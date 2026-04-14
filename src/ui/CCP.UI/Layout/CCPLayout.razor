@@ -34,10 +34,7 @@
                 <span class="ccp-nav-label">Main</span>
                 <ul>
                     <li>
-                        <!--The dashboard route should be changed to route either to /dashboard or /dashboard/manager depending on the logged in user
-                            but for now its just hardcoded as /dashboard
-                        -->
-                        <NavLink class="ccp-nav-item" href="@((UserContext.Role == Shared.ValueObjects.UserRole.Manager || UserContext.Role == Shared.ValueObjects.UserRole.Admin) ? "/dashboard" : "/dashboard")" Match="NavLinkMatch.All">
+                        <NavLink class="ccp-nav-item" href="/" Match="NavLinkMatch.All">
                             <span class="ccp-nav-icon icon-indigo">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -103,58 +100,103 @@
                             <span class="ccp-nav-text">Reports</span>
                         </NavLink>
                     </li>
+                    <AuthorizeView Policy="RequireSupporter">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/Ticketportal">
+                                <span class="ccp-nav-icon icon-amber">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                                        <path d="M9 12h6M9 16h4" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Tickets</span>
+                                <span class="ccp-badge badge-amber">12</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="RequireSupporter">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/inbox">
+                                <span class="ccp-nav-icon icon-slate">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                        <polyline points="22,6 12,13 2,6" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Inbox</span>
+                                <span class="ccp-badge badge-violet">5</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="RequireSupporter">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/reports">
+                                <span class="ccp-nav-icon icon-green">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Reports</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
                 </ul>
             </div>
 
-            <div class="ccp-nav-section">
-                <span class="ccp-nav-label">Workspace</span>
-                <ul>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/customers">
-                            <span class="ccp-nav-icon icon-purple">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Customers</span>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/labels">
-                            <span class="ccp-nav-icon icon-orange">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
-                                    <circle cx="7" cy="7" r="1.5" fill="currentColor" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Labels</span>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/automations">
-                            <span class="ccp-nav-icon icon-yellow">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Automations</span>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/knowledge-base">
-                            <span class="ccp-nav-icon icon-teal">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Knowledge Base</span>
-                        </NavLink>
-                    </li>
-                </ul>
-            </div>
+            <AuthorizeView Policy="RequireSupporter">
+                <div class="ccp-nav-section">
+                    <span class="ccp-nav-label">Workspace</span>
+                    <ul>
+                        <AuthorizeView Policy="RequireAdmin" Context="adminContext">
+                            <li>
+                                <NavLink class="ccp-nav-item" href="/customers">
+                                    <span class="ccp-nav-icon icon-purple">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                            <circle cx="9" cy="7" r="4" />
+                                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                                        </svg>
+                                    </span>
+                                    <span class="ccp-nav-text">Customers</span>
+                                </NavLink>
+                            </li>
+                        </AuthorizeView>
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/labels">
+                                <span class="ccp-nav-icon icon-orange">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                                        <circle cx="7" cy="7" r="1.5" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Labels</span>
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/automations">
+                                <span class="ccp-nav-icon icon-yellow">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Automations</span>
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/knowledge-base">
+                                <span class="ccp-nav-icon icon-teal">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Knowledge Base</span>
+                            </NavLink>
+                        </li>
+                    </ul>
+                </div>
+            </AuthorizeView>
 
             <div class="ccp-nav-section">
                 <span class="ccp-nav-label">Settings</span>
@@ -170,50 +212,58 @@
                             <span class="ccp-nav-text">Settings</span>
                         </NavLink>
                     </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/support-users">
-                            <span class="ccp-nav-icon icon-teal">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Support Users</span>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/InviteCustomers">
-                            <span class="ccp-nav-icon icon-blue">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                                    <circle cx="8.5" cy="7" r="4" />
-                                    <polyline points="17 11 19 13 23 9" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Invite Customer</span>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/InviteSupporters">
-                            <span class="ccp-nav-icon icon-purple">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                                    <circle cx="8.5" cy="7" r="4" />
-                                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Invite Supporter</span>
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="ccp-nav-item" href="/PromoteSupporterToManager">
-                            <span class="ccp-nav-icon icon-amber">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                            </span>
-                            <span class="ccp-nav-text">Promote Supporter</span>
-                        </NavLink>
-                    </li>
+                    <AuthorizeView Policy="RequireManager">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/support-users">
+                                <span class="ccp-nav-icon icon-teal">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Support Users</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="RequireManager">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/InviteCustomers">
+                                <span class="ccp-nav-icon icon-blue">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                        <circle cx="8.5" cy="7" r="4" />
+                                        <polyline points="17 11 19 13 23 9" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Invite Customer</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="RequireAdmin">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/InviteSupporters">
+                                <span class="ccp-nav-icon icon-purple">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                        <circle cx="8.5" cy="7" r="4" />
+                                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Invite Supporter</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="RequireAdmin">
+                        <li>
+                            <NavLink class="ccp-nav-item" href="/PromoteSupporterToManager">
+                                <span class="ccp-nav-icon icon-amber">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                    </svg>
+                                </span>
+                                <span class="ccp-nav-text">Promote Supporter</span>
+                            </NavLink>
+                        </li>
+                    </AuthorizeView>
                 </ul>
             </div>
 

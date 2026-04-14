@@ -1,6 +1,10 @@
 @page "/InviteCustomers"
 @layout CCPLayout
+@using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
 @inject IJSRuntime JS
+@attribute [Authorize(Policy = "RequireManager")]
+
 
 <PageTitle>Customer Management</PageTitle>
 
