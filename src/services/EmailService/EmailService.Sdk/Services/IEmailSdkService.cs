@@ -2,7 +2,7 @@
 
 namespace EmailService.Sdk.Services
 {
-    public interface IEmailService
+    public interface IEmailSdkService
     {
 
         Task NotifyTicketCreatedAsync(Guid customerId, int ticketId);

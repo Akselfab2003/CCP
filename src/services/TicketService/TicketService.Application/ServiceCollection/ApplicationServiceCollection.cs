@@ -10,8 +10,7 @@ namespace TicketService.Application.ServiceDefaults
         {
             services.AddScoped<ITicketCommands, TicketCommands>()
                     .AddScoped<ITicketQueries, TicketQueries>()
-                    .AddScoped<IAssignmentCommands, AssignmentCommands>()
-                    .AddScoped<ITicketEmailNotifier, TicketEmailNotifier>();
+                    .AddScoped<IAssignmentCommands, AssignmentCommands>();
 
         }
     }

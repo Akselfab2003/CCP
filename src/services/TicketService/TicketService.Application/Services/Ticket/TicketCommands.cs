@@ -2,6 +2,7 @@
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using EmailService.Sdk.Services;
 
 namespace TicketService.Application.Services.Ticket
 {
@@ -11,19 +12,19 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
-        private readonly ITicketEmailNotifier _emailNotifier;
+        private readonly IEmailSdkService _emailSdkService;
         public TicketCommands(
              ILogger<TicketCommands> logger,
              ITicketRepositoryCommands ticketRepository,
              ICurrentUser currentUser,
              IAssignmentCommands assignmentCommands,
-             ITicketEmailNotifier emailNotifier)
+             IEmailSdkService emailSdkService)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _assignmentCommands = assignmentCommands;
-            _emailNotifier = emailNotifier;
+            _emailSdkService = emailSdkService;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -56,7 +57,15 @@ namespace TicketService.Application.Services.Ticket
 
                 await _ticketRepository.SaveChangesAsync();
 
-                await _emailNotifier.NotifyTicketCreatedAsync(result.Value.Id);
+                    try
+                    {
+                        if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
+                            await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
+                    }
 
                 return Result.Success(result.Value.Id); // ← return the ticket ID
             }

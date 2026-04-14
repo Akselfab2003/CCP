@@ -4,10 +4,10 @@ using EmailService.Sdk.Models;
 
 namespace EmailService.Sdk.Services
 {
-    internal class EmailService : IEmailService
+    internal class EmailSdkService : IEmailSdkService
     {
         private readonly IKiotaApiClient<EmailServiceClient> _client;
-        public EmailService(IKiotaApiClient<EmailServiceClient> client)
+        public EmailSdkService(IKiotaApiClient<EmailServiceClient> client)
         {
             _client = client;
         }

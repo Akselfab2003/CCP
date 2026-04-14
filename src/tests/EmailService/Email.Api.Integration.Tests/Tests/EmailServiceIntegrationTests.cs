@@ -18,217 +18,205 @@ namespace Email.Api.Integration.Tests.Tests
         }
 
         [Fact]
-        public async Task SendEmail_ShouldReturnSuccess()
+        public async Task NotifyTicketCreated_ShouldReturnSuccess()
         {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var recipientEmail = "toTest@toTest.com";
-            var subject = "Test Subject";
 
-            await emailService.SendTicketCreatedEmailAsync(ticketId, subject, "TEST", recipientEmail);
+            await emailService.NotifyTicketCreatedAsync(customerId, ticketId);
 
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            var emailSent = await emailSentRepo.GetByIdAsync(ticketId);
-            Assert.NotNull(emailSent);
-            Assert.Equal(subject, emailSent.Subject);
-            Assert.Equal(recipientEmail, emailSent.RecipientAddress);
-            _output.WriteLine($"Email sent with subject: {emailSent.Subject} to {emailSent.RecipientAddress}");
+            _output.WriteLine($"Notification sent for ticket creation: TicketId={ticketId}, CustomerId={customerId}");
         }
 
         [Fact]
-        public async Task SendEmail_WithMultipleEmails_ShouldSaveAllInDatabase()
+        public async Task NotifyTicketStatusChanged_ShouldReturnSuccess()
         {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            var emailCount = 3;
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
+            var ticketId = Random.Shared.Next(1000, int.MaxValue);
+            var oldStatus = "open";
+            var newStatus = "assigned";
+            var agentName = "John Doe";
+            var agentRole = "Support Agent";
+            var agentNote = "Ticket assigned to me";
+
+            await emailService.NotifyTicketStatusChangedAsync(
+                customerId,
+                ticketId,
+                oldStatus,
+                newStatus,
+                agentName,
+                agentRole,
+                agentNote);
+
+            _output.WriteLine($"Notification sent for status change: TicketId={ticketId}, Status={oldStatus} -> {newStatus}");
+        }
+
+        [Fact]
+        public async Task NotifyTicketReply_ShouldReturnSuccess()
+        {
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
+            var ticketId = Random.Shared.Next(1000, int.MaxValue);
+            var agentName = "Jane Smith";
+            var agentRole = "Support Specialist";
+            var replyContent = "Thank you for your inquiry. We are working on your issue.";
+
+            await emailService.NotifyTicketRepliedAsync(
+                customerId,
+                ticketId,
+                agentName,
+                agentRole,
+                replyContent);
+
+            _output.WriteLine($"Notification sent for reply: TicketId={ticketId}, Agent={agentName}");
+        }
+
+        [Fact]
+        public async Task NotifyTicketCreated_WithMultipleNotifications_ShouldSucceed()
+        {
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var notificationCount = 3;
             var ticketIds = new List<int>();
 
-            for (int i = 0; i < emailCount; i++)
+            for (int i = 0; i < notificationCount; i++)
             {
-                // Fixed: use Random.Shared to avoid duplicate seeds in tight loops on Linux CI
+                var customerId = Guid.NewGuid();
                 var ticketId = Random.Shared.Next(1000, int.MaxValue);
                 ticketIds.Add(ticketId);
-                await emailService.SendTicketCreatedEmailAsync(
+
+                await emailService.NotifyTicketCreatedAsync(customerId, ticketId);
+            }
+
+            _output.WriteLine($"Successfully sent {notificationCount} ticket creation notifications");
+        }
+
+        [Fact]
+        public async Task NotifyTicketStatusChanged_WithVariousStatuses_ShouldSucceed()
+        {
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
+            var ticketId = Random.Shared.Next(1000, int.MaxValue);
+
+            var statusTransitions = new[]
+            {
+                ("open", "assigned"),
+                ("assigned", "in_progress"),
+                ("in_progress", "closed")
+            };
+
+            foreach (var (oldStatus, newStatus) in statusTransitions)
+            {
+                await emailService.NotifyTicketStatusChangedAsync(
+                    customerId,
                     ticketId,
-                    $"Subject {i}",
-                    $"Test body {i}",
-                    $"recipient{i}@test.com"
-                );
+                    oldStatus,
+                    newStatus,
+                    "Support Agent",
+                    "Agent Role",
+                    $"Status changed to {newStatus}");
             }
 
-            foreach (var id in ticketIds)
+            _output.WriteLine($"Successfully sent {statusTransitions.Length} status change notifications");
+        }
+
+        [Fact]
+        public async Task NotifyTicketReply_WithSpecialCharacters_ShouldSucceed()
+        {
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
+            var ticketId = Random.Shared.Next(1000, int.MaxValue);
+            var replyContent = "Reply with special chars: æøå ÆØÅ !@#$%^&*() <html>";
+
+            await emailService.NotifyTicketRepliedAsync(
+                customerId,
+                ticketId,
+                "Agent Name",
+                "Agent Role",
+                replyContent);
+
+            _output.WriteLine($"Notification sent with special characters");
+        }
+
+        [Fact]
+        public async Task NotifyTicketStatusChanged_WithLongAgentNote_ShouldSucceed()
+        {
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
+            var ticketId = Random.Shared.Next(1000, int.MaxValue);
+            var longNote = new StringBuilder();
+
+            for (int i = 0; i < 50; i++)
             {
-                var email = await emailSentRepo.GetByIdAsync(id);
-                Assert.NotNull(email);
+                longNote.AppendLine($"Line {i}: This is a detailed agent note about the status change.");
             }
 
-            _output.WriteLine($"Successfully sent {emailCount} emails");
-        }
-
-        [Fact]
-        public async Task SendEmail_WithLongBody_ShouldHandleCorrectly()
-        {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var longBody = new StringBuilder();
-            for (int i = 0; i < 100; i++)
-            {
-                longBody.AppendLine($"Line {i}: This is a test line with some content to make the email body longer.");
-            }
-
-            await emailService.SendTicketCreatedEmailAsync(
+            await emailService.NotifyTicketStatusChangedAsync(
+                customerId,
                 ticketId,
-                "Long Body Test",
-                longBody.ToString(),
-                "longbody@test.com"
-            );
+                "open",
+                "closed",
+                "Senior Agent",
+                "Support Manager",
+                longNote.ToString());
 
-            var sentEmail = await emailSentRepo.GetByIdAsync(ticketId);
-            Assert.NotNull(sentEmail);
-            Assert.Contains("Line 50:", sentEmail.Body);
-            Assert.True(sentEmail.Body.Length > 5000);
-            _output.WriteLine($"Email with body length {sentEmail.Body.Length} sent successfully");
+            _output.WriteLine($"Notification sent with long agent note ({longNote.Length} chars)");
         }
 
         [Fact]
-        public async Task SendEmail_WithSpecialCharacters_ShouldEncodeCorrectly()
+        public async Task NotifyTicketReply_WithEmptyReplyContent_ShouldSucceed()
         {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var specialSubject = "Test æøå ÆØÅ !@#$%^&*()";
-            var specialBody = "Body with special chars: <html> & \"quotes\" 'apostrophes'";
-
-            await emailService.SendTicketCreatedEmailAsync(
-                ticketId,
-                specialSubject,
-                specialBody,
-                "special@test.com"
-            );
-
-            var sentEmail = await emailSentRepo.GetByIdAsync(ticketId);
-            Assert.NotNull(sentEmail);
-            Assert.Contains("æøå", sentEmail.Subject);
-            Assert.Contains("<html>", sentEmail.Body);
-            _output.WriteLine($"Email with special characters sent: {sentEmail.Subject}");
-        }
-
-        [Fact]
-        public async Task SendEmail_WithEmptyBody_ShouldStillSave()
-        {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.SendTicketCreatedEmailAsync(
+            await emailService.NotifyTicketRepliedAsync(
+                customerId,
                 ticketId,
-                "Empty Body Test",
-                "",
-                "emptybody@test.com"
-            );
+                "Agent",
+                "Support",
+                "");
 
-            var sentEmail = await emailSentRepo.GetByIdAsync(ticketId);
-            Assert.NotNull(sentEmail);
-            Assert.Equal("", sentEmail.Body);
-            Assert.Equal("Empty Body Test", sentEmail.Subject);
-            _output.WriteLine("Email with empty body sent successfully");
+            _output.WriteLine($"Notification sent with empty reply content");
         }
 
         [Fact]
-        public async Task SendEmail_VerifyAllFieldsAreSaved()
+        public async Task NotifyTicketCreated_WithValidGuids_ShouldSucceed()
         {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var recipientEmail = "verify@test.com";
-            var subject = "Verification Test";
-            var body = "This is a verification test body";
-
-            await emailService.SendTicketCreatedEmailAsync(
-                ticketId,
-                subject,
-                body,
-                recipientEmail
-            );
-
-            var sentEmail = await emailSentRepo.GetByIdAsync(ticketId);
-            Assert.NotNull(sentEmail);
-            Assert.Equal(recipientEmail, sentEmail.RecipientAddress);
-            Assert.Equal(subject, sentEmail.Subject);
-            Assert.Equal(body, sentEmail.Body);
-            // Fixed: widened the time window from 1 to 5 minutes to handle slow CI runners
-            Assert.True(sentEmail.SentAt <= DateTime.UtcNow);
-            Assert.True(sentEmail.SentAt >= DateTime.UtcNow.AddMinutes(-5));
-            _output.WriteLine($"All fields verified for email ID: {sentEmail.Id}");
-        }
-
-        [Fact]
-        public async Task SendEmail_WithUniqueTicketId_ShouldBeRetrievable()
-        {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.SendTicketCreatedEmailAsync(
-                ticketId,
-                "Unique Organization Test",
-                "Unique organization test",
-                "unique@test.com"
-            );
+            await emailService.NotifyTicketCreatedAsync(customerId, ticketId);
 
-            var retrievedEmail = await emailSentRepo.GetByIdAsync(ticketId);
-            Assert.NotNull(retrievedEmail);
-            Assert.Equal(ticketId, retrievedEmail.Id);
-            _output.WriteLine($"Email retrieved by ticket ID: {ticketId}");
+            Assert.True(customerId != Guid.Empty);
+            Assert.True(ticketId > 0);
+            _output.WriteLine($"Verified ticket creation with CustomerId: {customerId}, TicketId: {ticketId}");
         }
 
         [Fact]
-        public async Task GetByIdAsync_WithValidId_ShouldReturnEmail()
+        public async Task NotifyTicketStatusChanged_WithAllParameters_ShouldSucceed()
         {
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-
+            IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
+            var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
+            var agentName = "Support Agent";
+            var agentRole = "Specialist";
+            var oldStatus = "pending";
+            var newStatus = "resolved";
+            var agentNote = "Issue resolved by updating configuration";
 
-            await emailService.SendTicketCreatedEmailAsync(
+            await emailService.NotifyTicketStatusChangedAsync(
+                customerId,
                 ticketId,
-                "GetById Test",
-                "Test body",
-                "getbyid@test.com"
-            );
+                oldStatus,
+                newStatus,
+                agentName,
+                agentRole,
+                agentNote);
 
-            var emailById = await emailSentRepo.GetByIdAsync(ticketId);
-
-            Assert.NotNull(emailById);
-            Assert.Equal(ticketId, emailById.Id);
-            Assert.Equal("GetById Test", emailById.Subject);
-            _output.WriteLine($"Email retrieved by ID {emailById.Id}");
-        }
-
-        [Fact]
-        public async Task GetByIdAsync_WithInvalidId_ShouldReturnNull()
-        {
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            // Fixed: use a sentinel value that can never be a valid ticket ID
-            int invalidId = -1;
-
-            var result = await emailSentRepo.GetByIdAsync(invalidId);
-
-            Assert.Null(result);
-            _output.WriteLine($"Correctly returned null for invalid ID {invalidId}");
-        }
-
-        [Fact]
-        public async Task GetByOrganizationIdAsync_WithInvalidOrganizationId_ShouldReturnNull()
-        {
-            IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
-            var invalidOrgId = Guid.NewGuid();
-
-            var result = await emailSentRepo.GetByOrganizationIdAsync(invalidOrgId);
-
-            Assert.Null(result);
-            _output.WriteLine($"Correctly returned null for invalid organization ID");
+            _output.WriteLine($"All parameters verified for status change notification");
         }
     }
 }

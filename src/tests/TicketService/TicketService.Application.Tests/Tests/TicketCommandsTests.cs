@@ -1,5 +1,6 @@
 ﻿using CCP.Shared.AuthContext;
 using CCP.Shared.ResultAbstraction;
+using EmailService.Sdk.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -18,6 +19,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly ICurrentUser _currentUser;
         private readonly IAssignmentCommands _assignmentCommands;
+        private readonly IEmailSdkService _emailSdkService;
         private readonly TicketCommands _sut; // System Under Test
 
         public TicketCommandsTests()
@@ -27,6 +29,7 @@ namespace TicketService.Application.Tests.Tests
             _ticketRepository = Substitute.For<ITicketRepositoryCommands>();
             _currentUser = Substitute.For<ICurrentUser>();
             _assignmentCommands = Substitute.For<IAssignmentCommands>();
+            _emailSdkService = Substitute.For<IEmailSdkService>();
 
             // Setup standard værdier
             _currentUser.OrganizationId.Returns(Guid.NewGuid());
@@ -36,7 +39,8 @@ namespace TicketService.Application.Tests.Tests
                 _logger,
                 _ticketRepository,
                 _currentUser,
-                _assignmentCommands
+                _assignmentCommands,
+                _emailSdkService
             );
         }
 
