@@ -29,6 +29,13 @@ namespace TicketService.Api.Endpoints
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+            ticketRoute.MapPatch("/{ticketId:int}/status", UpdateTicketStatus)
+                       .Produces(StatusCodes.Status200OK)
+                       .ProducesProblem(StatusCodes.Status404NotFound)
+                       .ProducesProblem(StatusCodes.Status400BadRequest)
+                       .ProducesProblem(StatusCodes.Status401Unauthorized)
+                       .ProducesProblem(StatusCodes.Status500InternalServerError);
+
             return builder;
         }
 
@@ -62,6 +69,22 @@ namespace TicketService.Api.Endpoints
             }
         }
 
+
+        private static async Task<IResult> UpdateTicketStatus(
+            [FromServices] ITicketCommands ticketCommands,
+            [FromRoute] int ticketId,
+            [FromBody] UpdateTicketStatusRequest request)
+        {
+            try
+            {
+                var result = await ticketCommands.UpdateTicketStatusAsync(ticketId, request.NewStatus);
+                return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
+            }
+            catch (Exception)
+            {
+                return Results.Problem("An error occurred while updating the ticket status.");
+            }
+        }
 
         private static async Task<IResult> CreateTicket([FromServices] ITicketCommands ticketCommands, [FromBody] CreateTicketRequest request)
         {

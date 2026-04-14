@@ -165,10 +165,13 @@ TicketService
     })
     .WithOtlpExporter();
 
-MessagingService.WaitFor(Keycloak)
+MessagingService
+    .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
+    .WithReference(RabbitMq)
+    .WaitFor(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
