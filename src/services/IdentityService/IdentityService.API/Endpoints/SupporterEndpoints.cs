@@ -1,5 +1,6 @@
 using CCP.Shared.ResultAbstraction;
 using IdentityService.Application.Models;
+using IdentityService.Application.Services.Member;
 using IdentityService.Application.Services.Supporter;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,7 +39,7 @@ namespace IdentityService.API.Endpoints
         /// Sender invitation til en ny supporter
         /// </summary>
         private static async Task<IResult> InviteSupporter(
-            [FromServices] ISupporterService supporterService, 
+            [FromServices] ISupporterService supporterService,
             [FromQuery] string email)
         {
             try
@@ -60,12 +61,11 @@ namespace IdentityService.API.Endpoints
         /// Henter alle supporters i den nuværende organisation
         /// </summary>
         private static async Task<IResult> GetAllSupporters(
-            [FromServices] ISupporterService supporterService)
+            [FromServices] IMemberService memberService)
         {
             try
             {
-                Result<List<TenantMemberDto>> result = await supporterService.GetAllTenantSupporterUsers();
-
+                Result<List<TenantMemberDto>> result = await memberService.GetAllSupportUsersOfTenant();
                 return result.IsSuccess
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
@@ -75,5 +75,6 @@ namespace IdentityService.API.Endpoints
                 return Results.Problem(ex.Message);
             }
         }
+
     }
 }

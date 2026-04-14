@@ -25,7 +25,6 @@ namespace IdentityService.API
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddApiAuthenticationServices("IdentityService.API", "CCP");
 
-
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
                 var keycloakServiceUrl = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
@@ -69,7 +68,8 @@ namespace IdentityService.API
             app.MapUserEndpoints()
                .MapTenantEndpoints()
                .MapCustomerEndpoints()
-               .MapSupporterEndpoints();
+               .MapSupporterEndpoints()
+               .MapUserRightsManagementEndpoints();
 
             app.Run();
         }

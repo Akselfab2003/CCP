@@ -8,8 +8,14 @@
         Customer
     }
 
+
     public static class UserRolesExtensions
     {
+        public const string AdminRoleString = "CCP.Rolesorg.Admin";
+        public const string ManagerRoleString = "CCP.Rolesorg.Manager";
+        public const string SupporterRoleString = "CCP.Rolesorg.Supporter";
+        public const string CustomerRoleString = "CCP.Rolesorg.Customer";
+
         public static string ToRoleString(this UserRole role)
         {
             return role switch
@@ -31,6 +37,18 @@
                 "CCP.Rolesorg.Supporter" => UserRole.Supporter,
                 "CCP.Rolesorg.Customer" => UserRole.Customer,
                 _ => null
+            };
+        }
+
+        public static string ToGroupName(this UserRole role)
+        {
+            return role switch
+            {
+                UserRole.Admin => "Admins",
+                UserRole.Manager => "Managers",
+                UserRole.Supporter => "Supporters",
+                UserRole.Customer => "Customers",
+                _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
             };
         }
     }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CCP.Sdk.utils.Abstractions;
+﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ResultAbstraction;
 using IdentityService.Sdk.Models;
 using Microsoft.Extensions.Logging;
@@ -14,7 +11,7 @@ namespace IdentityService.Sdk.Services.Supporter
         private readonly ILogger<SupporterServiceClient> _logger;
         private readonly IKiotaApiClient<IdentityServiceClient> _client;
 
-        public SupporterServiceClient(ILogger<SupporterServiceClient> logger,IKiotaApiClient<IdentityServiceClient> client)
+        public SupporterServiceClient(ILogger<SupporterServiceClient> logger, IKiotaApiClient<IdentityServiceClient> client)
         {
             _logger = logger;
             _client = client;
@@ -61,7 +58,9 @@ namespace IdentityService.Sdk.Services.Supporter
                     Id = s.Id ?? Guid.Empty,
                     FirstName = s.FirstName ?? string.Empty,
                     LastName = s.LastName ?? string.Empty,
-                    Email = s.Email ?? string.Empty
+                    Email = s.Email ?? string.Empty,
+                    Roles = s.Roles ?? new List<string>(),
+                    Groups = s.Groups ?? new List<string>()
                 }).ToList();
 
                 return Result.Success(tenantMembers);

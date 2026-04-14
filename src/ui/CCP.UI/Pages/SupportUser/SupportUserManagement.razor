@@ -1,9 +1,11 @@
 ﻿@using IdentityService.Sdk.Services.User
-
+@using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
 @page "/support-users"
 @layout CCPLayout
 @inject IJSRuntime JS
 @inject IUserService UserService
+@attribute [Authorize(Policy = "RequireManager")]
 
 <PageTitle>Support User Management</PageTitle>
 
