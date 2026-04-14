@@ -170,6 +170,8 @@ MessagingService.WaitFor(Keycloak)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(TicketService)
+    .WithReference(RabbitMq)
+    .WaitFor(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
