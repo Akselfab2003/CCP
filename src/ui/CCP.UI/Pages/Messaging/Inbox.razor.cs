@@ -18,6 +18,9 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     [Inject] private ILogger<Inbox> Logger { get; set; } = default!;
     [Inject] private IdentityService.Sdk.Services.User.IUserService UserService { get; set; } = default!;
 
+    [SupplyParameterFromQuery(Name = "ticketId")]
+    [Parameter] public int? TicketId { get; set; }
+
     private List<TicketSdkDto> _tickets = new();
     private List<MessageDto> _messages = new();
     private int? _activeTicketId;
@@ -64,6 +67,10 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
         // Load tickets for the current user
         await LoadTicketsAsync();
+
+        // Pre-select ticket from query parameter if provided
+        if (TicketId.HasValue)
+            await PreSelectTicketAsync(TicketId.Value);
     }
 
     private async Task LoadTicketsAsync()
@@ -260,6 +267,34 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         }
     }
 
+    private async Task PreSelectTicketAsync(int ticketId)
+    {
+        // Check if ticket is already in our loaded list
+        var existing = _tickets.FirstOrDefault(t => t.Id == ticketId);
+        if (existing is not null)
+        {
+            ActiveTicketId = ticketId;
+            return;
+        }
+
+        // Managers may navigate to tickets not in their assigned list.
+        // Fetch the ticket directly and inject it if found.
+        if (UserContext.IsInternalUser)
+        {
+            var result = await TicketSdkService.GetTicketAsync(ticketId);
+            if (result.IsSuccess)
+            {
+                _tickets.Insert(0, result.Value);
+                ActiveTicketId = ticketId;
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                Logger.LogWarning("PreSelectTicketAsync: ticket {TicketId} not found or not accessible", ticketId);
+            }
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         HubService.OnMessageReceived -= HandleMessageReceived;
@@ -348,6 +383,20 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         {
             Logger.LogError("Failed to update ticket status: {Error}", result.Error);
         }
+    }
+
+    private string GetCustomerFacingStatusLabel(int status)
+    {
+        if (!UserContext.IsInternalUser && status == (int)TicketStatus.Blocked)
+            return GetStatusLabel((int)TicketStatus.Open);
+        return GetStatusLabel(status);
+    }
+
+    private string GetCustomerFacingStatusTagClass(int status)
+    {
+        if (!UserContext.IsInternalUser && status == (int)TicketStatus.Blocked)
+            return GetStatusTagClass((int)TicketStatus.Open);
+        return GetStatusTagClass(status);
     }
 
     private string GetStatusLabel(int status) => status switch

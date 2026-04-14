@@ -53,7 +53,7 @@
                             </div>
                             <div class="inbox-conv-preview">Ticket #@ticket.Id</div>
                             <div class="inbox-conv-tags">
-                                <span class="inbox-tag @GetStatusTagClass(ticket.Status)">@GetStatusLabel(ticket.Status)</span>
+                                <span class="inbox-tag @GetCustomerFacingStatusTagClass(ticket.Status)">@GetCustomerFacingStatusLabel(ticket.Status)</span>
                                 @if (!UserContext.IsInternalUser)
                                 {
                                     @if (ticket.AssignedUserId is null)
@@ -90,12 +90,12 @@
                 <div class="inbox-chat-header-left">
                     <div>
                         <div class="inbox-chat-name">@(ActiveTicket?.Title ?? "Ticket")</div>
-                        <div class="inbox-chat-sub">#TK-@_activeTicketId · @GetStatusLabel(ActiveTicket?.Status ?? 0)</div>
+                        <div class="inbox-chat-sub">#TK-@_activeTicketId · @GetCustomerFacingStatusLabel(ActiveTicket?.Status ?? 0)</div>
                     </div>
                 </div>
                 <div class="inbox-chat-header-right">
-                    <span class="inbox-tag @GetStatusTagClass(ActiveTicket?.Status ?? 0)" style="font-size:11px;padding:3px 9px;">
-                        @GetStatusLabel(ActiveTicket?.Status ?? 0)
+                    <span class="inbox-tag @GetCustomerFacingStatusTagClass(ActiveTicket?.Status ?? 0)" style="font-size:11px;padding:3px 9px;">
+                        @GetCustomerFacingStatusLabel(ActiveTicket?.Status ?? 0)
                     </span>
                     @if (UserContext.IsInternalUser)
                     {
@@ -104,6 +104,16 @@
                                     @onclick="() => UpdateTicketStatusAsync(TicketStatus.Open)"
                                     title="Set to Open">
                                 Open
+                            </button>
+                            <button class="inbox-status-btn @(ActiveTicket?.Status == 1 ? "inbox-status-btn--active tag-amber" : "")"
+                                    @onclick="() => UpdateTicketStatusAsync(TicketStatus.WaitingForCustomer)"
+                                    title="Set to Waiting for Customer">
+                                Waiting for Customer
+                            </button>
+                            <button class="inbox-status-btn @(ActiveTicket?.Status == 2 ? "inbox-status-btn--active tag-indigo" : "")"
+                                    @onclick="() => UpdateTicketStatusAsync(TicketStatus.WaitingForSupport)"
+                                    title="Set to Waiting for Support">
+                                Waiting for Support
                             </button>
                             <button class="inbox-status-btn @(ActiveTicket?.Status == 3 ? "inbox-status-btn--active tag-slate" : "")"
                                     @onclick="() => UpdateTicketStatusAsync(TicketStatus.Closed)"

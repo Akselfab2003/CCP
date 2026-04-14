@@ -32,13 +32,6 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
-builder.Services.AddHttpClient("TicketService", client =>
-{
-    var url = builder.Configuration.GetValue<string>("services:ticketservice-api:http:0");
-    if (!string.IsNullOrEmpty(url))
-        client.BaseAddress = new Uri(url);
-});
-
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();

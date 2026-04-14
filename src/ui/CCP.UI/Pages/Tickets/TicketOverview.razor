@@ -84,7 +84,7 @@
                 <tbody>
                     @foreach (var ticket in PagedTickets)
                     {
-                        <tr class="to-row">
+                        <tr class="to-row" @onclick="() => OpenPanel(ticket)">
                             <td class="to-cell-id">#@ticket.Id</td>
                             <td class="to-cell-title">@ticket.Title</td>
                             <td>
@@ -107,7 +107,7 @@
                             <td class="to-cell-muted">
                                 @(ticket.CreatedAt?.ToLocalTime().ToString("MMM d, yyyy") ?? "—")
                             </td>
-                            <td>
+                            <td @onclick:stopPropagation="true">
                                 <div class="to-cell-actions">
                                     @if (ticket.AssignedUserId != UserContext.UserId)
                                     {
@@ -120,14 +120,6 @@
                                     else
                                     {
                                         <span class="to-assigned-indicator">Assigned to you</span>
-                                    }
-                                    @if (IsManager)
-                                    {
-                                        <button class="to-action-btn to-action-btn--secondary"
-                                                @onclick="() => OpenAssignModal(ticket.Id)"
-                                                disabled="@_isAssigning">
-                                            Assign to…
-                                        </button>
                                     }
                                 </div>
                             </td>
@@ -181,29 +173,133 @@
 
 </div>
 
-@if (_showAssignModal)
-{
-    <div class="to-modal-backdrop" @onclick="CloseAssignModal">
-        <div class="to-modal" @onclick:stopPropagation="true">
-            <div class="to-modal-header">
-                <span class="to-modal-title">Assign Ticket #@_modalTicketId</span>
-                <button class="to-modal-close" @onclick="CloseAssignModal">×</button>
+<div class="to-panel-backdrop @(_isPanelOpen ? "open" : "")" @onclick="ClosePanel"></div>
+
+<div class="to-panel @(_isPanelOpen ? "open" : "")">
+    @if (_selectedTicket is not null)
+    {
+        <div class="to-panel-header">
+            <div class="to-panel-header-left">
+                <span class="to-panel-ticket-id">#@_selectedTicket.Id</span>
+                <span class="to-status-pill @GetStatusTagClass(_selectedTicket.Status)">
+                    @GetStatusLabel(_selectedTicket.Status)
+                </span>
             </div>
-            <div class="to-modal-body">
-                <label class="to-modal-label">User ID (Guid)</label>
-                <input class="to-modal-input"
-                       type="text"
-                       placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                       @bind="_assignTargetUserIdInput" />
-                @if (_assignModalError is not null)
+            <button class="to-panel-close" @onclick="ClosePanel">×</button>
+        </div>
+
+        <div class="to-panel-body">
+
+            <h3 class="to-panel-title">@_selectedTicket.Title</h3>
+
+            <div class="to-panel-meta">
+                <div class="to-panel-meta-row">
+                    <span class="to-panel-meta-label">Created</span>
+                    <span class="to-panel-meta-value">
+                        @(_selectedTicket.CreatedAt?.ToLocalTime().ToString("MMM d, yyyy HH:mm") ?? "—")
+                    </span>
+                </div>
+                <div class="to-panel-meta-row">
+                    <span class="to-panel-meta-label">Customer</span>
+                    <span class="to-panel-meta-value to-panel-mono">
+                        @(_selectedTicket.CustomerId.HasValue
+                            ? _selectedTicket.CustomerId.Value.ToString()[..8] + "…"
+                            : "—")
+                    </span>
+                </div>
+                <div class="to-panel-meta-row">
+                    <span class="to-panel-meta-label">Assigned to</span>
+                    <span class="to-panel-meta-value">
+                        @if (_selectedTicket.AssignedUserId is null)
+                        {
+                            <span class="to-assigned-pill to-assigned-unassigned">Unassigned</span>
+                        }
+                        else if (_selectedTicket.AssignedUserId == UserContext.UserId)
+                        {
+                            <span class="to-assigned-pill to-assigned-you">You</span>
+                        }
+                        else
+                        {
+                            <span class="to-assigned-pill to-assigned-other">
+                                @GetAssigneeName(_selectedTicket.AssignedUserId)
+                            </span>
+                        }
+                    </span>
+                </div>
+            </div>
+
+            <div class="to-panel-divider"></div>
+
+            <!-- Assignment actions -->
+            <div class="to-panel-section">
+                <span class="to-panel-section-label">Assignment</span>
+
+                @if (_selectedTicket.AssignedUserId != UserContext.UserId)
                 {
-                    <p class="to-modal-error">@_assignModalError</p>
+                    <button class="to-action-btn to-action-btn--primary"
+                            style="width:100%; justify-content:center; margin-bottom:8px;"
+                            @onclick="SelfAssignFromPanelAsync"
+                            disabled="@_isUpdatingAssignment">
+                        Assign to me
+                    </button>
+                }
+                else
+                {
+                    <p class="to-assigned-indicator" style="margin-bottom:8px;">
+                        ✓ Assigned to you
+                    </p>
+                }
+
+                @if (IsManager)
+                {
+                    <div class="to-panel-search-wrap">
+                        <input class="to-modal-input"
+                               placeholder="Search supporters by name…"
+                               value="@_supporterSearchTerm"
+                               @oninput="HandleSupporterSearchInput" />
+                        @if (_isSearching)
+                        {
+                            <p class="to-panel-search-hint">Searching…</p>
+                        }
+                        @if (_searchError is not null)
+                        {
+                            <p class="to-modal-error">@_searchError</p>
+                        }
+                        @if (_supporterSearchResults.Any())
+                        {
+                            <ul class="to-panel-search-results">
+                                @foreach (var supporter in _supporterSearchResults)
+                                {
+                                    var s = supporter;
+                                    <li class="to-panel-search-result"
+                                        @onclick="() => AssignToSupporterAsync(s.userId)">
+                                        <span class="to-panel-result-name">@s.name</span>
+                                        <span class="to-panel-result-email">@s.email</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
                 }
             </div>
-            <div class="to-modal-footer">
-                <button class="to-action-btn to-action-btn--ghost" @onclick="CloseAssignModal">Cancel</button>
-                <button class="to-action-btn to-action-btn--primary" @onclick="SubmitAssignModalAsync">Assign</button>
-            </div>
+
+            <div class="to-panel-divider"></div>
+
+            <!-- Go to inbox -->
+            @if (CanGoToInbox(_selectedTicket))
+            {
+                <button class="to-action-btn to-action-btn--ghost"
+                        style="width:100%; justify-content:center;"
+                        @onclick="() => NavigateToInbox(_selectedTicket.Id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" width="14" height="14">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    Go to Inbox
+                </button>
+            }
+
         </div>
-    </div>
-}
+    }
+</div>

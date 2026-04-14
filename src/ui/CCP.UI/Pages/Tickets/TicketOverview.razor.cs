@@ -1,5 +1,6 @@
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
+using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
@@ -34,13 +35,21 @@ public partial class TicketOverview : ComponentBase
     private IEnumerable<TicketSdkDto> PagedTickets =>
         _filteredTickets.Skip((_currentPage - 1) * PageSize).Take(PageSize);
 
-    // ── Manager assign modal ──────────────────────────────────────────────
-    private bool _showAssignModal;
-    private int _modalTicketId;
-    private string _assignTargetUserIdInput = string.Empty;
-    private string? _assignModalError;
+    // ── Side panel ────────────────────────────────────────────────────────
+    private TicketSdkDto? _selectedTicket;
+    private bool _isPanelOpen;
+    private bool _isUpdatingAssignment;
+
+    // Supporter search state (manager-only feature)
+    private string _supporterSearchTerm = string.Empty;
+    private List<UserAccount> _supporterSearchResults = new();
+    private bool _isSearching;
+    private string? _searchError;
 
     private bool IsManager => UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin;
+
+    private bool CanGoToInbox(TicketSdkDto ticket) =>
+        IsManager || ticket.AssignedUserId == UserContext.UserId;
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -184,51 +193,90 @@ public partial class TicketOverview : ComponentBase
         _isAssigning = false;
     }
 
-    private void OpenAssignModal(int ticketId)
+    // ── Side panel ────────────────────────────────────────────────────────
+
+    private void OpenPanel(TicketSdkDto ticket)
     {
-        _modalTicketId = ticketId;
-        _assignTargetUserIdInput = string.Empty;
-        _assignModalError = null;
-        _showAssignModal = true;
+        _selectedTicket = ticket;
+        _supporterSearchTerm = string.Empty;
+        _supporterSearchResults = new();
+        _searchError = null;
+        _isPanelOpen = true;
     }
 
-    private void CloseAssignModal() => _showAssignModal = false;
+    private void ClosePanel() => _isPanelOpen = false;
 
-    private async Task SubmitAssignModalAsync()
+    private async Task HandleSupporterSearchInput(ChangeEventArgs e)
     {
-        if (!Guid.TryParse(_assignTargetUserIdInput, out var parsedGuid))
+        _supporterSearchTerm = e.Value?.ToString() ?? string.Empty;
+        await SearchSupportersAsync();
+    }
+
+    private async Task SearchSupportersAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_supporterSearchTerm))
         {
-            _assignModalError = "Invalid User ID. Please enter a valid GUID.";
+            _supporterSearchResults = new();
             return;
         }
 
-        _assignModalError = null;
-        var result = await TicketSdkService.AssignTicketAsync(_modalTicketId, parsedGuid);
+        _isSearching = true;
+        StateHasChanged();
 
+        var result = await UserService.SearchUsers(_supporterSearchTerm);
+        _supporterSearchResults = result.IsSuccess ? result.Value : new();
+        _searchError = result.IsSuccess ? null : "Search failed. Please try again.";
+
+        _isSearching = false;
+        StateHasChanged();
+    }
+
+    private async Task AssignToSupporterAsync(Guid supporterUserId)
+    {
+        if (_selectedTicket is null || _isUpdatingAssignment) return;
+        _isUpdatingAssignment = true;
+
+        var result = await TicketSdkService.AssignTicketAsync(_selectedTicket.Id, supporterUserId);
         if (result.IsSuccess)
         {
-            var ticket = _tickets.FirstOrDefault(t => t.Id == _modalTicketId);
-            if (ticket is not null)
-                ticket.AssignedUserId = parsedGuid;
+            // Update both _selectedTicket and the matching entry in _tickets
+            _selectedTicket.AssignedUserId = supporterUserId;
+            var ticket = _tickets.FirstOrDefault(t => t.Id == _selectedTicket.Id);
+            if (ticket is not null) ticket.AssignedUserId = supporterUserId;
 
-            // Resolve the new assignee's name if we don't have it yet
-            if (!_userNames.ContainsKey(parsedGuid))
+            // Resolve name if not yet cached
+            if (!_userNames.ContainsKey(supporterUserId))
             {
-                var nameResult = await UserService.GetUserDetailsAsync(parsedGuid);
-                _userNames[parsedGuid] = nameResult.IsSuccess
-                    ? nameResult.Value.name
-                    : parsedGuid.ToString()[..8] + "…";
+                var found = _supporterSearchResults.FirstOrDefault(u => u.userId == supporterUserId);
+                if (found is not null)
+                    _userNames[supporterUserId] = found.name;
             }
 
-            CloseAssignModal();
+            _supporterSearchTerm = string.Empty;
+            _supporterSearchResults = new();
             ApplyFilter();
         }
         else
         {
-            Logger.LogError("Failed to assign ticket {TicketId}: {Error}", _modalTicketId, result.Error);
-            _assignModalError = $"Failed to assign: {result.Error.Description}";
+            _searchError = $"Failed to assign: {result.Error.Description}";
         }
+
+        _isUpdatingAssignment = false;
+        StateHasChanged();
     }
+
+    private async Task SelfAssignFromPanelAsync()
+    {
+        if (_selectedTicket is null) return;
+        await SelfAssignAsync(_selectedTicket.Id);
+        // Sync selected ticket with the updated _tickets list
+        _selectedTicket = _tickets.FirstOrDefault(t => t.Id == _selectedTicket.Id)
+                          ?? _selectedTicket;
+        StateHasChanged();
+    }
+
+    private void NavigateToInbox(int ticketId) =>
+        NavigationManager.NavigateTo($"/inbox?ticketId={ticketId}");
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
