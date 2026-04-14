@@ -1,5 +1,4 @@
 using System.Reflection;
-using CustomerService.Sdk.ServiceDefaults;
 using EmailService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Api.Endpoints;

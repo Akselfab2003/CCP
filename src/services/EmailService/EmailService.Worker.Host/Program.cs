@@ -23,6 +23,7 @@ builder.UseWolverine(opts =>
             c.PauseTime = TimeSpan.FromMinutes(1);
         })
         .UseDurableInbox();
+
 });
 
 builder.Services.AddDbContext<DBcontext>(option =>
