@@ -1,21 +1,26 @@
 ﻿@page "/InviteSupporters"
+@using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
 @layout CCPLayout
 @inject IJSRuntime JS
+@attribute [Authorize(Policy = "RequireAdmin")]
 
 <PageTitle>Supporter Management</PageTitle>
 
-<EditForm Model="InviteSupporterModel" OnValidSubmit="@Submit">
+<EditForm Model="InviteSupporterModel" OnValidSubmit="@Submit" OnInvalidSubmit="@OnInvalidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <!-- Top Header -->
     <div class="dash-greeting">
         <div>
             <h2 class="dash-greeting-title">Invite Supporter</h2>
-            <p class="dash-greeting-sub">Invite Your Supporter.</p>
+            <p class="dash-greeting-sub">Invite a new supporter to join your team.</p>
         </div>
         <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
     </div>
 
-    <!-- Main Grid: Invite form til venstre, Supporter liste til højre -->
+    <!-- Main Grid: Invite form til venstre, info til højre -->
     <div class="Supporter-grid">
 
         <!-- VENSTRE SIDE: Invite Form -->
@@ -27,15 +32,12 @@
 
                 <div class="Supporter-invite-form">
                     <div class="form-group">
-                        <label class="form-label">Select Customer</label>
-                        <InputSelect @bind-Value="InviteSupporterModel.CustomerId"
-                                     class="form-input">
-                            <option value="">-- Select a customer to promote --</option>
-                            @foreach (var customer in customers)
-                            {
-                                <option value="@customer.Id">@customer.Name - @customer.Email</option>
-                            }
-                        </InputSelect>
+                        <label class="form-label">Supporter Email</label>
+                        <InputText @bind-Value="InviteSupporterModel.Email"
+                                   type="email"
+                                   class="form-input"
+                                   placeholder="supporter@example.com" />
+                        <ValidationMessage For="@(() => InviteSupporterModel.Email)" />
                     </div>
 
                     <div class="form-group">
@@ -46,54 +48,56 @@
                                   placeholder="Write a welcome message to the new supporter..."></textarea>
                     </div>
 
-                    <button class="btn-primary" type="submit">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                        </svg>
-                        Send Invitation
+                    <button class="btn-primary" type="submit" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner"></span>
+                            <span>Sending...</span>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                            </svg>
+                            <span>Send Invitation</span>
+                        }
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- HØJRE SIDE: Supporter Liste -->
+        <!-- HØJRE SIDE: Info -->
         <div class="Supporter-list-container">
             <div class="dash-card">
                 <div class="dash-card-header">
-                    <span class="dash-card-title">Existing Supporters (@supporters.Count)</span>
+                    <span class="dash-card-title">About Supporters</span>
                 </div>
-
-                <div class="Supporter-list">
-                    @if (supporters.Count == 0)
-                    {
-                        <div class="empty-state">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
-                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                            </svg>
-                            <p>No supporters yet</p>
-                        </div>
-                    }
-                    else
-                    {
-                        @foreach (var supporter in supporters)
-                        {
-                            <div class="supporter-item">
-                                <div class="supporter-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
-                                    @GetInitials(supporter.Name)
-                                </div>
-                                <div class="supporter-info">
-                                    <div class="supporter-name">@supporter.Name</div>
-                                    <div class="supporter-email">@supporter.Email</div>
-                                </div>
-                            </div>
-                        }
-                    }
+                <div class="info-content">
+                    <p>Supporters can help manage tickets and provide customer support.</p>
+                    <p>An invitation email will be sent with a link to create their account.</p>
                 </div>
             </div>
         </div>
 
     </div>
 </EditForm>
+
+<!-- Toast Notifications -->
+@if (successMessage != null)
+{
+    <div class="toast toast-success">
+        @successMessage
+        <button @onclick="@(() => successMessage = null)">×</button>
+    </div>
+}
+
+@if (submitErrorMessage != null)
+{
+    <div class="toast toast-error">
+        @submitErrorMessage
+        <button @onclick="@(() => submitErrorMessage = null)">×</button>
+    </div>
+}
+
+
 

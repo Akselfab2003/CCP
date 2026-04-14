@@ -57,7 +57,7 @@ namespace IdentityService.API.Endpoints
             try
             {
 
-                Result<List<TenantMemberDto>> result = await memberService.GetAllTenantMembers();
+                Result<List<TenantMemberDto>> result = await memberService.GetAllInternalUsers();
 
                 return result.IsSuccess
                             ? Results.Ok(result.Value)

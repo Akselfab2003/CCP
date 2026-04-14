@@ -84,6 +84,21 @@ namespace IdentityService.Application.Services.User
             }
         }
 
+        public async Task<Result<Guid>> CreateSupporter(string email, CancellationToken ct = default)
+        {
+            try
+            {
+                return await _userKeycloakService.CreateSupporter(email, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating a supporter with email {Email}", email);
+                return Result.Failure<Guid>(Error.Failure("FailedToCreateSupporter", $"An error occurred while creating a supporter with email {email}"));
+            }
+        }
+
+
+
         public async Task<Result<UserKeycloakAccount>> GetUserDetails(Guid UserID, CancellationToken ct)
         {
             try

@@ -74,7 +74,10 @@ namespace Keycloak.Sdk.services.members
                 }
 
                 List<string> groups = [.. GroupMemberships.Value.Where(g => !string.IsNullOrEmpty(g.Name)).Select(g => g.Name!)];
-                var roles = GroupMemberships.Value.SelectMany(g => g.Roles).Distinct().ToList();
+
+                // Hent roller via role-mappings endpoint da Organizations Members endpoint ikke returnerer dem
+                Result<List<string>> rolesResult = await GetUserRoles(userId);
+                List<string> roles = rolesResult.IsSuccess ? rolesResult.Value : new List<string>();
 
                 KeycloakTenantMember tenantMember = new KeycloakTenantMember
                 {
@@ -126,6 +129,73 @@ namespace Keycloak.Sdk.services.members
             {
                 _logger.LogError(ex, "Error retrieving group memberships for user {UserId}", userId);
                 return Result.Failure<List<KeycloakGroup>>(Error.Failure("GetMemberGroupMemberships.failed", $"An error occurred while retrieving group memberships for the user: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// Henter brugerens client roller via Keycloak's role-mappings endpoint.
+        /// Kun client roles bruges til supporter/manager funktionalitet.
+        /// Bruger det simple endpoint direkte i stedet for at parse komplekse objekter.
+        /// </summary>
+        private async Task<Result<List<string>>> GetUserRoles(Guid userId, CancellationToken ct = default)
+        {
+            try
+            {
+                //hent role mappings for at få client IDs
+                var roleMappings = await Client.Admin.Realms[Constants.REALM]
+                                                .Users[userId.ToString()]
+                                                .RoleMappings
+                                                .GetAsync(cancellationToken: ct);
+
+                if (roleMappings?.ClientMappings?.AdditionalData == null || !roleMappings.ClientMappings.AdditionalData.Any())
+                {
+                    _logger.LogInformation("User {UserId} has no client role mappings", userId);
+                    return Result.Success(new List<string>());
+                }
+
+                List<string> allRoles = new List<string>();
+
+                //Hent roller for hver client
+                foreach (var clientId in roleMappings.ClientMappings.AdditionalData.Keys)
+                {
+                    try
+                    {
+                        //Brug endpoint til at hente client roles direkte
+                        var clientRoles = await Client.Admin.Realms[Constants.REALM]
+                                                      .Users[userId.ToString()]
+                                                      .RoleMappings
+                                                      .Clients[clientId]
+                                                      .GetAsync(cancellationToken: ct);
+
+                        if (clientRoles != null && clientRoles.Count > 0)
+                        {
+                            var roleNames = clientRoles
+                                .Where(r => !string.IsNullOrEmpty(r.Name))
+                                .Select(r => r.Name!)
+                                .ToList();
+
+                            if (roleNames.Any())
+                            {
+                                _logger.LogInformation("🔑 User {UserId} has {Count} client roles from '{ClientId}': {Roles}",
+                                    userId, roleNames.Count, clientId, string.Join(", ", roleNames));
+                                allRoles.AddRange(roleNames);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to get client roles for client {ClientId} and user {UserId}", clientId, userId);
+                    }
+                }
+
+                _logger.LogInformation("✅ User {UserId} has total {Count} client roles", userId, allRoles.Count);
+
+                return Result.Success(allRoles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving roles for user {UserId}", userId);
+                return Result.Success(new List<string>());
             }
         }
     }

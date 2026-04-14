@@ -1,7 +1,7 @@
 ﻿@page "/customers"
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
+@attribute [Authorize(Policy = "RequireAdmin")]
 
 
 @code {
