@@ -37,36 +37,6 @@ namespace CPP.UI.Tests.Fixtures.Website
             });
         }
 
-        //protected override IHost CreateHost(IHostBuilder builder)
-        //{
-        //    builder.ConfigureWebHost(webHostBuilder =>
-        //    {
-        //        webHostBuilder.UseUrls("http://127.0.0.1:0"); // Use dynamic port allocation
-        //        webHostBuilder.UseEnvironment("Test"); // Set the environment to Test
-        //        webHostBuilder.UseKestrel();
-        //        webHostBuilder.UseStartup<CCP.Website.Program>();
-        //    });
-
-        //    builder.ConfigureServices(services =>
-        //    {
-        //        // Add services to the container.
-        //        services.AddRazorComponents()
-        //            .AddInteractiveServerComponents();
-
-        //        services.AddRazorPages();
-        //        ConfigureMocks(services);
-        //        ConfigureAuthentication(services);
-        //    });
-
-
-        //    var host = builder.Build();
-        //    host.Start();
-
-        //    var addresses = host.Services.GetRequiredService<IServer>().Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>()?.Addresses;
-
-        //    BaseUrl = addresses?.FirstOrDefault() ?? throw new InvalidOperationException("Failed to determine the server's base URL.");
-        //    return host;
-        //}
 
         private void ConfigureMocks(IServiceCollection services)
         {

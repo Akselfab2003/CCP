@@ -1,8 +1,19 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using CCP.Shared.AuthContext;
+using CCP.Shared.UIContext;
+using CCP.UI.Services;
+using CPP.UI.Tests.Fixtures.Website;
+using IdentityService.Sdk.Services.Customer;
+using IdentityService.Sdk.Services.Supporter;
+using IdentityService.Sdk.Services.Tenant;
+using IdentityService.Sdk.Services.User;
+using MessagingService.Sdk.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
+using TicketService.Sdk.Services.Assignment;
+using TicketService.Sdk.Services.Ticket;
 namespace CPP.UI.Tests.Fixtures.Application
 {
     public class TestFactoryApplication : WebApplicationFactory<CCP.UI.Program>
@@ -20,6 +31,11 @@ namespace CPP.UI.Tests.Fixtures.Application
                     ["services:Keycloak:http:0"] = "http://localhost:8080",
                     ["services:ccp-ui:https:0"] = "http://localhost:5000",
                     ["services:identityservice-api:https:0"] = "http://localhost:5001",
+                    ["services:messagingservice-api:http:0"] = "http://localhost:5002",
+                    ["services:ticketservice-api:http:0"] = "http://localhost:5003",
+                    ["services:customerservice-api:http:0"] = "http://localhost:5004",
+                    ["services:messagingservice-api:http:0"] = "http://localhost:5005",
+                    ["services:EmailService:http:0"] = "http://localhost:5006",
                     ["CircuitOptions.DetailedErrors"] = "true",
                 })
                 .Build());
@@ -34,6 +50,22 @@ namespace CPP.UI.Tests.Fixtures.Application
 
         private void ConfigureMocks(IServiceCollection services)
         {
+            AddMockedScoped<ChatHubService>(services);
+            AddMockedScoped<ICurrentUser>(services);
+            AddMockedScoped<IUIUserContext>(services);
+
+            // MessagingService Sdk
+            AddMockedScoped<IMessageSdkService>(services);
+
+            // IdentityService Sdk
+            AddMockedScoped<IUserService>(services);
+            AddMockedScoped<ITenantService>(services);
+            AddMockedScoped<ICustomerService>(services);
+            AddMockedScoped<ISupporterService>(services);
+
+            // TicketService Sdk
+            AddMockedScoped<ITicketService>(services);
+            AddMockedScoped<IAssignmentService>(services);
 
         }
 
