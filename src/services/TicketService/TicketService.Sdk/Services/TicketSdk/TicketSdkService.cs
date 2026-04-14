@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
+using System.Net.Http;
+using System.Net.Http.Json;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Models;
+using TicketService.Sdk.Services.Assignment;
 
 namespace TicketService.Sdk.Services.TicketSdk
 {
@@ -9,13 +12,17 @@ namespace TicketService.Sdk.Services.TicketSdk
     {
         private readonly IKiotaApiClient<TicketServiceClient> _client;
         private readonly ILogger<TicketSdkService> _logger;
+        private readonly IAssignmentService _assignmentService;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         private TicketServiceClient Client => _client.Client;
 
-        public TicketSdkService(IKiotaApiClient<TicketServiceClient> client, ILogger<TicketSdkService> logger)
+        public TicketSdkService(IKiotaApiClient<TicketServiceClient> client, ILogger<TicketSdkService> logger, IAssignmentService assignmentService, IHttpClientFactory httpClientFactory)
         {
             _client = client;
             _logger = logger;
+            _assignmentService = assignmentService;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<Result<TicketSdkDto>> GetTicketAsync(int ticketId, CancellationToken ct = default)
@@ -111,6 +118,46 @@ namespace TicketService.Sdk.Services.TicketSdk
             {
                 _logger.LogError(ex, "Error creating ticket");
                 return Result.Failure<int>(Error.Failure("TicketCreationFailed", "An error occurred while creating the ticket."));
+            }
+        }
+
+        public async Task<Result> AssignTicketAsync(int ticketId, Guid userId, CancellationToken ct = default)
+        {
+            try
+            {
+                await _assignmentService.AssignTicketToUserAsync(ticketId, userId, ct);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning ticket {TicketId} to user {UserId}", ticketId, userId);
+                return Result.Failure(Error.Failure("AssignmentFailed", "An error occurred while assigning the ticket."));
+            }
+        }
+
+        public async Task<Result> UpdateTicketStatusAsync(int ticketId, TicketStatus newStatus, CancellationToken ct = default)
+        {
+            try
+            {
+                var http = _httpClientFactory.CreateClient("TicketServiceClient");
+                var response = await http.PatchAsJsonAsync(
+                    $"/ticket/{ticketId}/status",
+                    new { NewStatus = (int)newStatus },
+                    ct);
+
+                if (response.IsSuccessStatusCode)
+                    return Result.Success();
+
+                return (int)response.StatusCode switch
+                {
+                    404 => Result.Failure(Error.NotFound("TicketNotFound", $"Ticket {ticketId} not found.")),
+                    _ => Result.Failure(Error.Failure("StatusUpdateFailed", $"Failed to update status. Status: {(int)response.StatusCode}"))
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating status for ticket {TicketId}", ticketId);
+                return Result.Failure(Error.Failure("StatusUpdateFailed", "An error occurred while updating the ticket status."));
             }
         }
 

@@ -67,5 +67,14 @@ namespace TicketService.Infrastructure.Persistence.Repositories.Tickets
         public Task SaveChangesAsync()
             => _context.SaveChangesAsync();
 
+        public async Task<Result> UpdateStatusAsync(int ticketId, TicketStatus newStatus)
+        {
+            var ticket = await _context.Tickets.FindAsync(ticketId);
+            if (ticket is null)
+                return Result.Failure(Error.NotFound("TicketNotFound", $"Ticket {ticketId} not found."));
+            ticket.UpdateStatus(newStatus);
+            await _context.SaveChangesAsync();
+            return Result.Success();
+        }
     }
 }

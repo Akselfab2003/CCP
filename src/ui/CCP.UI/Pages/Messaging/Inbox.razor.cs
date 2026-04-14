@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
@@ -330,12 +331,32 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         }
     }
 
+    private async Task UpdateTicketStatusAsync(TicketStatus newStatus)
+    {
+        if (_activeTicketId is null) return;
+        var result = await TicketSdkService.UpdateTicketStatusAsync(_activeTicketId.Value, newStatus);
+        if (result.IsSuccess)
+        {
+            var ticket = _tickets.FirstOrDefault(t => t.Id == _activeTicketId);
+            if (ticket is not null)
+            {
+                ticket.Status = (int)newStatus;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            Logger.LogError("Failed to update ticket status: {Error}", result.Error);
+        }
+    }
+
     private string GetStatusLabel(int status) => status switch
     {
         0 => "Open",
-        1 => "Pending",
-        2 => "Resolved",
+        1 => "Waiting for customer",
+        2 => "Waiting for support",
         3 => "Closed",
+        4 => "Blocked",
         _ => "Unknown"
     };
 
@@ -343,8 +364,9 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     {
         0 => "tag-teal",
         1 => "tag-amber",
-        2 => "tag-slate",
+        2 => "tag-indigo",
         3 => "tag-slate",
+        4 => "tag-red",
         _ => "tag-slate"
     };
 

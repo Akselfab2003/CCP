@@ -1,0 +1,209 @@
+@using Microsoft.AspNetCore.Authorization
+@page "/tickets"
+@attribute [Authorize]
+@layout CCPLayout
+
+<HeadContent>
+    <link rel="stylesheet" href="CCP.UI.styles.css" />
+</HeadContent>
+
+<div class="to-wrap">
+
+    <div class="to-header">
+        <div class="to-header-top">
+            <h2 class="to-title">Ticket Overview</h2>
+            <span class="to-count-badge">@_tickets.Count</span>
+        </div>
+        <p class="to-subtitle">Manage and assign support tickets</p>
+    </div>
+
+    @if (_errorMessage is not null)
+    {
+        <div class="to-error-banner">
+            <span>@_errorMessage</span>
+            <button class="to-error-dismiss" @onclick="() => _errorMessage = null">×</button>
+        </div>
+    }
+
+    <div class="to-filter-row">
+        @{
+            var filterLabels = new Dictionary<string, string>
+            {
+                ["All"] = "All",
+                ["Open"] = "Open",
+                ["WaitingForCustomer"] = "Waiting for Customer",
+                ["WaitingForSupport"] = "Waiting for Support",
+                ["Closed"] = "Closed",
+                ["Blocked"] = "Blocked",
+                ["Unassigned"] = "Unassigned"
+            };
+        }
+        @foreach (var filter in filterLabels)
+        {
+            <button class="to-filter @(_statusFilter == filter.Key ? "active" : "")"
+                    @onclick="() => SetFilter(filter.Key)">
+                @filter.Value
+            </button>
+        }
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="to-loading">
+            <svg class="to-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+            Loading tickets...
+        </div>
+    }
+    else if (!_filteredTickets.Any())
+    {
+        <div class="to-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                <rect x="9" y="3" width="6" height="4" rx="1" />
+                <path d="M9 12h6M9 16h4" />
+            </svg>
+            <p>No tickets found for <strong>@_statusFilter</strong></p>
+        </div>
+    }
+    else
+    {
+        <div class="to-table-wrap">
+            <table class="to-table">
+                <thead>
+                    <tr>
+                        <th class="to-col-id">#</th>
+                        <th>Title</th>
+                        <th class="to-col-status">Status</th>
+                        <th class="to-col-assign">Assigned To</th>
+                        <th class="to-col-created">Created</th>
+                        <th class="to-col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in PagedTickets)
+                    {
+                        <tr class="to-row">
+                            <td class="to-cell-id">#@ticket.Id</td>
+                            <td class="to-cell-title">@ticket.Title</td>
+                            <td>
+                                <span class="to-status-pill @GetStatusTagClass(ticket.Status)">
+                                    @GetStatusLabel(ticket.Status)
+                                </span>
+                            </td>
+                            <td>
+                                @if (ticket.AssignedUserId is null)
+                                {
+                                    <span class="to-assigned-pill to-assigned-unassigned">Unassigned</span>
+                                }
+                                else
+                                {
+                                    <span class="to-assigned-pill @GetAssigneePillClass(ticket.AssignedUserId)">
+                                        @GetAssigneeName(ticket.AssignedUserId)
+                                    </span>
+                                }
+                            </td>
+                            <td class="to-cell-muted">
+                                @(ticket.CreatedAt?.ToLocalTime().ToString("MMM d, yyyy") ?? "—")
+                            </td>
+                            <td>
+                                <div class="to-cell-actions">
+                                    @if (ticket.AssignedUserId != UserContext.UserId)
+                                    {
+                                        <button class="to-action-btn to-action-btn--primary"
+                                                @onclick="() => SelfAssignAsync(ticket.Id)"
+                                                disabled="@_isAssigning">
+                                            Assign to me
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="to-assigned-indicator">Assigned to you</span>
+                                    }
+                                    @if (IsManager)
+                                    {
+                                        <button class="to-action-btn to-action-btn--secondary"
+                                                @onclick="() => OpenAssignModal(ticket.Id)"
+                                                disabled="@_isAssigning">
+                                            Assign to…
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Pagination — only shown when there's more than one page *@
+        @if (TotalPages > 1)
+        {
+            <div class="to-pagination">
+                <span class="to-pagination-info">
+                    Page @_currentPage of @TotalPages
+                    <span class="to-pagination-count">(@_filteredTickets.Count tickets)</span>
+                </span>
+                <div class="to-pagination-controls">
+                    <button class="to-page-btn" @onclick="() => GoToPage(1)" disabled="@(_currentPage == 1)" title="First page">
+                        «
+                    </button>
+                    <button class="to-page-btn" @onclick="() => GoToPage(_currentPage - 1)" disabled="@(_currentPage == 1)" title="Previous page">
+                        ‹
+                    </button>
+
+                    @* Show up to 5 page numbers centred around current page *@
+                    @{
+                        int start = Math.Max(1, _currentPage - 2);
+                        int end = Math.Min(TotalPages, start + 4);
+                        start = Math.Max(1, end - 4); // re-clamp start if end was capped
+                    }
+                    @for (int p = start; p <= end; p++)
+                    {
+                        var pageNum = p;
+                        <button class="to-page-btn @(pageNum == _currentPage ? "active" : "")"
+                                @onclick="() => GoToPage(pageNum)">
+                            @pageNum
+                        </button>
+                    }
+
+                    <button class="to-page-btn" @onclick="() => GoToPage(_currentPage + 1)" disabled="@(_currentPage == TotalPages)" title="Next page">
+                        ›
+                    </button>
+                    <button class="to-page-btn" @onclick="() => GoToPage(TotalPages)" disabled="@(_currentPage == TotalPages)" title="Last page">
+                        »
+                    </button>
+                </div>
+            </div>
+        }
+    }
+
+</div>
+
+@if (_showAssignModal)
+{
+    <div class="to-modal-backdrop" @onclick="CloseAssignModal">
+        <div class="to-modal" @onclick:stopPropagation="true">
+            <div class="to-modal-header">
+                <span class="to-modal-title">Assign Ticket #@_modalTicketId</span>
+                <button class="to-modal-close" @onclick="CloseAssignModal">×</button>
+            </div>
+            <div class="to-modal-body">
+                <label class="to-modal-label">User ID (Guid)</label>
+                <input class="to-modal-input"
+                       type="text"
+                       placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                       @bind="_assignTargetUserIdInput" />
+                @if (_assignModalError is not null)
+                {
+                    <p class="to-modal-error">@_assignModalError</p>
+                }
+            </div>
+            <div class="to-modal-footer">
+                <button class="to-action-btn to-action-btn--ghost" @onclick="CloseAssignModal">Cancel</button>
+                <button class="to-action-btn to-action-btn--primary" @onclick="SubmitAssignModalAsync">Assign</button>
+            </div>
+        </div>
+    </div>
+}

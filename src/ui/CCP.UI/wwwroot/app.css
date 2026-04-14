@@ -38,6 +38,11 @@
     overflow: hidden;
 }
 
+/* Shell override: ticket overview needs no extra padding (it manages its own) */
+.ccp-content:has(.to-wrap) {
+    padding: 0;
+}
+
 /* SIDEBAR */
 .ccp-sidebar {
     width: var(--ccp-sidebar-w);

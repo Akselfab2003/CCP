@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Authorization
+@using CCP.Shared.ValueObjects
 @using CCP.UI.Layout
 @page "/inbox"
 @attribute [Authorize]
@@ -96,6 +97,26 @@
                     <span class="inbox-tag @GetStatusTagClass(ActiveTicket?.Status ?? 0)" style="font-size:11px;padding:3px 9px;">
                         @GetStatusLabel(ActiveTicket?.Status ?? 0)
                     </span>
+                    @if (UserContext.IsInternalUser)
+                    {
+                        <div class="inbox-status-group">
+                            <button class="inbox-status-btn @(ActiveTicket?.Status == 0 ? "inbox-status-btn--active tag-teal" : "")"
+                                    @onclick="() => UpdateTicketStatusAsync(TicketStatus.Open)"
+                                    title="Set to Open">
+                                Open
+                            </button>
+                            <button class="inbox-status-btn @(ActiveTicket?.Status == 3 ? "inbox-status-btn--active tag-slate" : "")"
+                                    @onclick="() => UpdateTicketStatusAsync(TicketStatus.Closed)"
+                                    title="Set to Closed">
+                                Closed
+                            </button>
+                            <button class="inbox-status-btn @(ActiveTicket?.Status == 4 ? "inbox-status-btn--active tag-red" : "")"
+                                    @onclick="() => UpdateTicketStatusAsync(TicketStatus.Blocked)"
+                                    title="Set to Blocked">
+                                Blocked
+                            </button>
+                        </div>
+                    }
                 </div>
             </div>
 
