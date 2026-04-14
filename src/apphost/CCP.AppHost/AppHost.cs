@@ -141,6 +141,10 @@ TicketService
     .WaitFor(TicketDB)
     .WithReference(MessagingService)
     .WaitFor(MessagingService)
+    .WithReference(CustomerService)
+    .WaitFor(CustomerService)
+    .WithReference(EmailService)
+    .WaitFor(EmailService)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

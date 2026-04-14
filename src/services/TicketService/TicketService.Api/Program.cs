@@ -1,4 +1,6 @@
 using System.Reflection;
+using CustomerService.Sdk.ServiceDefaults;
+using EmailService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Api.Endpoints;
 using TicketService.Application.ServiceDefaults;
@@ -29,6 +31,12 @@ namespace TicketService.Api
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
+
+
+                builder.Services.AddEmailServiceSdk(
+                    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
+                    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
+
                 builder.Services.AddDbContext<TicketDbContext>(options =>
                 {
                     options.UseNpgsql(builder.Configuration.GetConnectionString("TicketDb"));
@@ -45,6 +53,8 @@ namespace TicketService.Api
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")!);
             });
+
+
 
 
             var app = builder.Build();

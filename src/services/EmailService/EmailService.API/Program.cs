@@ -3,12 +3,13 @@ using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
-using EmailTemplates.Renderes;
+using CustomerService.Sdk.ServiceDefaults;
 using EmailService.Application.Interfaces;
 using EmailService.Application.Services;
 using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
+using EmailTemplates.Renderes;
 using Microsoft.EntityFrameworkCore;
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -36,6 +37,9 @@ builder.Services.ConfigureDefaultOpenTelemetry("EmailService.Api");
 
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
+    builder.Services.AddCustomerviceSdk(
+        builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
+        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
     builder.Services.AddDbContext<DBcontext>(options =>
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
@@ -59,8 +63,9 @@ builder.Services.AddScoped<IEmailReceived, EmailReceivedRepo>();
 builder.Services.AddScoped<IEmailSent, EmailSentRepo>();
 builder.Services.AddScoped<IEmail, EmailSendingService>();
 builder.Services.AddScoped<ISmtpClient, SmtpClient>();
-builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>()
-                .AddScoped<ITenantEmailConfigurationRepo, TenantEmailConfigurationRepo>();
+builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
+builder.Services.AddScoped<ITenantEmailConfigurationRepo, TenantEmailConfigurationRepo>();
+builder.Services.AddScoped<ITicketEmailService, TicketEmailService>();
 
 builder.Services.AddScoped<ITenantEmailConfigurationService, TenantEmailConfigurationService>();
 
