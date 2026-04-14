@@ -165,11 +165,11 @@ TicketService
     })
     .WithOtlpExporter();
 
-MessagingService.WaitFor(Keycloak)
+MessagingService
+    .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
-    .WithReference(TicketService)
     .WithReference(RabbitMq)
     .WaitFor(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
