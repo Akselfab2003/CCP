@@ -30,6 +30,7 @@ IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
+IResourceBuilder<RabbitMQServerResource> RabbitMq = builder.AddRabbitMQ("RabbitMQ");
 
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
@@ -86,6 +87,10 @@ Keycloak.WithRealmImport(RealmImportPath)
         .WithLifetime(LifeTimeMode);
 
 
+RabbitMq.WithOtlpExporter()
+    .WithLifetime(LifeTimeMode);
+
+
 // Add Databases
 IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
 IResourceBuilder<PostgresDatabaseResource> ChatDB = Postgres.AddDatabase(name: "chatDB", databaseName: "chatDB");
@@ -140,6 +145,8 @@ EmailService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
     .WithOtlpExporter();
 
 
@@ -228,8 +235,10 @@ EmailWorkerService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
-    .WithExplicitStart()
-    .WithOtlpExporter();
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
+    .WithOtlpExporter()
+    .WithExplicitStart();
 
 
 if (Environment == "DEV")
@@ -239,10 +248,10 @@ if (Environment == "DEV")
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-
-
-
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
+
+    RabbitMq.WithDataVolume("rabbitmq_data").WithOtlpExporter().WithManagementPlugin(port: 15672);
 }
+
 
 builder.Build().Run();
