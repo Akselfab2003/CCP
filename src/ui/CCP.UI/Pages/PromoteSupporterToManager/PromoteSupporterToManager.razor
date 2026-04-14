@@ -1,6 +1,9 @@
 @page "/PromoteSupporterToManager"
+@using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
 @layout CCPLayout
 @inject IJSRuntime JS
+@attribute [Authorize(Roles = UserRolesExtensions.AdminRoleString)]
 
 <PageTitle>Promote Supporter to Manager</PageTitle>
 

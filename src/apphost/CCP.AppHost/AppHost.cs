@@ -41,6 +41,22 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 Ollama.WithOtlpExporter().WithExplicitStart()
       .WithLifetime(LifeTimeMode);
 
+var mailhog = builder.AddContainer("MailHog", "mailhog/mailhog")
+                     .WithLifetime(LifeTimeMode)
+                     .WithEndpoint("smtp", config =>
+                     {
+                         config.TargetPort = 1025;
+                         config.Port = 1025;
+                     })
+                     .WithEndpoint("ui", config =>
+                     {
+                         config.Protocol = System.Net.Sockets.ProtocolType.Tcp;
+                         config.UriScheme = "http";
+                         config.TargetPort = 8025;
+                         config.Port = 8025;
+                     });
+
+
 Roundcube
        .WithEnvironment(env =>
        {

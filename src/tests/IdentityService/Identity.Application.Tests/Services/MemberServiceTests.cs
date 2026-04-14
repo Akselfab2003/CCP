@@ -56,7 +56,7 @@ namespace Identity.Application.Tests.Services
 
             _memberKeycloakService.GetAllMembersOfOrganization(orgId, CancellationToken.None).Returns(Result.Success(members));
             // Act
-            Result<List<TenantMemberDto>> result = await _memberService.GetAllTenantMembers();
+            Result<List<TenantMemberDto>> result = await _memberService.GetAllInternalUsers();
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -70,7 +70,7 @@ namespace Identity.Application.Tests.Services
             // Arrange
             _currentUser.OrganizationId.Returns(Guid.Empty);
             // Act
-            Result<List<TenantMemberDto>> result = await _memberService.GetAllTenantMembers();
+            Result<List<TenantMemberDto>> result = await _memberService.GetAllInternalUsers();
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("GetTenantMembersNoOrgId", result.Error.Code);
@@ -86,7 +86,7 @@ namespace Identity.Application.Tests.Services
                                   .Returns(Result.Failure<List<KeycloakTenantMember>>(Error.Failure("KeycloakError", "Failed to retrieve members from Keycloak")));
 
             // Act
-            Result<List<TenantMemberDto>> result = await _memberService.GetAllTenantMembers();
+            Result<List<TenantMemberDto>> result = await _memberService.GetAllInternalUsers();
 
             // Assert
             Assert.False(result.IsSuccess);
@@ -102,7 +102,7 @@ namespace Identity.Application.Tests.Services
             _memberKeycloakService.GetAllMembersOfOrganization(orgId, CancellationToken.None)
                 .ThrowsAsync(new Exception("Unexpected error"));
             // Act
-            Result<List<TenantMemberDto>> result = await _memberService.GetAllTenantMembers();
+            Result<List<TenantMemberDto>> result = await _memberService.GetAllInternalUsers();
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("GetTenantMembersFailed", result.Error.Code);
