@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @layout CCPLayout
 @inject IJSRuntime JS
-@attribute [Authorize(Roles = UserRolesExtensions.AdminRoleString)]
+@attribute [Authorize(Policy = "RequireAdmin")]
 
 <PageTitle>Promote Supporter to Manager</PageTitle>
 
