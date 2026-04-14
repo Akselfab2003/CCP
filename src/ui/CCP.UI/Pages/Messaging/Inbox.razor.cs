@@ -58,15 +58,11 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         HubService.OnMessageDeleted += HandleMessageDeleted;
         HubService.OnTicketAssigned += HandleTicketAssigned;
 
-        // Start the SignalR connection independently — a hub failure must not prevent tickets from loading
-        _ = HubService.StartAsync().ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-                Logger.LogError(t.Exception, "Failed to start hub connection");
-        }, TaskScheduler.Default);
-
-        // Load tickets for the current user
+        // Load tickets from HTTP — renders the list immediately
         await LoadTicketsAsync();
+
+        // Connect hub and join groups in the background — non-blocking
+        _ = ConnectHubAndJoinGroupsAsync();
 
         // Pre-select ticket from query parameter if provided
         if (TicketId.HasValue)
@@ -113,9 +109,22 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
         _tickets = allTickets.OrderByDescending(t => t.CreatedAt).ToList();
         _isLoadingTickets = false;
+        StateHasChanged();
+    }
 
-        // Wait for hub connection before joining groups
-        // Poll briefly — hub start is fire-and-forget so we can't await it directly
+    private async Task ConnectHubAndJoinGroupsAsync()
+    {
+        try
+        {
+            await HubService.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to start hub connection");
+            return;
+        }
+
+        // Poll briefly until the hub reports connected
         var waited = 0;
         while (!HubService.IsConnected && waited < 5000)
         {
@@ -125,7 +134,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
         if (HubService.IsConnected)
         {
-            Logger.LogInformation("Hub connected: {IsConnected} after {Waited}ms", HubService.IsConnected, waited);
+            Logger.LogInformation("Hub connected after {Waited}ms", waited);
 
             foreach (var ticket in _tickets)
             {
@@ -147,8 +156,8 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
     private async Task OnTicketSelectedAsync(int? ticketId)
     {
-        _messages.Clear();
         _isLoadingMessages = true;
+        _messages = new();
         await InvokeAsync(StateHasChanged);
 
         if (ticketId is null)
@@ -157,7 +166,13 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
             return;
         }
 
-        await HubService.JoinTicketAsync(ticketId.Value);
+        _ = HubService.JoinTicketAsync(ticketId.Value)
+            .ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Logger.LogWarning("Failed to join ticket group {TicketId}: {Error}",
+                        ticketId, t.Exception?.Message);
+            }, TaskScheduler.Default);
 
         var result = await MessageSdkService.GetMessagesByTicketIdAsync(ticketId.Value);
 
@@ -348,21 +363,26 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
             .Where(id => !_userNameCache.ContainsKey(id))
             .ToList();
 
-        // Look up each unknown user
-        foreach (var userId in unknownUserIds)
+        // Look up all unknown users in parallel
+        var tasks = unknownUserIds.Select(async userId =>
         {
             try
             {
                 var result = await UserService.GetUserDetailsAsync(userId);
-                if (result.IsSuccess)
-                {
-                    _userNameCache[userId] = result.Value.name;
-                }
+                return (userId, name: result.IsSuccess ? result.Value.name : (string?)null);
             }
             catch (Exception ex)
             {
                 Logger.LogWarning(ex, "Could not resolve name for user {UserId}", userId);
+                return (userId, name: (string?)null);
             }
+        });
+
+        var results = await Task.WhenAll(tasks);
+        foreach (var (userId, name) in results)
+        {
+            if (name is not null)
+                _userNameCache[userId] = name;
         }
     }
 
