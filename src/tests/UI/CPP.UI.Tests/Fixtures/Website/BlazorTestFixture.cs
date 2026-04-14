@@ -34,7 +34,16 @@ namespace CPP.UI.Tests.Fixtures.Website
             var context = await Browser.NewContextAsync(new BrowserNewContextOptions()
             {
                 BaseURL = _url,
-                IgnoreHTTPSErrors = true
+                IgnoreHTTPSErrors = true,
+                RecordVideoDir = Path.Combine(Directory.GetCurrentDirectory(), "playwright-videos"),
+            });
+
+            await context.Tracing.StartAsync(new()
+            {
+                Title = "BlazorTestFixture Trace",
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true,
             });
 
             return await context.NewPageAsync();
@@ -42,6 +51,14 @@ namespace CPP.UI.Tests.Fixtures.Website
 
         public async ValueTask DisposeAsync()
         {
+            var tracePath = Path.Combine(Directory.GetCurrentDirectory(), "playwright-traces");
+            foreach (var context in Browser.Contexts)
+            {
+                await context.Tracing.StopAsync(new() { Path = Path.Combine(tracePath, $"{Guid.NewGuid()}.zip") });
+                await context.CloseAsync();
+            }
+
+
             await Browser.DisposeAsync();
             _playwright.Dispose();
             Factory.Dispose();

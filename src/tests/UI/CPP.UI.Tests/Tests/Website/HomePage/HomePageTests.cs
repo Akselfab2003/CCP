@@ -22,7 +22,6 @@ namespace CPP.UI.Tests.Tests.Website.HomePage
 
             mock.Login.Returns("/login");
             mock.Register.Returns("/register");
-
             var page = await _fixture.CreatePageAsync();
             await page.GotoAsync("/");
             Assert.NotNull(page);
@@ -30,11 +29,14 @@ namespace CPP.UI.Tests.Tests.Website.HomePage
 
             // Assert that the main elements of the home page are visible
 
-            var testlogin = await page.GetByTestId("login-link").IsVisibleAsync();
-            var testsignup = await page.GetByTestId("signup-link").IsVisibleAsync();
+            var loginLink = page.GetByTestId("login-link");
+            var signupLink = page.GetByTestId("signup-link");
 
-            Assert.True(testlogin, "Login link should be visible on the home page.");
-            Assert.True(testsignup, "Sign up link should be visible on the home page.");
+            Assert.True(await loginLink.IsVisibleAsync(), "Login link should be visible on the home page.");
+            Assert.True(await signupLink.IsVisibleAsync(), "Sign up link should be visible on the home page.");
+
+            Assert.Equal("/login", await loginLink.GetAttributeAsync("href"));
+            Assert.Equal("/register", await signupLink.GetAttributeAsync("href"));
         }
     }
 }

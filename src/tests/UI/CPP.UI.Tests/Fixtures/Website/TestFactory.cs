@@ -5,25 +5,36 @@ using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-
+using Microsoft.FluentUI.AspNetCore.Components;
 namespace CPP.UI.Tests.Fixtures.Website
 {
     public class TestFactory : WebApplicationFactory<CCP.Website.Program>
     {
         public string BaseUrl { get; private set; } = default!;
 
-        private readonly Dictionary<Type, object> _mockproviders = new();
+        private readonly Dictionary<System.Type, object> _mockproviders = new();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Test"); // Set the environment to Test
+            builder.UseEnvironment("Development"); // Set the environment to Test
+            builder.UseConfiguration(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["services:Keycloak:http:0"] = "http://localhost:8080",
+                    ["services:ccp-ui:https:0"] = "http://localhost:5000",
+                    ["services:identityservice-api:https:0"] = "http://localhost:5001",
+                    ["CircuitOptions.DetailedErrors"] = "true",
+                })
+                .Build());
             builder.ConfigureServices(services =>
             {
+                services.AddFluentUIComponents();
+
                 ConfigureMocks(services);
                 ConfigureAuth(services);
             });
-
         }
 
         //protected override IHost CreateHost(IHostBuilder builder)
@@ -108,7 +119,7 @@ namespace CPP.UI.Tests.Fixtures.Website
         {
             foreach (var provider in _mockproviders.Values)
             {
-                ((dynamic)provider).Clear();
+                ((dynamic)provider).ClearReceivedCalls();
             }
         }
 
