@@ -19,7 +19,10 @@ namespace CCP.Website
                 .AddInteractiveServerComponents();
 
 
-            var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+            var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") == null
+                              && !builder.Environment.IsEnvironment("Test")
+                                    ? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.")
+                                    : "http://localhost:8080";
 
             builder.Services.AddAuthentication(options =>
             {
@@ -53,18 +56,27 @@ namespace CCP.Website
             });
 
 
-            var SassServiceUrl = builder.Configuration.GetValue<string>("services:ccp-ui:https:0");
+            var SassServiceUrl = builder.Configuration.GetValue<string>("services:ccp-ui:https:0") == null
+                                  && !builder.Environment.IsEnvironment("Test")
+                                        ? throw new InvalidOperationException("CCP_UI configuration value is required.")
+                                        : "http://localhost:8081";
+
+
             builder.Services.AddScoped<IWebsiteReferencesService, WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("CCP_UI configuration value is required.")));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddFluentUIComponents();
 
-            var IdentityServiceUrl = builder.Configuration.GetValue<string>("services:identityservice-api:https:0") ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required.");
+            var IdentityServiceUrl = builder.Configuration.GetValue<string>("services:identityservice-api:https:0") == null
+                                        && !builder.Environment.IsEnvironment("Test")
+                                            ? throw new InvalidOperationException("IdentityServiceUrl configuration value is required.")
+                                            : "http://localhost:8082";
+
             builder.Services.AddIdentityServiceSdk(IdentityServiceUrl);
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Test"))
             {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
