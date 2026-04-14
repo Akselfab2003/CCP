@@ -1,7 +1,9 @@
-﻿using EmailService.Domain.Models;
+﻿using CCP.Shared.AuthContext;
+using EmailService.Domain.Models;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Email.Application.Tests
 {
@@ -9,10 +11,8 @@ namespace Email.Application.Tests
     {
         public static DBcontext Create(string dbName)
         {
-            var options = new DbContextOptionsBuilder<DBcontext>()
-                .UseInMemoryDatabase(dbName)
-                .Options;
-            return new DBcontext(options);
+            IServiceProvider serviceProvider = new ServiceCollection().AddScoped<ICurrentUser, CurrentUser>().AddDbContext<DBcontext>(options => options.UseInMemoryDatabase(dbName)).BuildServiceProvider();
+            return serviceProvider.GetRequiredService<DBcontext>();
         }
     }
 

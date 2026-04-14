@@ -1,9 +1,10 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Sdk.utils.Authentication;
 using IdentityService.Sdk.Services.Customer;
-using IdentityService.Sdk.Services.Group;
+using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
+using IdentityService.Sdk.Services.UserRights;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityService.Sdk.ServiceDefaults
@@ -22,10 +23,11 @@ namespace IdentityService.Sdk.ServiceDefaults
                 return new KiotaApiClientAbstraction<IdentityServiceClient>(httpClientFactory, IdentityServiceClientName, requestAdapter => new IdentityServiceClient(requestAdapter));
             });
 
-            services.AddScoped<IGroupService, GroupServiceClient>()
-                    .AddScoped<IUserService, UserServiceClient>()
+            services.AddScoped<IUserService, UserServiceClient>()
                     .AddScoped<ITenantService, TenantServiceClient>()
-                    .AddScoped<ICustomerService, CustomerServiceClient>();
+                    .AddScoped<ICustomerService, CustomerServiceClient>()
+                    .AddScoped<ISupporterService, SupporterServiceClient>()
+                    .AddScoped<IUserRightsManagementService, UserRightsManagementClient>();
 
             return services;
         }

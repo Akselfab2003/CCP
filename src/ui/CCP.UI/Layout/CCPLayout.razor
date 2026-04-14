@@ -6,6 +6,7 @@
 
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IUIUserContext UserContext
+@inject NavigationManager Navigation
 
 <HeadContent>
     <link rel="stylesheet" href="css/app.css" />
@@ -191,6 +192,28 @@
                             <span class="ccp-nav-text">Invite Customer</span>
                         </NavLink>
                     </li>
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/InviteSupporters">
+                            <span class="ccp-nav-icon icon-purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                    <circle cx="8.5" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Invite Supporter</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/PromoteSupporterToManager">
+                            <span class="ccp-nav-icon icon-amber">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Promote Supporter</span>
+                        </NavLink>
+                    </li>
                 </ul>
             </div>
 
@@ -203,13 +226,25 @@
                 <span class="ccp-user-name">@UserContext.FullName</span>
                 <span class="ccp-user-role">@UserContext.Role</span>
             </div>
-            <button class="ccp-user-more" title="More options">
+            <button class="ccp-user-more" title="More options" @onclick="ToggleUserMenu">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                     <circle cx="5" cy="12" r="1.5" />
                     <circle cx="12" cy="12" r="1.5" />
                     <circle cx="19" cy="12" r="1.5" />
                 </svg>
             </button>
+            @if (_isUserMenuOpen)
+            {
+                <div class="ccp-dropdown-overlay" @onclick="ToggleUserMenu"></div>
+                <div class="ccp-user-dropdown">
+                    <button class="ccp-user-dropdown-item" @onclick="LogoutAsync">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                        </svg>
+                        <span>Log Out</span>
+                    </button>
+                </div>
+            }
         </div>
 
     </aside>
@@ -272,7 +307,18 @@
 
         <!-- Content -->
         <main class="ccp-content">
-            @Body
+            @if (isLoading)
+            {
+                <div class="loading-spinner">Loading...</div>
+            }
+            else if (errorMessage != null)
+            {
+                <div class="error-message">@errorMessage</div>
+            }
+            else
+            {
+                @Body
+            }
         </main>
 
     </div>
@@ -280,9 +326,22 @@
 
 @code {
     private bool _isDarkMode = true;
+    private bool _isUserMenuOpen = false;
+    private bool isLoading = false;
+    private string? errorMessage = null;
 
     private void ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
+    }
+
+    private void ToggleUserMenu()
+    {
+        _isUserMenuOpen = !_isUserMenuOpen;
+    }
+
+    private async Task LogoutAsync()
+    {
+        Navigation.NavigateTo("/authentication/logout", forceLoad: true);
     }
 }
