@@ -42,17 +42,23 @@ namespace CCP.UI
             var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"{keycloakURL}/realms/CCP/.well-known/openid-configuration";
 
 
-            builder.Services.AddAuthentication(options =>
+            if (builder.Configuration.GetValue<bool>("UI_TESTS", defaultValue: false))
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            }).AddCookie(options =>
+                builder.Services.AddAuthenticationCore();
+            }
+            else
             {
-                options.SlidingExpiration = false;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
-            })
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                }).AddCookie(options =>
+                {
+                    options.SlidingExpiration = false;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+                })
             .AddOpenIdConnect(options =>
             {
                 options.Authority = $"{keycloakURL}/realms/CCP";
@@ -91,6 +97,8 @@ namespace CCP.UI
                     };
                 }
             });
+            }
+
 
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();

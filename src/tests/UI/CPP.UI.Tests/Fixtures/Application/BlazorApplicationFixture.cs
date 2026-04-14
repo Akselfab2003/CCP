@@ -1,18 +1,17 @@
-﻿using CPP.UI.Tests.Fixtures.Website;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 
 namespace CPP.UI.Tests.Fixtures.Application
 {
-    public class BlazorApplicationFixture
+    public class BlazorApplicationFixture : IAsyncLifetime
     {
         public IBrowser Browser { get; private set; } = default!;
-        public TestFactory Factory { get; private set; } = default!;
+        public TestFactoryApplication Factory { get; private set; } = default!;
 
         private IPlaywright _playwright = default!;
         private string? _url = string.Empty;
         public async ValueTask InitializeAsync()
         {
-            Factory = new TestFactory();
+            Factory = new TestFactoryApplication();
             Factory.UseKestrel(0);
             var test = Factory.CreateClient();
             _url = test.BaseAddress?.ToString();

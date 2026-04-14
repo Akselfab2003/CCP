@@ -1,14 +1,34 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using System.Security.Claims;
+using System.Text.Encodings.Web;
+using CCP.Shared.ValueObjects;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CPP.UI.Tests.Fixtures.Application
 {
-    public class FakeAuthStateProvider : AuthenticationStateProvider
+    public class FakeAuthStateProvider : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public new const string Scheme = "Test";
+
+        public FakeAuthStateProvider(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
         {
-            var identity = new System.Security.Claims.ClaimsIdentity();
-            var user = new System.Security.Claims.ClaimsPrincipal(identity);
-            return Task.FromResult(new AuthenticationState(user));
+        }
+
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            var claims = new[]
+            {
+            new Claim(ClaimTypes.Name, "Test User"),
+            new Claim(ClaimTypes.Role, UserRole.Customer.ToRoleString()) // optional
+        };
+
+            var identity = new ClaimsIdentity(claims, Scheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            var ticket = new AuthenticationTicket(principal, Scheme);
+
+            return Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
 }

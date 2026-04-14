@@ -7,6 +7,7 @@ using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -30,13 +31,14 @@ namespace CPP.UI.Tests.Fixtures.Application
                 {
                     ["services:Keycloak:http:0"] = "http://localhost:8080",
                     ["services:ccp-ui:https:0"] = "http://localhost:5000",
-                    ["services:identityservice-api:https:0"] = "http://localhost:5001",
+                    ["services:identityservice-api:http:0"] = "http://localhost:5001",
                     ["services:messagingservice-api:http:0"] = "http://localhost:5002",
                     ["services:ticketservice-api:http:0"] = "http://localhost:5003",
                     ["services:customerservice-api:http:0"] = "http://localhost:5004",
                     ["services:messagingservice-api:http:0"] = "http://localhost:5005",
                     ["services:EmailService:http:0"] = "http://localhost:5006",
                     ["CircuitOptions.DetailedErrors"] = "true",
+                    ["UI_TESTS"] = "true"
                 })
                 .Build());
             builder.ConfigureServices(services =>
@@ -66,7 +68,6 @@ namespace CPP.UI.Tests.Fixtures.Application
             // TicketService Sdk
             AddMockedScoped<ITicketService>(services);
             AddMockedScoped<IAssignmentService>(services);
-
         }
 
         private void AddMockedScoped<T>(IServiceCollection services)
@@ -120,11 +121,13 @@ namespace CPP.UI.Tests.Fixtures.Application
         // -------------------------
         private void ConfigureAuth(IServiceCollection services)
         {
-            services.AddAuthorizationCore();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = FakeAuthStateProvider.Scheme;
+                options.DefaultChallengeScheme = FakeAuthStateProvider.Scheme;
+            }).AddScheme<AuthenticationSchemeOptions, FakeAuthStateProvider>(FakeAuthStateProvider.Scheme, options => { });
 
-            services.AddScoped<
-                Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider,
-                FakeAuthStateProvider>();
+            services.AddAuthorization();
         }
     }
 }
