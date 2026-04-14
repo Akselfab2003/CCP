@@ -130,6 +130,8 @@ EmailService
     .WithExplicitStart()
     .WithReference(EmailDB)
     .WaitFor(EmailDB)
+    .WithReference(CustomerService)
+    .WaitFor(CustomerService)
     .WaitFor(Keycloak)
     .WithReference(Keycloak)
     .WithEndpoint("https", endpoint => endpoint.IsProxied = false)

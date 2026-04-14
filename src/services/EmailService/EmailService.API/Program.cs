@@ -66,7 +66,7 @@ builder.Services.AddScoped<ISmtpClient, SmtpClient>();
 builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
 builder.Services.AddScoped<ITenantEmailConfigurationRepo, TenantEmailConfigurationRepo>();
 builder.Services.AddScoped<ITicketEmailService, TicketEmailService>();
-
+builder.Services.AddScoped<IEmailTemplateRenderer,EmailTemplateRenderer>();
 builder.Services.AddScoped<ITenantEmailConfigurationService, TenantEmailConfigurationService>();
 
 var app = builder.Build();
