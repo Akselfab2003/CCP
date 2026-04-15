@@ -1,7 +1,7 @@
 ﻿namespace TicketService.Api.IntegrationTests.Fixtures
 {
     [CollectionDefinition("TicketService")]
-    [Trait("Category", "Dontwork")] //Since it fails currently in ui 
+    [Trait("Category", "Integration")]
     public class TicketServiceCollection : ICollectionFixture<TicketServiceFixture>
     {
     }

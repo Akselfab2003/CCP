@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-@inject WebsiteReferencesService References
+@inject IWebsiteReferencesService References
 
 
 <HeadContent>
@@ -23,7 +23,7 @@
                             <path d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </div>
-                    <span class="ccp-brand-name">CCP</span>
+                    <span class="ccp-brand-name" >CCP</span>
                 </a>
             </div>
             <div class="ccp-topbar-right">
@@ -49,8 +49,8 @@
                         </svg>
                     }
                 </button>
-                <a href="@References.Login" class="ccp-public-login">Log in</a>
-                <a href="@References.Register" class="ccp-public-signup">Sign up</a>
+                <a href="@References.Login" class="ccp-public-login" data-testid="login-link">Log in</a>
+                <a href="@References.Register" class="ccp-public-signup" data-testid="signup-link">Sign up</a>
             </div>
         </header>
 

@@ -1,13 +1,12 @@
 ﻿using CCP.Shared.UIContext;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
-using TicketService.Sdk.Services.TicketSdk;
 
 namespace CCP.UI.Components.CreateTicket;
 
 public partial class CreateTicketCustomer : ComponentBase
 {
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private TicketService.Sdk.Services.Ticket.ITicketService TicketService { get; set; } = default!;
     [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -30,10 +29,12 @@ public partial class CreateTicketCustomer : ComponentBase
 
         _isSubmitting = true;
 
-        var result = await TicketSdkService.CreateTicketAsync(
-            title: _title.Trim(),
-            customerId: UserContext.UserId,
-            assignedUserId: null);
+        var result = await TicketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
+        {
+            Title = _title.Trim(),
+            CustomerId = UserContext.UserId,
+            AssignedUserId = null
+        });
 
         if (result.IsSuccess)
         {

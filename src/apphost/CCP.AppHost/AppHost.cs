@@ -151,12 +151,12 @@ EmailService
 
 
 TicketService
-    .WithReference(Keycloak)
     .WaitFor(Keycloak)
-    .WithReference(TicketDB)
     .WaitFor(TicketDB)
-    .WithReference(MessagingService)
-    .WaitFor(MessagingService)
+    .WaitFor(RabbitMq)
+    .WithReference(Keycloak)
+    .WithReference(TicketDB)
+    .WithReference(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

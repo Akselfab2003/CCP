@@ -1,4 +1,5 @@
-﻿using CCP.Shared.ValueObjects;
+﻿using CCP.Shared.AuthContext;
+using CCP.Shared.ValueObjects;
 using Microsoft.Extensions.DependencyInjection;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
@@ -21,6 +22,8 @@ namespace TicketService.Infrastructure.Tests.Tests
         {
             // Arrange
             using var DbScope = _fixture.DB.CreateAsyncScope();
+            ICurrentUser currentUser = DbScope.ServiceProvider.GetRequiredService<ICurrentUser>();
+            currentUser.SetOrganizationId(Guid.NewGuid());
 
             // Get the repository from the service provider
             ITicketRepositoryCommands ticketRepositoryCommands = DbScope.ServiceProvider.GetRequiredService<ITicketRepositoryCommands>();
@@ -29,7 +32,7 @@ namespace TicketService.Infrastructure.Tests.Tests
                 Title = "Test Ticket",
                 CustomerId = Guid.NewGuid(),
                 Status = TicketStatus.Open,
-                OrganizationId = Guid.NewGuid(),
+                OrganizationId = currentUser.OrganizationId,
                 CreatedAt = DateTime.UtcNow,
             };
 
@@ -48,6 +51,8 @@ namespace TicketService.Infrastructure.Tests.Tests
         {
             // Arrange
             using var DbScope = _fixture.DB.CreateAsyncScope();
+            ICurrentUser currentUser = DbScope.ServiceProvider.GetRequiredService<ICurrentUser>();
+            currentUser.SetOrganizationId(Guid.NewGuid());
 
             // Get the repository from the service provider
             ITicketRepositoryCommands ticketRepositoryCommands = DbScope.ServiceProvider.GetRequiredService<ITicketRepositoryCommands>();
@@ -57,7 +62,7 @@ namespace TicketService.Infrastructure.Tests.Tests
                 Title = "open",
                 CustomerId = Guid.NewGuid(),
                 Status = TicketStatus.Open,
-                OrganizationId = Guid.NewGuid(),
+                OrganizationId = currentUser.OrganizationId,
                 CreatedAt = DateTime.UtcNow,
             };
             var closedTicket = new Ticket
@@ -65,7 +70,7 @@ namespace TicketService.Infrastructure.Tests.Tests
                 Title = "closed",
                 CustomerId = Guid.NewGuid(),
                 Status = TicketStatus.Closed,
-                OrganizationId = Guid.NewGuid(),
+                OrganizationId = currentUser.OrganizationId,
                 CreatedAt = DateTime.UtcNow,
             };
             await ticketRepositoryCommands.AddAsync(openTicket);
@@ -87,6 +92,8 @@ namespace TicketService.Infrastructure.Tests.Tests
         {
             // Arrange
             using var DbScope = _fixture.DB.CreateAsyncScope();
+            ICurrentUser currentUser = DbScope.ServiceProvider.GetRequiredService<ICurrentUser>();
+            currentUser.SetOrganizationId(Guid.NewGuid());
 
             // Get the repository from the service provider
             ITicketRepositoryCommands ticketRepositoryCommands = DbScope.ServiceProvider.GetRequiredService<ITicketRepositoryCommands>();
@@ -97,7 +104,7 @@ namespace TicketService.Infrastructure.Tests.Tests
                 Title = "Ticket 1",
                 CustomerId = customerId,
                 Status = TicketStatus.Open,
-                OrganizationId = Guid.NewGuid(),
+                OrganizationId = currentUser.OrganizationId,
                 CreatedAt = DateTime.UtcNow,
             };
             var ticket2 = new Ticket
@@ -105,7 +112,7 @@ namespace TicketService.Infrastructure.Tests.Tests
                 Title = "Ticket 2",
                 CustomerId = Guid.NewGuid(),
                 Status = TicketStatus.Open,
-                OrganizationId = Guid.NewGuid(),
+                OrganizationId = currentUser.OrganizationId,
                 CreatedAt = DateTime.UtcNow,
             };
             await ticketRepositoryCommands.AddAsync(ticket1);
@@ -127,6 +134,9 @@ namespace TicketService.Infrastructure.Tests.Tests
         {
             // Arrange
             using var DbScope = _fixture.DB.CreateAsyncScope();
+            ICurrentUser currentUser = DbScope.ServiceProvider.GetRequiredService<ICurrentUser>();
+            currentUser.SetOrganizationId(Guid.NewGuid());
+
 
             // Get the repository from the service provider
             ITicketRepositoryCommands ticketRepositoryCommands = DbScope.ServiceProvider.GetRequiredService<ITicketRepositoryCommands>();
@@ -145,6 +155,8 @@ namespace TicketService.Infrastructure.Tests.Tests
         {
             // Arrange
             using var DbScope = _fixture.DB.CreateAsyncScope();
+            ICurrentUser currentUser = DbScope.ServiceProvider.GetRequiredService<ICurrentUser>();
+            currentUser.SetOrganizationId(Guid.NewGuid());
 
             // Get the repository from the service provider
             ITicketRepositoryCommands ticketRepositoryCommands = DbScope.ServiceProvider.GetRequiredService<ITicketRepositoryCommands>();
@@ -154,7 +166,7 @@ namespace TicketService.Infrastructure.Tests.Tests
                 Title = "Test Ticket",
                 CustomerId = Guid.NewGuid(),
                 Status = TicketStatus.Open,
-                OrganizationId = Guid.NewGuid(),
+                OrganizationId = currentUser.OrganizationId,
                 CreatedAt = DateTime.UtcNow,
             };
             await ticketRepositoryCommands.AddAsync(ticket);
@@ -174,6 +186,8 @@ namespace TicketService.Infrastructure.Tests.Tests
         {
             //Arrange
             using var DbScope = _fixture.DB.CreateAsyncScope();
+            ICurrentUser currentUser = DbScope.ServiceProvider.GetRequiredService<ICurrentUser>();
+            currentUser.SetOrganizationId(Guid.NewGuid());
 
             // Get the repository from the service provider
             ITicketRepositoryCommands ticketRepositoryCommands = DbScope.ServiceProvider.GetRequiredService<ITicketRepositoryCommands>();

@@ -4,6 +4,8 @@ using TicketService.Api.Endpoints;
 using TicketService.Application.ServiceDefaults;
 using TicketService.Infrastructure.Persistence;
 using TicketService.Infrastructure.ServiceCollection;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 namespace TicketService.Api
 {
@@ -36,16 +38,18 @@ namespace TicketService.Api
 
                 // Keep this inside the guard — Swagger UI only needed at runtime
                 builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
+
+                builder.UseWolverine(opts =>
+                {
+                    opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
+                        .AutoProvision();
+
+                    opts.PublishAllMessages().ToRabbitQueue("ticket.assignment.updated").UseDurableOutbox();
+                });
             }
 
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure();
-
-            builder.Services.AddHttpClient("MessagingService", client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")!);
-            });
-
 
             var app = builder.Build();
 

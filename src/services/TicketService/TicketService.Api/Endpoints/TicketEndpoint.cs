@@ -14,7 +14,7 @@ namespace TicketService.Api.Endpoints
                                      .RequireAuthorization();
 
             ticketRoute.MapPost("/create", CreateTicket)
-                       .Produces(StatusCodes.Status200OK)
+                       .Produces<int>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 

@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
 using TicketService.Sdk.Services.Assignment;
 using TicketService.Sdk.Services.Ticket;
-using TicketService.Sdk.Services.TicketSdk;
 
 namespace TicketService.Sdk.ServiceDefaults
 {
@@ -20,8 +18,7 @@ namespace TicketService.Sdk.ServiceDefaults
                                                                                                              requestAdapter => new TicketServiceClient(requestAdapter)));
 
             services.AddScoped<ITicketService, TicketApiClientService>()
-                    .AddScoped<IAssignmentService, AssignmentApiService>()
-                    .AddScoped<ITicketSdkService, TicketSdkService>();
+                    .AddScoped<IAssignmentService, AssignmentApiService>();
 
 
             return services;

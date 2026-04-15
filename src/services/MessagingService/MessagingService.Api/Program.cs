@@ -4,6 +4,8 @@ using MessagingService.Application.ServiceCollection;
 using MessagingService.Infrastructure.Persistence;
 using MessagingService.Infrastructure.ServiceCollection;
 using Microsoft.EntityFrameworkCore;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,21 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
     builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
     builder.Services.AddApiAuthenticationServices("MessagingService.Api", "CCP");
+
+
+    builder.UseWolverine(opts =>
+    {
+        opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
+            .AutoProvision();
+
+        opts.ListenToRabbitQueue("ticket.assignment.updated")
+            .CircuitBreaker(c =>
+            {
+                c.FailurePercentageThreshold = 10;
+                c.PauseTime = TimeSpan.FromMinutes(1);
+            })
+            .UseDurableInbox();
+    });
 }
 
 builder.Services.AddApplication();
