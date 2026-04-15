@@ -81,10 +81,9 @@ namespace CCP.Website
             app.UseAntiforgery();
             if (app.Environment.IsDevelopment())
             {
-                app.UseStaticFiles();
                 app.MapStaticAssets();
             }
-
+            app.UseStaticFiles();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
