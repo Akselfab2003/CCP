@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using Wolverine;
 
@@ -11,18 +12,22 @@ namespace TicketService.Application.Services.Assignment
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly ICurrentUser _currentUser;
         private readonly IMessageBus _messageBus;
+        private readonly ITicketHistoryRepository _historyRepository;
+
         public AssignmentCommands(
             ILogger<AssignmentCommands> logger,
             IAssignmentRepository assignmentRepository,
             ITicketRepositoryCommands ticketRepository,
             ICurrentUser currentUser,
-            IMessageBus messageBus)
+            IMessageBus messageBus,
+            ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _assignmentRepository = assignmentRepository;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _messageBus = messageBus;
+            _historyRepository = historyRepository;
         }
 
         public async Task<Result<Guid>> CreateAssignmentAsync(int ticketId, Guid AssignUserId)
@@ -90,6 +95,14 @@ namespace TicketService.Application.Services.Assignment
                     {
                         _logger.LogWarning("Assignment saved but could not update AssignmentId on ticket {TicketId}: {Error}", ticketId, ticketResult.Error);
                     }
+
+                    await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                        ticketId,
+                        actorUserId: assignUserId,
+                        eventType: "AssignedToSupporter",
+                        oldValue: null,
+                        newValue: null
+                    ));
 
                     await NotifyAssignmentAsync(ticketId, assignUserId);
                 }

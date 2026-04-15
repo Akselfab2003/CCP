@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using TicketService.Sdk.Services.Assignment;
 using TicketService.Sdk.Services.Ticket;
 
@@ -8,9 +9,9 @@ namespace TicketService.Sdk.ServiceDefaults
     {
         private const string TicketServiceClientName = "TicketServiceClient";
 
-        public static IServiceCollection AddTicketServiceSdk(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false)
+        public static IServiceCollection AddTicketServiceSdk(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false, IConfiguration? configuration = null)
         {
-            services.AddSdkAuthentication(TicketServiceClientName, serviceUrl, IsServiceAccount);
+            services.AddSdkAuthentication(TicketServiceClientName, serviceUrl, IsServiceAccount, configuration);
 
 
             services.AddScoped<IKiotaApiClient<TicketServiceClient>>(sp => new KiotaApiClientAbstraction<TicketServiceClient>(sp.GetRequiredService<IHttpClientFactory>(),

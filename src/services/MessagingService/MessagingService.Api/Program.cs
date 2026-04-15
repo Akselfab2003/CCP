@@ -4,6 +4,7 @@ using MessagingService.Application.ServiceCollection;
 using MessagingService.Infrastructure.Persistence;
 using MessagingService.Infrastructure.ServiceCollection;
 using Microsoft.EntityFrameworkCore;
+using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -45,6 +46,11 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             .UseDurableInbox();
     });
 }
+
+builder.Services.AddTicketServiceSdk(
+    builder.Configuration.GetConnectionString("ticketservice-api") ?? builder.Configuration["services:ticketservice-api:https:0"] ?? string.Empty,
+    IsServiceAccount: true,
+    configuration: builder.Configuration);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();

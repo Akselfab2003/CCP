@@ -1,4 +1,5 @@
 ﻿using Duende.AccessTokenManagement;
+using Microsoft.Extensions.Configuration;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.IdentityModel.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,17 +11,18 @@ namespace CCP.Sdk.utils.Authentication
         public static IServiceCollection AddSdkAuthentication(this IServiceCollection services,
                                                               string clientName,
                                                               string ServiceUrl,
-                                                              bool IsServiceAccount = false)
+                                                              bool IsServiceAccount = false,
+                                                              IConfiguration? configuration = null)
         {
 
-            services.AddOpenIdAccessTokenManagement(IsServiceAccount);
+            services.AddOpenIdAccessTokenManagement(IsServiceAccount, configuration);
             services.AddHttpClientConnection(clientName, ServiceUrl, IsServiceAccount);
 
             return services;
         }
 
 
-        private static IServiceCollection AddOpenIdAccessTokenManagement(this IServiceCollection services, bool IsDataSeeder)
+        private static IServiceCollection AddOpenIdAccessTokenManagement(this IServiceCollection services, bool IsDataSeeder, IConfiguration? configuration = null)
         {
             if (!IsDataSeeder)
             {
@@ -33,9 +35,41 @@ namespace CCP.Sdk.utils.Authentication
                     })
                     .AddBlazorServerAccessTokenManagement<ServerSideUserTokenStore>();
             }
-
             else
-                services.AddClientCredentialsTokenManagement();
+            {
+                // Resolve Keycloak URL — Aspire injects this as a connection string
+                var keycloakUrl = configuration?["services:keycloak:http:0"]
+                               ?? configuration?["Keycloak:Authority"]
+                               ?? "http://localhost:8080";
+                //REMOVE!
+                Console.WriteLine($"[SdkAuth] keycloakUrl={keycloakUrl}");
+                Console.WriteLine($"[SdkAuth] CCP.ServiceAccount={configuration?["CCP.ServiceAccount"]}");
+                Console.WriteLine($"[SdkAuth] SERVICE_ACCOUNT_SECRET={configuration?["SERVICE_ACCOUNT_SECRET"]}");
+                Console.WriteLine($"[SdkAuth] All keys: {string.Join(", ", configuration?.AsEnumerable().Select(k => k.Key) ?? [])}");
+
+                var tokenEndpoint = keycloakUrl.TrimEnd('/') + "/realms/CCP/protocol/openid-connect/token";
+
+                // Secret is injected by AppHost via WithEnvironment("CCP.ServiceAccount", ...)
+                var serviceAccountSecret = configuration?["CCP.ServiceAccount"]
+                                        ?? configuration?["SERVICE_ACCOUNT_SECRET"];
+
+                var tokenManagement = services.AddClientCredentialsTokenManagement();
+
+                // Only register the client if the secret is available.
+                // During OpenAPI spec generation (GetDocument.Insider) the secret is not
+                // present — skipping avoids a startup exception in that context.
+                if (!string.IsNullOrEmpty(serviceAccountSecret))
+                {
+                    tokenManagement.AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                    {
+                        client.TokenEndpoint = new Uri(tokenEndpoint);
+                        client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                        client.ClientSecret = ClientSecret.Parse(serviceAccountSecret);
+                        client.Scope = Scope.ParseOrDefault("openid");
+                        client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                    });
+                }
+            }
 
             return services;
         }

@@ -38,6 +38,7 @@
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\MessagingService.Application\MessagingService.Application.csproj" />
     <ProjectReference Include="..\MessagingService.Infrastructure\MessagingService.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

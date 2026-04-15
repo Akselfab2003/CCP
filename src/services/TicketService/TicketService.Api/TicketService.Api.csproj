@@ -36,6 +36,7 @@
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
     <ProjectReference Include="..\TicketService.Application\TicketService.Application.csproj" />
     <ProjectReference Include="..\TicketService.Infrastructure\TicketService.Infrastructure.csproj" />
+    <ProjectReference Include="..\TicketService.Sdk\TicketService.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>
