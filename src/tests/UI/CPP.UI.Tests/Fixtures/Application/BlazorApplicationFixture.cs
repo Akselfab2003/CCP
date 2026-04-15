@@ -15,6 +15,7 @@ namespace CPP.UI.Tests.Fixtures.Application
             Factory.UseKestrel(0);
             var test = Factory.CreateClient();
             _url = test.BaseAddress?.ToString();
+
             _playwright = await Playwright.CreateAsync();
 
             Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions

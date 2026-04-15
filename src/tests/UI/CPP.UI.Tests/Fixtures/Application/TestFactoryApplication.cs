@@ -2,6 +2,7 @@
 using CCP.Shared.UIContext;
 using CCP.UI.Services;
 using CPP.UI.Tests.Fixtures.Website;
+using CPP.UI.Tests.Utils;
 using IdentityService.Sdk.Services.Customer;
 using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
@@ -20,6 +21,12 @@ namespace CPP.UI.Tests.Fixtures.Application
     public class TestFactoryApplication : WebApplicationFactory<CCP.UI.Program>
     {
         public string BaseUrl { get; private set; } = default!;
+
+        public TestUserContext GetUserContext()
+        {
+            return Services.GetRequiredService<TestUserContext>();
+        }
+
 
         private readonly Dictionary<System.Type, object> _mockproviders = new();
 
@@ -121,11 +128,17 @@ namespace CPP.UI.Tests.Fixtures.Application
         // -------------------------
         private void ConfigureAuth(IServiceCollection services)
         {
+
+            services.AddSingleton<TestUserContext>();
+
             services.AddAuthentication(options =>
             {
-                options.DefaultScheme = FakeAuthStateProvider.Scheme;
-                options.DefaultChallengeScheme = FakeAuthStateProvider.Scheme;
-            }).AddScheme<AuthenticationSchemeOptions, FakeAuthStateProvider>(FakeAuthStateProvider.Scheme, options => { });
+                options.DefaultScheme = TestAuthHandler.Scheme;
+                options.DefaultChallengeScheme = TestAuthHandler.Scheme;
+            })
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                TestAuthHandler.Scheme,
+                _ => { });
 
             services.AddAuthorization();
         }

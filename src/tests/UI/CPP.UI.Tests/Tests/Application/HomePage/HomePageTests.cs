@@ -8,14 +8,20 @@ namespace CPP.UI.Tests.Tests.Application.HomePage
     public class HomePageTests
     {
         private readonly BlazorApplicationFixture _fixture;
-        public HomePageTests(BlazorApplicationFixture fixture)
+        private readonly ITestOutputHelper _outputHelper;
+        public HomePageTests(BlazorApplicationFixture fixture, ITestOutputHelper outputHelper)
         {
             _fixture = fixture;
+            _outputHelper = outputHelper;
         }
 
         [Fact]
         public async Task HomePage_Should_Display_Correctly_Based_On_User_Role()
         {
+
+            var user = _fixture.Factory.GetUserContext();
+            user.SetCustomer();
+
             var mock = _fixture.Factory.SetMock<IUIUserContext>();
             mock.Role.Returns(CCP.Shared.ValueObjects.UserRole.Customer);
 
@@ -28,6 +34,20 @@ namespace CPP.UI.Tests.Tests.Application.HomePage
 
             Assert.Contains("Welcome back", await welcomeMessage.InnerTextAsync());
             Assert.True(await welcomeMessage.IsVisibleAsync(), "Welcome message should be visible on the home page.");
+        }
+
+
+        [Fact]
+        public async Task HomePage_Should_Only_Be_Available_To_Authenticated_Users()
+        {
+            var user = _fixture.Factory.GetUserContext();
+            user.SetAnonymous();
+
+            var page = await _fixture.CreatePageAsync();
+            var response = await page.GotoAsync("/");
+
+            Assert.NotNull(page);
+            Assert.Equal(401, response?.Status);
         }
     }
 }

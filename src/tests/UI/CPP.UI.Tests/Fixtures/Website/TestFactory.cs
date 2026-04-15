@@ -1,8 +1,10 @@
 ﻿using CCP.Website.Services;
+using CPP.UI.Tests.Utils;
 using IdentityService.Sdk.Services.Customer;
 using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +20,7 @@ namespace CPP.UI.Tests.Fixtures.Website
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Development"); // Set the environment to Test
+            builder.UseEnvironment("Development");
             builder.UseConfiguration(new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -92,17 +94,21 @@ namespace CPP.UI.Tests.Fixtures.Website
                 ((dynamic)provider).ClearReceivedCalls();
             }
         }
-
-        // -------------------------
-        // Auth
-        // -------------------------
         private void ConfigureAuth(IServiceCollection services)
         {
-            services.AddAuthorizationCore();
 
-            services.AddScoped<
-                Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider,
-                FakeAuthStateProvider>();
+            services.AddSingleton<TestUserContext>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = TestAuthHandler.Scheme;
+                options.DefaultChallengeScheme = TestAuthHandler.Scheme;
+            })
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                TestAuthHandler.Scheme,
+                _ => { });
+
+            services.AddAuthorization();
         }
     }
 }
