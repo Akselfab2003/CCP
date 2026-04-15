@@ -4,6 +4,8 @@ using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
 using CustomerService.Sdk.ServiceDefaults;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
 using EmailService.Application.Interfaces;
 using EmailService.Application.Services;
 using EmailService.Domain.Interfaces;
@@ -11,6 +13,8 @@ using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
 using EmailTemplates.Renderes;
 using Microsoft.EntityFrameworkCore;
+using TicketService.Sdk.ServiceDefaults;
+using TicketService.Sdk.Services.TicketSdk;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -37,9 +41,28 @@ builder.Services.ConfigureDefaultOpenTelemetry("EmailService.Api");
 
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
+    var keycloakServiceUrl =
+        builder.Configuration.GetValue<string>("services:Keycloak:http:0")
+        ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+
+
+    builder.Services.AddClientCredentialsTokenManagement()
+                        .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                        {
+                            client.TokenEndpoint = new Uri($"{keycloakServiceUrl}/realms/CCP/protocol/openid-connect/token");
+                            client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                            client.ClientSecret = ClientSecret.Parse(
+                                builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                                ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                            );
+                            client.Scope = Scope.ParseOrDefault("openid");
+                            client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                        });
+
     builder.Services.AddCustomerviceSdk(
         builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
-        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
+        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."),true);
+
     builder.Services.AddDbContext<DBcontext>(options =>
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));

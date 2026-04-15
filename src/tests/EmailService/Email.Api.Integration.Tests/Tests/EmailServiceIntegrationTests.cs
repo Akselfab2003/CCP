@@ -24,7 +24,7 @@ namespace Email.Api.Integration.Tests.Tests
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.NotifyTicketCreatedAsync(customerId, ticketId);
+            await emailService.NotifyTicketCreatedAsync(customerId, "test1", ticketId);
 
             _output.WriteLine($"Notification sent for ticket creation: TicketId={ticketId}, CustomerId={customerId}");
         }
@@ -43,6 +43,7 @@ namespace Email.Api.Integration.Tests.Tests
 
             await emailService.NotifyTicketStatusChangedAsync(
                 customerId,
+                "test2",
                 ticketId,
                 oldStatus,
                 newStatus,
@@ -65,6 +66,7 @@ namespace Email.Api.Integration.Tests.Tests
 
             await emailService.NotifyTicketRepliedAsync(
                 customerId,
+                "test3",
                 ticketId,
                 agentName,
                 agentRole,
@@ -86,7 +88,7 @@ namespace Email.Api.Integration.Tests.Tests
                 var ticketId = Random.Shared.Next(1000, int.MaxValue);
                 ticketIds.Add(ticketId);
 
-                await emailService.NotifyTicketCreatedAsync(customerId, ticketId);
+                await emailService.NotifyTicketCreatedAsync(customerId,"test4", ticketId);
             }
 
             _output.WriteLine($"Successfully sent {notificationCount} ticket creation notifications");
@@ -110,6 +112,7 @@ namespace Email.Api.Integration.Tests.Tests
             {
                 await emailService.NotifyTicketStatusChangedAsync(
                     customerId,
+                    "test5",
                     ticketId,
                     oldStatus,
                     newStatus,
@@ -131,6 +134,7 @@ namespace Email.Api.Integration.Tests.Tests
 
             await emailService.NotifyTicketRepliedAsync(
                 customerId,
+                "test6",
                 ticketId,
                 "Agent Name",
                 "Agent Role",
@@ -154,6 +158,7 @@ namespace Email.Api.Integration.Tests.Tests
 
             await emailService.NotifyTicketStatusChangedAsync(
                 customerId,
+                "test7",
                 ticketId,
                 "open",
                 "closed",
@@ -173,6 +178,7 @@ namespace Email.Api.Integration.Tests.Tests
 
             await emailService.NotifyTicketRepliedAsync(
                 customerId,
+                "test8",
                 ticketId,
                 "Agent",
                 "Support",
@@ -188,7 +194,7 @@ namespace Email.Api.Integration.Tests.Tests
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.NotifyTicketCreatedAsync(customerId, ticketId);
+            await emailService.NotifyTicketCreatedAsync(customerId,"test9", ticketId);
 
             Assert.True(customerId != Guid.Empty);
             Assert.True(ticketId > 0);
@@ -209,6 +215,7 @@ namespace Email.Api.Integration.Tests.Tests
 
             await emailService.NotifyTicketStatusChangedAsync(
                 customerId,
+                "test10",
                 ticketId,
                 oldStatus,
                 newStatus,

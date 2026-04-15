@@ -20,6 +20,13 @@
             }
           },
           {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "ticketId",
             "in": "query",
             "schema": {
@@ -47,6 +54,13 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -94,11 +108,32 @@
             }
           },
           {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "ticketId",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "ticketStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticketStatusLabel",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {

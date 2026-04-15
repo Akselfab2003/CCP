@@ -127,7 +127,6 @@ IdentityService
     .WithOtlpExporter();
 
 EmailService
-    .WithExplicitStart()
     .WithReference(EmailDB)
     .WaitFor(EmailDB)
     .WithReference(CustomerService)
@@ -146,6 +145,7 @@ EmailService
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
     })
     .WaitFor(RabbitMq)
     .WithReference(RabbitMq)

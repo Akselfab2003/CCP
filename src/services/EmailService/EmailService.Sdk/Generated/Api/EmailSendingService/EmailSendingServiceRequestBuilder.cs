@@ -33,7 +33,7 @@ namespace EmailService.Sdk.Api.EmailSendingService
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public EmailSendingServiceRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService{?customerId*,ticketId*}", pathParameters)
+        public EmailSendingServiceRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService{?customerId*,ticketId*,ticketTitle*}", pathParameters)
         {
         }
         /// <summary>
@@ -41,7 +41,7 @@ namespace EmailService.Sdk.Api.EmailSendingService
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public EmailSendingServiceRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService{?customerId*,ticketId*}", rawUrl)
+        public EmailSendingServiceRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService{?customerId*,ticketId*,ticketTitle*}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -92,6 +92,15 @@ namespace EmailService.Sdk.Api.EmailSendingService
             public Guid? CustomerId { get; set; }
             [QueryParameter("ticketId")]
             public int? TicketId { get; set; }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            [QueryParameter("ticketTitle")]
+            public string? TicketTitle { get; set; }
+#nullable restore
+#else
+            [QueryParameter("ticketTitle")]
+            public string TicketTitle { get; set; }
+#endif
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

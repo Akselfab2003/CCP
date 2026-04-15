@@ -11,7 +11,7 @@ namespace EmailService.Sdk.Services
         {
             _client = client;
         }
-        public async Task NotifyTicketCreatedAsync(Guid customerId, int ticketId)
+        public async Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId)
         {
             var api = _client.Client;
 
@@ -20,12 +20,14 @@ namespace EmailService.Sdk.Services
                 .PostAsync(request =>
                 {
                     request.QueryParameters.CustomerId = customerId;
+                    request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                 });
         }
 
         public async Task NotifyTicketStatusChangedAsync(
             Guid customerId,
+            string ticketTitle,
             int ticketId,
             string oldStatus,
             string newStatus,
@@ -41,6 +43,7 @@ namespace EmailService.Sdk.Services
                 .PostAsync(request =>
                 {
                     request.QueryParameters.CustomerId = customerId;
+                    request.QueryParameters.TicketTitle= ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.NewStatus = newStatus;
                     request.QueryParameters.OldStatus = oldStatus;
@@ -49,6 +52,7 @@ namespace EmailService.Sdk.Services
 
         public async Task NotifyTicketRepliedAsync(
             Guid customerId,
+            string ticketTitle,
             int ticketId,
             string agentName,
             string agentRole,
@@ -62,6 +66,7 @@ namespace EmailService.Sdk.Services
                 .PostAsync(request =>
                 {
                     request.QueryParameters.CustomerId = customerId;
+                    request.QueryParameters.TicketTitle= ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.AgentRole = agentRole;

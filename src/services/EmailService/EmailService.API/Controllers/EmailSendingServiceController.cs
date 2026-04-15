@@ -18,33 +18,25 @@ namespace EmailService.Api.Controllers
     {
         private readonly ITicketEmailService _ticketEmailService;
         private readonly ICustomerSdkService _customerSdkService;
-        private readonly ITicketSdkService _ticketSdkService;
         private readonly IConfiguration _configuration;
 
-        public EmailSendingServiceController(ITicketEmailService ticketEmailService, ICustomerSdkService customerSdkService, ITicketSdkService ticketSdkService, IConfiguration configuration)
+        public EmailSendingServiceController(ITicketEmailService ticketEmailService, ICustomerSdkService customerSdkService, IConfiguration configuration)
         {
             _ticketEmailService = ticketEmailService;
             _customerSdkService = customerSdkService;
-            _ticketSdkService = ticketSdkService;
             _configuration = configuration;
         }
 
         [HttpPost]
-        public async Task<IResult> NotifyNewTicketCreation(Guid customerId, int ticketId)
+        public async Task<IResult> NotifyNewTicketCreation([FromQuery] Guid customerId, [FromQuery] string ticketTitle, [FromQuery] int ticketId)
         {
             try
             {
-                var ticketResult = await _ticketSdkService.GetTicketAsync(ticketId);
-
-                if (ticketResult.IsFailure)
-                    return Results.NotFound($"Ticket with ID {ticketId} not found.");
-
                 var customerResult = await _customerSdkService.GetCustomerById(customerId);
 
                 if (customerResult.IsFailure)
                     return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
 
-                var ticket = ticketResult.Value;
                 var customer = customerResult.Value;
 
                 var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
@@ -53,7 +45,7 @@ namespace EmailService.Api.Controllers
 
                 var emailModel = new EmailSent
                 {
-                    Subject = ticket.Title,
+                    Subject = ticketTitle,
                     Body = $"A new support ticket has been created. Ticket ID: {ticketId}",
                     SenderAddress = _configuration.GetValue<string>("EmailSettings:SenderAddress") ?? "noreply@support.com",
                     RecipientAddress = customer.Email ?? "",
@@ -62,7 +54,7 @@ namespace EmailService.Api.Controllers
 
                 await _ticketEmailService.SendTicketCreatedNotificationAsync(
                     recipientEmail: customer.Email ?? "",
-                    ticketTitle: ticket.Title,
+                    ticketTitle: ticketTitle,
                     emailModel: emailModel,
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
@@ -77,18 +69,14 @@ namespace EmailService.Api.Controllers
         }
 
         [HttpPost("status-change")]
-        public async Task<IResult> NotifyTicketStatusChange(Guid customerId, int ticketId, string newStatus,string oldStatus)
+        public async Task<IResult> NotifyTicketStatusChange([FromQuery] Guid customerId, [FromQuery] string ticketTitle, [FromQuery] int ticketId, [FromQuery] string newStatus, [FromQuery] string oldStatus)
         {
             try
             {
-                var ticketResult = await _ticketSdkService.GetTicketAsync(ticketId);
-                if (ticketResult.IsFailure)
-                    return Results.NotFound($"Ticket with ID {ticketId} not found.");
                 var customerResult = await _customerSdkService.GetCustomerById(customerId);
                 if (customerResult.IsFailure)
                     return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
 
-                var ticket = ticketResult.Value;
                 var customer = customerResult.Value;
 
                 var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
@@ -96,7 +84,7 @@ namespace EmailService.Api.Controllers
 
                 var emailModel = new EmailSent
                 {
-                    Subject = $"[Status Update] {ticket.Title} - Now {newStatus}",
+                    Subject = $"[Status Update] {ticketTitle} - Now {newStatus}",
                     Body = $"The status of your support ticket (ID: {ticketId}) has changed from {oldStatus} to {newStatus}.",
                     SenderAddress = _configuration.GetValue<string>("EmailSettings:SenderAddress") ?? "noreply@support.com",
                     RecipientAddress = customer.Email ?? "",
@@ -105,7 +93,7 @@ namespace EmailService.Api.Controllers
 
                 await _ticketEmailService.SendTicketStatusChangeNotificationAsync(
                     recipientEmail: customer.Email ?? "",
-                    ticketTitle: ticket.Title,
+                    ticketTitle: ticketTitle,
                     emailModel: emailModel,
                     organizationName: organizationName,
                     newStatus: newStatus,
@@ -127,21 +115,16 @@ namespace EmailService.Api.Controllers
         }
 
         [HttpPost("reply")]
-        public async Task<IResult> NotifyTicketReply(Guid customerId, int ticketId, string agentName, string agentRole, string replyContent)
+        public async Task<IResult> NotifyTicketReply([FromQuery] Guid customerId, [FromQuery] string ticketTitle, [FromQuery] int ticketId,[FromQuery] string ticketStatus,[FromQuery] string ticketStatusLabel, [FromQuery] string agentName, [FromQuery] string agentRole, [FromQuery] string replyContent)
         {
             try
             {
-                var ticketResult = await _ticketSdkService.GetTicketAsync(ticketId);
-
-                if (ticketResult.IsFailure)
-                    return Results.NotFound($"Ticket with ID {ticketId} not found.");
 
                 var customerResult = await _customerSdkService.GetCustomerById(customerId);
 
                 if (customerResult.IsFailure)
                     return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
 
-                var ticket = ticketResult.Value;
                 var customer = customerResult.Value;
 
                 var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
@@ -152,7 +135,7 @@ namespace EmailService.Api.Controllers
 
                 var emailModel = new EmailReceived
                 {
-                    Subject = $"[Reply] {ticket.Title}",
+                    Subject = $"[Reply] {ticketTitle}",
                     Body = $"A support agent has replied to your ticket (ID: {ticketId}).",
                     SenderAddress = _configuration.GetValue<string>("EmailSettings:SenderAddress") ?? "noreply@support.com",
                     RecipientAddress = customer.Email ?? "",
@@ -161,14 +144,14 @@ namespace EmailService.Api.Controllers
 
                 await _ticketEmailService.SendTicketReplyNotificationAsync(
                     recipientEmail: customer.Email ?? "",
-                    ticketTitle: ticket.Title,
+                    ticketTitle: ticketTitle,
                     emailModel: emailModel,
                     recipientName: customer.Name ?? "Customer",
                     organizationName: organizationName,
                     agentName: agentName,
                     agentRole: agentRole,
-                    ticketStatus: ticket.Status.ToString(),
-                    ticketStatusLabel: ticket.Status.ToString(),
+                    ticketStatus: ticketStatus,
+                    ticketStatusLabel: ticketStatusLabel,
                     replyUrl: replyUrl,
                     portalUrl: portalUrl,
                     viewHistoryUrl: viewHistoryUrl,

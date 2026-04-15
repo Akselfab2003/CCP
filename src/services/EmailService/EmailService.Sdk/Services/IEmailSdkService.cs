@@ -5,10 +5,11 @@ namespace EmailService.Sdk.Services
     public interface IEmailSdkService
     {
 
-        Task NotifyTicketCreatedAsync(Guid customerId, int ticketId);
+        Task NotifyTicketCreatedAsync(Guid customerId,string ticketTitle, int ticketId);
 
         Task NotifyTicketStatusChangedAsync(
             Guid customerId,
+            string ticketTitle,
             int ticketId,
             string oldStatus,
             string newStatus,
@@ -18,6 +19,7 @@ namespace EmailService.Sdk.Services
 
         Task NotifyTicketRepliedAsync(
             Guid customerId,
+            string ticketTitle,
             int ticketId,
             string agentName,
             string agentRole,

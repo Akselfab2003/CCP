@@ -60,8 +60,8 @@ namespace TicketService.Application.Services.Ticket
                     try
                     {
                         if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                            await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Id);
-                    }
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value,result.Value.Title, result.Value.Id);
+                }
                     catch (Exception ex)
                     {
                         _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
