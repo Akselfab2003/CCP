@@ -113,5 +113,35 @@ namespace TicketService.Sdk.Services.Ticket
                 return Result.Failure<List<TicketSdkDto>>(Error.Failure(code: "TicketRetrievalFailed", description: "An error occurred while retrieving tickets."));
             }
         }
+
+
+        public async Task<Result> UpdateTicketStatusAsync(int ticketId, TicketStatus newStatus, CancellationToken ct = default)
+        {
+            try
+            {
+                await Client.Ticket[ticketId].Status.PatchAsync(new Models.UpdateTicketStatusRequest()
+                {
+                    NewStatus = (int)newStatus
+                }, cancellationToken: ct);
+
+                return Result.Success();
+            }
+            catch (ApiException ex)
+            {
+                return ex.ResponseStatusCode switch
+                {
+                    400 => Result.Failure(Error.Failure(code: "BadRequest", description: "The request was invalid. Please check the provided parameters.")),
+                    401 => Result.Failure(Error.Failure(code: "Unauthorized", description: "You are not authorized to perform this action.")),
+                    403 => Result.Failure(Error.Failure(code: "Forbidden", description: "You do not have permission to perform this action.")),
+                    404 => Result.Failure(Error.Failure(code: "NotFound", description: $"No ticket found with id {ticketId}.")),
+                    _ => Result.Failure(Error.Failure(code: "TicketStatusUpdateFailed", description: $"An error occurred while updating the status of ticket with id {ticketId}. Status code: {ex.ResponseStatusCode}"))
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating the status of ticket with id {TicketId}.", ticketId);
+                return Result.Failure(Error.Failure(code: "TicketStatusUpdateFailed", description: $"An error occurred while updating the status of ticket with id {ticketId}."));
+            }
+        }
     }
 }

@@ -297,7 +297,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         // Fetch the ticket directly and inject it if found.
         if (UserContext.IsInternalUser)
         {
-            var result = await TicketSdkService.GetTicketAsync(ticketId);
+            var result = await TicketService.GetTicket(ticketId);
             if (result.IsSuccess)
             {
                 _tickets.Insert(0, result.Value);
@@ -390,7 +390,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     private async Task UpdateTicketStatusAsync(TicketStatus newStatus)
     {
         if (_activeTicketId is null) return;
-        var result = await TicketSdkService.UpdateTicketStatusAsync(_activeTicketId.Value, newStatus);
+        var result = await TicketService.UpdateTicketStatusAsync(_activeTicketId.Value, newStatus);
         if (result.IsSuccess)
         {
             var ticket = _tickets.FirstOrDefault(t => t.Id == _activeTicketId);

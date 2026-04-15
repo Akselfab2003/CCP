@@ -4,13 +4,15 @@ using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
-using TicketService.Sdk.Services.TicketSdk;
+using TicketService.Sdk.Services.Assignment;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Pages.Tickets;
 
 public partial class TicketOverview : ComponentBase
 {
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private ITicketService TicketService { get; set; } = default!;
+    [Inject] private IAssignmentService AssignmentService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
@@ -72,7 +74,7 @@ public partial class TicketOverview : ComponentBase
         _isLoading = true;
         _errorMessage = null;
 
-        var result = await TicketSdkService.GetTicketsAsync();
+        var result = await TicketService.GetTickets();
 
         if (result.IsSuccess && result.Value is not null)
         {
@@ -174,7 +176,7 @@ public partial class TicketOverview : ComponentBase
         _isAssigning = true;
         _errorMessage = null;
 
-        var result = await TicketSdkService.AssignTicketAsync(ticketId, UserContext.UserId);
+        var result = await AssignmentService.AssignTicketToUserAsync(ticketId, UserContext.UserId);
 
         if (result.IsSuccess)
         {
@@ -236,7 +238,7 @@ public partial class TicketOverview : ComponentBase
         if (_selectedTicket is null || _isUpdatingAssignment) return;
         _isUpdatingAssignment = true;
 
-        var result = await TicketSdkService.AssignTicketAsync(_selectedTicket.Id, supporterUserId);
+        var result = await AssignmentService.AssignTicketToUserAsync(_selectedTicket.Id, supporterUserId);
         if (result.IsSuccess)
         {
             // Update both _selectedTicket and the matching entry in _tickets
