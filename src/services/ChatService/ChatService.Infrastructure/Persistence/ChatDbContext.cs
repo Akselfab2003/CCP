@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.AuthContext;
 using ChatService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace ChatService.Infrastructure.Persistence;
 
@@ -15,7 +16,7 @@ public class ChatDbContext : DbContext
 
     public ChatDbContext(DbContextOptions<ChatDbContext> options, ICurrentUser currentUser) : base(options)
     {
-        _currentUser = currentUser;
+        _currentUser = currentUser ?? throw new InvalidOperationException("CurrentUser service is not available.");
     }
 
     public DbSet<FaqEntity> FaqEntries => Set<FaqEntity>();
@@ -39,5 +40,19 @@ public class ChatDbContext : DbContext
             modelBuilder.Entity<SessionEntity>()
                 .HasQueryFilter(s => s.OrganizationId == _currentUser.OrganizationId);
         }
+    }
+}
+
+public class ChatDbContextFactory : IDesignTimeDbContextFactory<ChatDbContext>
+{
+    public ChatDbContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ChatDbContext>();
+
+        optionsBuilder.UseNpgsql(a =>
+        {
+            a.UseVector();
+        });
+        return new ChatDbContext(optionsBuilder.Options, new CurrentUser());
     }
 }
