@@ -5,12 +5,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatService.Infrastructure.ServiceCollection
 {
-    public class InfrastructureServiceCollection
+    public static class InfrastructureServiceCollection
     {
-        public static void AddInfrastructureServices(IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IFaqRepository, FaqRepository>()
                     .AddScoped<ISessionRepository, SessionRepository>();
+
+            return services;
         }
     }
 }

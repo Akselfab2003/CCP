@@ -3,10 +3,13 @@ using CCP.ServiceDefaults;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using ChatService.Api.Endpoints;
+using ChatService.Application.ServiceCollection;
 using ChatService.Infrastructure.Persistence;
+using ChatService.Infrastructure.ServiceCollection;
 using ChatService.Interfaces;
 using ChatService.Models;
 using ChatService.Repositories;
+using IdentityService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,12 +44,14 @@ var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
     ?? builder.Configuration["services:ticketservice-api:http:0"]
     ?? "http://localhost:5001";
 
-builder.Services.AddHttpClient<ITicketClient, TicketClient>(c =>
-    c.BaseAddress = new Uri(ticketUrl));
+builder.Services.AddIdentityServiceSdk(
+    builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
 
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
 builder.Services.AddControllers();
-
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 // Swagger til debugging
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
