@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CCP.Shared.ResultAbstraction;
-using IdentityService.Application.Models;
+﻿using CCP.Shared.ResultAbstraction;
 
 namespace IdentityService.Application.Services.Supporter
 {
@@ -10,6 +6,5 @@ namespace IdentityService.Application.Services.Supporter
     public interface ISupporterService
     {
         Task<Result> InviteSupporter(string email, CancellationToken ct = default);
-        Task<Result<List<TenantMemberDto>>> GetAllTenantSupporterUsers(CancellationToken ct = default);
     }
 }

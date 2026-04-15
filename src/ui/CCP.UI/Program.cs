@@ -1,6 +1,7 @@
 using CCP.ServiceDefaults;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
 using IdentityService.Sdk.ServiceDefaults;
@@ -99,6 +100,25 @@ namespace CCP.UI
             });
             }
 
+
+            //Authorization Policies
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdmin", policy => policy.RequireRole(
+                    UserRolesExtensions.AdminRoleString));
+                options.AddPolicy("RequireManager", policy => policy.RequireRole(
+                    UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                options.AddPolicy("RequireSupporter", policy =>policy.RequireRole(
+                    UserRolesExtensions.SupporterRoleString,
+                    UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                options.AddPolicy("RequireInitialUser", policy => policy.RequireRole(
+                    UserRolesExtensions.CustomerRoleString,
+                    UserRolesExtensions.SupporterRoleString,
+                    UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+            });
 
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();

@@ -4,6 +4,7 @@ using IdentityService.Sdk.Customer;
 using IdentityService.Sdk.Supporter;
 using IdentityService.Sdk.Tenant;
 using IdentityService.Sdk.User;
+using IdentityService.Sdk.Userrights;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Serialization.Form;
@@ -41,6 +42,11 @@ namespace IdentityService.Sdk
         public global::IdentityService.Sdk.User.UserRequestBuilder User
         {
             get => new global::IdentityService.Sdk.User.UserRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The userrights property</summary>
+        public global::IdentityService.Sdk.Userrights.UserrightsRequestBuilder Userrights
+        {
+            get => new global::IdentityService.Sdk.Userrights.UserrightsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::IdentityService.Sdk.IdentityServiceClient"/> and sets the default values.

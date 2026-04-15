@@ -57,5 +57,24 @@ namespace TicketService.Application.Services.Ticket
                 return Result.Failure<int>(Error.Failure(code: "TicketCreationFailed", description: "An error occurred while creating the ticket."));
             }
         }
+
+        public async Task<Result> UpdateTicketStatusAsync(int ticketId, TicketStatus newStatus)
+        {
+            try
+            {
+                var result = await _ticketRepository.UpdateStatusAsync(ticketId, newStatus);
+                if (result.IsFailure)
+                {
+                    _logger.LogError("Failed to update status for ticket {TicketId}: {Error}", ticketId, result.Error);
+                    return result;
+                }
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating status for ticket {TicketId}.", ticketId);
+                return Result.Failure(Error.Failure("StatusUpdateFailed", "An error occurred while updating the ticket status."));
+            }
+        }
     }
 }

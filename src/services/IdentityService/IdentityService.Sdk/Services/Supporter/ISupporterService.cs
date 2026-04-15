@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CCP.Shared.ResultAbstraction;
+﻿using CCP.Shared.ResultAbstraction;
 using IdentityService.Sdk.Models;
 
 namespace IdentityService.Sdk.Services.Supporter

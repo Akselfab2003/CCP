@@ -673,3 +673,35 @@
     box-shadow: 0 0 6px rgba(250,204,21,0.5);
     flex-shrink: 0;
 }
+
+/* Status button group in chat header */
+.inbox-status-group {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--ccp-border);
+    border-radius: 7px;
+    padding: 2px;
+}
+
+.inbox-status-btn {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--ccp-text-lo);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.inbox-status-btn:hover {
+    background: rgba(255,255,255,0.07);
+    color: var(--ccp-text-hi);
+}
+
+.inbox-status-btn--active {
+    font-weight: 600;
+}
