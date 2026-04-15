@@ -16,9 +16,10 @@ namespace EmailTemplates.Renderes
             _loggerFactory = loggerFactory;
         }
 
-        public Task<string> RenderTicketCreatedEmailAsync(
-            EmailSent email, string organizationName, string expectedResponseTime, string portalUrl) =>
-            RenderComponentAsync<TicketCreatedEmail>(p =>
+        public async Task<string> RenderTicketCreatedEmailAsync(
+            EmailSent email, string organizationName, string expectedResponseTime, string portalUrl)
+        {
+            var component = await RenderComponentAsync<TicketCreatedEmail>(p =>
             {
                 p.Add(nameof(TicketCreatedEmail.Email), email);
                 p.Add(nameof(TicketCreatedEmail.OrganizationName), organizationName);
@@ -26,11 +27,16 @@ namespace EmailTemplates.Renderes
                 p.Add(nameof(TicketCreatedEmail.PortalUrl), portalUrl);
             });
 
-        public Task<string> RenderTicketReplyEmailAsync(
+            
+            return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
+        }
+
+        public async Task<string> RenderTicketReplyEmailAsync(
             EmailReceived email, string recipientName, string organizationName,
             string agentName, string agentRole, string ticketStatus, string ticketStatusLabel,
-            string replyUrl, string portalUrl, string viewHistoryUrl, string reopenUrl) =>
-            RenderComponentAsync<TicketReplyEmail>(p =>
+            string replyUrl, string portalUrl, string viewHistoryUrl, string reopenUrl)
+        {
+            var component = await RenderComponentAsync<TicketReplyEmail>(p =>
             {
                 p.Add(nameof(TicketReplyEmail.Email), email);
                 p.Add(nameof(TicketReplyEmail.RecipientName), recipientName);
@@ -45,22 +51,31 @@ namespace EmailTemplates.Renderes
                 p.Add(nameof(TicketReplyEmail.ReopenUrl), reopenUrl);
             });
 
-        public Task<string> RenderTicketStatusEmailAsync(
+            return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
+        }
+
+
+
+        public async Task<string> RenderTicketStatusEmailAsync(
             EmailSent email, string organizationName, string newStatus, string newStatusLabel,
             string oldStatusLabel, string updatedByAgent, string agentNote,
-            string portalUrl, string reopenUrl) =>
-            RenderComponentAsync<TicketStatusEmail>(p =>
-            {
-                p.Add(nameof(TicketStatusEmail.Email), email);
-                p.Add(nameof(TicketStatusEmail.OrganizationName), organizationName);
-                p.Add(nameof(TicketStatusEmail.NewStatus), newStatus);
-                p.Add(nameof(TicketStatusEmail.NewStatusLabel), newStatusLabel);
-                p.Add(nameof(TicketStatusEmail.OldStatusLabel), oldStatusLabel);
-                p.Add(nameof(TicketStatusEmail.UpdatedByAgent), updatedByAgent);
-                p.Add(nameof(TicketStatusEmail.AgentNote), agentNote);
-                p.Add(nameof(TicketStatusEmail.PortalUrl), portalUrl);
-                p.Add(nameof(TicketStatusEmail.ReopenUrl), reopenUrl);
-            });
+            string portalUrl, string reopenUrl)
+        {
+                var component = await RenderComponentAsync<TicketStatusEmail>(p =>
+                {
+                    p.Add(nameof(TicketStatusEmail.Email), email);
+                    p.Add(nameof(TicketStatusEmail.OrganizationName), organizationName);
+                    p.Add(nameof(TicketStatusEmail.NewStatus), newStatus);
+                    p.Add(nameof(TicketStatusEmail.NewStatusLabel), newStatusLabel);
+                    p.Add(nameof(TicketStatusEmail.OldStatusLabel), oldStatusLabel);
+                    p.Add(nameof(TicketStatusEmail.UpdatedByAgent), updatedByAgent);
+                    p.Add(nameof(TicketStatusEmail.AgentNote), agentNote);
+                    p.Add(nameof(TicketStatusEmail.PortalUrl), portalUrl);
+                    p.Add(nameof(TicketStatusEmail.ReopenUrl), reopenUrl);
+                });
+    
+                return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
+        }
 
         public Task<string> RenderSupportTicketNotificationAsync(
             EmailSent email, string customerEmail, string organizationName,

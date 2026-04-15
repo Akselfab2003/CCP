@@ -39,6 +39,7 @@ namespace EmailService.Api.Controllers
 
                 var customer = customerResult.Value;
 
+                // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
                 var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
                 var expectedResponseTime = _configuration.GetValue<string>("EmailSettings:ExpectedResponseTime") ?? "24 hours";
                 var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
@@ -47,7 +48,7 @@ namespace EmailService.Api.Controllers
                 {
                     Subject = ticketTitle,
                     Body = $"A new support ticket has been created. Ticket ID: {ticketId}",
-                    SenderAddress = _configuration.GetValue<string>("EmailSettings:SenderAddress") ?? "noreply@support.com",
+                    SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
                     RecipientAddress = customer.Email ?? "",
                     SentAt = DateTime.UtcNow,
                 };
@@ -79,6 +80,8 @@ namespace EmailService.Api.Controllers
 
                 var customer = customerResult.Value;
 
+                // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
+                // These URLs can be used in the email template to direct customers to the appropriate pages in the customer portal
                 var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
                 var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
 
@@ -86,7 +89,7 @@ namespace EmailService.Api.Controllers
                 {
                     Subject = $"[Status Update] {ticketTitle} - Now {newStatus}",
                     Body = $"The status of your support ticket (ID: {ticketId}) has changed from {oldStatus} to {newStatus}.",
-                    SenderAddress = _configuration.GetValue<string>("EmailSettings:SenderAddress") ?? "noreply@support.com",
+                    SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."), 
                     RecipientAddress = customer.Email ?? "",
                     SentAt = DateTime.UtcNow,
                 };
@@ -127,6 +130,7 @@ namespace EmailService.Api.Controllers
 
                 var customer = customerResult.Value;
 
+                // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
                 var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
                 var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
                 var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
@@ -137,7 +141,7 @@ namespace EmailService.Api.Controllers
                 {
                     Subject = $"[Reply] {ticketTitle}",
                     Body = $"A support agent has replied to your ticket (ID: {ticketId}).",
-                    SenderAddress = _configuration.GetValue<string>("EmailSettings:SenderAddress") ?? "noreply@support.com",
+                    SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
                     RecipientAddress = customer.Email ?? "",
                     ReceivedAt = DateTime.UtcNow,
                 };
