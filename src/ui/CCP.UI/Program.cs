@@ -4,6 +4,7 @@ using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
+using CustomerService.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
@@ -102,7 +103,7 @@ namespace CCP.UI
                 options.AddPolicy("RequireManager", policy => policy.RequireRole(
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireSupporter", policy =>policy.RequireRole(
+                options.AddPolicy("RequireSupporter", policy => policy.RequireRole(
                     UserRolesExtensions.SupporterRoleString,
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
@@ -125,11 +126,11 @@ namespace CCP.UI
             builder.Services.AddMessageServiceSDK(
                 builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
                 ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
-            /*
+
             builder.Services.AddCustomerviceSdk(
                 builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
                 ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
-            */
+
             builder.Services.AddIdentityServiceSdk(
                 builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                 ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));

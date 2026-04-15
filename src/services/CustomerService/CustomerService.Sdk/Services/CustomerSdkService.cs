@@ -1,17 +1,20 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ResultAbstraction;
 using CustomerService.Sdk.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CustomerService.Sdk.Services
 {
     // Client implementation using Kiota to communicate with Customer API
     internal class CustomerSdkService : ICustomerSdkService
     {
+        private readonly ILogger<CustomerSdkService> _logger;
         private readonly IKiotaApiClient<CustomerServiceClient> _apiClient;
 
-        public CustomerSdkService(IKiotaApiClient<CustomerServiceClient> client)
+        public CustomerSdkService(IKiotaApiClient<CustomerServiceClient> client, ILogger<CustomerSdkService> logger)
         {
             _apiClient = client;
+            _logger = logger;
         }
 
         public async Task CreateCustomer(CreateCustomerRequest customerRequest)
@@ -27,8 +30,9 @@ namespace CustomerService.Sdk.Services
                     OrganizationId = customerRequest.OrganizationId
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error creating customer with id {CustomerId}", customerRequest.Id);
             }
         }
 
