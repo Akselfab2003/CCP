@@ -13,8 +13,8 @@ using Pgvector;
 namespace ChatService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20260415111336_init")]
-    partial class init
+    [Migration("20260415111934_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
