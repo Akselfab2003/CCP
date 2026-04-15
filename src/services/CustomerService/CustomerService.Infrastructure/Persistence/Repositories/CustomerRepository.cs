@@ -30,7 +30,7 @@ namespace CustomerService.Infrastructure.Persistence.Repositories
         public async Task<Customer> CreateCustomer(Customer customer)
         {
             // Generer en ny GUID for kunden
-            customer.Id = Guid.NewGuid();
+            customer.Id = customer.Id;
             // Tilføj kunden til databasen
             _dbContext.Customers.Add(customer);
             //Gem ændringerne
