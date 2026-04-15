@@ -6,9 +6,7 @@ using ChatService.Api.Endpoints;
 using ChatService.Application.ServiceCollection;
 using ChatService.Infrastructure.Persistence;
 using ChatService.Infrastructure.ServiceCollection;
-using ChatService.Interfaces;
 using ChatService.Models;
-using ChatService.Repositories;
 using IdentityService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,11 +31,6 @@ var ollamaUrl = builder.Configuration["services:ollama:https:0"]
     ?? builder.Configuration["services:ollama:http:0"]
     ?? "http://localhost:49234";
 
-builder.Services.AddHttpClient<IEmbeddingService, EmbeddingService>(c =>
-    c.BaseAddress = new Uri(ollamaUrl));
-
-builder.Services.AddHttpClient<IChatService, ChatService.Repositories.ChatService>(c =>
-    c.BaseAddress = new Uri(ollamaUrl));
 
 // Og samme for TicketService:
 var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
@@ -48,7 +41,6 @@ builder.Services.AddIdentityServiceSdk(
     builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
     ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
 
-builder.Services.AddScoped<IFaqRepository, FaqRepository>();
 builder.Services.AddControllers();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);

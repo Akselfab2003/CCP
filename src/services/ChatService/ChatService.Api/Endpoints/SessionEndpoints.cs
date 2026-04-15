@@ -1,4 +1,5 @@
-﻿using ChatService.Application.Services;
+﻿using CCP.Shared.ResultAbstraction;
+using ChatService.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatService.Api.Endpoints
@@ -24,16 +25,24 @@ namespace ChatService.Api.Endpoints
 
         private static async Task<IResult> CreateSession([FromServices] ISessionManagement sessionManagement, [FromServices] IHttpContextAccessor httpContextAccessor)
         {
+            try
+            {
 
-            var domain = httpContextAccessor.HttpContext?.Request.Headers[""].ToString();
-            var result = await sessionManagement.CreateSession(domain);
-            if (result.IsSuccess)
-            {
-                return Results.Ok();
+                var domain = httpContextAccessor.HttpContext?.Request.Host.Host;
+                if (domain == null) return Results.BadRequest("Domain is required.");
+                var result = await sessionManagement.CreateSession(domain);
+                if (result.IsSuccess)
+                {
+                    return Results.Ok();
+                }
+                else
+                {
+                    return result.ToProblemDetails();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Results.Problem(result.ErrorMessage);
+                return Results.Problem(ex.Message);
             }
         }
 
