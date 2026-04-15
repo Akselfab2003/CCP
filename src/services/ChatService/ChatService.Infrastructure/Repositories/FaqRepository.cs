@@ -1,5 +1,5 @@
-﻿using ChatService.Data;
-using ChatService.Domain.Entities;
+﻿using ChatService.Domain.Entities;
+using ChatService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pgvector;
@@ -9,11 +9,11 @@ namespace ChatService.Repositories;
 
 public interface IFaqRepository
 {
-    Task<List<FaqEntry>> SearchSimilarAsync(
+    Task<List<FaqEntity>> SearchSimilarAsync(
         float[] queryEmbedding, Guid orgId,
         int topK, double threshold, CancellationToken ct = default);
 
-    Task UpsertAsync(FaqEntry entry, float[] embedding, CancellationToken ct = default);
+    Task UpsertAsync(FaqEntity entry, float[] embedding, CancellationToken ct = default);
 }
 
 public class FaqRepository : IFaqRepository
@@ -27,7 +27,7 @@ public class FaqRepository : IFaqRepository
         _logger = logger;
     }
 
-    public async Task<List<FaqEntry>> SearchSimilarAsync(
+    public async Task<List<FaqEntity>> SearchSimilarAsync(
         float[] queryEmbedding, Guid orgId,
         int topK, double threshold, CancellationToken ct = default)
     {
@@ -45,7 +45,7 @@ public class FaqRepository : IFaqRepository
             .OrderBy(f => f.Embedding.CosineDistance(vector))
             .Where(f => 1 - f.Embedding.CosineDistance(vector) >= threshold)
             .Take(topK)
-            .Select(f => new FaqEntry
+            .Select(f => new FaqEntity
             {
                 Id = f.Id,
                 Question = f.Question,
@@ -56,7 +56,7 @@ public class FaqRepository : IFaqRepository
             .ToListAsync(ct);
     }
 
-    public async Task UpsertAsync(FaqEntry entry, float[] embedding, CancellationToken ct = default)
+    public async Task UpsertAsync(FaqEntity entry, float[] embedding, CancellationToken ct = default)
     {
         var existing = await _db.FaqEntries.FindAsync([entry.Id], ct);
 

@@ -1,6 +1,6 @@
 ﻿namespace ChatService.Domain.Entities
 {
-    public class Session
+    public class SessionEntity
     {
         public Guid SessionId { get; set; }
         public Guid OrganizationId { get; set; }

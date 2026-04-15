@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pgvector.EntityFrameworkCore" />
+    <ProjectReference Include="..\ChatService.Domain\ChatService.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
-  </ItemGroup>
 </Project>

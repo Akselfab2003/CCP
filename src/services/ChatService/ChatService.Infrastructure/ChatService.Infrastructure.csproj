@@ -13,6 +13,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
     <ProjectReference Include="..\ChatService.Domain\ChatService.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 </Project>

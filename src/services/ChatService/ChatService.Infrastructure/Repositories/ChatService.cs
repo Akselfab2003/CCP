@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using ChatService.Domain.Entities;
@@ -78,7 +76,7 @@ namespace ChatService.Repositories
             };
         }
 
-        private string BuildSystemPrompt(ChatRequest request, List<FaqEntry> faqHits)
+        private string BuildSystemPrompt(ChatRequest request, List<FaqEntity> faqHits)
         {
             var sb = new StringBuilder();
 

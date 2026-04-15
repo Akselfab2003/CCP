@@ -3,7 +3,7 @@ using CCP.ServiceDefaults;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using ChatService.Api.Endpoints;
-using ChatService.Data;
+using ChatService.Infrastructure.Persistence;
 using ChatService.Interfaces;
 using ChatService.Models;
 using ChatService.Repositories;
