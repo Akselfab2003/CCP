@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace ChatService.Models;
+namespace ChatService.Domain.Entities;
 
 public class FaqEntry
 {

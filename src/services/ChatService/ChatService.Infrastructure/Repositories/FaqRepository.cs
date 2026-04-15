@@ -1,5 +1,5 @@
 ﻿using ChatService.Data;
-using ChatService.Models;
+using ChatService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pgvector;

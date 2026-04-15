@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using ChatService.Domain.Entities;
 using ChatService.Interfaces;
 using ChatService.Models;
 using Microsoft.Extensions.Logging;

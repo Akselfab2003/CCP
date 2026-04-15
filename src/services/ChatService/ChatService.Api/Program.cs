@@ -2,6 +2,7 @@ using System.Reflection;
 using CCP.ServiceDefaults;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
+using ChatService.Api.Endpoints;
 using ChatService.Data;
 using ChatService.Interfaces;
 using ChatService.Models;
@@ -62,4 +63,5 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+app.MapSessionEndpoints();
 app.Run();

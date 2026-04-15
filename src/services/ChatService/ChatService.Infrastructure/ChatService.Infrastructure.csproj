@@ -12,4 +12,7 @@
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChatService.Domain\ChatService.Domain.csproj" />
+  </ItemGroup>
 </Project>

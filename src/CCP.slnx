@@ -7,6 +7,7 @@
   <Folder Name="/src/services/" />
   <Folder Name="/src/services/ChatService/">
     <Project Path="services/ChatService/ChatService.Api/ChatService.Api.csproj" />
+    <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e" />
     <Project Path="services/ChatService/ChatService.Infrastructure/ChatService.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/services/CustomerService/">
