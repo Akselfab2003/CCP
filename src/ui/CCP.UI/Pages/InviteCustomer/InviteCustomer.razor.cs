@@ -28,7 +28,7 @@ namespace CCP.UI.Pages.InviteCustomer
                 var result = await _customerService.InviteCustomer(InviteCustomerModel.Email);
                 await _customerSdkService.CreateCustomer(new CustomerService.Sdk.Models.CreateCustomerRequest()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = result.Value,
                     Email = InviteCustomerModel.Email,
                     Name = InviteCustomerModel.Email, // Assuming name is same as email for this example
                     OrganizationId = _uIUserContext.OrganizationId,
