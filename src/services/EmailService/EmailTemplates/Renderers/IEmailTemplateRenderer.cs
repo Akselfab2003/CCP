@@ -34,22 +34,22 @@ namespace EmailTemplates.Renderes
             string portalUrl,
             string reopenUrl);
 
-        Task<string> RenderSupportTicketNotificationAsync(
-            EmailSent email,
-            string customerEmail,
-            string organizationName,
-            string expectedResponseTime,
-            string managementUrl);
+        //Task<string> RenderSupportTicketNotificationAsync(
+        //    EmailSent email,
+        //    string customerEmail,
+        //    string organizationName,
+        //    string expectedResponseTime,
+        //    string managementUrl);
 
-        Task<string> RenderSupportCustomerReplyNotificationAsync(
-            EmailReceived email,
-            string customerName,
-            string customerEmail,
-            string organizationName,
-            string ticketStatus,
-            string ticketStatusLabel,
-            string replyUrl,
-            string managementUrl,
-            string viewHistoryUrl);
+        //Task<string> RenderSupportCustomerReplyNotificationAsync(
+        //    EmailReceived email,
+        //    string customerName,
+        //    string customerEmail,
+        //    string organizationName,
+        //    string ticketStatus,
+        //    string ticketStatusLabel,
+        //    string replyUrl,
+        //    string managementUrl,
+        //    string viewHistoryUrl);
     }
 }

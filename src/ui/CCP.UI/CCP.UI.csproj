@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\services\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
+    <ProjectReference Include="..\..\services\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />

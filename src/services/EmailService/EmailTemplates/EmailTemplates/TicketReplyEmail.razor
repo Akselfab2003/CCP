@@ -109,9 +109,15 @@
     [Parameter]
     public string AgentRole { get; set; } = "";
     [Parameter]
+    public string TicketStatus { get; set; } = "open";
+    [Parameter]
     public string TicketStatusLabel { get; set; } = "Open";
     [Parameter]
     public string ReplyUrl { get; set; } = "#";
+    [Parameter]
+    public string PortalUrl { get; set; } = "#";
+    [Parameter]
+    public string ReopenUrl { get; set; } = "#";
     [Parameter]
     public string ViewHistoryUrl { get; set; } = "#";
 }

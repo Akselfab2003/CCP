@@ -42,6 +42,25 @@ namespace EmailService.Application.Interfaces
             string agentNote,
             string portalUrl,
             string reopenUrl);
+        //Task SendSupportCustomerReplyEmailAsync(
+        //    string to,
+        //    EmailReceived email,
+        //    string customerName,
+        //    string customerEmail,
+        //    string organizationName,
+        //    string ticketStatus,
+        //    string ticketStatusLabel,
+        //    string replyUrl,
+        //    string managementUrl,
+        //    string viewHistoryUrl);
+
+        //Task SendSupportNewTicketEmailAsync(
+        //    string to,
+        //    EmailSent email,
+        //    string customerEmail,
+        //    string organizationName,
+        //    string expectedResponseTime,
+        //    string managementUrl);
 
     }
 }

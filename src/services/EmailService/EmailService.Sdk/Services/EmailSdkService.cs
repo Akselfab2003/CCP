@@ -73,5 +73,56 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.ReplyContent = replyContent;
                 });
         }
+        //public async Task NotifySupportCustomerReplyAsync(
+        //    Guid customerId,
+        //    string agentEmail,
+        //    string agentName,
+        //    int ticketId,
+        //    string ticketTitle,
+        //    string ticketStatus,
+        //    string ticketStatusLabel,
+        //    string replyContent)
+        //{
+        //    var api = _client.Client;
+
+        //    await api.Api
+        //        .EmailSendingService
+        //        .Support
+        //        .CustomerReplied
+        //        .PostAsync(request =>
+        //        {
+        //            request.QueryParameters.CustomerId = customerId;
+        //            request.QueryParameters.AgentEmail = agentEmail;
+        //            request.QueryParameters.AgentName = agentName;
+        //            request.QueryParameters.TicketId = ticketId;
+        //            request.QueryParameters.TicketTitle = ticketTitle;
+        //            request.QueryParameters.TicketStatus = ticketStatus;
+        //            request.QueryParameters.TicketStatusLabel = ticketStatusLabel;
+        //            request.QueryParameters.ReplyContent = replyContent;
+        //        });
+        //}
+
+        //public async Task NotifySupportNewTicketAsync(
+        //    Guid customerId,
+        //    string supportTeamEmail,
+        //    string ticketTitle,
+        //    int ticketId,
+        //    string ticketBody)
+        //{
+        //    var api = _client.Client;
+
+        //    await api.Api
+        //        .EmailSendingService
+        //        .Support
+        //        .NewTicket
+        //        .PostAsync(request =>
+        //        {
+        //            request.QueryParameters.CustomerId = customerId;
+        //            request.QueryParameters.SupportTeamEmail = supportTeamEmail;
+        //            request.QueryParameters.TicketTitle = ticketTitle;
+        //            request.QueryParameters.TicketId = ticketId;
+        //            request.QueryParameters.TicketBody = ticketBody;
+        //        });
+        //}
     }
 }

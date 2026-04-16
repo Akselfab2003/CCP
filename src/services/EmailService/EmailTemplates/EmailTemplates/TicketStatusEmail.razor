@@ -110,11 +110,17 @@
     [Parameter]
     public string OrganizationName { get; set; } = "Support";
     [Parameter]
+    public string NewStatus { get; set; } = "Updated";
+    [Parameter]
     public string OldStatusLabel { get; set; } = "Previous";
     [Parameter]
     public string NewStatusLabel { get; set; } = "Updated";
     [Parameter]
+    public string UpdatedByAgent { get; set; } = "Support Team";
+    [Parameter]
     public string AgentNote { get; set; } = "";
     [Parameter]
     public string PortalUrl { get; set; } = "#";
+    [Parameter]
+    public string ReopenUrl { get; set; } = "#";
 }
