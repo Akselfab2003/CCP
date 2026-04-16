@@ -91,8 +91,8 @@ RabbitMq.WithOtlpExporter()
     .WithLifetime(LifeTimeMode);
 
 // Add AI Models
-Ollama.AddModel("embedding", "nomic-embed-text:latest");
-Ollama.AddModel("qwen", "qwen2.5:1.5b");
+IResourceBuilder<OllamaModelResource> EmbeddingModel = Ollama.AddModel("embedding", "nomic-embed-text:latest");
+IResourceBuilder<OllamaModelResource> QwenModel = Ollama.AddModel("qwen", "qwen2.5:1.5b");
 
 // Add Databases
 IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
@@ -217,19 +217,18 @@ ChatService
     .WithOtlpExporter();
 
 
-UI
-    .WaitFor(MessagingService)
-    .WaitFor(Keycloak)
-    .WaitFor(IdentityService)
-    .WaitFor(CustomerService)
-    .WaitFor(TicketService)
-    .WithReference(MessagingService)
-    .WithReference(Keycloak)
-    .WithReference(CustomerService)
-    .WithReference(IdentityService)
-    .WithReference(TicketService)
-    .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
-    .WithOtlpExporter();
+UI.WaitFor(MessagingService)
+  .WaitFor(Keycloak)
+  .WaitFor(IdentityService)
+  .WaitFor(CustomerService)
+  .WaitFor(TicketService)
+  .WithReference(MessagingService)
+  .WithReference(Keycloak)
+  .WithReference(CustomerService)
+  .WithReference(IdentityService)
+  .WithReference(TicketService)
+  .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+  .WithOtlpExporter();
 
 CCPWebsite
     .WaitFor(UI)

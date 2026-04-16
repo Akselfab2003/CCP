@@ -18,10 +18,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OllamaSharp" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\CCP.Encryption\CCP.Encryption.csproj" />
+    <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
     <ProjectReference Include="..\CustomerService.Application\CustomerService.Application.csproj" />
     <ProjectReference Include="..\CustomerService.Domain\CustomerService.Domain.csproj" />
   </ItemGroup>
