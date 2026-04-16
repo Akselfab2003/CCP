@@ -1,6 +1,6 @@
 ﻿using CCP.Shared.ResultAbstraction;
 
-namespace ChatService.Application.Services
+namespace ChatService.Application.Services.Session
 {
     public interface ISessionManagement
     {

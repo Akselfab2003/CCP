@@ -3,6 +3,7 @@ using CCP.ServiceDefaults;
 using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
+using CCP.Shared.AuthContext;
 using ChatService.Api.Endpoints;
 using ChatService.Application.ServiceCollection;
 using ChatService.Infrastructure.Persistence;
@@ -29,9 +30,8 @@ public partial class Program
 
         builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
 
-        var ollamaUrl = builder.Configuration["services:ollama:https:0"]
-                        ?? builder.Configuration["services:ollama:http:0"]
-                        ?? "http://localhost:49234";
+        builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
+        builder.AddOllamaApiClient("qwen").AddKeyedChatClient("qwen");
 
         // Ticket service URL.
         var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
@@ -70,11 +70,13 @@ public partial class Program
         if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         {
             app.AppMapSwaggerExtensions();
+            app.UseMiddleware<AuthMiddleware>();
             AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
         }
 
         app.MapOpenApi();
-        app.MapSessionEndpoints();
+        app.MapSessionEndpoints()
+           .MapFaqManagementEndpoints();
         app.Run();
     }
 }

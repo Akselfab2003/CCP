@@ -1,4 +1,5 @@
-﻿using ChatService.Application.Services;
+﻿using ChatService.Application.Services.Faq;
+using ChatService.Application.Services.Session;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatService.Application.ServiceCollection
@@ -7,7 +8,8 @@ namespace ChatService.Application.ServiceCollection
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddScoped<ISessionManagement, SessionManagement>();
+            services.AddScoped<ISessionManagement, SessionManagement>()
+                    .AddScoped<IFaqManagementService, FaqManagementService>();
             return services;
         }
     }

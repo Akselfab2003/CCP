@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OllamaSharp" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\ChatService.Domain\ChatService.Domain.csproj" />
   </ItemGroup>

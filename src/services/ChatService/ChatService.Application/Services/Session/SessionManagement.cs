@@ -3,7 +3,7 @@ using ChatService.Domain.Interfaces;
 using IdentityService.Sdk.Services.Tenant;
 using Microsoft.Extensions.Logging;
 
-namespace ChatService.Application.Services
+namespace ChatService.Application.Services.Session
 {
     public class SessionManagement : ISessionManagement
     {

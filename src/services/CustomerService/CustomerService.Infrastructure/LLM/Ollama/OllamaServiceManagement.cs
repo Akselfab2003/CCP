@@ -1,7 +1,5 @@
-﻿using CCP.Shared.ResultAbstraction;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OllamaSharp;
 
 namespace CustomerService.Infrastructure.LLM.Ollama
 {
@@ -15,19 +13,7 @@ namespace CustomerService.Infrastructure.LLM.Ollama
             _logger = logger;
         }
 
-        public Result<IOllamaApiClient> ConfigureOllamaClient(string ModelName)
-        {
-            try
-            {
 
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error configuring Ollama client");
-                return Result.Failure<IOllamaApiClient>(Error.Failure(code: "OllamaClientConfigurationError", description: "An error occurred while configuring the Ollama client."));
-            }
-        }
 
 
 

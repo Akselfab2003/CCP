@@ -23,6 +23,7 @@
     <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.0" />
     <!-- ENTITY FRAMEWORK CORE
          ORM used across data-access projects and API services -->
+    <PackageVersion Include="CommunityToolkit.Aspire.OllamaSharp" Version="13.1.1" />
     <PackageVersion Include="coverlet.MTP" Version="8.0.1" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.5" />

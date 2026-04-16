@@ -1,5 +1,5 @@
 ﻿using CCP.Shared.ResultAbstraction;
-using ChatService.Application.Services;
+using ChatService.Application.Services.Session;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatService.Api.Endpoints
