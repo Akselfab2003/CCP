@@ -90,6 +90,9 @@ Keycloak.WithRealmImport(RealmImportPath)
 RabbitMq.WithOtlpExporter()
     .WithLifetime(LifeTimeMode);
 
+// Add AI Models
+Ollama.AddModel("embedding", "nomic-embed-text:latest");
+Ollama.AddModel("qwen", "qwen2.5:1.5b");
 
 // Add Databases
 IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
