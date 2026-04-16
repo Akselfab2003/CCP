@@ -4,6 +4,6 @@ namespace ChatService.Application.Services
 {
     public interface ISessionManagement
     {
-        Task<Result> CreateSession(string Domain);
+        Task<Result<Guid>> CreateSession(string Domain);
     }
 }

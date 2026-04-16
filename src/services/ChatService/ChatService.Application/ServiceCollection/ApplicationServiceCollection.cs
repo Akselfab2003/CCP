@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ChatService.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatService.Application.ServiceCollection
 {
@@ -6,6 +7,7 @@ namespace ChatService.Application.ServiceCollection
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
+            services.AddScoped<ISessionManagement, SessionManagement>();
             return services;
         }
     }

@@ -17,14 +17,14 @@ namespace ChatService.Application.Services
             _tenantService = tenantService;
         }
 
-        public async Task<Result> CreateSession(string Domain)
+        public async Task<Result<Guid>> CreateSession(string Domain)
         {
             try
             {
                 var tenantResult = await _tenantService.GetTenantDetailsAsync(tenantId: null, domain: Domain);
 
                 if (tenantResult.IsFailure)
-                    return Result.Failure(Error.Failure("TenantNotFound", $"No tenant found for domain {Domain}"));
+                    return Result.Failure<Guid>(Error.Failure("TenantNotFound", $"No tenant found for domain {Domain}"));
 
                 var Session = new Domain.Entities.SessionEntity()
                 {
@@ -36,12 +36,12 @@ namespace ChatService.Application.Services
 
                 var result = await _sessionRepo.AddSession(Session);
 
-                return result;
+                return Session.SessionId;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while creating session");
-                return Result.Failure(Error.Failure("SessionCreationFailed", "An error occurred while creating the session"));
+                return Result.Failure<Guid>(Error.Failure("SessionCreationFailed", "An error occurred while creating the session"));
             }
         }
     }

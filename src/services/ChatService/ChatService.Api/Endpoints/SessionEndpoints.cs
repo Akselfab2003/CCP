@@ -18,6 +18,9 @@ namespace ChatService.Api.Endpoints
                         .RequireAuthorization();
 
             sessionRoute.MapPost("/", CreateSession)
+                        .Produces<Guid>(StatusCodes.Status200OK)
+                        .ProducesProblem(StatusCodes.Status400BadRequest)
+                        .ProducesProblem(StatusCodes.Status401Unauthorized)
                         .WithName("CreateSession")
                         .WithTags("Sessions");
             return app;
@@ -31,14 +34,8 @@ namespace ChatService.Api.Endpoints
                 var domain = httpContextAccessor.HttpContext?.Request.Host.Host;
                 if (domain == null) return Results.BadRequest("Domain is required.");
                 var result = await sessionManagement.CreateSession(domain);
-                if (result.IsSuccess)
-                {
-                    return Results.Ok();
-                }
-                else
-                {
-                    return result.ToProblemDetails();
-                }
+
+                return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
             }
             catch (Exception ex)
             {

@@ -1,52 +1,80 @@
 using System.Reflection;
 using CCP.ServiceDefaults;
+using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using ChatService.Api.Endpoints;
 using ChatService.Application.ServiceCollection;
 using ChatService.Infrastructure.Persistence;
 using ChatService.Infrastructure.ServiceCollection;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
 using IdentityService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Aspire service defaults — tilføjer service discovery, health checks, OTEL
-builder.Services.AddServiceDefaults("ChatService.Api");
-
-// EF Core med pgvector via Aspire
-builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
-
-var ollamaUrl = builder.Configuration["services:ollama:https:0"]
-                ?? builder.Configuration["services:ollama:http:0"]
-                ?? "http://localhost:49234";
-
-
-// Og samme for TicketService:
-var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
-                ?? builder.Configuration["services:ticketservice-api:http:0"]
-                ?? "http://localhost:5001";
-
-builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
-                                       ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
-
-builder.Services.AddControllers();
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
-// Swagger til debugging
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+public partial class Program
 {
-    app.AppMapSwaggerExtensions();
-    AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddOpenApi()
+                        .AddAuthentication();
+
+        builder.Services.AddAuthorization()
+                        .AddHttpContextAccessor();
+
+        builder.Services.AddServiceDefaults("ChatService.Api");
+        builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP");
+
+        builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
+
+        var ollamaUrl = builder.Configuration["services:ollama:https:0"]
+                        ?? builder.Configuration["services:ollama:http:0"]
+                        ?? "http://localhost:49234";
+
+        // Ticket service URL.
+        var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
+                        ?? builder.Configuration["services:ticketservice-api:http:0"]
+                        ?? "http://localhost:5001";
+
+        builder.Services.AddClientCredentialsTokenManagement()
+                       .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                       {
+                           client.TokenEndpoint = new Uri("http://localhost:8080/realms/CCP/protocol/openid-connect/token");
+                           client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                           client.ClientSecret = ClientSecret.Parse(
+                               builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                               ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                           );
+                           client.Scope = Scope.ParseOrDefault("openid");
+                           client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                       });
+
+
+        builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+                                               ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
+
+
+        builder.Services.AddControllers();
+        builder.Services.AddApplicationServices();
+
+        builder.Services.AddInfrastructureServices(builder.Configuration);
+
+        builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
+                        .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
+                        .AddEndpointsApiExplorer();
+
+        var app = builder.Build();
+
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            app.AppMapSwaggerExtensions();
+            AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
+        }
+
+        app.MapOpenApi();
+        app.MapSessionEndpoints();
+        app.Run();
+    }
 }
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.MapSessionEndpoints();
-app.Run();

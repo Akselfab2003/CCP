@@ -38,7 +38,7 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithLifetime(LifeTimeMode)
         .WithOtlpExporter();
 
-Ollama.WithOtlpExporter().WithExplicitStart()
+Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
 
 var mailhog = builder.AddContainer("MailHog", "mailhog/mailhog")
@@ -197,15 +197,21 @@ CustomerService.WaitFor(Keycloak)
         });
 
 ChatService
+    .WaitFor(IdentityService)
     .WaitFor(Keycloak)
     .WaitFor(ChatDB)
     .WaitFor(Ollama)
     .WaitFor(TicketService)
+    .WithReference(IdentityService)
     .WithReference(Keycloak)
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
-    .WithOtlpExporter().WithExplicitStart();
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
+    .WithOtlpExporter();
 
 
 UI

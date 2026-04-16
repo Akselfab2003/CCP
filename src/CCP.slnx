@@ -7,12 +7,8 @@
   <Folder Name="/src/services/" />
   <Folder Name="/src/services/ChatService/">
     <Project Path="services/ChatService/ChatService.Api/ChatService.Api.csproj" />
-    <Project Path="services/ChatService/ChatService.Application/ChatService.Application.csproj" Id="e4d69a0c-cf51-45b5-9138-3a24f9dbaada">
-      <Build Solution="Debug|*" Project="false" />
-    </Project>
-    <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e">
-      <Build Solution="Debug|*" Project="false" />
-    </Project>
+    <Project Path="services/ChatService/ChatService.Application/ChatService.Application.csproj" Id="e4d69a0c-cf51-45b5-9138-3a24f9dbaada" />
+    <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e" />
     <Project Path="services/ChatService/ChatService.Infrastructure/ChatService.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/services/CustomerService/">
