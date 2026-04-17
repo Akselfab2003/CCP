@@ -34,8 +34,25 @@ namespace ChatService.Api.Endpoints
                 var domain = httpContextAccessor.HttpContext?.Request.Host.Host;
                 if (domain == null) return Results.BadRequest("Domain is required.");
                 var result = await sessionManagement.CreateSession(domain);
-
-                return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemDetails();
+                if (result.IsSuccess)
+                {
+                    // Set the cookie with the session ID
+                    httpContextAccessor.HttpContext?.Response.Cookies.Append(
+                        "SessionId",
+                        result.Value.ToString(), // assuming result.Value is the session ID (Guid)
+                        new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            SameSite = SameSiteMode.None,
+                        }
+                    );
+                    return Results.Ok(result.Value);
+                }
+                else
+                {
+                    return result.ToProblemDetails();
+                }
             }
             catch (Exception ex)
             {
