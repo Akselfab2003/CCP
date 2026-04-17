@@ -137,6 +137,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             {
                 await _emailSendingService.SendSupportCustomerReplyEmailAsync(
                     to: recipientEmail,
+                    subject: $"[Customer Reply] {customerName} has replied to their support ticket",
                     email: emailModel,
                     customerName: customerName,
                     customerEmail: customerEmail,
@@ -169,6 +170,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             {
                 await _emailSendingService.SendSupportNewTicketEmailAsync(
                     to: recipientEmail,
+                    subject: $"[New Ticket] A new support ticket has been created by {customerEmail}",
                     email: emailModel,
                     customerEmail: customerEmail,
                     organizationName: organizationName,

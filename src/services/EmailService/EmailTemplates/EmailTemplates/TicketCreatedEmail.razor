@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Created – #@Email.Id</title>
+    <title>Ticket Created – #@Ticket.Id</title>
     <!--[if mso]>
     <style>
         table { border-collapse: collapse; }
@@ -126,6 +126,8 @@
     // ───────────────────────────────────────────────────────────────────────────────
     [Parameter, EditorRequired] 
     public EmailService.Domain.Models.EmailSent Email { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public TicketService.Domain.Entities.Ticket Ticket { get; set; } = default!;
     [Parameter] 
     public string OrganizationName { get; set; } = "Support";
     [Parameter] 

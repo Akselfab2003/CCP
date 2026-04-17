@@ -6,7 +6,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Reply on Ticket #@Email.Id</title>
+    <title>Customer Reply on Ticket #@Ticket.Id</title>
     <!--[if mso]>
     <style>
         table { border-collapse: collapse; }
@@ -128,13 +128,24 @@
 </html>
 
 @code {
-    [Parameter, EditorRequired] public EmailService.Domain.Models.EmailReceived Email { get; set; } = default!;
-    [Parameter] public string CustomerName { get; set; } = "Customer";
-    [Parameter] public string CustomerEmail { get; set; } = "";
-    [Parameter] public string OrganizationName { get; set; } = "Support";
-    [Parameter] public string TicketStatus { get; set; } = "open";
-    [Parameter] public string TicketStatusLabel { get; set; } = "Open";
-    [Parameter] public string ReplyUrl { get; set; } = "#";
-    [Parameter] public string ManagementUrl { get; set; } = "#";
-    [Parameter] public string ViewHistoryUrl { get; set; } = "#";
+    [Parameter, EditorRequired]
+    public EmailService.Domain.Models.EmailReceived Email { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public TicketService.Domain.Entities.Ticket Ticket { get; set; } = default!;
+    [Parameter]
+    public string CustomerName { get; set; } = "Customer";
+    [Parameter]
+    public string CustomerEmail { get; set; } = "";
+    [Parameter]
+    public string OrganizationName { get; set; } = "Support";
+    [Parameter]
+    public string TicketStatus { get; set; } = "open";
+    [Parameter]
+    public string TicketStatusLabel { get; set; } = "Open";
+    [Parameter]
+    public string ReplyUrl { get; set; } = "#";
+    [Parameter]
+    public string ManagementUrl { get; set; } = "#";
+    [Parameter]
+    public string ViewHistoryUrl { get; set; } = "#";
 }
