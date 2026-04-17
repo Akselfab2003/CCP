@@ -10,6 +10,14 @@ namespace EmailService.Worker.Host.handlers
         private readonly IEmail _emailSendingService;
         private readonly IConfiguration _configuration;
 
+        // Keywords that suggest a customer wants support
+        private static readonly string[] SupportKeywords =
+        [
+            "help", "issue", "problem", "broken", "error", "not working",
+            "support", "request", "bug", "crash", "fail", "trouble",
+            "urgent", "cannot", "can't", "unable", "wrong", "stuck"
+        ];
+
         public MailReceivedHandler(
             ILogger<MailReceivedHandler> logger,
             IEmail emailSendingService,
@@ -31,14 +39,20 @@ namespace EmailService.Worker.Host.handlers
 
                 var ticketId = ExtractTicketIdFromSubject(mail_Received.Subject);
 
-                if (ticketId != null)  // fixed: was backwards
+                if (ticketId != null)
                 {
+                    // Known ticket — notify support that customer replied
                     await SendSupportCustomerReplyEmailAsync(mail_Received, ticketId.Value);
+                }
+                else if (LooksSupportRequest(mail_Received.Subject, mail_Received.Body))
+                {
+                    // No ticket ID but looks like a support request — confirm to customer
+                    await SendNewTicketConfirmationAsync(mail_Received);
                 }
                 else
                 {
                     _logger.LogWarning(
-                        "Could not extract ticket ID from email subject: {Subject}. Skipping.",
+                        "Email does not match a ticket reply or support request. Subject: {Subject}. Skipping.",
                         mail_Received.Subject);
                 }
             }
@@ -89,6 +103,48 @@ namespace EmailService.Worker.Host.handlers
             {
                 _logger.LogError(ex, "Failed to send support customer-reply notification for ticket #{TicketId}", ticketId);
             }
+        }
+
+        private async Task SendNewTicketConfirmationAsync(mail_received mail_Received)
+        {
+            try
+            {
+                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                var expectedResponse = _configuration.GetValue<string>("EmailSettings:ExpectedResponseTime") ?? "24 hours";
+                var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
+
+                var emailModel = new EmailSent
+                {
+                    Subject = mail_Received.Subject,
+                    Body = mail_Received.Body,
+                    SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? "",
+                    RecipientAddress = mail_Received.MailFrom,
+                    SentAt = DateTime.UtcNow,
+                };
+
+                await _emailSendingService.SendTicketCreatedEmailAsync(
+                    to: mail_Received.MailFrom,
+                    subject: $"[Ticket Created] {mail_Received.Subject}",
+                    email: emailModel,
+                    organizationName: organizationName,
+                    expectedResponseTime: expectedResponse,
+                    portalUrl: portalUrl);
+
+                _logger.LogInformation(
+                    "Sent new ticket confirmation to {CustomerEmail} for subject: {Subject}",
+                    mail_Received.MailFrom, mail_Received.Subject);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send new ticket confirmation to {CustomerEmail}", mail_Received.MailFrom);
+            }
+        }
+
+        private static bool LooksSupportRequest(string subject, string body)
+        {
+            // Check both subject and body against the keyword list (case-insensitive)
+            var combined = $"{subject} {body}".ToLowerInvariant();
+            return SupportKeywords.Any(keyword => combined.Contains(keyword));
         }
 
         private int? ExtractTicketIdFromSubject(string subject)
