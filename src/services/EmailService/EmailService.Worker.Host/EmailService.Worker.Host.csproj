@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EmailService.Infrastructure\EmailService.Infrastructure.csproj" />
+    <ProjectReference Include="..\EmailService.Sdk\EmailService.Sdk.csproj" />
   </ItemGroup>
   
 </Project>
