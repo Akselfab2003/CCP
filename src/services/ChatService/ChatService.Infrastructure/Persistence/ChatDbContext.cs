@@ -20,8 +20,9 @@ public class ChatDbContext : DbContext
     }
 
     public DbSet<FaqEntity> FaqEntries => Set<FaqEntity>();
-
     public DbSet<SessionEntity> Sessions => Set<SessionEntity>();
+    public DbSet<ConversationEntity> Conversations => Set<ConversationEntity>();
+    public DbSet<MessageEntity> Messages => Set<MessageEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,15 +31,24 @@ public class ChatDbContext : DbContext
         {
             modelBuilder.ApplyConfiguration(new Configurations.SessionEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.FaqEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ConversationEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
             return;
         }
         else
         {
             modelBuilder.ApplyConfiguration(new Configurations.SessionEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.FaqEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ConversationEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
 
             modelBuilder.Entity<SessionEntity>()
                 .HasQueryFilter(s => s.OrganizationId == _currentUser.OrganizationId);
+
+            modelBuilder.Entity<ConversationEntity>()
+                .HasQueryFilter(c => c.OrgId == _currentUser.OrganizationId);
+            modelBuilder.Entity<MessageEntity>()
+               .HasQueryFilter(m => m.OrgId == _currentUser.OrganizationId);
         }
     }
 }
