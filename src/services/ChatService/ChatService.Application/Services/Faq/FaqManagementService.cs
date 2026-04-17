@@ -54,5 +54,27 @@ namespace ChatService.Application.Services.Faq
                 return Result.Failure(Error.Failure("FaqCreationError", "An error occurred while creating the FAQ."));
             }
         }
+
+        public async Task<Result<List<FaqEntity>>> GetRelevantFaqAsync(string question)
+        {
+            try
+            {
+                var embeddingResult = await _embeddingService.GenerateEmbeddingAsync(question);
+                if (embeddingResult.IsFailure) return Result.Failure<List<FaqEntity>>(embeddingResult.Error);
+
+                var embedding = new Pgvector.Vector(embeddingResult.Value.Vector);
+
+                var SimilarFaq = await _faqRepository.SemanticSearch(embedding);
+
+                if (SimilarFaq.IsFailure) return Result.Failure<List<FaqEntity>>(SimilarFaq.Error);
+
+                return SimilarFaq;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving relevant FAQs.");
+                return Result.Failure<List<FaqEntity>>(Error.Failure("FaqRetrievalError", "An error occurred while retrieving relevant FAQs."));
+            }
+        }
     }
 }

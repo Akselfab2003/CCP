@@ -78,8 +78,11 @@ public partial class Program
         }
 
         app.MapOpenApi();
+
         app.MapSessionEndpoints()
-           .MapFaqManagementEndpoints();
+           .MapFaqManagementEndpoints()
+           .MapChatEndpoints();
+
         app.Run();
     }
 }

@@ -12,9 +12,12 @@ namespace ChatService.Infrastructure.ServiceCollection
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IFaqRepository, FaqRepository>()
-                    .AddScoped<ISessionRepository, SessionRepository>();
+                    .AddScoped<ISessionRepository, SessionRepository>()
+                    .AddScoped<IConversationRepository, ConversationRepository>()
+                    .AddScoped<IMessageRepository, MessageRepository>();
 
-            services.AddScoped<IEmbeddingService, EmbeddingService>();
+            services.AddScoped<IEmbeddingService, EmbeddingService>()
+                .AddScoped<IChatService, LLM.Chat.ChatService>();
 
 
             return services;
