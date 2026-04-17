@@ -15,12 +15,14 @@ namespace TicketService.Infrastructure.Persistence
 
         public DbSet<Ticket> Tickets => Set<Ticket>();
         public DbSet<Assignment> Assignments => Set<Assignment>();
+        public DbSet<TicketHistoryEntry> TicketHistory => Set<TicketHistoryEntry>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
             modelBuilder.ApplyConfiguration<Ticket>(new TicketEntityConfiguration());
             modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
+            modelBuilder.ApplyConfiguration<TicketHistoryEntry>(new TicketHistoryEntryConfiguration());
         }
     }
 }

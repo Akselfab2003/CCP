@@ -18,6 +18,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly ICurrentUser _currentUser;
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IMessageBus _messageBus;
+        private readonly ITicketHistoryRepository _historyRepository;
         private readonly AssignmentCommands _sut; //System Under Test
 
         //Faste test værdier til genbrug
@@ -32,6 +33,7 @@ namespace TicketService.Application.Tests.Tests
             _ticketRepository = Substitute.For<ITicketRepositoryCommands>();
             _currentUser = Substitute.For<ICurrentUser>();
             _messageBus = Substitute.For<IMessageBus>();
+            _historyRepository = Substitute.For<ITicketHistoryRepository>();
 
             //Setup faste test værdier
             _testUserId = Guid.NewGuid();
@@ -42,7 +44,7 @@ namespace TicketService.Application.Tests.Tests
             _currentUser.OrganizationId.Returns(_testOrganizationId);
 
             //Lav System Under Test med mocked dependencies
-            _sut = new AssignmentCommands(_logger, _assignmentRepository, _ticketRepository, _currentUser, _messageBus);
+            _sut = new AssignmentCommands(_logger, _assignmentRepository, _ticketRepository, _currentUser, _messageBus, _historyRepository);
         }
 
         [Fact]

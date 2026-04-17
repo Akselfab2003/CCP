@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using TicketService.Infrastructure.Persistence.Repositories;
 using TicketService.Infrastructure.Persistence.Repositories.Tickets;
 
 namespace TicketService.Infrastructure.ServiceCollection
@@ -9,7 +10,8 @@ namespace TicketService.Infrastructure.ServiceCollection
         {
             services.AddScoped<Domain.Interfaces.ITicketRepositoryCommands, TicketRepositoryCommands>()
                     .AddScoped<Domain.Interfaces.IAssignmentRepository, Persistence.Repositories.AssignmentRepository>()
-                    .AddScoped<Domain.Interfaces.ITicketRepositoryQueries, TicketRepositoryQueries>();
+                    .AddScoped<Domain.Interfaces.ITicketRepositoryQueries, TicketRepositoryQueries>()
+                    .AddScoped<Domain.Interfaces.ITicketHistoryRepository, TicketHistoryRepository>();
         }
     }
 }

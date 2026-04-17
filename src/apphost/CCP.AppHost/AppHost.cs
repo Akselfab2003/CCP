@@ -168,10 +168,13 @@ TicketService
 MessagingService
     .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
+    .WaitFor(TicketService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(RabbitMq)
+    .WithReference(TicketService)
     .WaitFor(RabbitMq)
+    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

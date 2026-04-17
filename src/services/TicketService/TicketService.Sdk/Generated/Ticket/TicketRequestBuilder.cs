@@ -9,6 +9,7 @@ using System;
 using TicketService.Sdk.Ticket.Create;
 using TicketService.Sdk.Ticket.GetTicket;
 using TicketService.Sdk.Ticket.GetTickets;
+using TicketService.Sdk.Ticket.History;
 using TicketService.Sdk.Ticket.Item;
 namespace TicketService.Sdk.Ticket
 {
@@ -32,6 +33,11 @@ namespace TicketService.Sdk.Ticket
         public global::TicketService.Sdk.Ticket.GetTickets.GetTicketsRequestBuilder GetTickets
         {
             get => new global::TicketService.Sdk.Ticket.GetTickets.GetTicketsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The history property</summary>
+        public global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder History
+        {
+            get => new global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the TicketService.Sdk.ticket.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>

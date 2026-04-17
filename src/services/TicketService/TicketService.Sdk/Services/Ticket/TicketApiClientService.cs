@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
+using System.Net.Http.Json;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Mappers;
 
@@ -7,15 +8,19 @@ namespace TicketService.Sdk.Services.Ticket
 {
     internal class TicketApiClientService : ITicketService
     {
+        private const string ClientName = "TicketServiceClient";
+
         private readonly ILogger<TicketApiClientService> _logger;
         private readonly IKiotaApiClient<TicketServiceClient> _client;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         private TicketServiceClient Client => _client.Client;
 
-        public TicketApiClientService(ILogger<TicketApiClientService> logger, IKiotaApiClient<TicketServiceClient> client)
+        public TicketApiClientService(ILogger<TicketApiClientService> logger, IKiotaApiClient<TicketServiceClient> client, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _client = client;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<Result<int>> CreateTicket(CreateTicketRequestDto request, CancellationToken ct = default)
@@ -141,6 +146,56 @@ namespace TicketService.Sdk.Services.Ticket
             {
                 _logger.LogError(ex, "An error occurred while updating the status of ticket with id {TicketId}.", ticketId);
                 return Result.Failure(Error.Failure(code: "TicketStatusUpdateFailed", description: $"An error occurred while updating the status of ticket with id {ticketId}."));
+            }
+        }
+
+        public async Task<Result<List<TicketHistoryEntryDto>>> GetCustomerHistoryAsync(Guid customerId, int limit = 20, CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.GetAsync($"/ticket/history/customer/{customerId}?limit={limit}", ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                        code: "HistoryRetrievalFailed",
+                        description: $"Failed to retrieve customer history. Status code: {(int)response.StatusCode}"));
+
+                var entries = await response.Content.ReadFromJsonAsync<List<TicketHistoryEntryDto>>(cancellationToken: ct);
+                return Result.Success(entries ?? new List<TicketHistoryEntryDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving history for customer {CustomerId}.", customerId);
+                return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                    code: "HistoryRetrievalFailed",
+                    description: "An error occurred while retrieving customer history."));
+            }
+        }
+
+        public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet, CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.PostAsJsonAsync(
+                    $"/ticket/{ticketId}/history/message",
+                    new { SenderUserId = senderUserId, MessageSnippet = messageSnippet },
+                    ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure(Error.Failure(
+                        code: "RecordMessageFailed",
+                        description: $"Failed to record message history. Status code: {(int)response.StatusCode}"));
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while recording message history for ticket {TicketId}.", ticketId);
+                return Result.Failure(Error.Failure(
+                    code: "RecordMessageFailed",
+                    description: "An error occurred while recording message history."));
             }
         }
     }

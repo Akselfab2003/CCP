@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TicketService.Sdk.ServiceDefaults;
 
@@ -109,7 +110,7 @@ namespace CCP.UI
                 options.AddPolicy("RequireManager", policy => policy.RequireRole(
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireSupporter", policy =>policy.RequireRole(
+                options.AddPolicy("RequireSupporter", policy => policy.RequireRole(
                     UserRolesExtensions.SupporterRoleString,
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
@@ -180,8 +181,14 @@ namespace CCP.UI
                 return loginChallenged;
             });
 
-            app.MapGet("/authentication/logout", async (HttpContext context) =>
+            app.MapGet("/authentication/logout", async (HttpContext context, IMemoryCache memoryCache) =>
             {
+                // Evict the cached access token before signing out so that re-login always fetches a fresh token rather than serving the stale cached one.
+                var sub = context.User.FindFirst("sub")?.Value
+                       ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (sub is not null)
+                    memoryCache.Remove($"user_token:{sub}:");
+
                 await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties
                 {
