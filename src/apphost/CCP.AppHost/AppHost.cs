@@ -258,7 +258,9 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode)).WithGPUSupport();
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode))
+        .WithDataVolume()
+        .WithGPUSupport();
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");

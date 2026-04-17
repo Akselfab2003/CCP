@@ -14,8 +14,8 @@ namespace ChatService.Api.Endpoints
                                     .RequireAuthorization();
 
             faqGroup.MapPost("/", CreateFaqEmbedding)
-                .WithDisplayName("Create FAQ Embedding")
-                .WithDescription("Creates an embedding for a sample FAQ and returns it. In a real application, you would typically save the embedding to a database.");
+                    .WithDisplayName("Create FAQ Embedding")
+                    .WithDescription("Creates an embedding for a sample FAQ and returns it. In a real application, you would typically save the embedding to a database.");
 
             return endpoints;
         }
