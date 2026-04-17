@@ -2,13 +2,12 @@
 @layout CCPLayout
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
-@inject IJSRuntime JS
 @attribute [Authorize(Policy = "RequireManager")]
 
 
 <PageTitle>Customer Management</PageTitle>
 
-<EditForm Model="InviteCustomerModel" OnValidSubmit="@Submit">
+<EditForm Model="InviteCustomerModel" OnValidSubmit="@Submit" data-testid="invite-customer-form">
 
     <!-- Top Header -->
     <div class="dash-greeting">
