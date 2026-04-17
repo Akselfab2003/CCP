@@ -28,34 +28,37 @@ public partial class Program
         builder.Services.AddServiceDefaults("ChatService.Api");
         builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP");
 
-        builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
 
-        builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
-        builder.AddOllamaApiClient("qwen").AddKeyedChatClient("qwen");
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
 
-        // Ticket service URL.
-        var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
-                        ?? builder.Configuration["services:ticketservice-api:http:0"]
-                        ?? "http://localhost:5001";
+            builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
+            builder.AddOllamaApiClient("qwen").AddKeyedChatClient("qwen");
 
-        builder.Services.AddClientCredentialsTokenManagement()
-                       .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
-                       {
-                           client.TokenEndpoint = new Uri("http://localhost:8080/realms/CCP/protocol/openid-connect/token");
-                           client.ClientId = ClientId.Parse("CCP.ServiceAccount");
-                           client.ClientSecret = ClientSecret.Parse(
-                               builder.Configuration["SERVICE_ACCOUNT_SECRET"]
-                               ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
-                           );
-                           client.Scope = Scope.ParseOrDefault("openid");
-                           client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
-                       });
+            // Ticket service URL.
+            var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
+                            ?? builder.Configuration["services:ticketservice-api:http:0"]
+                            ?? "http://localhost:5001";
+
+            builder.Services.AddClientCredentialsTokenManagement()
+                           .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                           {
+                               client.TokenEndpoint = new Uri("http://localhost:8080/realms/CCP/protocol/openid-connect/token");
+                               client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                               client.ClientSecret = ClientSecret.Parse(
+                                   builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                                   ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                               );
+                               client.Scope = Scope.ParseOrDefault("openid");
+                               client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                           });
 
 
-        builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
-                                               ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
+            builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+                                                   ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
-
+        }
         builder.Services.AddControllers();
         builder.Services.AddApplicationServices();
 

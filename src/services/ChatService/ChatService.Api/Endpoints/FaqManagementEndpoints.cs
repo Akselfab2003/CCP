@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.ResultAbstraction;
+using ChatService.Application.Models;
 using ChatService.Application.Services.Faq;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,12 +20,11 @@ namespace ChatService.Api.Endpoints
             return endpoints;
         }
 
-        private static async Task<IResult> CreateFaqEmbedding([FromServices] IFaqManagementService faqManagementService)
+        private static async Task<IResult> CreateFaqEmbedding([FromServices] IFaqManagementService faqManagementService, [FromBody] CreateFaqRequest request)
         {
             try
             {
-                string sampleFaq = "What is the return policy?";
-                var embeddingResult = await faqManagementService.CreateFaqAsync(sampleFaq, "Our return policy allows returns within 30 days of purchase.");
+                var embeddingResult = await faqManagementService.CreateFaqAsync(request.Question, request.Answer);
                 if (embeddingResult.IsSuccess)
                 {
                     return Results.Ok(new
