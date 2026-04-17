@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using EmailService.Sdk.Api.EmailSendingService.Reply;
 using EmailService.Sdk.Api.EmailSendingService.StatusChange;
+using EmailService.Sdk.Api.EmailSendingService.Support;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions;
@@ -27,6 +28,11 @@ namespace EmailService.Sdk.Api.EmailSendingService
         public global::EmailService.Sdk.Api.EmailSendingService.StatusChange.StatusChangeRequestBuilder StatusChange
         {
             get => new global::EmailService.Sdk.Api.EmailSendingService.StatusChange.StatusChangeRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The support property</summary>
+        public global::EmailService.Sdk.Api.EmailSendingService.Support.SupportRequestBuilder Support
+        {
+            get => new global::EmailService.Sdk.Api.EmailSendingService.Support.SupportRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::EmailService.Sdk.Api.EmailSendingService.EmailSendingServiceRequestBuilder"/> and sets the default values.

@@ -168,103 +168,103 @@ namespace EmailService.Api.Controllers
                 return Results.Problem(detail: ex.Message, title: "An error occurred while sending the email notification.");
             }
         }
-        //[HttpPost("support/customer-replied")]
-        //public async Task<IResult> NotifySupportCustomerReply(
-        //    [FromQuery] Guid customerId,
-        //    [FromQuery] string agentEmail,      // the support agent assigned to the ticket
-        //    [FromQuery] string agentName,
-        //    [FromQuery] int ticketId,
-        //    [FromQuery] string ticketTitle,
-        //    [FromQuery] string ticketStatus,
-        //    [FromQuery] string ticketStatusLabel,
-        //    [FromQuery] string replyContent)
-        //{
-        //    try
-        //    {
-        //        var customerResult = await _customerSdkService.GetCustomerById(customerId);
-        //        if (customerResult.IsFailure)
-        //            return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
+        [HttpPost("support/customer-replied")]
+        public async Task<IResult> NotifySupportCustomerReply(
+            [FromQuery] Guid customerId,
+            [FromQuery] string agentEmail,      // the support agent assigned to the ticket
+            [FromQuery] string agentName,
+            [FromQuery] int ticketId,
+            [FromQuery] string ticketTitle,
+            [FromQuery] string ticketStatus,
+            [FromQuery] string ticketStatusLabel,
+            [FromQuery] string replyContent)
+        {
+            try
+            {
+                var customerResult = await _customerSdkService.GetCustomerById(customerId);
+                if (customerResult.IsFailure)
+                    return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
 
-        //        var customer = customerResult.Value;
+                var customer = customerResult.Value;
 
-        //        var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
-        //        var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
-        //        var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
-        //        var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
+                var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
+                var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
+                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
 
-        //        var emailModel = new EmailReceived
-        //        {
-        //            Id = ticketId,
-        //            Subject = $"[Customer Reply] {ticketTitle}",
-        //            Body = replyContent,
-        //            SenderAddress = customer.Email ?? "",
-        //            RecipientAddress = agentEmail,
-        //            ReceivedAt = DateTime.UtcNow,
-        //        };
+                var emailModel = new EmailReceived
+                {
+                    Id = ticketId,
+                    Subject = $"[Customer Reply] {ticketTitle}",
+                    Body = replyContent,
+                    SenderAddress = customer.Email ?? "",
+                    RecipientAddress = agentEmail,
+                    ReceivedAt = DateTime.UtcNow,
+                };
 
-        //        await _ticketEmailService.SendSupportCustomerReplyNotificationAsync(
-        //            recipientEmail: agentEmail,
-        //            emailModel: emailModel,
-        //            customerName: customer.Name ?? "Customer",
-        //            customerEmail: customer.Email ?? "",
-        //            organizationName: organizationName,
-        //            ticketStatus: ticketStatus,
-        //            ticketStatusLabel: ticketStatusLabel,
-        //            replyUrl: replyUrl,
-        //            managementUrl: managementUrl,
-        //            viewHistoryUrl: viewHistoryUrl);
+                await _ticketEmailService.SendSupportCustomerReplyNotificationAsync(
+                    recipientEmail: agentEmail,
+                    emailModel: emailModel,
+                    customerName: customer.Name ?? "Customer",
+                    customerEmail: customer.Email ?? "",
+                    organizationName: organizationName,
+                    ticketStatus: ticketStatus,
+                    ticketStatusLabel: ticketStatusLabel,
+                    replyUrl: replyUrl,
+                    managementUrl: managementUrl,
+                    viewHistoryUrl: viewHistoryUrl);
 
-        //        return Results.Accepted($"Support reply notification sent to {agentEmail} for ticket #{ticketId}.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Results.Problem(detail: ex.Message, title: "An error occurred while sending the support reply notification.");
-        //    }
-        //}
-        //[HttpPost("support/new-ticket")]
-        //public async Task<IResult> NotifySupportNewTicket(
-        //    [FromQuery] Guid customerId,
-        //    [FromQuery] string supportTeamEmail,   // e.g. "support@yourcompany.com"
-        //    [FromQuery] string ticketTitle,
-        //    [FromQuery] int ticketId,
-        //    [FromQuery] string ticketBody)
-        //{
-        //    try
-        //    {
-        //        var customerResult = await _customerSdkService.GetCustomerById(customerId);
-        //        if (customerResult.IsFailure)
-        //            return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
+                return Results.Accepted($"Support reply notification sent to {agentEmail} for ticket #{ticketId}.");
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "An error occurred while sending the support reply notification.");
+            }
+        }
+        [HttpPost("support/new-ticket")]
+        public async Task<IResult> NotifySupportNewTicket(
+            [FromQuery] Guid customerId,
+            [FromQuery] string supportTeamEmail,   // e.g. "support@yourcompany.com"
+            [FromQuery] string ticketTitle,
+            [FromQuery] int ticketId,
+            [FromQuery] string ticketBody)
+        {
+            try
+            {
+                var customerResult = await _customerSdkService.GetCustomerById(customerId);
+                if (customerResult.IsFailure)
+                    return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
 
-        //        var customer = customerResult.Value;
+                var customer = customerResult.Value;
 
-        //        var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
-        //        var expectedResponse = _configuration.GetValue<string>("EmailSettings:ExpectedResponseTime") ?? "24 hours";
-        //        var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
+                var expectedResponse = _configuration.GetValue<string>("EmailSettings:ExpectedResponseTime") ?? "24 hours";
+                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
 
-        //        var emailModel = new EmailSent
-        //        {
-        //            Id = ticketId,
-        //            Subject = ticketTitle,
-        //            Body = ticketBody,
-        //            SenderAddress = customer.Email ?? "",
-        //            RecipientAddress = supportTeamEmail,
-        //            SentAt = DateTime.UtcNow,
-        //        };
+                var emailModel = new EmailSent
+                {
+                    Id = ticketId,
+                    Subject = ticketTitle,
+                    Body = ticketBody,
+                    SenderAddress = customer.Email ?? "",
+                    RecipientAddress = supportTeamEmail,
+                    SentAt = DateTime.UtcNow,
+                };
 
-        //        await _ticketEmailService.SendSupportNewTicketNotificationAsync(
-        //            recipientEmail: supportTeamEmail,
-        //            emailModel: emailModel,
-        //            customerEmail: customer.Email ?? "",
-        //            organizationName: organizationName,
-        //            expectedResponseTime: expectedResponse,
-        //            managementUrl: managementUrl);
+                await _ticketEmailService.SendSupportNewTicketNotificationAsync(
+                    recipientEmail: supportTeamEmail,
+                    emailModel: emailModel,
+                    customerEmail: customer.Email ?? "",
+                    organizationName: organizationName,
+                    expectedResponseTime: expectedResponse,
+                    managementUrl: managementUrl);
 
-        //        return Results.Accepted($"Support new-ticket notification sent to {supportTeamEmail} for ticket #{ticketId}.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Results.Problem(detail: ex.Message, title: "An error occurred while sending the support new-ticket notification.");
-        //    }
-        //}
+                return Results.Accepted($"Support new-ticket notification sent to {supportTeamEmail} for ticket #{ticketId}.");
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "An error occurred while sending the support new-ticket notification.");
+            }
+        }
     }
 }

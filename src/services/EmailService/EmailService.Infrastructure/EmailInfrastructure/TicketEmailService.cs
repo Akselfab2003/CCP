@@ -121,68 +121,68 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 _logger.LogError(ex, $"Failed to send ticket status change email to {recipientEmail} for ticket: {ticketTitle}");
             }
         }
-        //public async Task SendSupportCustomerReplyNotificationAsync(
-        //    string recipientEmail,
-        //    EmailReceived emailModel,
-        //    string customerName,
-        //    string customerEmail,
-        //    string organizationName,
-        //    string ticketStatus,
-        //    string ticketStatusLabel,
-        //    string replyUrl,
-        //    string managementUrl,
-        //    string viewHistoryUrl)
-        //{
-        //    try
-        //    {
-        //        await _emailSendingService.SendSupportCustomerReplyEmailAsync(
-        //            to: recipientEmail,
-        //            email: emailModel,
-        //            customerName: customerName,
-        //            customerEmail: customerEmail,
-        //            organizationName: organizationName,
-        //            ticketStatus: ticketStatus,
-        //            ticketStatusLabel: ticketStatusLabel,
-        //            replyUrl: replyUrl,
-        //            managementUrl: managementUrl,
-        //            viewHistoryUrl: viewHistoryUrl);
+        public async Task SendSupportCustomerReplyNotificationAsync(
+            string recipientEmail,
+            EmailReceived emailModel,
+            string customerName,
+            string customerEmail,
+            string organizationName,
+            string ticketStatus,
+            string ticketStatusLabel,
+            string replyUrl,
+            string managementUrl,
+            string viewHistoryUrl)
+        {
+            try
+            {
+                await _emailSendingService.SendSupportCustomerReplyEmailAsync(
+                    to: recipientEmail,
+                    email: emailModel,
+                    customerName: customerName,
+                    customerEmail: customerEmail,
+                    organizationName: organizationName,
+                    ticketStatus: ticketStatus,
+                    ticketStatusLabel: ticketStatusLabel,
+                    replyUrl: replyUrl,
+                    managementUrl: managementUrl,
+                    viewHistoryUrl: viewHistoryUrl);
 
-        //        _logger.LogInformation("Support customer-reply notification sent to {Recipient} for ticket #{TicketId}",
-        //            recipientEmail, emailModel.Id);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Failed to send support customer-reply notification to {Recipient} for ticket #{TicketId}",
-        //            recipientEmail, emailModel.Id);
-        //    }
-        //}
+                _logger.LogInformation("Support customer-reply notification sent to {Recipient} for ticket #{TicketId}",
+                    recipientEmail, emailModel.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send support customer-reply notification to {Recipient} for ticket #{TicketId}",
+                    recipientEmail, emailModel.Id);
+            }
+        }
 
-        //public async Task SendSupportNewTicketNotificationAsync(
-        //    string recipientEmail,
-        //    EmailSent emailModel,
-        //    string customerEmail,
-        //    string organizationName,
-        //    string expectedResponseTime,
-        //    string managementUrl)
-        //{
-        //    try
-        //    {
-        //        await _emailSendingService.SendSupportNewTicketEmailAsync(
-        //            to: recipientEmail,
-        //            email: emailModel,
-        //            customerEmail: customerEmail,
-        //            organizationName: organizationName,
-        //            expectedResponseTime: expectedResponseTime,
-        //            managementUrl: managementUrl);
+        public async Task SendSupportNewTicketNotificationAsync(
+            string recipientEmail,
+            EmailSent emailModel,
+            string customerEmail,
+            string organizationName,
+            string expectedResponseTime,
+            string managementUrl)
+        {
+            try
+            {
+                await _emailSendingService.SendSupportNewTicketEmailAsync(
+                    to: recipientEmail,
+                    email: emailModel,
+                    customerEmail: customerEmail,
+                    organizationName: organizationName,
+                    expectedResponseTime: expectedResponseTime,
+                    managementUrl: managementUrl);
 
-        //        _logger.LogInformation("Support new-ticket notification sent to {Recipient} for ticket #{TicketId}",
-        //            recipientEmail, emailModel.Id);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Failed to send support new-ticket notification to {Recipient} for ticket #{TicketId}",
-        //            recipientEmail, emailModel.Id);
-        //    }
-        //}
+                _logger.LogInformation("Support new-ticket notification sent to {Recipient} for ticket #{TicketId}",
+                    recipientEmail, emailModel.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send support new-ticket notification to {Recipient} for ticket #{TicketId}",
+                    recipientEmail, emailModel.Id);
+            }
+        }
     }
 }

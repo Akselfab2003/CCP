@@ -42,24 +42,24 @@ namespace EmailService.Application.Interfaces
             string agentNote,
             string portalUrl,
             string reopenUrl);
-        //Task SendSupportCustomerReplyNotificationAsync(
-        //    string recipientEmail,
-        //    EmailReceived emailModel,
-        //    string customerName,
-        //    string customerEmail,
-        //    string organizationName,
-        //    string ticketStatus,
-        //    string ticketStatusLabel,
-        //    string replyUrl,
-        //    string managementUrl,
-        //    string viewHistoryUrl);
+        Task SendSupportCustomerReplyNotificationAsync(
+            string recipientEmail,
+            EmailReceived emailModel,
+            string customerName,
+            string customerEmail,
+            string organizationName,
+            string ticketStatus,
+            string ticketStatusLabel,
+            string replyUrl,
+            string managementUrl,
+            string viewHistoryUrl);
 
-        //Task SendSupportNewTicketNotificationAsync(
-        //    string recipientEmail,
-        //    EmailSent emailModel,
-        //    string customerEmail,
-        //    string organizationName,
-        //    string expectedResponseTime,
-        //    string managementUrl);
+        Task SendSupportNewTicketNotificationAsync(
+            string recipientEmail,
+            EmailSent emailModel,
+            string customerEmail,
+            string organizationName,
+            string expectedResponseTime,
+            string managementUrl);
     }
 }

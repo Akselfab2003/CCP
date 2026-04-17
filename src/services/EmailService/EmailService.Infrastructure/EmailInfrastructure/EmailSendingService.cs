@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using CCP.Shared.ValueObjects;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
 using EmailTemplates.Renderes;
@@ -97,6 +99,64 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             await _smtpClient.SendAsync(message);
         }
 
+        public async Task SendSupportCustomerReplyEmailAsync(
+            string to,
+            string subject,
+            EmailReceived email,
+            string customerName,
+            string customerEmail,
+            string organizationName,
+            string ticketStatus,
+            string ticketStatusLabel,
+            string replyUrl,
+            string managementUrl,
+            string viewHistoryUrl)
+        {
+            var htmlContent = await _emailTemplateRenderer.RenderSupportCustomerReplyNotificationAsync(
+            email,
+            customerName,
+            customerEmail,
+            organizationName,
+            ticketStatus,
+            ticketStatusLabel,
+            replyUrl,
+            managementUrl,
+            viewHistoryUrl);
+            var message = BuildMessage(
+                fromAddress: email.SenderAddress,
+                fromName: organizationName,
+                toAddress: to,
+                toName: email.RecipientAddress,
+                subject: subject
+            );
+            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            await _smtpClient.SendAsync(message);
+        }
+        public async Task SendSupportNewTicketEmailAsync(
+            string to,
+            string subject,
+            EmailSent email,
+            string customerEmail,
+            string organizationName,
+            string expectedResponseTime,
+            string managementUrl)
+        {
+            var htmlContent = await _emailTemplateRenderer.RenderSupportTicketNotificationAsync(
+                email, customerEmail, organizationName,
+            expectedResponseTime, managementUrl
+                );
+            var message = BuildMessage(
+                fromAddress: email.SenderAddress,
+                fromName: organizationName,
+                toAddress: to,
+                toName: email.RecipientAddress,
+                subject: subject
+            );
+            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            await _smtpClient.SendAsync(message);
+        }
+
+
         private static MimeMessage BuildMessage(
         string fromAddress,
         string fromName,
@@ -110,5 +170,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             message.Subject = subject;
             return message;
         }
+
+
     }
 }

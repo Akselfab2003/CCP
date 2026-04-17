@@ -77,34 +77,34 @@ namespace EmailTemplates.Renderes
                 return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
         }
 
-        //public Task<string> RenderSupportTicketNotificationAsync(
-        //    EmailSent email, string customerEmail, string organizationName,
-        //    string expectedResponseTime, string managementUrl) =>
-        //    RenderComponentAsync<SupportTicketNotification>(p =>
-        //    {
-        //        p.Add(nameof(SupportTicketNotification.Email), email);
-        //        p.Add(nameof(SupportTicketNotification.CustomerEmail), customerEmail);
-        //        p.Add(nameof(SupportTicketNotification.OrganizationName), organizationName);
-        //        p.Add(nameof(SupportTicketNotification.ExpectedResponseTime), expectedResponseTime);
-        //        p.Add(nameof(SupportTicketNotification.ManagementUrl), managementUrl);
-        //    });
+        public Task<string> RenderSupportTicketNotificationAsync(
+            EmailSent email, string customerEmail, string organizationName,
+            string expectedResponseTime, string managementUrl) =>
+            RenderComponentAsync<SupportTicketNotification>(p =>
+            {
+                p.Add(nameof(SupportTicketNotification.Email), email);
+                p.Add(nameof(SupportTicketNotification.CustomerEmail), customerEmail);
+                p.Add(nameof(SupportTicketNotification.OrganizationName), organizationName);
+                p.Add(nameof(SupportTicketNotification.ExpectedResponseTime), expectedResponseTime);
+                p.Add(nameof(SupportTicketNotification.ManagementUrl), managementUrl);
+            });
 
-        //public Task<string> RenderSupportCustomerReplyNotificationAsync(
-        //    EmailReceived email, string customerName, string customerEmail,
-        //    string organizationName, string ticketStatus, string ticketStatusLabel,
-        //    string replyUrl, string managementUrl, string viewHistoryUrl) =>
-        //    RenderComponentAsync<SupportCustomerReplyNotification>(p =>
-        //    {
-        //        p.Add(nameof(SupportCustomerReplyNotification.Email), email);
-        //        p.Add(nameof(SupportCustomerReplyNotification.CustomerName), customerName);
-        //        p.Add(nameof(SupportCustomerReplyNotification.CustomerEmail), customerEmail);
-        //        p.Add(nameof(SupportCustomerReplyNotification.OrganizationName), organizationName);
-        //        p.Add(nameof(SupportCustomerReplyNotification.TicketStatus), ticketStatus);
-        //        p.Add(nameof(SupportCustomerReplyNotification.TicketStatusLabel), ticketStatusLabel);
-        //        p.Add(nameof(SupportCustomerReplyNotification.ReplyUrl), replyUrl);
-        //        p.Add(nameof(SupportCustomerReplyNotification.ManagementUrl), managementUrl);
-        //        p.Add(nameof(SupportCustomerReplyNotification.ViewHistoryUrl), viewHistoryUrl);
-        //    });
+        public Task<string> RenderSupportCustomerReplyNotificationAsync(
+            EmailReceived email, string customerName, string customerEmail,
+            string organizationName, string ticketStatus, string ticketStatusLabel,
+            string replyUrl, string managementUrl, string viewHistoryUrl) =>
+            RenderComponentAsync<SupportCustomerReplyNotification>(p =>
+            {
+                p.Add(nameof(SupportCustomerReplyNotification.Email), email);
+                p.Add(nameof(SupportCustomerReplyNotification.CustomerName), customerName);
+                p.Add(nameof(SupportCustomerReplyNotification.CustomerEmail), customerEmail);
+                p.Add(nameof(SupportCustomerReplyNotification.OrganizationName), organizationName);
+                p.Add(nameof(SupportCustomerReplyNotification.TicketStatus), ticketStatus);
+                p.Add(nameof(SupportCustomerReplyNotification.TicketStatusLabel), ticketStatusLabel);
+                p.Add(nameof(SupportCustomerReplyNotification.ReplyUrl), replyUrl);
+                p.Add(nameof(SupportCustomerReplyNotification.ManagementUrl), managementUrl);
+                p.Add(nameof(SupportCustomerReplyNotification.ViewHistoryUrl), viewHistoryUrl);
+            });
 
         private async Task<string> RenderComponentAsync<TComponent>(
             Action<Dictionary<string, object?>> configureParameters)
