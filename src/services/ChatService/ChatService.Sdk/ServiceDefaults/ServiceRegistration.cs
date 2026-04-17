@@ -1,5 +1,6 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Sdk.utils.Authentication;
+using ChatService.Sdk.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatService.Sdk.ServiceDefaults
@@ -15,6 +16,8 @@ namespace ChatService.Sdk.ServiceDefaults
             services.AddScoped<IKiotaApiClient<ChatServiceClient>>(sp => new KiotaApiClientAbstraction<ChatServiceClient>(sp.GetRequiredService<IHttpClientFactory>(),
                                                                                                              ChatServiceClientName,
                                                                                                              requestAdapter => new ChatServiceClient(requestAdapter)));
+
+            services.AddScoped<IFaqService, FaqServiceClient>();
 
             return services;
         }
