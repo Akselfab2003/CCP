@@ -79,12 +79,8 @@ namespace CCP.Website
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
             app.UseAntiforgery();
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseStaticFiles();
-                app.MapStaticAssets();
-            }
-
+            app.MapStaticAssets();
+            app.UseStaticFiles();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
