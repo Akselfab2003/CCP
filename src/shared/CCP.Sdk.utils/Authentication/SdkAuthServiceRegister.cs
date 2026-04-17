@@ -41,11 +41,6 @@ namespace CCP.Sdk.utils.Authentication
                 var keycloakUrl = configuration?["services:keycloak:http:0"]
                                ?? configuration?["Keycloak:Authority"]
                                ?? "http://localhost:8080";
-                //REMOVE!
-                Console.WriteLine($"[SdkAuth] keycloakUrl={keycloakUrl}");
-                Console.WriteLine($"[SdkAuth] CCP.ServiceAccount={configuration?["CCP.ServiceAccount"]}");
-                Console.WriteLine($"[SdkAuth] SERVICE_ACCOUNT_SECRET={configuration?["SERVICE_ACCOUNT_SECRET"]}");
-                Console.WriteLine($"[SdkAuth] All keys: {string.Join(", ", configuration?.AsEnumerable().Select(k => k.Key) ?? [])}");
 
                 var tokenEndpoint = keycloakUrl.TrimEnd('/') + "/realms/CCP/protocol/openid-connect/token";
 
