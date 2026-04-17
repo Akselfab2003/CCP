@@ -25,65 +25,69 @@ namespace EmailService.Worker.Host.handlers
         {
             try
             {
-                _logger.LogInformation($"Handled mail_received event: Subject: {mail_Received.Subject}, From: {mail_Received.MailFrom}, To: {mail_Received.MailTo}, MessageId: {mail_Received.MessageId}");
+                _logger.LogInformation(
+                    "Handled mail_received event: Subject: {Subject}, From: {From}, To: {To}, MessageId: {MessageId}",
+                    mail_Received.Subject, mail_Received.MailFrom, mail_Received.MailTo, mail_Received.MessageId);
 
                 var ticketId = ExtractTicketIdFromSubject(mail_Received.Subject);
 
-                if (ticketId == null)
+                if (ticketId != null)  // fixed: was backwards
                 {
-                    await SendTicketReplyEmailAsync(mail_Received, ticketId);
+                    await SendSupportCustomerReplyEmailAsync(mail_Received, ticketId.Value);
                 }
                 else
                 {
-                    _logger.LogWarning($"Could not extract ticket ID from email subject: {mail_Received.Subject}. Skipping ticket reply email.");
+                    _logger.LogWarning(
+                        "Could not extract ticket ID from email subject: {Subject}. Skipping.",
+                        mail_Received.Subject);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error handling mail_received event");
             }
-
         }
 
-        private async Task SendTicketReplyEmailAsync(mail_received mail_Received, int? ticketId)
+        private async Task SendSupportCustomerReplyEmailAsync(mail_received mail_Received, int ticketId)
         {
             try
             {
                 var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
-                var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
+                var supportTeamEmail = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? "support@example.com";
                 var replyUrl = _configuration.GetValue<string>("ApplicationUrls:TicketReply") ?? "#";
+                var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
                 var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:TicketHistory") ?? "#";
-                var reopenUrl = _configuration.GetValue<string>("ApplicationUrls:TicketReopen") ?? "#";
 
                 var emailModel = new EmailReceived
                 {
+                    Id = ticketId,
                     Subject = mail_Received.Subject,
                     Body = mail_Received.Body,
                     SenderAddress = mail_Received.MailFrom,
-                    RecipientAddress = mail_Received.MailTo,
+                    RecipientAddress = supportTeamEmail,
                     ReceivedAt = DateTime.UtcNow,
                 };
 
-                await _emailSendingService.SendTicketReplyEmailAsync(
-                    to: mail_Received.MailTo,
-                    subject: $"[Reply] Ticket #{ticketId}",
+                await _emailSendingService.SendSupportCustomerReplyEmailAsync(
+                    to: supportTeamEmail,
+                    subject: mail_Received.Subject,
                     email: emailModel,
-                    recipientName: ExtractNameFromEmail(mail_Received.MailTo),
+                    customerName: ExtractNameFromEmail(mail_Received.MailFrom),
+                    customerEmail: mail_Received.MailFrom,
                     organizationName: organizationName,
-                    agentName: "Support Team",
-                    agentRole: "Suppport Agent",
-                    ticketStatus: "Open",
+                    ticketStatus: "open",
                     ticketStatusLabel: "Open",
                     replyUrl: replyUrl,
-                    portalUrl: portalUrl,
-                    viewHistoryUrl: viewHistoryUrl,
-                    reopenUrl: reopenUrl
-                );
-                _logger.LogInformation($"Sent ticket reply email for ticket #{ticketId} to {mail_Received.MailTo}");
+                    managementUrl: managementUrl,
+                    viewHistoryUrl: viewHistoryUrl);
+
+                _logger.LogInformation(
+                    "Sent support customer-reply notification for ticket #{TicketId} to {SupportEmail}",
+                    ticketId, supportTeamEmail);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to send ticket reply email for ticket #{ticketId} to {mail_Received.MailTo}");
+                _logger.LogError(ex, "Failed to send support customer-reply notification for ticket #{TicketId}", ticketId);
             }
         }
 
@@ -95,9 +99,7 @@ namespace EmailService.Worker.Host.handlers
             {
                 var match = System.Text.RegularExpressions.Regex.Match(subject, pattern);
                 if (match.Success && int.TryParse(match.Groups[1].Value, out var ticketId))
-                {
                     return ticketId;
-                }
             }
 
             return null;
