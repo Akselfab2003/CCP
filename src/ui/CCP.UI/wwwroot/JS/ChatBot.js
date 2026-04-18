@@ -3,6 +3,7 @@ class ChatBot {
     constructor() {
         this.connection = null;
         this.init();
+        this.activeConversationID = null;
     }
 
     init() {
@@ -28,6 +29,7 @@ class ChatBot {
         if (!chatWindow) {
             this.createChatWindow();
             this.connectToChatHub();
+            this.createChatConversation();
             chatWindow = document.getElementById("chatWindow");
         }
         chatWindow.classList.toggle("open");
@@ -126,25 +128,49 @@ class ChatBot {
         const messages = document.createElement("div");
         messages.classList.add("chat-messages");
         messages.id = "chatMessages";
+        return messages;
+    }
 
-        const typing_indicator = document.createElement("div");
-        typing_indicator.classList.add("typing-indicator");
-        for (let i = 0; i < 4; i++) {
+    showTypingIndicator() {
+        const messages = document.getElementById("chatMessages");
+        if (!messages || messages.querySelector('.typing-indicator')) return;
+        const typingIndicator = document.createElement("div");
+        typingIndicator.classList.add("typing-indicator");
+        for (let i = 0; i < 3; i++) {
             const dot = document.createElement("div");
             dot.classList.add("typing-dot");
-            typing_indicator.appendChild(dot);
+            typingIndicator.appendChild(dot);
         }
-        messages.appendChild(typing_indicator);
+        messages.appendChild(typingIndicator);
+        messages.scrollTop = messages.scrollHeight;
+    }
 
+    hideTypingIndicator() {
+        const messages = document.getElementById("chatMessages");
+        if (!messages) return;
+        const indicator = messages.querySelector('.typing-indicator');
+        if (indicator) {
+            messages.removeChild(indicator);
+        }
+    }
+
+    addMessage({ text, role = "user", time = null }) {
+        const messages = document.getElementById("chatMessages");
+        if (!messages) return;
         const msg = document.createElement("div");
-        msg.classList.add("msg", "user");
-        msg.textContent = "Hej, hvordan har du det?";
+        msg.classList.add("msg", role);
+        msg.textContent = text;
         const msg_meta = document.createElement("div");
         msg_meta.classList.add("msg-meta");
-        msg_meta.textContent = "12:00";
+        msg_meta.textContent = time || this.getCurrentTime();
         msg.appendChild(msg_meta);
         messages.appendChild(msg);
-        return messages;
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
     createChatInput() {
@@ -181,6 +207,15 @@ class ChatBot {
         button.appendChild(send_icon);
         form.appendChild(button);
 
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            const message = input.value.trim();
+            if (message) {
+                this.sendMessage(message);
+                input.value = "";
+            }
+        });
+
         return form;
     }
 
@@ -199,6 +234,14 @@ class ChatBot {
         const cookies = document.cookie.split(";").map(cookie => cookie.trim());
         const sessionIdCookie = cookies.find(cookie => cookie.startsWith("SessionId="));
         return sessionIdCookie ? sessionIdCookie.split("=")[1] : null;
+    }
+
+    sendMessage(message) {
+        if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
+            this.connection.invoke("SendMessageToChatBot", this.activeConversationID, message)
+                .catch(err => console.error("Error sending message:", err));
+        }
+        this.addMessage({ text: message, role: "user" });
     }
 
     connectToChatHub() {
@@ -222,8 +265,48 @@ class ChatBot {
             console.log("Reconnected to hub with connection ID:", cid);
         });
 
+
+        this.connection.on("ChatMessage", message => {
+            console.log("Received new message:", message);
+            this.hideTypingIndicator();
+            this.addMessage({ text: message, role: "bot" });
+        });
+
+        this.connection.on("ReceiveTyping", conversationID => {
+            console.log("Received typing indicator for conversation", conversationID);
+            this.showTypingIndicator();
+        });
+
+        this.connection.on("ReceiveMessage", (conversationID, message) => {
+            console.log("Received message for conversation", conversationID, ":", message);
+            this.hideTypingIndicator();
+            this.addMessage({ text: message, role: "bot" });
+        });
+
         this.connection.start();
     }
+
+    async createChatConversation() {
+        const conversationUrl = "https://localhost:7127/chat/createConversation";
+        var conversationID = await fetch(conversationUrl, {
+            method: "POST",
+            credentials: "include",
+        }).then(async response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            console.log("Conversation created successfully");
+            var data = await response.json();
+            let conversationID = data["conversationID"];
+            console.log("Conversation ID:", conversationID);
+            return conversationID;
+        })
+            .catch(error => {
+                console.error("Error creating conversation:", error);
+            });
+        this.activeConversationID = conversationID;
+    }
+
 }
 
 window.addEventListener('DOMContentLoaded', () => {

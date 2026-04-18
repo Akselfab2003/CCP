@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.AuthContext;
+using ChatService.Application.AuthContext;
 using ChatService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -8,15 +9,17 @@ namespace ChatService.Infrastructure.Persistence;
 public class ChatDbContext : DbContext
 {
     private readonly ICurrentUser _currentUser;
+    private readonly IActiveSession _activeSession;
     private bool _IsDesignTime;
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         _IsDesignTime = !optionsBuilder.IsConfigured;
     }
 
-    public ChatDbContext(DbContextOptions<ChatDbContext> options, ICurrentUser currentUser) : base(options)
+    public ChatDbContext(DbContextOptions<ChatDbContext> options, ICurrentUser currentUser, IActiveSession activeSession) : base(options)
     {
         _currentUser = currentUser ?? throw new InvalidOperationException("CurrentUser service is not available.");
+        _activeSession = activeSession ?? throw new InvalidOperationException("ActiveSession service is not available.");
     }
 
     public DbSet<FaqEntity> FaqEntries => Set<FaqEntity>();
@@ -49,9 +52,10 @@ public class ChatDbContext : DbContext
                 .HasQueryFilter(s => s.OrganizationId == _currentUser.OrganizationId);
 
             modelBuilder.Entity<ConversationEntity>()
-                .HasQueryFilter(c => c.OrgId == _currentUser.OrganizationId);
+                .HasQueryFilter(c => c.OrgId == _currentUser.OrganizationId || c.OrgId == _activeSession.OrgId);
+
             modelBuilder.Entity<MessageEntity>()
-               .HasQueryFilter(m => m.OrgId == _currentUser.OrganizationId);
+               .HasQueryFilter(m => m.OrgId == _currentUser.OrganizationId || m.OrgId == _activeSession.OrgId);
         }
     }
 }
@@ -66,6 +70,6 @@ public class ChatDbContextFactory : IDesignTimeDbContextFactory<ChatDbContext>
         {
             a.UseVector();
         });
-        return new ChatDbContext(optionsBuilder.Options, new CurrentUser());
+        return new ChatDbContext(optionsBuilder.Options, new CurrentUser(), new ActiveSession());
     }
 }

@@ -13,6 +13,7 @@ using ChatService.Infrastructure.ServiceCollection;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using IdentityService.Sdk.ServiceDefaults;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 public partial class Program
@@ -61,7 +62,10 @@ public partial class Program
                                                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
         }
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options =>
+        {
+            options.AddFilter<HubFilter>();
+        });
 
 
         builder.Services.AddControllers();
