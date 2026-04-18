@@ -1,18 +1,13 @@
-﻿window.onload = function () {
+﻿window.onload = function() {
     LoadChatBot();
 };
 
-function getSession() {
+function getSession(){
     const sessionUrl = "https://localhost:7127/session";
 
     fetch(sessionUrl, {
         method: "POST",
-    }).then(data => {
-        return data.text();
-    }).then(sessionId => {
-        const cleanSessionId = sessionId.trim().replace(/^"|"$/g, "");
-        console.log("Session ID:", cleanSessionId);
-        document.cookie = `sessionId=${cleanSessionId}; path=/; secure; samesite=strict`;
+        credentials: "include",
     }).catch(error => {
         console.error("Error fetching session:", error);
     });
@@ -40,7 +35,7 @@ function CreateChatToggle() {
     const root = document.createElement("button");
     root.id = "chatToggle";
     root.setAttribute("aria-label", "Åbn chat");
-
+    
     const icon = document.createElement("span");
     icon.id = "chatBadge"
     root.appendChild(icon);
@@ -60,7 +55,7 @@ function CreateChatToggle() {
     path_chat.setAttribute("d", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z");
     icon_chat.appendChild(path_chat);
 
-
+    
     var icon_close = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     icon_close.classList.add("icon-close");
     icon_close.setAttribute("width", "20");
@@ -87,7 +82,7 @@ function CreateChatToggle() {
     root.appendChild(icon_chat);
     root.appendChild(icon_close);
 
-    root.addEventListener("click", function () {
+    root.addEventListener("click", function() {
         ToggleChat();
     });
 
@@ -111,18 +106,18 @@ function CreateChatHeader() {
     info.appendChild(chat_header_name);
     var chat_header_status = document.createElement("div");
     chat_header_status.classList.add("chat-header-status");
-
+    
     var status_indicator = document.createElement("span");
     status_indicator.classList.add("status-dot");
     chat_header_status.appendChild(status_indicator);
     chat_header_status.appendChild(document.createTextNode("Online"));
     info.appendChild(chat_header_status);
-
+    
     header.appendChild(info);
     return header;
 }
 
-function CreateChatMessages() {
+function CreateChatMessages(){
     var messages = document.createElement("div");
     messages.classList.add("chat-messages");
     messages.id = "chatMessages";
@@ -151,37 +146,37 @@ function CreateChatInput() {
     var form = document.createElement("form");
     form.classList.add("chat-input-area");
     form.id = "chatForm";
-    var input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "write a message...";
-    input.id = "chatInput";
-    form.appendChild(input);
+        var input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "write a message...";
+        input.id = "chatInput";
+        form.appendChild(input);
 
-    var button = document.createElement("button");
-    button.type = "submit";
-    button.ariaLabel = "Send Message";
-    var send_icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    send_icon.setAttribute("width", "22");
-    send_icon.setAttribute("height", "22");
-    send_icon.setAttribute("viewBox", "0 0 24 24");
-    send_icon.setAttribute("fill", "none");
-    send_icon.setAttribute("stroke", "currentColor");
-    send_icon.setAttribute("stroke-width", "2.2");
-    send_icon.setAttribute("stroke-linecap", "round");
-    send_icon.setAttribute("stroke-linejoin", "round");
-    var path1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    path1.setAttribute("x1", "22");
-    path1.setAttribute("y1", "2");
-    path1.setAttribute("x2", "11");
-    path1.setAttribute("y2", "13");
-    send_icon.appendChild(path1);
-    var path2 = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    path2.setAttribute("points", "22 2 15 22 11 13 2 9 22 2");
-    send_icon.appendChild(path2);
-    button.appendChild(send_icon);
-    form.appendChild(button);
+        var button = document.createElement("button");
+        button.type = "submit";
+        button.ariaLabel = "Send Message";
+        var send_icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        send_icon.setAttribute("width", "22");
+        send_icon.setAttribute("height", "22");
+        send_icon.setAttribute("viewBox", "0 0 24 24");
+        send_icon.setAttribute("fill", "none");
+        send_icon.setAttribute("stroke", "currentColor");
+        send_icon.setAttribute("stroke-width", "2.2");
+        send_icon.setAttribute("stroke-linecap", "round");
+        send_icon.setAttribute("stroke-linejoin", "round");
+        var path1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        path1.setAttribute("x1", "22");
+        path1.setAttribute("y1", "2");
+        path1.setAttribute("x2", "11");
+        path1.setAttribute("y2", "13");
+        send_icon.appendChild(path1);
+        var path2 = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        path2.setAttribute("points", "22 2 15 22 11 13 2 9 22 2");
+        send_icon.appendChild(path2);
+        button.appendChild(send_icon);
+        form.appendChild(button);
 
-    return form;
+        return form;
 }
 
 function CreateChatWindow() {
