@@ -1,5 +1,6 @@
 ﻿using ChatService.Application.AuthContext;
 using ChatService.Application.Services.Chat;
+using ChatService.Application.Services.Domain;
 using ChatService.Application.Services.Faq;
 using ChatService.Application.Services.Session;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,8 @@ namespace ChatService.Application.ServiceCollection
                     .AddScoped<IFaqManagementService, FaqManagementService>();
 
             services.AddScoped<IActiveSession, ActiveSession>()
-                    .AddScoped<IChatManagementService, ChatManagementService>();
+                    .AddScoped<IChatManagementService, ChatManagementService>()
+                    .AddScoped<IDomainServices, DomainServices>();
 
             return services;
         }

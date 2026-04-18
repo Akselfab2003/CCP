@@ -14,7 +14,8 @@ namespace ChatService.Infrastructure.ServiceCollection
             services.AddScoped<IFaqRepository, FaqRepository>()
                     .AddScoped<ISessionRepository, SessionRepository>()
                     .AddScoped<IConversationRepository, ConversationRepository>()
-                    .AddScoped<IMessageRepository, MessageRepository>();
+                    .AddScoped<IMessageRepository, MessageRepository>()
+                    .AddScoped<IDomainDetailsRepository, DomainDetailsRepository>();
 
             services.AddScoped<IEmbeddingService, EmbeddingService>()
                 .AddScoped<IChatService, LLM.Chat.ChatService>();

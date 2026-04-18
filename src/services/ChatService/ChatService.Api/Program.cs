@@ -61,18 +61,6 @@ public partial class Program
         }
 
 
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll", policy =>
-            {
-                policy.WithOrigins("http://127.0.0.1:5500")
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials();
-
-            });
-        });
-
         builder.Services.AddControllers();
         builder.Services.AddApplicationServices();
 
@@ -95,8 +83,13 @@ public partial class Program
 
         app.MapSessionEndpoints()
            .MapFaqManagementEndpoints()
-           .MapChatEndpoints();
-        app.UseCors("AllowAll");
+           .MapChatEndpoints()
+           .MapConfigurationEndpoints();
+
+        app.UseCors();
+
+
+
         app.Run();
     }
 }

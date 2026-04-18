@@ -1,4 +1,6 @@
-﻿using CCP.Shared.ResultAbstraction;
+﻿using System.Reflection;
+using CCP.Shared.ResultAbstraction;
+using ChatService.Application.Services.Domain;
 using ChatService.Application.Services.Session;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,8 +11,24 @@ namespace ChatService.Api.Endpoints
         public static IEndpointRouteBuilder MapSessionEndpoints(this IEndpointRouteBuilder app)
         {
             var sessionRoute = app.MapGroup("/session")
-                                  .WithTags("Sessions");
+                                 .WithTags("Sessions");
 
+            if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+            {
+                sessionRoute.RequireCors(c =>
+                {
+                    c.SetIsOriginAllowed(origin =>
+                    {
+                        using var scope = app.ServiceProvider.CreateScope();
+                        var domainservices = scope.ServiceProvider.GetRequiredService<IDomainServices>();
+                        var host = new Uri(origin).Host;
+                        return domainservices.IsDomainAllowed(host);
+                    })
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials();
+                });
+            }
 
             sessionRoute.MapGet("/", GetSessions)
                         .WithName("GetSessions")
@@ -31,9 +49,9 @@ namespace ChatService.Api.Endpoints
             try
             {
 
-                var domain = httpContextAccessor.HttpContext?.Request.Host.Host;
-                if (domain == null) return Results.BadRequest("Domain is required.");
-                var result = await sessionManagement.CreateSession(domain);
+                var requestUrl = httpContextAccessor.HttpContext?.Request.Headers.Origin.First();
+                if (requestUrl == null) return Results.BadRequest("Domain is required.");
+                var result = await sessionManagement.CreateSession(requestUrl);
                 if (result.IsSuccess)
                 {
                     // Set the cookie with the session ID

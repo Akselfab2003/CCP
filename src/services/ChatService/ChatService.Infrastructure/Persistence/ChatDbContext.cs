@@ -23,6 +23,7 @@ public class ChatDbContext : DbContext
     public DbSet<SessionEntity> Sessions => Set<SessionEntity>();
     public DbSet<ConversationEntity> Conversations => Set<ConversationEntity>();
     public DbSet<MessageEntity> Messages => Set<MessageEntity>();
+    public DbSet<DomainDetails> DomainDetails => Set<DomainDetails>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +34,7 @@ public class ChatDbContext : DbContext
             modelBuilder.ApplyConfiguration(new Configurations.FaqEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.ConversationEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.DomainDetailsConfiguration());
             return;
         }
         else
@@ -41,6 +43,7 @@ public class ChatDbContext : DbContext
             modelBuilder.ApplyConfiguration(new Configurations.FaqEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.ConversationEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.DomainDetailsConfiguration());
 
             modelBuilder.Entity<SessionEntity>()
                 .HasQueryFilter(s => s.OrganizationId == _currentUser.OrganizationId);

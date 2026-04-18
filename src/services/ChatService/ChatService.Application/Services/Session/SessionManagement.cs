@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.ResultAbstraction;
+using ChatService.Application.Services.Domain;
+using ChatService.Domain.Entities;
 using ChatService.Domain.Interfaces;
-using IdentityService.Sdk.Services.Tenant;
 using Microsoft.Extensions.Logging;
 
 namespace ChatService.Application.Services.Session
@@ -9,27 +10,31 @@ namespace ChatService.Application.Services.Session
     {
         private readonly ILogger<SessionManagement> _logger;
         private readonly ISessionRepository _sessionRepo;
-        private readonly ITenantService _tenantService;
-        public SessionManagement(ILogger<SessionManagement> logger, ISessionRepository sessionRepo, ITenantService tenantService)
+        private readonly IDomainServices _domainServices;
+        public SessionManagement(ILogger<SessionManagement> logger, ISessionRepository sessionRepo, IDomainServices domainServices)
         {
             _logger = logger;
             _sessionRepo = sessionRepo;
-            _tenantService = tenantService;
+            _domainServices = domainServices;
         }
 
         public async Task<Result<Guid>> CreateSession(string Domain)
         {
             try
             {
-                var tenantResult = await _tenantService.GetTenantDetailsAsync(tenantId: null, domain: Domain);
+                var Host = new Uri(Domain).Host;
+                var validateDomain = _domainServices.IsDomainAllowed(Host);
+                if (!validateDomain) return Result.Failure<Guid>(Error.Failure("InvalidDomain", $"The domain {Domain} is not allowed to create a session"));
 
-                if (tenantResult.IsFailure)
-                    return Result.Failure<Guid>(Error.Failure("TenantNotFound", $"No tenant found for domain {Domain}"));
+                var domainDetailsResult = await _domainServices.GetDomainDetails(Host);
+                if (domainDetailsResult is null || domainDetailsResult.IsFailure) return Result.Failure<Guid>(Error.NotFound("DomainNotFound", $"No details found for domain {Domain}"));
 
-                var Session = new Domain.Entities.SessionEntity()
+                var details = domainDetailsResult.Value;
+
+                var Session = new SessionEntity()
                 {
                     SessionId = Guid.NewGuid(),
-                    OrganizationId = tenantResult.Value.OrgId,
+                    OrganizationId = details.OrgId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
