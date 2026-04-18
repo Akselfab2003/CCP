@@ -4,7 +4,9 @@ using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
+using ChatService.Api.ChatHub;
 using ChatService.Api.Endpoints;
+using ChatService.Api.Middleware;
 using ChatService.Application.ServiceCollection;
 using ChatService.Infrastructure.Persistence;
 using ChatService.Infrastructure.ServiceCollection;
@@ -59,6 +61,7 @@ public partial class Program
                                                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
         }
+        builder.Services.AddSignalR();
 
 
         builder.Services.AddControllers();
@@ -76,6 +79,7 @@ public partial class Program
         {
             app.AppMapSwaggerExtensions();
             app.UseMiddleware<AuthMiddleware>();
+            app.UseMiddleware<UserSessionMiddleware>();
             AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
         }
 
@@ -87,6 +91,8 @@ public partial class Program
            .MapConfigurationEndpoints();
 
         app.UseCors();
+
+        app.MapHub<ChatHub>("/chatHub");
 
 
 

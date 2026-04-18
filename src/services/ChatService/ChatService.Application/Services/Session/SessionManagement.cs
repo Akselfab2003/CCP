@@ -49,5 +49,20 @@ namespace ChatService.Application.Services.Session
                 return Result.Failure<Guid>(Error.Failure("SessionCreationFailed", "An error occurred while creating the session"));
             }
         }
+
+        public async Task<Result<SessionEntity>> GetSessionDetails(Guid SessionId)
+        {
+            try
+            {
+                var sessionResult = await _sessionRepo.GetSessionByIdAsync(SessionId);
+                if (sessionResult is null || sessionResult.IsFailure) return Result.Failure<SessionEntity>(Error.NotFound("SessionNotFound", $"No session found with ID {SessionId}"));
+                return sessionResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while retrieving session details");
+                return Result.Failure<SessionEntity>(Error.Failure("SessionRetrievalFailed", "An error occurred while retrieving the session details"));
+            }
+        }
     }
 }

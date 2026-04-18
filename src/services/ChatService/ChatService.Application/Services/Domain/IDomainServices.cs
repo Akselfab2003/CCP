@@ -8,5 +8,6 @@ namespace ChatService.Application.Services.Domain
         Task<Result> AddOrUpdateDomainDetails(string domain);
         Task<Result<DomainDetails>> GetDomainDetails(string domain);
         bool IsDomainAllowed(string Host);
+        Task<Result<bool>> ValidateConnection(Guid sessionId, string Host);
     }
 }

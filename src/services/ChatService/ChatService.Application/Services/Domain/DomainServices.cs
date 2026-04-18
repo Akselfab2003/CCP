@@ -10,13 +10,15 @@ namespace ChatService.Application.Services.Domain
     {
         private readonly ILogger<DomainServices> _logger;
         private readonly IDomainDetailsRepository _repository;
+        private readonly ISessionRepository _sessionRepository;
         private readonly ICurrentUser _currentUser;
 
-        public DomainServices(ILogger<DomainServices> logger, IDomainDetailsRepository repository, ICurrentUser currentUser)
+        public DomainServices(ILogger<DomainServices> logger, IDomainDetailsRepository repository, ICurrentUser currentUser, ISessionRepository sessionRepository)
         {
             _logger = logger;
             _repository = repository;
             _currentUser = currentUser;
+            _sessionRepository = sessionRepository;
         }
 
         public async Task<Result> AddOrUpdateDomainDetails(string domain)
@@ -70,6 +72,40 @@ namespace ChatService.Application.Services.Domain
             {
                 _logger.LogError(ex, "Error checking if domain is allowed");
                 return false;
+            }
+        }
+
+
+        public async Task<Result<bool>> ValidateConnection(Guid sessionId, string Host)
+        {
+            try
+            {
+                var isDomainAllowed = IsDomainAllowed(Host);
+                if (!isDomainAllowed)
+                {
+                    return Result.Failure<bool>(Error.Failure(code: "DomainNotAllowed", description: "The domain is not allowed"));
+                }
+                var sessionResult = await _sessionRepository.GetSessionByIdAsync(sessionId);
+                var domainDetailsResult = await _repository.GetDomainDetailsBasedOnDomain(Host);
+
+                if (sessionResult is null || sessionResult.IsFailure) return Result.Failure<bool>(Error.NotFound("SessionNotFound", $"No session found with ID {sessionId}"));
+                var session = sessionResult.Value;
+
+                if (domainDetailsResult is null || domainDetailsResult.IsFailure) return Result.Failure<bool>(Error.NotFound("DomainDetailsNotFound", $"No domain details found for domain {Host}"));
+
+                var domain = domainDetailsResult.Value;
+
+                if (session.OrganizationId != domain.OrgId)
+                {
+                    return Result.Failure<bool>(Error.Failure(code: "OrgIdMismatch", description: "The session's organization ID does not match the domain's organization ID"));
+                }
+
+                return Result.Success(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while validating session");
+                return Result.Failure<bool>(Error.Failure(code: "ValidationError", description: "An error occurred while validating the session"));
             }
         }
     }
