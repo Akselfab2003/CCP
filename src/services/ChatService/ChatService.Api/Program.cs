@@ -6,8 +6,8 @@ using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
 using ChatService.Api.ChatHub;
 using ChatService.Api.Endpoints;
-using ChatService.Api.Middleware;
 using ChatService.Application.ServiceCollection;
+using ChatService.Application.Services.Domain;
 using ChatService.Infrastructure.Persistence;
 using ChatService.Infrastructure.ServiceCollection;
 using Duende.AccessTokenManagement;
@@ -79,7 +79,10 @@ public partial class Program
         {
             app.AppMapSwaggerExtensions();
             app.UseMiddleware<AuthMiddleware>();
-            app.UseMiddleware<UserSessionMiddleware>();
+            //app.MapWhen(context => context.Request.Path.StartsWithSegments("/chatHub", StringComparison.CurrentCultureIgnoreCase), conf =>
+            //{
+            //    conf.UseMiddleware<UserSessionMiddleware>();
+            //});
             AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
         }
 
@@ -91,8 +94,24 @@ public partial class Program
            .MapConfigurationEndpoints();
 
         app.UseCors();
+        var hubRoute = app.MapHub<ChatHub>("/chatHub");
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            hubRoute.RequireCors(c =>
+            {
+                c.SetIsOriginAllowed(origin =>
+                {
+                    using var scope = app.Services.CreateScope();
+                    var domainservices = scope.ServiceProvider.GetRequiredService<IDomainServices>();
+                    var host = new Uri(origin).Host;
+                    return domainservices.IsDomainAllowed(host);
+                })
+                 .AllowAnyHeader()
+                 .AllowAnyMethod()
+                 .AllowCredentials();
+            });
+        }
 
-        app.MapHub<ChatHub>("/chatHub");
 
 
 

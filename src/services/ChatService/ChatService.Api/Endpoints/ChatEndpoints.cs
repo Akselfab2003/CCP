@@ -2,6 +2,7 @@
 using ChatService.Application.Models;
 using ChatService.Application.Services.Chat;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatService.Api.Endpoints
 {
@@ -19,7 +20,15 @@ namespace ChatService.Api.Endpoints
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status401Unauthorized);
 
+            chatGroup.MapPost("/test", testsignalR);
+
+
             return builder;
+        }
+
+        private static async Task testsignalR([FromServices] IHubContext<ChatHub.ChatHub> hubContext, [FromQuery] string session, [FromQuery] string domain, [FromQuery] string message)
+        {
+            await hubContext.Clients.Group($"{domain}:{session}").SendAsync("test", message);
         }
 
         private static async Task<IResult> SendMessage([FromServices] IChatManagementService chatManagement, [FromBody] ChatMessageRequest request)

@@ -21,11 +21,21 @@ namespace ChatService.Api.ChatHub
             var HttpContext = Context.GetHttpContext();
             if (HttpContext == null) Context.Abort();
 
-            var origin = HttpContext!.Request.Headers.Origin.First();
-            if (!HttpContext.Request.Cookies.TryGetValue("SessionId", out var SessionIdCookie)) Context.Abort();
+
+            var cookie = HttpContext!.Request.Cookies["SessionId"];
+
+            var origin = HttpContext!.Request.Headers["Origin"].FirstOrDefault();
+            if (origin == null || cookie == null) Context.Abort();
+
             var host = new Uri(origin!).Host;
-            var sessionId = Guid.Parse(SessionIdCookie!);
-            var validateConnectionResult = await _domainServices.ValidateConnection(sessionId, host);
+            var validateConnectionResult = await _domainServices.ValidateConnection(Guid.Parse(cookie!), host);
+            _activeSession.SetSessionId(Guid.Parse(cookie!));
+            var domainDetails = await _domainServices.GetDomainDetails(host);
+            if (domainDetails != null && domainDetails.IsSuccess)
+            {
+                _activeSession.SetHost(host);
+                _activeSession.SetOrgId(domainDetails.Value.OrgId);
+            }
 
             if (validateConnectionResult is null || validateConnectionResult.IsFailure)
             {

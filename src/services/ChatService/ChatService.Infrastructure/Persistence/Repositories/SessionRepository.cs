@@ -36,7 +36,7 @@ namespace ChatService.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var session = await _context.Sessions.SingleOrDefaultAsync(s => s.SessionId == sessionId, ct);
+                var session = await _context.Sessions.IgnoreQueryFilters().SingleOrDefaultAsync(s => s.SessionId == sessionId, ct);
 
                 return session is null
                     ? Result.Failure<SessionEntity>(Error.NotFound("SessionNotFound", $"No session found with ID: {sessionId}"))
