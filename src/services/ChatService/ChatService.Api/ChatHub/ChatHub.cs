@@ -18,6 +18,14 @@ namespace ChatService.Api.ChatHub
             _parser = parser;
         }
 
+
+        public async Task SendMessageToChatBot(string conversationId, string message)
+        {
+            var key = $"{_activeSession.Host}:{_activeSession.SessionId}";
+            await Clients.Group(key).SendAsync("ReceiveMessage", conversationId, message);
+        }
+
+
         public override async Task OnConnectedAsync()
         {
             var HttpContext = Context.GetHttpContext();

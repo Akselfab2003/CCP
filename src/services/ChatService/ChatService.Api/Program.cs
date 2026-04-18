@@ -3,9 +3,9 @@ using CCP.ServiceDefaults;
 using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
-using CCP.Shared.AuthContext;
 using ChatService.Api.ChatHub;
 using ChatService.Api.Endpoints;
+using ChatService.Api.Middleware;
 using ChatService.Application.ServiceCollection;
 using ChatService.Application.Services.Domain;
 using ChatService.Infrastructure.Persistence;
@@ -75,27 +75,8 @@ public partial class Program
 
         var app = builder.Build();
 
-        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
-        {
-            app.AppMapSwaggerExtensions();
-            app.UseMiddleware<AuthMiddleware>();
-            //app.MapWhen(context => context.Request.Path.StartsWithSegments("/chat/createConversation", StringComparison.CurrentCultureIgnoreCase), conf =>
-            //{
-            //    //conf.UseMiddleware<UserSessionMiddleware>();
-
-            //    conf.UseCors();
-            //});
-            AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
-        }
-
-        app.MapOpenApi();
-        app.MapControllers();
-        app.MapSessionEndpoints()
-           .MapFaqManagementEndpoints()
-           .MapChatEndpoints()
-           .MapConfigurationEndpoints();
-
         app.UseCors();
+
         var hubRoute = app.MapHub<ChatHub>("/chatHub");
         if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         {
@@ -110,9 +91,29 @@ public partial class Program
                 })
                  .AllowAnyHeader()
                  .AllowAnyMethod()
-                 .AllowCredentials();
+                  .AllowCredentials();
             });
         }
+
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            app.AppMapSwaggerExtensions();
+            // app.UseMiddleware<AuthMiddleware>();
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/chatHub", StringComparison.CurrentCultureIgnoreCase), conf =>
+            {
+                conf.UseMiddleware<UserSessionMiddleware>();
+
+            });
+            AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
+        }
+
+        app.MapOpenApi();
+        app.MapControllers();
+        app.MapSessionEndpoints()
+           .MapFaqManagementEndpoints()
+           .MapChatEndpoints()
+           .MapConfigurationEndpoints();
+
 
 
 
