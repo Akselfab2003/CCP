@@ -9,33 +9,27 @@ namespace ChatService.Api.ChatHub
         private readonly ILogger<ChatHub> _logger;
         private readonly IDomainServices _domainServices;
         private readonly IActiveSession _activeSession;
-        public ChatHub(ILogger<ChatHub> logger, IDomainServices domainServices, IActiveSession activeSession)
+        private readonly IAuthParser _parser;
+        public ChatHub(ILogger<ChatHub> logger, IDomainServices domainServices, IActiveSession activeSession, IAuthParser parser)
         {
             _logger = logger;
             _domainServices = domainServices;
             _activeSession = activeSession;
+            _parser = parser;
         }
 
         public override async Task OnConnectedAsync()
         {
             var HttpContext = Context.GetHttpContext();
-            if (HttpContext == null) Context.Abort();
 
-
-            var cookie = HttpContext!.Request.Cookies["SessionId"];
-
-            var origin = HttpContext!.Request.Headers["Origin"].FirstOrDefault();
-            if (origin == null || cookie == null) Context.Abort();
-
-            var host = new Uri(origin!).Host;
-            var validateConnectionResult = await _domainServices.ValidateConnection(Guid.Parse(cookie!), host);
-            _activeSession.SetSessionId(Guid.Parse(cookie!));
-            var domainDetails = await _domainServices.GetDomainDetails(host);
-            if (domainDetails != null && domainDetails.IsSuccess)
+            var parseResult = await _parser.ParseContext(HttpContext!);
+            if (parseResult == null || parseResult.IsFailure)
             {
-                _activeSession.SetHost(host);
-                _activeSession.SetOrgId(domainDetails.Value.OrgId);
+                Context.Abort();
+                return;
             }
+
+            var validateConnectionResult = await _domainServices.ValidateConnection(_activeSession.SessionId, _activeSession.Host);
 
             if (validateConnectionResult is null || validateConnectionResult.IsFailure)
             {
@@ -45,6 +39,7 @@ namespace ChatService.Api.ChatHub
             {
                 var key = $"{_activeSession.Host}:{_activeSession.SessionId}";
                 await Groups.AddToGroupAsync(Context.ConnectionId, key);
+
                 await base.OnConnectedAsync();
             }
         }

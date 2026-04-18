@@ -79,15 +79,17 @@ public partial class Program
         {
             app.AppMapSwaggerExtensions();
             app.UseMiddleware<AuthMiddleware>();
-            //app.MapWhen(context => context.Request.Path.StartsWithSegments("/chatHub", StringComparison.CurrentCultureIgnoreCase), conf =>
+            //app.MapWhen(context => context.Request.Path.StartsWithSegments("/chat/createConversation", StringComparison.CurrentCultureIgnoreCase), conf =>
             //{
-            //    conf.UseMiddleware<UserSessionMiddleware>();
+            //    //conf.UseMiddleware<UserSessionMiddleware>();
+
+            //    conf.UseCors();
             //});
             AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
         }
 
         app.MapOpenApi();
-
+        app.MapControllers();
         app.MapSessionEndpoints()
            .MapFaqManagementEndpoints()
            .MapChatEndpoints()

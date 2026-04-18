@@ -16,7 +16,8 @@ namespace ChatService.Application.ServiceCollection
 
             services.AddScoped<IActiveSession, ActiveSession>()
                     .AddScoped<IChatManagementService, ChatManagementService>()
-                    .AddScoped<IDomainServices, DomainServices>();
+                    .AddScoped<IDomainServices, DomainServices>()
+                    .AddScoped<IAuthParser, AuthParser>();
 
             return services;
         }

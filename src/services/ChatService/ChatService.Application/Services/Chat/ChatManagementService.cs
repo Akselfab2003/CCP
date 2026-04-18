@@ -75,6 +75,33 @@ namespace ChatService.Application.Services.Chat
             }
         }
 
+        public async Task<Result<Guid>> CreateConversation(Guid SessionId)
+        {
+            try
+            {
+                var newConversation = new ConversationEntity
+                {
+                    Id = Guid.NewGuid(),
+                    OrgId = _activeSession.OrgId,
+                    SessionId = SessionId,
+                    CreatedAt = DateTime.UtcNow,
+                };
+                var addConversationResult = await _conversationRepository.AddConversation(newConversation);
+                if (addConversationResult.IsFailure)
+                {
+                    return Result.Failure<Guid>(Error.Failure(code: "FailedToCreateConversation", description: "Failed to create a new conversation."));
+                }
+                return Result.Success(newConversation.Id);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating a new conversation.");
+                return Result.Failure<Guid>(Error.Failure(code: "CreateConversationError", description: "An error occurred while creating the conversation."));
+            }
+
+        }
+
 
         private async Task<Result<string>> CreateNewConversation(Guid SessionId, string InitialMessage)
         {
