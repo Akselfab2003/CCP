@@ -21,8 +21,8 @@ namespace EmailService.Worker.Host.Services
 
             // TODO: Make the username and password dynamic by reading from Database
 
-            await client.ConnectAsync(_configuration.GetValue<string>("emailWorkerServiceHostUrl"), 143, false);
-            await client.AuthenticateAsync(_configuration.GetValue<string>("emailWorkerServiceUsername"), _configuration.GetValue<string>("emailWorkerServicePassword"));
+            await client.ConnectAsync(_configuration.GetValue<string>("emailWorkerServiceHostUrl")!, 143, false);
+            await client.AuthenticateAsync(_configuration.GetValue<string>("emailWorkerServiceUsername")!, _configuration.GetValue<string>("emailWorkerServicePassword")!);
 
             var folders = await client.GetFoldersAsync(client.PersonalNamespaces[0]);
             var folder = folders.FirstOrDefault(f => f.FullName == FullFolderName);
