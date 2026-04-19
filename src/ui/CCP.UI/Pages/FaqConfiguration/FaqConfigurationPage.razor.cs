@@ -14,6 +14,8 @@ namespace CCP.UI.Pages.FaqConfiguration
         }
 
         private readonly List<FaqModel> _faqEntries = [];
+        private int ExpandedFaqId = 0;
+        //private bool IsCreatingNewEntry = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -26,6 +28,37 @@ namespace CCP.UI.Pages.FaqConfiguration
             {
 
             }
+        }
+
+        private void ToggleFaqEntry(int faqId)
+        {
+            if (ExpandedFaqId == faqId)
+            {
+                ExpandedFaqId = 0; // Collapse if the same entry is clicked
+            }
+            else
+            {
+                ExpandedFaqId = faqId; // Expand the clicked entry
+            }
+        }
+
+        private async Task DeleteFaqEntry(int faqId)
+        {
+
+
+        }
+
+        private async Task SaveFaqEntry(FaqModel faqEntry)
+        {
+        }
+
+        private async Task CreateFaqEntry()
+        {
+        }
+
+        private async Task CancelEdit()
+        {
+            ExpandedFaqId = 0;
         }
     }
 }

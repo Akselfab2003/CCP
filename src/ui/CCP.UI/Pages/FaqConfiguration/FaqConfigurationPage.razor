@@ -1,5 +1,6 @@
 ﻿@page "/faq-configuration"
 @layout CCPLayout
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
 <div class="container-shell">
@@ -45,8 +46,8 @@
                 <div class="faq-rows">
                     @foreach (var faq in _faqEntries)
                     {
-                        <div class="faq-row">
-                            <div class="faq-row-main" onclick="toggleExpand(this)">
+                        <div class="faq-row @(ExpandedFaqId == faq.Id ? "expanded" : "")">
+                            <div class="faq-row-main" @onclick="() => ToggleFaqEntry(faq.Id)" @onclick:preventDefault="true">
                                 <div class="row-question">
                                     <div class="question-text">@faq.Question</div>
                                 </div>
@@ -54,42 +55,45 @@
                                     <span class="badge">@faq.Category</span>
                                 </div>
                                 <div class="row-actions">
-                                    <button class="icon-btn edit-btn" title="Edit this question" onclick="event.stopPropagation(); toggleExpand(this.closest('.faq-row-main'));">
+                                    <button class="icon-btn edit-btn" title="Edit this question" @onclick="() => ToggleFaqEntry(faq.Id)" @onclick:preventDefault="false">
                                         <svg viewBox="0 0 16 16" fill="none"><path d="M2 13.5h1.5L11 5.5 9.5 4 2 11.5V13.5Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </button>
-                                    <button class="icon-btn delete-btn" title="Delete this question" onclick="event.stopPropagation();">
+                                    <button class="icon-btn delete-btn" title="Delete this question" @onclick="() => DeleteFaqEntry(faq.Id)">
                                         <svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4l1 8h4l1-8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </button>
                                 </div>
                             </div>
-                            <div class="faq-expand">
-                                <div class="expand-content">
-                                    <div class="expand-grid">
-                                        <div class="field">
-                                            <label class="field-label">Question</label>
-                                            <input type="text" class="field-input" value="@faq.Question" placeholder="Enter question">
+                            @if (ExpandedFaqId == faq.Id)
+                            {
+                                <div class="faq-expand">
+                                    <div class="expand-content">
+                                        <div class="expand-grid">
+                                            <div class="field">
+                                                <label class="field-label">Question</label>
+                                                <input type="text" class="field-input" value="@faq.Question" placeholder="Enter question">
+                                            </div>
+                                            <div class="field">
+                                                <label class="field-label">Answer</label>
+                                                <textarea class="field-input" placeholder="Enter answer">@faq.Answer</textarea>
+                                            </div>
+                                            <div class="field">
+                                                <label class="field-label">Category</label>
+                                                <select class="field-input">
+                                                    <option>General</option>
+                                                    <option>Pricing</option>
+                                                    <option>Technical</option>
+                                                    <option>Account</option>
+                                                    <option>Policies</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="field">
-                                            <label class="field-label">Answer</label>
-                                            <textarea class="field-input" placeholder="Enter answer">@faq.Answer</textarea>
+                                        <div class="expand-footer">
+                                            <button class="btn btn-primary" @onclick="() => SaveFaqEntry(faq)">Save Changes</button>
+                                            <button class="btn btn-secondary" @onclick="() => CancelEdit()">Cancel</button>
                                         </div>
-                                        <div class="field">
-                                            <label class="field-label">Category</label>
-                                            <select class="field-input">
-                                                <option>General</option>
-                                                <option>Pricing</option>
-                                                <option>Technical</option>
-                                                <option>Account</option>
-                                                <option>Policies</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="expand-footer">
-                                        <button class="btn btn-primary" onclick="saveFAQ(event)">Save Changes</button>
-                                        <button class="btn btn-secondary" onclick="event.stopPropagation(); cancelEdit(this)">Cancel</button>
                                     </div>
                                 </div>
-                            </div>
+                            }
                         </div>
                     }
                 </div>
