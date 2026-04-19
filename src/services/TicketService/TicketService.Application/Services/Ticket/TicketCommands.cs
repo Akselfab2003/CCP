@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using TicketService.Application.Services.Assignment;
+using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
 
@@ -11,12 +12,15 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands)
+        private readonly ITicketHistoryRepository _historyRepository;
+
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _assignmentCommands = assignmentCommands;
+            _historyRepository = historyRepository;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -68,12 +72,42 @@ namespace TicketService.Application.Services.Ticket
                     _logger.LogError("Failed to update status for ticket {TicketId}: {Error}", ticketId, result.Error);
                     return result;
                 }
+
+                await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                    ticketId,
+                    actorUserId: null,
+                    eventType: "StatusChanged",
+                    oldValue: null,
+                    newValue: newStatus.ToString()
+                ));
+
                 return Result.Success();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating status for ticket {TicketId}.", ticketId);
                 return Result.Failure(Error.Failure("StatusUpdateFailed", "An error occurred while updating the ticket status."));
+            }
+        }
+
+        public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet)
+        {
+            try
+            {
+                var snippet = messageSnippet.Length > 120 ? messageSnippet[..120] : messageSnippet;
+                await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                    ticketId,
+                    actorUserId: senderUserId,
+                    eventType: "MessageSent",
+                    oldValue: null,
+                    newValue: snippet
+                ));
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while recording message history for ticket {TicketId}.", ticketId);
+                return Result.Failure(Error.Failure("RecordMessageFailed", "An error occurred while recording message history."));
             }
         }
     }

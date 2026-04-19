@@ -1,6 +1,7 @@
-using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
+using Wolverine;
 
 namespace TicketService.Application.Services.Assignment
 {
@@ -10,20 +11,23 @@ namespace TicketService.Application.Services.Assignment
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly ICurrentUser _currentUser;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMessageBus _messageBus;
+        private readonly ITicketHistoryRepository _historyRepository;
 
         public AssignmentCommands(
             ILogger<AssignmentCommands> logger,
             IAssignmentRepository assignmentRepository,
             ITicketRepositoryCommands ticketRepository,
             ICurrentUser currentUser,
-            IHttpClientFactory httpClientFactory)
+            IMessageBus messageBus,
+            ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _assignmentRepository = assignmentRepository;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
-            _httpClientFactory = httpClientFactory;
+            _messageBus = messageBus;
+            _historyRepository = historyRepository;
         }
 
         public async Task<Result<Guid>> CreateAssignmentAsync(int ticketId, Guid AssignUserId)
@@ -92,6 +96,14 @@ namespace TicketService.Application.Services.Assignment
                         _logger.LogWarning("Assignment saved but could not update AssignmentId on ticket {TicketId}: {Error}", ticketId, ticketResult.Error);
                     }
 
+                    await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                        ticketId,
+                        actorUserId: assignUserId,
+                        eventType: "AssignedToSupporter",
+                        oldValue: null,
+                        newValue: null
+                    ));
+
                     await NotifyAssignmentAsync(ticketId, assignUserId);
                 }
 
@@ -108,8 +120,13 @@ namespace TicketService.Application.Services.Assignment
         {
             try
             {
-                var client = _httpClientFactory.CreateClient("MessagingService");
-                await client.PostAsJsonAsync("api/ticket-notifications/assignment-updated", new { ticketId, assignedUserId });
+                var assignmentUpdateEvent = new CCP.Shared.Events.TicketAssignmentUpdated
+                {
+                    ticketId = ticketId,
+                    assignedUserId = assignedUserId
+                };
+
+                await _messageBus.PublishAsync(assignmentUpdateEvent);
             }
             catch (Exception ex)
             {

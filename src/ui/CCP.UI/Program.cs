@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TicketService.Sdk.ServiceDefaults;
 
@@ -43,18 +44,23 @@ namespace CCP.UI
             var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"{keycloakURL}/realms/CCP/.well-known/openid-configuration";
 
 
-            builder.Services.AddAuthentication(options =>
+            if (builder.Configuration.GetValue<bool>("UI_TESTS", defaultValue: false))
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            }).AddCookie(options =>
+                builder.Services.AddAuthenticationCore();
+            }
+            else
             {
-                options.SlidingExpiration = false;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
-                options.AccessDeniedPath = "/";
-            })
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                }).AddCookie(options =>
+                {
+                    options.SlidingExpiration = false;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+                })
             .AddOpenIdConnect(options =>
             {
                 options.Authority = $"{keycloakURL}/realms/CCP";
@@ -93,6 +99,8 @@ namespace CCP.UI
                     };
                 }
             });
+            }
+
 
             //Authorization Policies
             builder.Services.AddAuthorization(options =>
@@ -102,7 +110,7 @@ namespace CCP.UI
                 options.AddPolicy("RequireManager", policy => policy.RequireRole(
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireSupporter", policy =>policy.RequireRole(
+                options.AddPolicy("RequireSupporter", policy => policy.RequireRole(
                     UserRolesExtensions.SupporterRoleString,
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
@@ -173,8 +181,14 @@ namespace CCP.UI
                 return loginChallenged;
             });
 
-            app.MapGet("/authentication/logout", async (HttpContext context) =>
+            app.MapGet("/authentication/logout", async (HttpContext context, IMemoryCache memoryCache) =>
             {
+                // Evict the cached access token before signing out so that re-login always fetches a fresh token rather than serving the stale cached one.
+                var sub = context.User.FindFirst("sub")?.Value
+                       ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (sub is not null)
+                    memoryCache.Remove($"user_token:{sub}:");
+
                 await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties
                 {

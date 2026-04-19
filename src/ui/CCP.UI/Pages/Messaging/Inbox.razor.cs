@@ -1,11 +1,12 @@
 ﻿using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
+using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
-using TicketService.Sdk.Services.TicketSdk;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Pages.Messaging;
 
@@ -14,9 +15,9 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     [Inject] private ChatHubService HubService { get; set; } = default!;
     [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private ILogger<Inbox> Logger { get; set; } = default!;
-    [Inject] private IdentityService.Sdk.Services.User.IUserService UserService { get; set; } = default!;
+    [Inject] private IUserService UserService { get; set; } = default!;
 
     [SupplyParameterFromQuery(Name = "ticketId")]
     [Parameter] public int? TicketId { get; set; }
@@ -77,14 +78,14 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         var allTickets = new List<TicketSdkDto>();
 
         // Get tickets assigned to the user (supporter role)
-        var assignedResult = await TicketSdkService.GetTicketsAsync(assignedUserId: userId);
+        var assignedResult = await TicketService.GetTickets(assignedUserId: userId);
         if (assignedResult.IsSuccess && assignedResult.Value is not null)
         {
             allTickets.AddRange(assignedResult.Value);
         }
 
         // Get tickets created by the user (customer role)
-        var customerResult = await TicketSdkService.GetTicketsAsync(customerId: userId);
+        var customerResult = await TicketService.GetTickets(CustomerId: userId);
         if (customerResult.IsSuccess && customerResult.Value is not null)
         {
             // Only add tickets we don't already have (avoid duplicates)
@@ -296,7 +297,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         // Fetch the ticket directly and inject it if found.
         if (UserContext.IsInternalUser)
         {
-            var result = await TicketSdkService.GetTicketAsync(ticketId);
+            var result = await TicketService.GetTicket(ticketId);
             if (result.IsSuccess)
             {
                 _tickets.Insert(0, result.Value);
@@ -389,7 +390,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     private async Task UpdateTicketStatusAsync(TicketStatus newStatus)
     {
         if (_activeTicketId is null) return;
-        var result = await TicketSdkService.UpdateTicketStatusAsync(_activeTicketId.Value, newStatus);
+        var result = await TicketService.UpdateTicketStatusAsync(_activeTicketId.Value, newStatus);
         if (result.IsSuccess)
         {
             var ticket = _tickets.FirstOrDefault(t => t.Id == _activeTicketId);

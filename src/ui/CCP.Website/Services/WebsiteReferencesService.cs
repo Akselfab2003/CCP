@@ -1,6 +1,6 @@
 ﻿namespace CCP.Website.Services
 {
-    public class WebsiteReferencesService
+    public class WebsiteReferencesService : IWebsiteReferencesService
     {
         private string SassServiceUrl { get; set; }
 

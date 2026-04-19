@@ -4,19 +4,21 @@ using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
-using TicketService.Sdk.Services.TicketSdk;
+using TicketService.Sdk.Services.Assignment;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Pages.Tickets;
 
 public partial class TicketOverview : ComponentBase
 {
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private ITicketService TicketService { get; set; } = default!;
+    [Inject] private IAssignmentService AssignmentService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private ILogger<TicketOverview> Logger { get; set; } = default!;
 
-    // ── Tickets ──────────────────────────────────────────────────────────
+    // Tickets
     private List<TicketSdkDto> _tickets = new();
     private List<TicketSdkDto> _filteredTickets = new();
     private string _statusFilter = "Open";
@@ -24,18 +26,18 @@ public partial class TicketOverview : ComponentBase
     private string? _errorMessage;
     private bool _isAssigning;
 
-    // ── User name cache: AssignedUserId → display name ───────────────────
+    // User name cache: AssignedUserId → display name
     private Dictionary<Guid, string> _userNames = new();
     private bool _isLoadingNames;
 
-    // ── Pagination ────────────────────────────────────────────────────────
+    // Pagination
     private const int PageSize = 25;
     private int _currentPage = 1;
     private int TotalPages => (int)Math.Ceiling(_filteredTickets.Count / (double)PageSize);
     private IEnumerable<TicketSdkDto> PagedTickets =>
         _filteredTickets.Skip((_currentPage - 1) * PageSize).Take(PageSize);
 
-    // ── Side panel ────────────────────────────────────────────────────────
+    // Side panel
     private TicketSdkDto? _selectedTicket;
     private bool _isPanelOpen;
     private bool _isUpdatingAssignment;
@@ -50,8 +52,6 @@ public partial class TicketOverview : ComponentBase
 
     private bool CanGoToInbox(TicketSdkDto ticket) =>
         IsManager || ticket.AssignedUserId == UserContext.UserId;
-
-    // ─────────────────────────────────────────────────────────────────────
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +72,7 @@ public partial class TicketOverview : ComponentBase
         _isLoading = true;
         _errorMessage = null;
 
-        var result = await TicketSdkService.GetTicketsAsync();
+        var result = await TicketService.GetTickets();
 
         if (result.IsSuccess && result.Value is not null)
         {
@@ -80,8 +80,14 @@ public partial class TicketOverview : ComponentBase
         }
         else
         {
-            Logger.LogError("Failed to load tickets: {Error}", result.Error);
-            _errorMessage = "Failed to load tickets. Please try again.";
+            Logger.LogError(
+                "TicketOverview failed to load tickets for user {UserId} (role: {Role}). " +
+                "Code: {ErrorCode} | Description: {ErrorDescription}",
+                UserContext.UserId,
+                UserContext.Role,
+                result.Error.Code,
+                result.Error.Description);
+            _errorMessage = $"Failed to load tickets ({result.Error.Code}: {result.Error.Description})";
             _tickets = new();
         }
 
@@ -133,7 +139,7 @@ public partial class TicketOverview : ComponentBase
         return _isLoadingNames ? "Loading..." : userId.Value.ToString()[..8] + "…";
     }
 
-    // ── Filter ────────────────────────────────────────────────────────────
+    // Filter
 
     private void ApplyFilter()
     {
@@ -157,7 +163,7 @@ public partial class TicketOverview : ComponentBase
         ApplyFilter();
     }
 
-    // ── Pagination ────────────────────────────────────────────────────────
+    // Pagination
 
     private void GoToPage(int page)
     {
@@ -166,7 +172,7 @@ public partial class TicketOverview : ComponentBase
         StateHasChanged();
     }
 
-    // ── Assignment ────────────────────────────────────────────────────────
+    // Assignment
 
     private async Task SelfAssignAsync(int ticketId)
     {
@@ -174,7 +180,7 @@ public partial class TicketOverview : ComponentBase
         _isAssigning = true;
         _errorMessage = null;
 
-        var result = await TicketSdkService.AssignTicketAsync(ticketId, UserContext.UserId);
+        var result = await AssignmentService.AssignTicketToUserAsync(ticketId, UserContext.UserId);
 
         if (result.IsSuccess)
         {
@@ -193,7 +199,7 @@ public partial class TicketOverview : ComponentBase
         _isAssigning = false;
     }
 
-    // ── Side panel ────────────────────────────────────────────────────────
+    // Side panel
 
     private void OpenPanel(TicketSdkDto ticket)
     {
@@ -236,7 +242,7 @@ public partial class TicketOverview : ComponentBase
         if (_selectedTicket is null || _isUpdatingAssignment) return;
         _isUpdatingAssignment = true;
 
-        var result = await TicketSdkService.AssignTicketAsync(_selectedTicket.Id, supporterUserId);
+        var result = await AssignmentService.AssignTicketToUserAsync(_selectedTicket.Id, supporterUserId);
         if (result.IsSuccess)
         {
             // Update both _selectedTicket and the matching entry in _tickets
@@ -278,7 +284,7 @@ public partial class TicketOverview : ComponentBase
     private void NavigateToInbox(int ticketId) =>
         NavigationManager.NavigateTo($"/inbox?ticketId={ticketId}");
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // Helpers
 
     private string GetStatusLabel(int status) => status switch
     {
@@ -300,7 +306,6 @@ public partial class TicketOverview : ComponentBase
         _ => "tag-slate"
     };
 
-    // CSS class for the assigned-to pill based on who the assignee is
     private string GetAssigneePillClass(Guid? userId)
     {
         if (userId is null) return "to-assigned-unassigned";

@@ -13,15 +13,16 @@ namespace TicketService.Infrastructure.Persistence
             _currentUser = this.GetService<ICurrentUser>();
         }
 
-        public DbSet<Domain.Entities.Ticket> Tickets => Set<Domain.Entities.Ticket>();
-        public DbSet<Domain.Entities.Assignment> Assignments => Set<Domain.Entities.Assignment>();
+        public DbSet<Ticket> Tickets => Set<Ticket>();
+        public DbSet<Assignment> Assignments => Set<Assignment>();
+        public DbSet<TicketHistoryEntry> TicketHistory => Set<TicketHistoryEntry>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
             modelBuilder.ApplyConfiguration<Ticket>(new TicketEntityConfiguration());
             modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
-            if (_currentUser != null)
-                modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
+            modelBuilder.ApplyConfiguration<TicketHistoryEntry>(new TicketHistoryEntryConfiguration());
         }
     }
 }

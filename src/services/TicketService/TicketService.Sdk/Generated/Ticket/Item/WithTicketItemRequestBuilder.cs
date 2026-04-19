@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using TicketService.Sdk.Ticket.Item.History;
 using TicketService.Sdk.Ticket.Item.Status;
 namespace TicketService.Sdk.Ticket.Item
 {
@@ -15,6 +16,11 @@ namespace TicketService.Sdk.Ticket.Item
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     internal partial class WithTicketItemRequestBuilder : BaseRequestBuilder
     {
+        /// <summary>The history property</summary>
+        public global::TicketService.Sdk.Ticket.Item.History.HistoryRequestBuilder History
+        {
+            get => new global::TicketService.Sdk.Ticket.Item.History.HistoryRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The status property</summary>
         public global::TicketService.Sdk.Ticket.Item.Status.StatusRequestBuilder Status
         {
