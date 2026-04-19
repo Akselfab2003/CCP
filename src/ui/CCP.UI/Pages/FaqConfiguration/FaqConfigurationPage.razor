@@ -1,4 +1,7 @@
 ﻿@page "/faq-configuration"
+@layout CCPLayout
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
 <div class="container-shell">
     <div class="content">
         <div class="header">
