@@ -65,5 +65,83 @@ namespace ChatService.Infrastructure.Persistence.Repositories
                 return Result.Failure<List<FaqEntity>>(Error.Failure("FaqRetrievalFailed", "An error occurred while retrieving FAQ entries."));
             }
         }
+
+        public async Task<Result> UpdateAsync(FaqEntity faq, CancellationToken ct = default)
+        {
+            try
+            {
+                var existingFaq = await _context.FaqEntries.SingleOrDefaultAsync(f => f.Id == faq.Id, cancellationToken: ct);
+                if (existingFaq == null)
+                {
+                    return Result.Failure(Error.NotFound("FaqNotFound", $"No FAQ entry found with ID: {faq.Id}"));
+                }
+                existingFaq.Question = faq.Question;
+                existingFaq.Answer = faq.Answer;
+                existingFaq.Embedding = faq.Embedding;
+                existingFaq.Category = faq.Category;
+                await _context.SaveChangesAsync(ct);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not update FAQ entry with ID: {Id}", faq.Id);
+                return Result.Failure(Error.Failure("FaqUpdateFailed", "An error occurred while updating the FAQ entry."));
+            }
+        }
+
+        public async Task<Result<FaqEntity>> GetByIdAsync(int id, CancellationToken ct = default)
+        {
+            try
+            {
+                var faq = await _context.FaqEntries.SingleOrDefaultAsync(f => f.Id == id, cancellationToken: ct);
+                if (faq == null)
+                {
+                    return Result.Failure<FaqEntity>(Error.NotFound("FaqNotFound", $"No FAQ entry found with ID: {id}"));
+                }
+                return Result.Success(faq);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not retrieve FAQ entry with ID: {Id}", id);
+                return Result.Failure<FaqEntity>(Error.Failure("FaqRetrievalFailed", "An error occurred while retrieving the FAQ entry."));
+            }
+        }
+
+
+        public async Task<Result> DeleteAsync(int id, CancellationToken ct = default)
+        {
+            try
+            {
+                var faq = await _context.FaqEntries.SingleAsync(f => f.Id == id, cancellationToken: ct);
+                if (faq == null)
+                {
+                    return Result.Failure(Error.NotFound("FaqNotFound", $"No FAQ entry found with ID: {id}"));
+                }
+                _context.FaqEntries.Remove(faq);
+                await _context.SaveChangesAsync(ct);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not delete FAQ entry with ID: {Id}", id);
+                return Result.Failure(Error.Failure("FaqDeleteFailed", "An error occurred while deleting the FAQ entry."));
+            }
+        }
+
+        public async Task<Result<List<FaqEntity>>> SearchFaqAsync(string query, CancellationToken ct = default)
+        {
+            try
+            {
+                var faqs = await _context.FaqEntries
+                    .Where(f => f.Question.Contains(query) || f.Answer.Contains(query))
+                    .ToListAsync(ct);
+                return Result.Success(faqs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not search FAQ entries with query: {Query}", query);
+                return Result.Failure<List<FaqEntity>>(Error.Failure("FaqSearchFailed", "An error occurred while searching FAQ entries."));
+            }
+        }
     }
 }

@@ -82,7 +82,7 @@
     <!-- EMAIL
          MailKit is used by the EmailLibrary / EmailService projects
          for sending and receiving email over SMTP/IMAP -->
-    <PackageVersion Include="MailKit" Version="4.15.1" />
+    <PackageVersion Include="MailKit" Version="4.16.0" />
     <!-- OPENTELEMETRY
          Distributed tracing, metrics, and logging. Used in ServiceDefaults
          and individual services to export telemetry to the Aspire dashboard
