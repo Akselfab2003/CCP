@@ -388,7 +388,7 @@ html, body {
     flex: 1;
     padding: 10px 14px;
     border: 1px solid var(--ccp-border);
-    background: var(--ccp-bg-sidebar);
+    background: var(--ccp-bg-content);
     font-size: 14px;
     color: var(--ccp-text-hi);
     outline: none;
