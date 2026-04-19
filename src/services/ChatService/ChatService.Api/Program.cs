@@ -3,6 +3,7 @@ using CCP.ServiceDefaults;
 using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
+using CCP.Shared.AuthContext;
 using ChatService.Api.ChatHub;
 using ChatService.Api.Endpoints;
 using ChatService.Api.Middleware;
@@ -102,7 +103,7 @@ public partial class Program
         if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         {
             app.AppMapSwaggerExtensions();
-            // app.UseMiddleware<AuthMiddleware>();
+            app.UseMiddleware<AuthMiddleware>();
             app.UseWhen(context => context.Request.Path.StartsWithSegments("/chatHub", StringComparison.CurrentCultureIgnoreCase), conf =>
             {
                 conf.UseMiddleware<UserSessionMiddleware>();

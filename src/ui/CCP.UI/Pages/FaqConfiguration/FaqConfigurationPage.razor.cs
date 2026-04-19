@@ -7,16 +7,19 @@ namespace CCP.UI.Pages.FaqConfiguration
     public partial class FaqConfigurationPage : ComponentBase
     {
         private readonly IFaqService _faqService;
-
-        public FaqConfigurationPage(IFaqService faqService)
+        private readonly IDomainService _domainService;
+        public FaqConfigurationPage(IFaqService faqService, IDomainService domainService)
         {
             _faqService = faqService;
+            _domainService = domainService;
         }
 
         private readonly List<FaqModel> _faqEntries = [];
         private int ExpandedFaqId = 0;
         private bool IsCreatingNewEntry = false;
         private FaqModel? NewFaqEntry { get; set; }
+
+        private string Domain { get; set; } = string.Empty;
 
         private void StartCreateFaq()
         {
@@ -31,9 +34,11 @@ namespace CCP.UI.Pages.FaqConfiguration
             {
                 _faqEntries.AddRange(result.Value);
             }
-            else
-            {
 
+            var domain = await _domainService.GetDomain();
+            if (domain.IsSuccess)
+            {
+                Domain = domain.Value;
             }
         }
 
@@ -89,6 +94,17 @@ namespace CCP.UI.Pages.FaqConfiguration
             {
 
 
+            }
+        }
+
+        public async Task SaveUpdatedDomain()
+        {
+            try
+            {
+                var result = await _domainService.AddOrUpdateDomain(Domain);
+            }
+            catch (Exception)
+            {
             }
         }
 

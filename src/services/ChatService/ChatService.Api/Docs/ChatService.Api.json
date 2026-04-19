@@ -509,12 +509,12 @@
         }
       }
     },
-    "/configuration/AddDomain": {
+    "/configuration/AddOrUpdateDomain": {
       "post": {
         "tags": [
           "Configuration"
         ],
-        "operationId": "AddDomain",
+        "operationId": "AddOrUpdateDomain",
         "parameters": [
           {
             "name": "domain",
@@ -528,6 +528,46 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/configuration/getDomain": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "GetDomain",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request",

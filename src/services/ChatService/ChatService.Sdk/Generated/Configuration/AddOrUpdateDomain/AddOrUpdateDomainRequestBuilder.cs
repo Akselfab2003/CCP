@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ChatService.Sdk.Configuration.AddDomain
+namespace ChatService.Sdk.Configuration.AddOrUpdateDomain
 {
     /// <summary>
-    /// Builds and executes requests for operations under \configuration\AddDomain
+    /// Builds and executes requests for operations under \configuration\AddOrUpdateDomain
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    internal partial class AddDomainRequestBuilder : BaseRequestBuilder
+    internal partial class AddOrUpdateDomainRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public AddDomainRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/configuration/AddDomain?domain={domain}", pathParameters)
+        public AddOrUpdateDomainRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/configuration/AddOrUpdateDomain?domain={domain}", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public AddDomainRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/configuration/AddDomain?domain={domain}", rawUrl)
+        public AddOrUpdateDomainRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/configuration/AddOrUpdateDomain?domain={domain}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -40,11 +40,11 @@ namespace ChatService.Sdk.Configuration.AddDomain
         /// <exception cref="global::ChatService.Sdk.Models.ProblemDetails">When receiving a 401 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<Stream?> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder.AddDomainRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream?> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder.AddOrUpdateDomainRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<Stream> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder.AddDomainRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder.AddOrUpdateDomainRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToPostRequestInformation(requestConfiguration);
@@ -59,11 +59,11 @@ namespace ChatService.Sdk.Configuration.AddDomain
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder.AddDomainRequestBuilderPostQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder.AddOrUpdateDomainRequestBuilderPostQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder.AddDomainRequestBuilderPostQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder.AddOrUpdateDomainRequestBuilderPostQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
@@ -74,15 +74,15 @@ namespace ChatService.Sdk.Configuration.AddDomain
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder WithUrl(string rawUrl)
+        public global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder(rawUrl, RequestAdapter);
         }
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         #pragma warning disable CS1591
-        internal partial class AddDomainRequestBuilderPostQueryParameters 
+        internal partial class AddOrUpdateDomainRequestBuilderPostQueryParameters 
         #pragma warning restore CS1591
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -100,7 +100,7 @@ namespace ChatService.Sdk.Configuration.AddDomain
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        internal partial class AddDomainRequestBuilderPostRequestConfiguration : RequestConfiguration<global::ChatService.Sdk.Configuration.AddDomain.AddDomainRequestBuilder.AddDomainRequestBuilderPostQueryParameters>
+        internal partial class AddOrUpdateDomainRequestBuilderPostRequestConfiguration : RequestConfiguration<global::ChatService.Sdk.Configuration.AddOrUpdateDomain.AddOrUpdateDomainRequestBuilder.AddOrUpdateDomainRequestBuilderPostQueryParameters>
         {
         }
     }

@@ -24,12 +24,12 @@ namespace ChatService.Application.Services.Domain
         public async Task<Result> AddOrUpdateDomainDetails(string domain)
         {
             var orgId = _currentUser.OrganizationId;
-            var existingDetailsResult = await _repository.GetDomainDetailsBasedOnDomain(domain);
+            var existingDetailsResult = await _repository.GetDomainDetailsByOrgId(orgId);
             if (existingDetailsResult.IsSuccess)
             {
                 var existingDetails = existingDetailsResult.Value;
                 existingDetails.Domain = domain;
-                return await _repository.AddDomainDetails(existingDetails);
+                return await _repository.UpdateDomainDetails(existingDetails);
             }
             else
             {
@@ -54,6 +54,19 @@ namespace ChatService.Application.Services.Domain
             {
                 _logger.LogError(ex, "Error getting domain details");
                 return Result.Failure<DomainDetails>(Error.Failure(code: "DomainDetailsError", description: "An error occurred while retrieving domain details"));
+            }
+        }
+
+        public async Task<Result<DomainDetails?>> GetDomainDetailsByOrgId()
+        {
+            try
+            {
+                return await _repository.GetDomainDetailsByOrgId(_currentUser.OrganizationId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting domain details by OrgId");
+                return Result.Failure<DomainDetails?>(Error.Failure(code: "DomainDetailsError", description: "An error occurred while retrieving domain details by organization ID"));
             }
         }
 

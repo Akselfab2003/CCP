@@ -31,22 +31,36 @@ namespace ChatService.Infrastructure.Persistence.Repositories
                 return Result.Failure(Error.Failure(code: "AddDomainDetailsError", description: "An error occurred while adding domain details."));
             }
         }
+        public async Task<Result> UpdateDomainDetails(DomainDetails details)
+        {
+            try
+            {
+                _context.DomainDetails.Update(details);
+                await _context.SaveChangesAsync();
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating domain details for OrgId: {OrgId}, Domain: {Domain}", details.OrgId, details.Domain);
+                return Result.Failure(Error.Failure(code: "UpdateDomainDetailsError", description: "An error occurred while updating domain details."));
+            }
+        }
 
-        public async Task<Result<DomainDetails>> GetDomainDetailsByOrgId(Guid orgId)
+        public async Task<Result<DomainDetails?>> GetDomainDetailsByOrgId(Guid orgId)
         {
             try
             {
                 var details = await _context.DomainDetails.FirstOrDefaultAsync(d => d.OrgId == orgId);
                 if (details == null)
                 {
-                    return Result.Failure<DomainDetails>(Error.Failure(code: "DomainDetailsNotFound", description: "Domain details not found for the given organization ID."));
+                    return Result.Failure<DomainDetails?>(Error.Failure(code: "DomainDetailsNotFound", description: "Domain details not found for the given organization ID."));
                 }
-                return Result.Success(details);
+                return details;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving domain details for OrgId: {OrgId}", orgId);
-                return Result.Failure<DomainDetails>(Error.Failure(code: "GetDomainDetailsError", description: "An error occurred while retrieving domain details."));
+                return Result.Failure<DomainDetails?>(Error.Failure(code: "GetDomainDetailsError", description: "An error occurred while retrieving domain details."));
             }
         }
 
