@@ -3,7 +3,7 @@ using ChatService.Sdk.Models;
 
 namespace ChatService.Sdk.Services
 {
-    internal interface IFaqService
+    public interface IFaqService
     {
         Task<Result> CreateNewFaqEntry(string question, string answer);
         Task<Result> DeleteFaq(int id);
