@@ -43,6 +43,11 @@
     padding: 0;
 }
 
+.ccp-content:has(.td-wrap) {
+    padding: 0;
+    overflow: hidden;
+}
+
 /* SIDEBAR */
 .ccp-sidebar {
     width: var(--ccp-sidebar-w);

@@ -50,7 +50,7 @@ public partial class TicketOverview : ComponentBase
 
     private bool IsManager => UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin;
 
-    private bool CanGoToInbox(TicketSdkDto ticket) =>
+    private bool CanGoToTicket(TicketSdkDto ticket) =>
         IsManager || ticket.AssignedUserId == UserContext.UserId;
 
     protected override async Task OnInitializedAsync()
@@ -281,8 +281,8 @@ public partial class TicketOverview : ComponentBase
         StateHasChanged();
     }
 
-    private void NavigateToInbox(int ticketId) =>
-        NavigationManager.NavigateTo($"/inbox?ticketId={ticketId}");
+    private void NavigateToTicket(int ticketId) =>
+        NavigationManager.NavigateTo($"/tickets/{ticketId}");
 
     // Helpers
 

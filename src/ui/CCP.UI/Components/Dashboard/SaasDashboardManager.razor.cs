@@ -156,7 +156,7 @@ public partial class SaasDashboardManager : ComponentBase
     }
 
     private void NavigateToTicket(int ticketId) =>
-        Navigation.NavigateTo($"/inbox?ticketId={ticketId}");
+        Navigation.NavigateTo($"/tickets/{ticketId}");
 
     private static string GetStatusLabel(int status) => status switch
     {

@@ -1,0 +1,592 @@
+﻿/* ==========================================================
+   Layout shell
+   ========================================================== */
+
+.td-wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.td-loading,
+.td-error {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ccp-text-lo);
+}
+
+.td-error {
+    color: #fca5a5;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.td-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* ==========================================================
+   Header  (full width, sits above the body row)
+   ========================================================== */
+
+.td-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1.5px solid var(--ccp-border-mid);
+    background: var(--ccp-bg-sidebar);
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.td-chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.td-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 6px;
+    color: var(--ccp-text-mid);
+    cursor: pointer;
+    padding: 5px 7px;
+    transition: background 0.13s, color 0.13s;
+    flex-shrink: 0;
+}
+
+    .td-back-btn:hover {
+        background: var(--ccp-hover);
+        color: var(--ccp-text-hi);
+    }
+
+.td-chat-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ccp-text-hi);
+}
+
+.td-chat-sub {
+    font-size: 11.5px;
+    color: var(--ccp-text-mid);
+}
+
+.td-chat-header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* Sidebar toggle button */
+.td-sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 6px;
+    color: var(--ccp-text-mid);
+    cursor: pointer;
+    padding: 5px 7px;
+    margin-left: 4px;
+    transition: background 0.13s, color 0.13s, border-color 0.13s;
+    flex-shrink: 0;
+}
+
+    .td-sidebar-toggle:hover {
+        background: var(--ccp-hover);
+        color: var(--ccp-text-hi);
+    }
+
+.td-sidebar-toggle--active {
+    background: var(--ccp-active-bg);
+    border-color: rgba(99,102,241,0.35);
+    color: #a5b4fc;
+}
+
+    .td-sidebar-toggle--active:hover {
+        background: rgba(99,102,241,0.22);
+        color: #c7d2fe;
+    }
+
+/* ==========================================================
+   Tags
+   ========================================================== */
+
+.td-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 4px;
+}
+
+.td-tag-red {
+    background: rgba(248,113,113,0.15);
+    color: #fca5a5;
+}
+
+.td-tag-amber {
+    background: rgba(245,158,11,0.15);
+    color: #fcd34d;
+}
+
+.td-tag-teal {
+    background: rgba(45,212,191,0.15);
+    color: #5eead4;
+}
+
+.td-tag-indigo {
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+}
+
+.td-tag-slate {
+    background: rgba(148,163,184,0.1);
+    color: #94a3b8;
+}
+
+/* ==========================================================
+   Status button group
+   ========================================================== */
+
+.td-status-group {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--ccp-border);
+    border-radius: 7px;
+    padding: 2px;
+}
+
+.td-status-btn {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--ccp-text-lo);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+    .td-status-btn:hover {
+        background: rgba(255,255,255,0.07);
+        color: var(--ccp-text-hi);
+    }
+
+.td-status-btn--active {
+    font-weight: 600;
+}
+
+/* ==========================================================
+   Body row: chat + sidebar side by side
+   ========================================================== */
+
+.td-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ==========================================================
+   Chat column
+   ========================================================== */
+
+.td-chat {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--ccp-bg-app);
+}
+
+/* Messages area */
+.td-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-bottom: 1.5px solid var(--ccp-border-mid);
+}
+
+    .td-messages::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .td-messages::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .td-messages::-webkit-scrollbar-thumb {
+        background: var(--ccp-border);
+        border-radius: 3px;
+    }
+
+/* Centred loading / empty state inside the messages area */
+.td-messages-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--ccp-text-lo);
+    font-size: 13px;
+}
+
+/* ==========================================================
+   Avatar
+   ========================================================== */
+
+.td-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.td-msg-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 10px !important;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ==========================================================
+   Message rows
+   ========================================================== */
+
+.td-msg {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+}
+
+.td-msg--out {
+    flex-direction: row-reverse;
+}
+
+.td-msg-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 72%;
+}
+
+.td-msg-body--out {
+    align-items: flex-end;
+}
+
+.td-msg-meta {
+    font-size: 10.5px;
+    color: var(--ccp-text-lo);
+}
+
+    .td-msg-meta span {
+        margin: 0 3px;
+    }
+
+.td-msg-meta--out {
+    text-align: right;
+}
+
+.td-msg-bubble {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+    .td-msg-bubble code {
+        font-family: 'Consolas', monospace;
+        font-size: 11.5px;
+        background: rgba(255,255,255,0.07);
+        padding: 2px 5px;
+        border-radius: 4px;
+    }
+
+.td-msg-bubble--in {
+    background: var(--ccp-bg-sidebar);
+    border: 1px solid var(--ccp-border-mid);
+    color: var(--ccp-text-hi);
+    border-radius: 2px 10px 10px 10px;
+}
+
+.td-msg-bubble--out {
+    background: var(--ccp-accent);
+    color: #fff;
+    border-radius: 10px 2px 10px 10px;
+}
+
+/* Internal note */
+.td-msg--note {
+    flex-direction: column;
+    align-items: flex-start;
+    background: rgba(245,158,11,0.06);
+    border: 1px dashed rgba(245,158,11,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    gap: 6px;
+}
+
+.td-msg-note-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #f59e0b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.td-msg-bubble--note {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12.5px;
+    color: var(--ccp-text-mid);
+}
+
+/* ==========================================================
+   Composer
+   ========================================================== */
+
+.td-composer {
+    flex-shrink: 0;
+    border-top: 1.5px solid var(--ccp-border-mid);
+    background: var(--ccp-bg-sidebar);
+}
+
+.td-composer-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--ccp-border);
+    padding: 0 16px;
+}
+
+.td-composer-tab {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ccp-text-mid);
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: color 0.13s;
+    font-family: inherit;
+}
+
+    .td-composer-tab:hover {
+        color: var(--ccp-text-hi);
+    }
+
+    .td-composer-tab.active {
+        color: var(--ccp-accent);
+        border-bottom-color: var(--ccp-accent);
+        font-weight: 600;
+    }
+
+.td-composer-body {
+    padding: 12px 16px 14px;
+}
+
+.td-composer-input {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--ccp-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--ccp-text-hi);
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+    .td-composer-input:focus {
+        border-color: var(--ccp-accent);
+    }
+
+    .td-composer-input::placeholder {
+        color: var(--ccp-text-lo);
+    }
+
+.td-composer-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.td-send-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ccp-accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 0 14px rgba(99,102,241,0.3);
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+    .td-send-btn:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+    }
+
+/* ==========================================================
+   Info sidebar
+   ========================================================== */
+
+.td-sidebar {
+    width: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--ccp-bg-sidebar);
+    border-left: 0 solid var(--ccp-border-mid);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.22s ease, border-left-width 0.22s ease;
+}
+
+.td-sidebar--open {
+    width: 260px;
+    border-left-width: 1.5px;
+    overflow-y: auto;
+}
+
+    .td-sidebar--open::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .td-sidebar--open::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .td-sidebar--open::-webkit-scrollbar-thumb {
+        background: var(--ccp-border);
+        border-radius: 3px;
+    }
+
+.td-sidebar-section {
+    padding: 16px 16px 4px;
+}
+
+.td-sidebar-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ccp-text-lo);
+    margin-bottom: 10px;
+}
+
+.td-sidebar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ccp-border);
+}
+
+    .td-sidebar-row:last-child {
+        border-bottom: none;
+    }
+
+.td-sidebar-label {
+    font-size: 11.5px;
+    color: var(--ccp-text-mid);
+    flex-shrink: 0;
+}
+
+.td-sidebar-value {
+    font-size: 12px;
+    color: var(--ccp-text-hi);
+    text-align: right;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.td-sidebar-mono {
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    color: var(--ccp-text-mid);
+}
+
+.td-sidebar-divider {
+    height: 1px;
+    background: var(--ccp-border-mid);
+    margin: 8px 0;
+}
+
+/* Assignee pills in sidebar */
+.td-assignee-pill {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.td-assignee-unassigned {
+    background: rgba(245,158,11,0.12);
+    color: #fcd34d;
+}
+
+.td-assignee-you {
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+}
+
+.td-assignee-other {
+    background: rgba(148,163,184,0.1);
+    color: #94a3b8;
+}

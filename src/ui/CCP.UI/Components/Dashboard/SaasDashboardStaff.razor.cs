@@ -153,7 +153,7 @@ public partial class SaasDashboardStaff : ComponentBase
     }
 
     private void NavigateToTicket(int ticketId) =>
-        Navigation.NavigateTo($"/inbox?ticketId={ticketId}");
+        Navigation.NavigateTo($"/tickets/{ticketId}");
 
     private static string GetInitials(string name)
     {
