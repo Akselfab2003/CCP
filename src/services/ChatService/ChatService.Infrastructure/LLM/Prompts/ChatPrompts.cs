@@ -41,7 +41,8 @@ namespace ChatService.Infrastructure.LLM.Prompts
 
         private static string FormatHistory(List<MessageEntity> history) =>
             string.Join("\n\n", history.Select(m =>
-            $"{(m.IsFromUser ? "USER" : "ASSISTANT")}: {m.MessageOutput}"));
+            $"{(m.IsFromUser ? "USER" : "ASSISTANT")}: " +
+            $"Input: {m.MessageInput}\nOutput: {m.MessageOutput}"));
 
         private static string SanitizeUserMessage(string message)
         {

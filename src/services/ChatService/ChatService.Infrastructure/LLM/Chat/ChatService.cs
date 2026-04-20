@@ -44,6 +44,8 @@ namespace ChatService.Infrastructure.LLM.Chat
                     Tools = [AiTool],
                 };
 
+                var chatHistory = History.Select(m => new ChatMessage(m.IsFromUser ? ChatRole.User : ChatRole.Assistant, m.MessageInput)).ToList();
+
                 var response = await _chatClient.GetResponseAsync(FullPrompt, options);
                 // Create a MessageEntity for the response
                 var messageEntity = new MessageEntity
