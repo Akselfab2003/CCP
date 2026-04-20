@@ -38,7 +38,7 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
         .WithLifetime(LifeTimeMode)
         .WithOtlpExporter();
 
-Ollama.WithOtlpExporter().WithExplicitStart()
+Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
 
 var mailhog = builder.AddContainer("MailHog", "mailhog/mailhog")
@@ -90,6 +90,9 @@ Keycloak.WithRealmImport(RealmImportPath)
 RabbitMq.WithOtlpExporter()
     .WithLifetime(LifeTimeMode);
 
+// Add AI Models
+IResourceBuilder<OllamaModelResource> EmbeddingModel = Ollama.AddModel("embedding", "nomic-embed-text:latest");
+IResourceBuilder<OllamaModelResource> QwenModel = Ollama.AddModel("qwen", "qwen2.5:1.5b");
 
 // Add Databases
 IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
@@ -200,30 +203,41 @@ CustomerService.WaitFor(Keycloak)
         });
 
 ChatService
+    .WaitFor(IdentityService)
     .WaitFor(Keycloak)
     .WaitFor(ChatDB)
     .WaitFor(Ollama)
     .WaitFor(TicketService)
+    .WaitFor(EmbeddingModel)
+    .WaitFor(QwenModel)
+    .WithReference(IdentityService)
     .WithReference(Keycloak)
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
-    .WithOtlpExporter().WithExplicitStart();
-
-
-UI
-    .WaitFor(MessagingService)
-    .WaitFor(Keycloak)
-    .WaitFor(IdentityService)
-    .WaitFor(CustomerService)
-    .WaitFor(TicketService)
-    .WithReference(MessagingService)
-    .WithReference(Keycloak)
-    .WithReference(CustomerService)
-    .WithReference(IdentityService)
-    .WithReference(TicketService)
-    .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+    .WithReference(EmbeddingModel)
+    .WithReference(QwenModel)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithOtlpExporter();
+
+
+UI.WaitFor(MessagingService)
+  .WaitFor(Keycloak)
+  .WaitFor(IdentityService)
+  .WaitFor(CustomerService)
+  .WaitFor(ChatService)
+  .WaitFor(TicketService)
+  .WithReference(MessagingService)
+  .WithReference(Keycloak)
+  .WithReference(ChatService)
+  .WithReference(CustomerService)
+  .WithReference(IdentityService)
+  .WithReference(TicketService)
+  .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+  .WithOtlpExporter();
 
 CCPWebsite
     .WaitFor(UI)
@@ -249,7 +263,9 @@ EmailWorkerService
 
 if (Environment == "DEV")
 {
-    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode)).WithGPUSupport();
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode))
+        .WithDataVolume()
+        .WithGPUSupport();
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");

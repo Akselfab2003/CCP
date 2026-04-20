@@ -13,11 +13,17 @@ namespace IdentityService.API.Endpoints
         {
             var tenantRoute = routeBuilder.MapGroup("/tenant")
                                          .WithTags("Tenant");
-            //   .RequireAuthorization();
 
             tenantRoute.MapPost("/create", CreateTenant)
                        .Produces(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
+                       .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            tenantRoute.MapGet("/info", GetTenantInfo)
+                       .RequireAuthorization()
+                       .Produces<TenantInfoDto>(StatusCodes.Status200OK)
+                       .ProducesProblem(StatusCodes.Status400BadRequest)
+                       .ProducesProblem(StatusCodes.Status404NotFound)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             tenantRoute.MapGet("/members", GetAllTenantMembers)
@@ -34,6 +40,22 @@ namespace IdentityService.API.Endpoints
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             return routeBuilder;
+        }
+
+        private static async Task<IResult> GetTenantInfo([FromServices] ITenantService tenantService, [FromQuery] Guid? tenantId, [FromQuery] string? Domain)
+        {
+            try
+            {
+                var result = await tenantService.GetTenantDetails(tenantId, Domain);
+
+                return result.IsSuccess
+                            ? Results.Ok(result.Value)
+                            : result.ToProblemDetails();
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving tenant information: " + ex.Message);
+            }
         }
 
         private static async Task<IResult> InviteNewTenantMember([FromServices] IOrganizationService organizationService, string Email)
