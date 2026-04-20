@@ -132,29 +132,6 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
             await _smtpClient.SendAsync(message);
         }
-        public async Task SendSupportNewTicketEmailAsync(
-            string to,
-            string subject,
-            EmailSent email,
-            string customerEmail,
-            string organizationName,
-            string expectedResponseTime,
-            string managementUrl)
-        {
-            var htmlContent = await _emailTemplateRenderer.RenderSupportTicketNotificationAsync(
-                email, customerEmail, organizationName,
-            expectedResponseTime, managementUrl
-                );
-            var message = BuildMessage(
-                fromAddress: email.SenderAddress,
-                fromName: organizationName,
-                toAddress: to,
-                toName: email.RecipientAddress,
-                subject: subject
-            );
-            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
-            await _smtpClient.SendAsync(message);
-        }
 
 
         private static MimeMessage BuildMessage(

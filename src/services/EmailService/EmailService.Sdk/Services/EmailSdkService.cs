@@ -102,28 +102,5 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.ReplyContent = replyContent;
                 });
         }
-
-        public async Task NotifySupportNewTicketAsync(
-            Guid customerId,
-            string supportTeamEmail,
-            string ticketTitle,
-            int ticketId,
-            string ticketBody)
-        {
-            var api = _client.Client;
-
-            await api.Api
-                .EmailSendingService
-                .Support
-                .NewTicket
-                .PostAsync(request =>
-                {
-                    request.QueryParameters.CustomerId = customerId;
-                    request.QueryParameters.SupportTeamEmail = supportTeamEmail;
-                    request.QueryParameters.TicketTitle = ticketTitle;
-                    request.QueryParameters.TicketId = ticketId;
-                    request.QueryParameters.TicketBody = ticketBody;
-                });
-        }
     }
 }

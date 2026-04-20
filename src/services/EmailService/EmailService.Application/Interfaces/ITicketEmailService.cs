@@ -54,12 +54,5 @@ namespace EmailService.Application.Interfaces
             string managementUrl,
             string viewHistoryUrl);
 
-        Task SendSupportNewTicketNotificationAsync(
-            string recipientEmail,
-            EmailSent emailModel,
-            string customerEmail,
-            string organizationName,
-            string expectedResponseTime,
-            string managementUrl);
     }
 }

@@ -35,12 +35,5 @@ namespace EmailService.Sdk.Services
             string ticketStatusLabel,
             string replyContent);
 
-        Task NotifySupportNewTicketAsync(
-            Guid customerId,
-            string supportTeamEmail,
-            string ticketTitle,
-            int ticketId,
-            string ticketBody);
-
     }
 }

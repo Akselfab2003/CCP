@@ -157,34 +157,5 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     recipientEmail, emailModel.Id);
             }
         }
-
-        public async Task SendSupportNewTicketNotificationAsync(
-            string recipientEmail,
-            EmailSent emailModel,
-            string customerEmail,
-            string organizationName,
-            string expectedResponseTime,
-            string managementUrl)
-        {
-            try
-            {
-                await _emailSendingService.SendSupportNewTicketEmailAsync(
-                    to: recipientEmail,
-                    subject: $"[New Ticket] A new support ticket has been created by {customerEmail}",
-                    email: emailModel,
-                    customerEmail: customerEmail,
-                    organizationName: organizationName,
-                    expectedResponseTime: expectedResponseTime,
-                    managementUrl: managementUrl);
-
-                _logger.LogInformation("Support new-ticket notification sent to {Recipient} for ticket #{TicketId}",
-                    recipientEmail, emailModel.Id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send support new-ticket notification to {Recipient} for ticket #{TicketId}",
-                    recipientEmail, emailModel.Id);
-            }
-        }
     }
 }
