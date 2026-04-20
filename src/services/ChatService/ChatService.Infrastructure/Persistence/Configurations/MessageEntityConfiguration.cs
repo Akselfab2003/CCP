@@ -20,10 +20,7 @@ namespace ChatService.Infrastructure.Persistence.Configurations
             builder.Property(e => e.IsFromUser)
                 .IsRequired();
 
-            builder.Property(e => e.MessageInput)
-                .IsRequired();
-
-            builder.Property(e => e.MessageOutput)
+            builder.Property(e => e.Message)
                 .IsRequired();
 
             builder.Property(e => e.CreatedAt)

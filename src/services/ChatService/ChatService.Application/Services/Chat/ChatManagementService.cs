@@ -58,6 +58,22 @@ namespace ChatService.Application.Services.Chat
                     var relevantFaq = await _faqManagementService.GetRelevantFaqAsync(message);
                     if (relevantFaq.IsFailure) return Result.Failure<string>(Error.Failure(code: "FailedToFindRelevantFaqs", description: "Failed to find relevant FAQs for the message."));
 
+                    var addUserMessageToDb = await _messageRepository.AddMessage(new MessageEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        ConversationId = Conversation.Id,
+                        IsFromUser = true,
+                        OrgId = _activeSession.OrgId,
+                        Message = message,
+                        CreatedAt = DateTime.UtcNow,
+                    });
+
+                    if (addUserMessageToDb.IsFailure)
+                    {
+                        return Result.Failure<string>(Error.Failure(code: "FailedToAddMessage", description: "Failed to add message to the database."));
+                    }
+
+
                     var MessageResponse = await _chatService.GetChatBotResponseAsync(message, relevantFaq.Value, ConversationHistory, Conversation.Id, _activeSession.OrgId, _activeSession.Host);
                     if (MessageResponse.IsFailure)
                     {
@@ -70,7 +86,7 @@ namespace ChatService.Application.Services.Chat
                         return Result.Failure<string>(Error.Failure(code: "FailedToAddMessage", description: "Failed to add message to the database."));
                     }
 
-                    return Result.Success(MessageResponse.Value.MessageOutput);
+                    return Result.Success(MessageResponse.Value.Message);
                 }
             }
             catch (Exception ex)
@@ -126,6 +142,21 @@ namespace ChatService.Application.Services.Chat
                 {
                     return Result.Failure<string>(Error.Failure(code: "FailedToCreateConversation", description: "Failed to create a new conversation."));
                 }
+                var addUserMessageToDb = await _messageRepository.AddMessage(new MessageEntity
+                {
+                    Id = Guid.NewGuid(),
+                    ConversationId = newConversation.Id,
+                    IsFromUser = true,
+                    OrgId = _activeSession.OrgId,
+                    Message = InitialMessage,
+                    CreatedAt = DateTime.UtcNow,
+                });
+
+                if (addUserMessageToDb.IsFailure)
+                {
+                    return Result.Failure<string>(Error.Failure(code: "FailedToAddMessage", description: "Failed to add message to the database."));
+                }
+
 
                 Result<List<FaqEntity>> RelevantFaqsResult = await _faqManagementService.GetRelevantFaqAsync(InitialMessage);
                 if (RelevantFaqsResult.IsFailure) return Result.Failure<string>(Error.Failure(code: "FailedToFindRelevantFaqs", description: "Failed to find relevant FAQs for the initial message."));
@@ -138,7 +169,7 @@ namespace ChatService.Application.Services.Chat
 
                 var AddedMessageToDb = await _messageRepository.AddMessage(MessageResponse.Value);
 
-                return Result.Success(MessageResponse.Value.MessageOutput);
+                return Result.Success(MessageResponse.Value.Message);
             }
             catch (Exception ex)
             {

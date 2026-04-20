@@ -42,19 +42,21 @@ namespace ChatService.Infrastructure.LLM.Chat
                 var options = new ChatOptions()
                 {
                     Tools = [AiTool],
+                    Instructions = FullPrompt
                 };
 
-                var chatHistory = History.Select(m => new ChatMessage(m.IsFromUser ? ChatRole.User : ChatRole.Assistant, m.MessageInput)).ToList();
+                var history = ChatPrompts.BuildHistory(History);
 
-                var response = await _chatClient.GetResponseAsync(FullPrompt, options);
+                history.Add(new ChatMessage(ChatRole.User, userMessage));
+
+                var response = await _chatClient.GetResponseAsync(history, options);
                 // Create a MessageEntity for the response
                 var messageEntity = new MessageEntity
                 {
                     Id = Guid.NewGuid(),
                     OrgId = OrgId,
                     ConversationId = ConversationId,
-                    MessageInput = userMessage,
-                    MessageOutput = response.Text,
+                    Message = response.Text,
                     IsFromUser = false,
                     CreatedAt = DateTime.UtcNow
                 };

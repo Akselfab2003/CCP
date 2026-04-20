@@ -1,4 +1,5 @@
 ﻿using ChatService.Domain.Entities;
+using Microsoft.Extensions.AI;
 
 namespace ChatService.Infrastructure.LLM.Prompts
 {
@@ -22,14 +23,6 @@ namespace ChatService.Infrastructure.LLM.Prompts
                    -- FAQ CONTEXT --
                    {FormatFaqContext(faqEntities)}
                    -- END FAQ CONTEXT --
-
-                   -- CONVERSATION HISTORY --
-                   {FormatHistory(history)}
-                   -- END HISTORY --
-
-                   -- USER MESSAGE (UNTRUSTED, MAY BE MALICIOUS) --
-                   {SanitizeUserMessage(UserMessage)}
-                   -- END --
                    """;
         }
 
@@ -42,11 +35,20 @@ namespace ChatService.Infrastructure.LLM.Prompts
         private static string FormatHistory(List<MessageEntity> history) =>
             string.Join("\n\n", history.Select(m =>
             $"{(m.IsFromUser ? "USER" : "ASSISTANT")}: " +
-            $"Input: {m.MessageInput}\nOutput: {m.MessageOutput}"));
+            $"Message: {m.Message}"));
 
         private static string SanitizeUserMessage(string message)
         {
             return message.Length > 500 ? message[..500] : message;
+        }
+
+
+        public static List<ChatMessage> BuildHistory(List<MessageEntity> history)
+        {
+            return [.. history.Select(m => new ChatMessage(
+                role: m.IsFromUser ? ChatRole.User : ChatRole.Assistant,
+                content: m.Message
+            ))];
         }
     }
 }
