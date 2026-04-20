@@ -37,8 +37,6 @@ namespace ChatService.Infrastructure.Persistence.Repositories
             try
             {
                 var messages = await _context.Messages.Where(m => m.ConversationId == conversationId).ToListAsync();
-                if (messages == null || !messages.Any())
-                    return Result.Failure<List<MessageEntity>>(Error.Failure(code: "MessageNotFound", description: $"No messages found for Conversation ID {conversationId}"));
                 return Result.Success(messages);
             }
             catch (Exception ex)

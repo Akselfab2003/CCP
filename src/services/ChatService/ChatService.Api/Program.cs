@@ -16,6 +16,7 @@ using Duende.IdentityModel.Client;
 using IdentityService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 
 public partial class Program
 {
@@ -38,7 +39,12 @@ public partial class Program
             builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
-            builder.AddOllamaApiClient("qwen").AddKeyedChatClient("qwen");
+            builder.AddKeyedOllamaApiClient("qwen")
+                   .AddKeyedChatClient("qwen")
+                   .UseFunctionInvocation()
+                   .UseOpenTelemetry()
+                   .UseLogging();
+
 
             // Ticket service URL.
             var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]

@@ -1,29 +1,29 @@
 ﻿using CCP.Shared.ResultAbstraction;
 using ChatService.Application.Interfaces;
 using ChatService.Domain.Entities;
-using ChatService.Domain.Interfaces;
 using ChatService.Infrastructure.LLM.Prompts;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
+using OllamaSharp;
 namespace ChatService.Infrastructure.LLM.Chat
 {
+    /// <summary>
+    /// Service responsible for handling chat interactions with the chatbot.
+    /// </summary>
     public class ChatService : IChatService
     {
         private readonly IChatClient _chatClient;
         private readonly ILogger<ChatService> _logger;
-        private readonly IEmbeddingService _embeddingService;
-        private readonly IFaqRepository _faqRepository;
+        private readonly IOllamaApiClient _ollamaApiClient;
+
         public ChatService([FromKeyedServices("qwen")] IChatClient chatClient,
-                           IEmbeddingService embeddingService,
-                           ILogger<ChatService> logger,
-                           IFaqRepository faqRepository)
+            [FromKeyedServices("qwen")] IOllamaApiClient ollamaApiClient,
+                           ILogger<ChatService> logger)
         {
             _chatClient = chatClient;
-            _embeddingService = embeddingService;
+            _ollamaApiClient = ollamaApiClient;
             _logger = logger;
-            _faqRepository = faqRepository;
         }
 
         public async Task<Result<MessageEntity>> GetChatBotResponseAsync(string userMessage, List<FaqEntity> mostRelevantFaqs, List<MessageEntity> History, Guid ConversationId, Guid OrgId, string OrgName)
@@ -35,8 +35,21 @@ namespace ChatService.Infrastructure.LLM.Chat
                                                    faqEntities: mostRelevantFaqs,
                                                    history: History);
 
-                var response = await _chatClient.GetResponseAsync(FullPrompt);
+                var AiTool = AIFunctionFactory.Create(() =>
+                {
+                    Console.WriteLine("Testing Chatbot tool calls ");
+                    _logger.LogError("Chatbot tool was called to contact a supporter.");
+                    test();
+                    return "A supporer is on their way";
+                }, "escalate_to_supporter", description: "escalate to a human");
 
+                var options = new ChatOptions()
+                {
+                    Tools = [AiTool],
+                };
+
+
+                var response = await _chatClient.GetResponseAsync(FullPrompt, options);
                 // Create a MessageEntity for the response
                 var messageEntity = new MessageEntity
                 {
@@ -58,5 +71,10 @@ namespace ChatService.Infrastructure.LLM.Chat
             }
         }
 
+        private void test()
+        {
+            _logger.LogInformation("Testing the chat service implementation.");
+
+        }
     }
 }

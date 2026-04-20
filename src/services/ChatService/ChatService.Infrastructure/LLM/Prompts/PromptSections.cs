@@ -44,7 +44,7 @@
             If your answer confidence is below 80%, do not guess.
             Say: "I want to make sure you get the right answer —
             let me connect you with someone from our team."
-            Then call escalate_to_support.
+            Then call escalate_to_supporter.
             """;
 
         public const string CustomerSystemRole = """
@@ -58,7 +58,7 @@
             WHAT YOU CAN DO:
             - Answer questions using the FAQ context provided
             - Ask ONE clarifying question if the issue is unclear
-            - Escalate to a human via the escalate_to_support tool
+            - Escalate to a human via the escalate_to_supporter tool
             """;
 
 

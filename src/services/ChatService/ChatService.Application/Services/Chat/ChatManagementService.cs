@@ -48,7 +48,12 @@ namespace ChatService.Application.Services.Chat
                         return Result.Failure<string>(Error.Failure(code: "FailedToFindConversation", description: "Failed to find conversation with the provided ID."));
                     }
                     var Conversation = conversationResult.Value;
-                    var ConversationHistory = Conversation.Messages;
+                    var messagesResult = await _messageRepository.GetMessagesByConversationId(Conversation.Id);
+                    if (messagesResult.IsFailure)
+                    {
+                        return Result.Failure<string>(Error.Failure(code: "FailedToGetMessages", description: "Failed to get messages for the conversation."));
+                    }
+                    var ConversationHistory = messagesResult.Value;
 
                     var relevantFaq = await _faqManagementService.GetRelevantFaqAsync(message);
                     if (relevantFaq.IsFailure) return Result.Failure<string>(Error.Failure(code: "FailedToFindRelevantFaqs", description: "Failed to find relevant FAQs for the message."));
