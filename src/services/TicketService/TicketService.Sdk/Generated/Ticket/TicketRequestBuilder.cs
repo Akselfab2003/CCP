@@ -11,6 +11,7 @@ using TicketService.Sdk.Ticket.GetTicket;
 using TicketService.Sdk.Ticket.GetTickets;
 using TicketService.Sdk.Ticket.History;
 using TicketService.Sdk.Ticket.Item;
+using TicketService.Sdk.Ticket.ManagerStats;
 namespace TicketService.Sdk.Ticket
 {
     /// <summary>
@@ -38,6 +39,11 @@ namespace TicketService.Sdk.Ticket
         public global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder History
         {
             get => new global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The managerStats property</summary>
+        public global::TicketService.Sdk.Ticket.ManagerStats.ManagerStatsRequestBuilder ManagerStats
+        {
+            get => new global::TicketService.Sdk.Ticket.ManagerStats.ManagerStatsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the TicketService.Sdk.ticket.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
