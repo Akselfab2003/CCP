@@ -1,4 +1,6 @@
-﻿class ChatBot {
+﻿import * as signalR from "@microsoft/signalr";
+
+class ChatBot {
     constructor() {
         this.connection = null;
         this.init();
