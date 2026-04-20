@@ -173,6 +173,30 @@ namespace TicketService.Sdk.Services.Ticket
             }
         }
 
+        public async Task<Result<ManagerStatsSdkDto>> GetManagerStatsAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.GetAsync("/ticket/manager-stats", ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure<ManagerStatsSdkDto>(Error.Failure(
+                        code: "ManagerStatsRetrievalFailed",
+                        description: $"Failed to retrieve manager stats. Status code: {(int)response.StatusCode}"));
+
+                var stats = await response.Content.ReadFromJsonAsync<ManagerStatsSdkDto>(cancellationToken: ct);
+                return Result.Success(stats ?? new ManagerStatsSdkDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving manager stats.");
+                return Result.Failure<ManagerStatsSdkDto>(Error.Failure(
+                    code: "ManagerStatsRetrievalFailed",
+                    description: "An error occurred while retrieving manager stats."));
+            }
+        }
+
         public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet, CancellationToken ct = default)
         {
             try

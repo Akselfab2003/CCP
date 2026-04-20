@@ -10,5 +10,6 @@ namespace TicketService.Sdk.Services.Ticket
         Task<Result> UpdateTicketStatusAsync(int ticketId, TicketStatus newStatus, CancellationToken ct = default);
         Task<Result<List<TicketHistoryEntryDto>>> GetCustomerHistoryAsync(Guid customerId, int limit = 20, CancellationToken ct = default);
         Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet, CancellationToken ct = default);
+        Task<Result<ManagerStatsSdkDto>> GetManagerStatsAsync(CancellationToken ct = default);
     }
 }

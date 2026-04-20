@@ -255,6 +255,35 @@
         }
       }
     },
+    "/ticket/manager-stats": {
+      "get": {
+        "tags": [
+          "Ticket"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerStatsDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/ticket/history/customer/{customerId}": {
       "get": {
         "tags": [
@@ -477,6 +506,32 @@
           }
         }
       },
+      "ManagerStatsDto": {
+        "type": "object",
+        "properties": {
+          "openTickets": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "closedToday": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgResponseTime": {
+            "type": "string"
+          },
+          "awaitingUser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "teamPerformance": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupporterPerformanceDto"
+            }
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -525,6 +580,19 @@
           },
           "messageSnippet": {
             "type": "string"
+          }
+        }
+      },
+      "SupporterPerformanceDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

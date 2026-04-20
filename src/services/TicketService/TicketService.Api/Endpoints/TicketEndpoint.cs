@@ -51,6 +51,10 @@ namespace TicketService.Api.Endpoints
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+            ticketRoute.MapGet("/manager-stats", GetManagerStats)
+                       .Produces<ManagerStatsDto>(StatusCodes.Status200OK)
+                       .ProducesProblem(StatusCodes.Status500InternalServerError);
+
             return builder;
         }
 
@@ -129,6 +133,21 @@ namespace TicketService.Api.Endpoints
             catch (Exception ex)
             {
                 return Results.Problem("An error occurred while retrieving customer history: " + ex.Message);
+            }
+        }
+
+        private static async Task<IResult> GetManagerStats(
+            [FromServices] IManagerStatsQuery statsQuery,
+            [FromServices] ICurrentUser currentUser)
+        {
+            try
+            {
+                var stats = await statsQuery.GetManagerStatsAsync(currentUser.UserId);
+                return Results.Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving manager stats: " + ex.Message);
             }
         }
 
