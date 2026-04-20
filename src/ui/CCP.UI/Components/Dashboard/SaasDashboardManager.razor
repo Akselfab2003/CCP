@@ -1,7 +1,5 @@
 ﻿@using CCP.Shared.UIContext
 
-@inject IUIUserContext UserContext
-
 <!-- Greeting -->
 <div class="dash-greeting">
     <div>
@@ -23,8 +21,19 @@
                 </svg>
             </span>
         </div>
-        <div class="dash-stat-value">247</div>
-        <div class="dash-stat-delta delta-up">↑ 8% vs last week</div>
+        <div class="dash-stat-value">
+            @if (_stats is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_stats.OpenTickets
+            }
+        </div>
+        <div class="dash-stat-delta delta-neutral">across all tickets</div>
     </div>
 
     <div class="dash-stat-card">
@@ -36,8 +45,19 @@
                 </svg>
             </span>
         </div>
-        <div class="dash-stat-value">38</div>
-        <div class="dash-stat-delta delta-up">↑ 12% vs yesterday</div>
+        <div class="dash-stat-value">
+            @if (_stats is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_stats.ClosedToday
+            }
+        </div>
+        <div class="dash-stat-delta delta-neutral">in the last 24 hours</div>
     </div>
 
     <div class="dash-stat-card">
@@ -50,8 +70,19 @@
                 </svg>
             </span>
         </div>
-        <div class="dash-stat-value">2.4h</div>
-        <div class="dash-stat-delta delta-down">↓ 5 min slower</div>
+        <div class="dash-stat-value">
+            @if (_stats is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_stats.AvgResponseTime
+            }
+        </div>
+        <div class="dash-stat-delta delta-neutral">avg. first response</div>
     </div>
 
     <div class="dash-stat-card">
@@ -64,7 +95,18 @@
                 </svg>
             </span>
         </div>
-        <div class="dash-stat-value">12</div>
+        <div class="dash-stat-value">
+            @if (_stats is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_stats.AwaitingUser
+            }
+        </div>
         <div class="dash-stat-delta delta-neutral">needs your attention</div>
     </div>
 </div>
@@ -81,85 +123,45 @@
 
         <div class="dash-feed">
 
-            <div class="dash-feed-item">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">AK</div>
-                <div class="dash-feed-body">
-                    <div class="dash-feed-top">
-                        <span class="dash-feed-ticket">#TK-8821</span>
-                        <span class="dash-feed-time">12 min ago</span>
-                    </div>
-                    <p class="dash-feed-text"><strong>Alex Kim</strong> replied — Payment gateway returning 500 error on checkout</p>
-                    <div class="dash-feed-tags">
-                        <span class="dash-tag tag-red">Urgent</span>
-                        <span class="dash-tag tag-slate">Bug</span>
-                    </div>
+            @if (_feedEntries is null)
+            {
+                <div class="dash-feed-loading">
+                    <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                    Loading activity...
                 </div>
-                <span class="dash-feed-dot dot-red"></span>
-            </div>
-
-            <div class="dash-feed-item">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">SM</div>
-                <div class="dash-feed-body">
-                    <div class="dash-feed-top">
-                        <span class="dash-feed-ticket">#TK-8820</span>
-                        <span class="dash-feed-time">1 hr ago</span>
-                    </div>
-                    <p class="dash-feed-text"><strong>Sam Miller</strong> changed status to <span class="dash-tag tag-teal" style="display:inline;padding:1px 6px;font-size:10px;">Open</span> — Unable to export data to CSV</p>
-                    <div class="dash-feed-tags">
-                        <span class="dash-tag tag-teal">Open</span>
-                        <span class="dash-tag tag-indigo">Feature</span>
-                    </div>
+            }
+            else if (!_feedEntries.Any())
+            {
+                <div style="padding: 20px 0; text-align:center; color:var(--ccp-text-lo); font-size:13px;">
+                    No recent activity yet.
                 </div>
-                <span class="dash-feed-dot dot-amber"></span>
-            </div>
-
-            <div class="dash-feed-item">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">RP</div>
-                <div class="dash-feed-body">
-                    <div class="dash-feed-top">
-                        <span class="dash-feed-ticket">#TK-8818</span>
-                        <span class="dash-feed-time">3 hrs ago</span>
+            }
+            else
+            {
+                @foreach (var entry in _feedEntries)
+                {
+                    <div class="dash-feed-item dash-feed-item--clickable" @onclick="() => NavigateToTicket(entry.TicketId)">
+                        <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                            @(entry.SenderName.Length >= 2 ? entry.SenderName[..2].ToUpper() : entry.SenderName.ToUpper())
+                        </div>
+                        <div class="dash-feed-body">
+                            <div class="dash-feed-top">
+                                <span class="dash-feed-ticket">#TK-@entry.TicketId</span>
+                                <span class="dash-feed-time">@GetRelativeTime(entry.OccurredAt)</span>
+                            </div>
+                            <p class="dash-feed-text">
+                                <strong>@entry.SenderName</strong> sent a message — @entry.TicketTitle
+                            </p>
+                            <div class="dash-feed-tags">
+                                <span class="dash-tag @GetStatusTagClass(entry.TicketStatus)">@GetStatusLabel(entry.TicketStatus)</span>
+                            </div>
+                        </div>
+                        <span class="dash-feed-dot @GetDotClass(entry.TicketStatus)"></span>
                     </div>
-                    <p class="dash-feed-text"><strong>Riley Park</strong> added a note — Wrong amount charged on Pro plan renewal</p>
-                    <div class="dash-feed-tags">
-                        <span class="dash-tag tag-amber">Pending</span>
-                        <span class="dash-tag tag-slate">Billing</span>
-                    </div>
-                </div>
-                <span class="dash-feed-dot dot-amber"></span>
-            </div>
-
-            <div class="dash-feed-item">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">CL</div>
-                <div class="dash-feed-body">
-                    <div class="dash-feed-top">
-                        <span class="dash-feed-ticket">#TK-8817</span>
-                        <span class="dash-feed-time">5 hrs ago</span>
-                    </div>
-                    <p class="dash-feed-text"><strong>Chris Lee</strong> replied — SSO login fails with Okta integration</p>
-                    <div class="dash-feed-tags">
-                        <span class="dash-tag tag-teal">Open</span>
-                        <span class="dash-tag tag-slate">Bug</span>
-                    </div>
-                </div>
-                <span class="dash-feed-dot dot-green"></span>
-            </div>
-
-            <div class="dash-feed-item">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">MJ</div>
-                <div class="dash-feed-body">
-                    <div class="dash-feed-top">
-                        <span class="dash-feed-ticket">#TK-8814</span>
-                        <span class="dash-feed-time">Yesterday</span>
-                    </div>
-                    <p class="dash-feed-text"><strong>Morgan J.</strong> closed ticket — Request for custom webhook endpoint config</p>
-                    <div class="dash-feed-tags">
-                        <span class="dash-tag tag-slate">Closed</span>
-                        <span class="dash-tag tag-indigo">Feature</span>
-                    </div>
-                </div>
-                <span class="dash-feed-dot dot-slate"></span>
-            </div>
+                }
+            }
 
         </div>
     </div>
@@ -168,65 +170,48 @@
     <div class="dash-card dash-team">
         <div class="dash-card-header">
             <span class="dash-card-title">Team Performance</span>
-            <span class="dash-card-sub">This week</span>
+            <span class="dash-card-sub">Last 7 days</span>
         </div>
 
         <div class="dash-team-list">
 
-            <div class="dash-team-row">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">JD</div>
-                <div class="dash-team-info">
-                    <span class="dash-team-name">Jordan Davis</span>
-                    <span class="dash-team-stat">24 resolved</span>
+            @if (_stats is null)
+            {
+                <div class="dash-feed-loading">
+                    <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" width="20" height="20">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                    Loading...
                 </div>
-                <div class="dash-team-bar-wrap">
-                    <div class="dash-team-bar" style="width:88%;background:#6366f1;"></div>
+            }
+            else if (!_stats.TeamPerformance.Any())
+            {
+                <div style="font-size:13px; color:var(--ccp-text-lo); text-align:center; padding: 16px 0;">
+                    No resolved tickets this week.
                 </div>
-            </div>
-
-            <div class="dash-team-row">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">AL</div>
-                <div class="dash-team-info">
-                    <span class="dash-team-name">Alex Lee</span>
-                    <span class="dash-team-stat">19 resolved</span>
-                </div>
-                <div class="dash-team-bar-wrap">
-                    <div class="dash-team-bar" style="width:70%;background:#10b981;"></div>
-                </div>
-            </div>
-
-            <div class="dash-team-row">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">SM</div>
-                <div class="dash-team-info">
-                    <span class="dash-team-name">Sam Miller</span>
-                    <span class="dash-team-stat">16 resolved</span>
-                </div>
-                <div class="dash-team-bar-wrap">
-                    <div class="dash-team-bar" style="width:58%;background:#ec4899;"></div>
-                </div>
-            </div>
-
-            <div class="dash-team-row">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">RP</div>
-                <div class="dash-team-info">
-                    <span class="dash-team-name">Riley Park</span>
-                    <span class="dash-team-stat">11 resolved</span>
-                </div>
-                <div class="dash-team-bar-wrap">
-                    <div class="dash-team-bar" style="width:40%;background:#f59e0b;"></div>
-                </div>
-            </div>
-
-            <div class="dash-team-row">
-                <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">CL</div>
-                <div class="dash-team-info">
-                    <span class="dash-team-name">Chris Lee</span>
-                    <span class="dash-team-stat">9 resolved</span>
-                </div>
-                <div class="dash-team-bar-wrap">
-                    <div class="dash-team-bar" style="width:33%;background:#0ea5e9;"></div>
-                </div>
-            </div>
+            }
+            else
+            {
+                var maxCount = _stats.TeamPerformance.Max(p => p.ResolvedCount);
+                @foreach (var supporter in _stats.TeamPerformance)
+                {
+                    var name = _supporterNames.TryGetValue(supporter.UserId, out var n) ? n : supporter.UserId.ToString()[..8] + "…";
+                    var barWidth = maxCount > 0 ? (int)((supporter.ResolvedCount / (double)maxCount) * 100) : 0;
+                    <div class="dash-team-row">
+                        <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                            @GetInitials(name)
+                        </div>
+                        <div class="dash-team-info">
+                            <span class="dash-team-name">@name</span>
+                            <span class="dash-team-stat">@supporter.ResolvedCount resolved</span>
+                        </div>
+                        <div class="dash-team-bar-wrap">
+                            <div class="dash-team-bar" style="width:@(barWidth)%;background:#6366f1;"></div>
+                        </div>
+                    </div>
+                }
+            }
 
         </div>
     </div>
