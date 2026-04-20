@@ -42,9 +42,9 @@ namespace TicketService.Application.Tests.Tests
                 _ticketRepository,
                 _currentUser,
                 _assignmentCommands,
+                _emailSdkService,
                 _historyRepository
-                _assignmentCommands,
-                _emailSdkService
+
             );
         }
 

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="WolverineFx.RabbitMQ" />
     <PackageReference Include="Aspire.RabbitMQ.Client" />

@@ -6,7 +6,6 @@ using EmailService.Domain.Models;
 using EmailTemplates.Renderes;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using TicketService.Sdk.Services.TicketSdk;
 
 
 

@@ -14,10 +14,13 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         {
             var emailHostUrl = configuration.GetValue<string>("emailHostUrl") ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
 
+            var username = configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
+            var password = configuration.GetValue<string>("emailWorkerServicePassword") ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
+
             using var client = new MailKit.Net.Smtp.SmtpClient();
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
             await client.ConnectAsync(emailHostUrl, 465, true);
-            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
+            await client.AuthenticateAsync(username, password);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }

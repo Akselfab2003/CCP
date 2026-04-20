@@ -14,7 +14,6 @@ using EmailService.Infrastructure.EmailInfrastructure;
 using EmailTemplates.Renderes;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Sdk.ServiceDefaults;
-using TicketService.Sdk.Services.TicketSdk;
 using Wolverine;
 using Wolverine.RabbitMQ;
 

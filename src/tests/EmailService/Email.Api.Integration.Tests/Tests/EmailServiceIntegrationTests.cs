@@ -148,8 +148,6 @@ namespace Email.Api.Integration.Tests.Tests
         {
             IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
             var customerId = Guid.NewGuid();
-
-            IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
             IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
             var longNote = new StringBuilder();
