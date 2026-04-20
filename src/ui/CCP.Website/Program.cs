@@ -53,12 +53,15 @@ namespace CCP.Website
             });
 
 
-            var SassServiceUrl = builder.Configuration.GetValue<string>("services:ccp-ui:https:0");
-            builder.Services.AddScoped<WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("CCP_UI configuration value is required.")));
+            var SassServiceUrl = builder.Configuration.GetValue<string>("services:ccp-ui:https:0") ?? throw new InvalidOperationException("CCP_UI configuration value is required.");
+
+
+            builder.Services.AddScoped<IWebsiteReferencesService, WebsiteReferencesService>(_ => new WebsiteReferencesService(SassServiceUrl ?? throw new InvalidOperationException("CCP_UI configuration value is required.")));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddFluentUIComponents();
 
             var IdentityServiceUrl = builder.Configuration.GetValue<string>("services:identityservice-api:https:0") ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required.");
+
             builder.Services.AddIdentityServiceSdk(IdentityServiceUrl);
 
             var app = builder.Build();
@@ -76,8 +79,8 @@ namespace CCP.Website
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
             app.UseAntiforgery();
-
             app.MapStaticAssets();
+            app.UseStaticFiles();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 

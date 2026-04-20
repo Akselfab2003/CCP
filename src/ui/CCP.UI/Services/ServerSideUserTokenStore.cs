@@ -48,7 +48,12 @@ internal sealed class ServerSideUserTokenStore : IUserTokenStore
         if (!authResult.Succeeded || authResult.Properties is null)
             return new FailedResult("Could not authenticate to retrieve user tokens");
 
-        return _storeTokensInProps.GetUserToken(authResult.Properties, parameters);
+        var tokenResult = _storeTokensInProps.GetUserToken(authResult.Properties, parameters);
+
+        if (tokenResult.Succeeded && tokenResult.Token.TokenForSpecifiedParameters is { } freshToken)
+            _cache.Set(key, freshToken, freshToken.Expiration);
+
+        return tokenResult;
     }
 
     public Task StoreTokenAsync(

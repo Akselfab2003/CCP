@@ -90,11 +90,57 @@ namespace TicketService.Infrastructure.Persistence.Migrations
                     b.ToTable("Tickets");
                 });
 
+            modelBuilder.Entity("TicketService.Domain.Entities.TicketHistoryEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("NewValue")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OldValue")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("ticket_history", (string)null);
+                });
+
             modelBuilder.Entity("TicketService.Domain.Entities.Assignment", b =>
                 {
                     b.HasOne("TicketService.Domain.Entities.Ticket", null)
                         .WithOne("Assignment")
                         .HasForeignKey("TicketService.Domain.Entities.Assignment", "TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TicketService.Domain.Entities.TicketHistoryEntry", b =>
+                {
+                    b.HasOne("TicketService.Domain.Entities.Ticket", null)
+                        .WithMany()
+                        .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

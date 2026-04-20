@@ -18,6 +18,10 @@ else if (Role == UserRole.Supporter)
 {
     <SaasDashboardStaff />
 }
+else if (Role == UserRole.Customer)
+{
+    <SaasDashboardCustomer />
+}
 
 @code {
     private UserRole Role => UserContext.Role;

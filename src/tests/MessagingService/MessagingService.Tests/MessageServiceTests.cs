@@ -1,4 +1,7 @@
 using MessagingService.Domain.Contracts;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using TicketService.Sdk.Services.Ticket;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
 using MessagingService.Application.Services;
@@ -67,7 +70,9 @@ public class MessageServiceTests
     private static MessageService CreateService(MessagingDbContext dbContext)
     {
         var validator = new AllowAllTestMessageAccessValidator();
-        return new MessageService(dbContext, validator);
+        var ticketService = Substitute.For<ITicketService>();
+        var logger = Substitute.For<ILogger<MessageService>>();
+        return new MessageService(dbContext, validator, ticketService, logger);
     }
 
     [Fact]

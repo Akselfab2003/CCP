@@ -20,6 +20,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\..\services\TicketService\TicketService.Application\TicketService.Application.csproj" />
+    <ProjectReference Include="..\..\..\services\TicketService\TicketService.Domain\TicketService.Domain.csproj" />
     <ProjectReference Include="..\..\TestUtils\TestUtils\TestUtils.csproj" />
   </ItemGroup>
 

@@ -9,6 +9,9 @@ using System;
 using TicketService.Sdk.Ticket.Create;
 using TicketService.Sdk.Ticket.GetTicket;
 using TicketService.Sdk.Ticket.GetTickets;
+using TicketService.Sdk.Ticket.History;
+using TicketService.Sdk.Ticket.Item;
+using TicketService.Sdk.Ticket.ManagerStats;
 namespace TicketService.Sdk.Ticket
 {
     /// <summary>
@@ -31,6 +34,41 @@ namespace TicketService.Sdk.Ticket
         public global::TicketService.Sdk.Ticket.GetTickets.GetTicketsRequestBuilder GetTickets
         {
             get => new global::TicketService.Sdk.Ticket.GetTickets.GetTicketsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The history property</summary>
+        public global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder History
+        {
+            get => new global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The managerStats property</summary>
+        public global::TicketService.Sdk.Ticket.ManagerStats.ManagerStatsRequestBuilder ManagerStats
+        {
+            get => new global::TicketService.Sdk.Ticket.ManagerStats.ManagerStatsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>Gets an item from the TicketService.Sdk.ticket.item collection</summary>
+        /// <param name="position">Unique identifier of the item</param>
+        /// <returns>A <see cref="global::TicketService.Sdk.Ticket.Item.WithTicketItemRequestBuilder"/></returns>
+        public global::TicketService.Sdk.Ticket.Item.WithTicketItemRequestBuilder this[int position]
+        {
+            get
+            {
+                var urlTplParams = new Dictionary<string, object>(PathParameters);
+                urlTplParams.Add("ticketId", position);
+                return new global::TicketService.Sdk.Ticket.Item.WithTicketItemRequestBuilder(urlTplParams, RequestAdapter);
+            }
+        }
+        /// <summary>Gets an item from the TicketService.Sdk.ticket.item collection</summary>
+        /// <param name="position">Unique identifier of the item</param>
+        /// <returns>A <see cref="global::TicketService.Sdk.Ticket.Item.WithTicketItemRequestBuilder"/></returns>
+        [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
+        public global::TicketService.Sdk.Ticket.Item.WithTicketItemRequestBuilder this[string position]
+        {
+            get
+            {
+                var urlTplParams = new Dictionary<string, object>(PathParameters);
+                if (!string.IsNullOrWhiteSpace(position)) urlTplParams.Add("ticketId", position);
+                return new global::TicketService.Sdk.Ticket.Item.WithTicketItemRequestBuilder(urlTplParams, RequestAdapter);
+            }
         }
         /// <summary>
         /// Instantiates a new <see cref="global::TicketService.Sdk.Ticket.TicketRequestBuilder"/> and sets the default values.

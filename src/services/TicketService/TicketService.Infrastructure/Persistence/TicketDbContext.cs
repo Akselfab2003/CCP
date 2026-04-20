@@ -14,8 +14,9 @@ namespace TicketService.Infrastructure.Persistence
             _currentUser = this.GetService<ICurrentUser>();
         }
 
-        public DbSet<Domain.Entities.Ticket> Tickets => Set<Domain.Entities.Ticket>();
-        public DbSet<Domain.Entities.Assignment> Assignments => Set<Domain.Entities.Assignment>();
+        public DbSet<Ticket> Tickets => Set<Ticket>();
+        public DbSet<Assignment> Assignments => Set<Assignment>();
+        public DbSet<TicketHistoryEntry> TicketHistory => Set<TicketHistoryEntry>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -36,6 +37,13 @@ namespace TicketService.Infrastructure.Persistence
                 modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
                 modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
             }
+        }
+    }
+}
+            modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
+            modelBuilder.ApplyConfiguration<Ticket>(new TicketEntityConfiguration());
+            modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
+            modelBuilder.ApplyConfiguration<TicketHistoryEntry>(new TicketHistoryEntryConfiguration());
         }
     }
 }

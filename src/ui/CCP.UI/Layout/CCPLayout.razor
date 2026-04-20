@@ -34,7 +34,7 @@
                 <span class="ccp-nav-label">Main</span>
                 <ul>
                     <li>
-                        <NavLink class="ccp-nav-item" href="/" Match="NavLinkMatch.All">
+                        <NavLink class="ccp-nav-item" href="/Dashboard" Match="NavLinkMatch.All">
                             <span class="ccp-nav-icon icon-indigo">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -44,50 +44,61 @@
                                 </svg>
                             </span>
                             <span class="ccp-nav-text">Dashboard</span>
-                            <span class="ccp-badge badge-indigo">3</span>
                         </NavLink>
                     </li>
-                    <AuthorizeView Policy="RequireSupporter">
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/Ticketportal">
+                            <span class="ccp-nav-icon icon-amber">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                                    <path d="M9 12h6M9 16h4" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Tickets</span>
+                            <span class="ccp-badge badge-amber">12</span>
+                        </NavLink>
+                    </li>
+                    @if (UserContext.IsInternalUser)
+                    {
                         <li>
-                            <NavLink class="ccp-nav-item" href="/Ticketportal">
-                                <span class="ccp-nav-icon icon-amber">
+                            <NavLink class="ccp-nav-item" href="/tickets" Match="NavLinkMatch.All">
+                                <span class="ccp-nav-icon icon-teal">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
                                         <rect x="9" y="3" width="6" height="4" rx="1" />
-                                        <path d="M9 12h6M9 16h4" />
+                                        <line x1="9" y1="12" x2="15" y2="12" />
+                                        <line x1="9" y1="16" x2="12" y2="16" />
+                                        <circle cx="17" cy="17" r="3" />
+                                        <path d="M19.5 19.5l1.5 1.5" />
                                     </svg>
                                 </span>
-                                <span class="ccp-nav-text">Tickets</span>
-                                <span class="ccp-badge badge-amber">12</span>
+                                <span class="ccp-nav-text">Ticket Overview</span>
                             </NavLink>
                         </li>
-                    </AuthorizeView>
-                    <AuthorizeView Policy="RequireSupporter">
-                        <li>
-                            <NavLink class="ccp-nav-item" href="/inbox">
-                                <span class="ccp-nav-icon icon-slate">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                        <polyline points="22,6 12,13 2,6" />
-                                    </svg>
-                                </span>
-                                <span class="ccp-nav-text">Inbox</span>
-                                <span class="ccp-badge badge-violet">5</span>
-                            </NavLink>
-                        </li>
-                    </AuthorizeView>
-                    <AuthorizeView Policy="RequireSupporter">
-                        <li>
-                            <NavLink class="ccp-nav-item" href="/reports">
-                                <span class="ccp-nav-icon icon-green">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M18 20V10M12 20V4M6 20v-6" />
-                                    </svg>
-                                </span>
-                                <span class="ccp-nav-text">Reports</span>
-                            </NavLink>
-                        </li>
-                    </AuthorizeView>
+                    }
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/inbox">
+                            <span class="ccp-nav-icon icon-slate">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Inbox</span>
+                            <span class="ccp-badge badge-violet">5</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="ccp-nav-item" href="/reports">
+                            <span class="ccp-nav-icon icon-green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 20V10M12 20V4M6 20v-6" />
+                                </svg>
+                            </span>
+                            <span class="ccp-nav-text">Reports</span>
+                        </NavLink>
+                    </li>
                 </ul>
             </div>
 

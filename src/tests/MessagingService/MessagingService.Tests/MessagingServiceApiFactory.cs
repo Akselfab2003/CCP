@@ -7,6 +7,7 @@ using MessagingService.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -70,6 +71,7 @@ public class MessagingServiceApiFactory : WebApplicationFactory<TestProgramNameS
             {
                 "MessagingDatabase",
                 "postgres",
+                "RabbitMQ",
             };
 
         var resources = AppHost.Resources.Where(r => !ResourcesToKeepName.Contains(r.Name))
@@ -106,7 +108,7 @@ public class MessagingServiceApiFactory : WebApplicationFactory<TestProgramNameS
     "emailWorkerServicePassword=test",
                     "ROUNDCUBE_DEFAULT_USER_EMAIL=test@test.test",
                 "ROUNDCUBE_DEFAULT_USER_PASSWORD=test",
-                "emailHostUrl=localhost"
+                "emailHostUrl=localhost",
         // REALM_IMPORT_PATH intentionally omitted — Keycloak removed during tests
         ], CancellationToken.None).Result;
 
@@ -117,11 +119,20 @@ public class MessagingServiceApiFactory : WebApplicationFactory<TestProgramNameS
 
         App.StartAsync(CancellationToken.None).WaitAsync(TimeSpan.FromMinutes(3), CancellationToken.None).Wait();
         App.ResourceNotifications.WaitForResourceHealthyAsync("MessagingDatabase", CancellationToken.None).WaitAsync(TimeSpan.FromMinutes(3), CancellationToken.None).Wait();
-
+        App.ResourceNotifications.WaitForResourceHealthyAsync("RabbitMQ", CancellationToken.None).WaitAsync(TimeSpan.FromMinutes(3), CancellationToken.None).Wait();
         var DbConnectionString = App.GetConnectionStringAsync("MessagingDatabase").Result;
+        var RabbitMQConnectionString = App.GetConnectionStringAsync("RabbitMQ").Result;
+
+        if (DbConnectionString == null || RabbitMQConnectionString == null)
+        {
+            throw new Exception("Failed to retrieve connection strings from Apphost resources.");
+        }
 
         builder.UseEnvironment("Development");
-
+        builder.UseConfiguration(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:RabbitMQ"] = RabbitMQConnectionString,
+        }).Build());
         builder.ConfigureServices(services =>
         {
             services.RemoveAll(typeof(DbContextOptions<MessagingDbContext>));
@@ -146,8 +157,6 @@ public class MessagingServiceApiFactory : WebApplicationFactory<TestProgramNameS
 
             services.AddScoped<IMessageAccessValidator, AllowAllIntegrationTestMessageAccessValidator>();
         });
-
-
     }
     protected override IHost CreateHost(IHostBuilder builder)
     {

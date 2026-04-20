@@ -323,6 +323,47 @@
     transition: width 0.4s ease;
 }
 
+/* ── Feed loading state ────────────────────────────────────── */
+
+.dash-feed-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px 0;
+    color: var(--ccp-text-lo);
+    font-size: 13px;
+}
+
+/* ── Clickable feed items ──────────────────────────────────── */
+
+.dash-feed-item--clickable {
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 6px;
+    margin: 0 -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+    .dash-feed-item--clickable:hover {
+        background: var(--ccp-bg-hover, rgba(255,255,255,0.04));
+    }
+
+/* ── Stat loading spinner ───────────────────────────────────── */
+
+@keyframes dash-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.dash-stat-spinner {
+    color: var(--ccp-text-lo);
+    animation: dash-spin 0.9s linear infinite;
+    display: block;
+}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
