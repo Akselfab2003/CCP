@@ -1,5 +1,4 @@
-﻿
-class ChatBot {
+﻿class ChatBot {
     constructor() {
         this.connection = null;
         this.init();
