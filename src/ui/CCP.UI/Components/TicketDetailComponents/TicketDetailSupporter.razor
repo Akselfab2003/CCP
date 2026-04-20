@@ -1,0 +1,230 @@
+﻿@using CCP.Shared.UIContext
+@using CCP.Shared.ValueObjects
+@using TicketService.Sdk.Dtos
+
+@namespace CCP.UI.Pages.Tickets.TicketDetailComponents
+
+<div class="tds-wrap">
+
+    <!-- Header -->
+    <div class="tds-header">
+        <div class="tds-header-left">
+            <button class="tds-back-btn" @onclick="NavigateBack" title="Back to tickets">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </button>
+            <div>
+                <div class="tds-title">@Ticket.Title</div>
+                <div class="tds-sub">#TK-@Ticket.Id · @GetStatusLabel(Ticket.Status)</div>
+            </div>
+        </div>
+        <div class="tds-header-right">
+            <span class="tds-tag @GetStatusTagClass(Ticket.Status)">@GetStatusLabel(Ticket.Status)</span>
+            <div class="tds-status-group">
+                <button class="tds-status-btn @(Ticket.Status == 0 ? "tds-status-btn--active tds-tag-teal" : "")"
+                        @onclick="() => UpdateStatusAsync(TicketStatus.Open)">
+                    Open
+                </button>
+                <button class="tds-status-btn @(Ticket.Status == 1 ? "tds-status-btn--active tds-tag-amber" : "")"
+                        @onclick="() => UpdateStatusAsync(TicketStatus.WaitingForCustomer)">
+                    Waiting for Customer
+                </button>
+                <button class="tds-status-btn @(Ticket.Status == 2 ? "tds-status-btn--active tds-tag-indigo" : "")"
+                        @onclick="() => UpdateStatusAsync(TicketStatus.WaitingForSupport)">
+                    Waiting for Support
+                </button>
+                <button class="tds-status-btn @(Ticket.Status == 3 ? "tds-status-btn--active tds-tag-slate" : "")"
+                        @onclick="() => UpdateStatusAsync(TicketStatus.Closed)">
+                    Closed
+                </button>
+                <button class="tds-status-btn @(Ticket.Status == 4 ? "tds-status-btn--active tds-tag-red" : "")"
+                        @onclick="() => UpdateStatusAsync(TicketStatus.Blocked)">
+                    Blocked
+                </button>
+            </div>
+            <button class="tds-sidebar-toggle @(_sidebarOpen ? "tds-sidebar-toggle--active" : "")"
+                    @onclick="() => _sidebarOpen = !_sidebarOpen"
+                    title="@(_sidebarOpen ? "Hide ticket info" : "Show ticket info")">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <line x1="15" y1="3" x2="15" y2="21" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="tds-body">
+
+        <div class="tds-chat">
+
+            <div class="tds-messages">
+                @if (_isLoadingMessages)
+                {
+                    <div class="tds-messages-state">
+                        <svg class="tds-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                        </svg>
+                        Loading messages...
+                    </div>
+                }
+                else if (!_messages.Any())
+                {
+                    <div class="tds-messages-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" style="color:var(--ccp-border-mid);">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                        </svg>
+                        No messages yet. Start the conversation!
+                    </div>
+                }
+                else
+                {
+                    @foreach (var msg in _messages)
+                    {
+                        @if (msg.IsInternalNote)
+                        {
+                            <div class="tds-msg tds-msg--note">
+                                <div class="tds-msg-note-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                    Internal note — @GetDisplayName(msg.UserId)
+                                </div>
+                                <div class="tds-msg-bubble tds-msg-bubble--note">@msg.Content</div>
+                                <div class="tds-msg-meta" style="padding-left:0;">@msg.CreatedAtUtc?.ToLocalTime().ToString("HH:mm")</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="tds-msg @(IsOwnMessage(msg) ? "tds-msg--out" : "tds-msg--in")">
+                                @if (!IsOwnMessage(msg))
+                                {
+                                    <div class="tds-avatar tds-msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                                        @GetInitials(msg.UserId)
+                                    </div>
+                                }
+                                <div class="tds-msg-body @(IsOwnMessage(msg) ? "tds-msg-body--out" : "")">
+                                    <div class="tds-msg-meta @(IsOwnMessage(msg) ? "tds-msg-meta--out" : "")">
+                                        @GetDisplayName(msg.UserId)<span>·</span>@msg.CreatedAtUtc?.ToLocalTime().ToString("HH:mm")
+                                    </div>
+                                    <div class="tds-msg-bubble @(IsOwnMessage(msg) ? "tds-msg-bubble--out" : "tds-msg-bubble--in")">
+                                        @msg.Content
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+
+            <div class="tds-composer">
+                <div class="tds-composer-tabs">
+                    <button class="tds-composer-tab @(!_isInternalNoteMode ? "active" : "")" @onclick="() => _isInternalNoteMode = false">Reply</button>
+                    <button class="tds-composer-tab @(_isInternalNoteMode ? "active" : "")" @onclick="() => _isInternalNoteMode = true">Internal Note</button>
+                </div>
+                <div class="tds-composer-body">
+                    <textarea class="tds-composer-input"
+                              placeholder="@(_isInternalNoteMode ? "Write an internal note..." : "Write a reply...")"
+                              rows="3"
+                              style="@(_isInternalNoteMode ? "border-color:#f59e0b;background:rgba(245,158,11,0.04);" : "")"
+                              @bind="_newMessageContent"
+                              @onkeydown="HandleKeyDown" />
+                    <div class="tds-composer-footer">
+                        <div></div>
+                        <button class="tds-send-btn"
+                                style="@(_isInternalNoteMode ? "background:#f59e0b;box-shadow:0 0 14px rgba(245,158,11,0.3);" : "")"
+                                @onclick="SendMessageAsync" disabled="@_isSending">
+                            @(_isInternalNoteMode ? "Add Note" : "Send")
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Info sidebar -->
+        <aside class="tds-sidebar @(_sidebarOpen ? "tds-sidebar--open" : "")">
+            <div class="tds-sidebar-section">
+                <div class="tds-sidebar-section-title">Ticket</div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">ID</span>
+                    <span class="tds-sidebar-value tds-sidebar-mono">#TK-@Ticket.Id</span>
+                </div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Status</span>
+                    <span class="tds-tag @GetStatusTagClass(Ticket.Status)" style="font-size:10px;">@GetStatusLabel(Ticket.Status)</span>
+                </div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Created</span>
+                    <span class="tds-sidebar-value">@(Ticket.CreatedAt?.ToLocalTime().ToString("MMM d, yyyy") ?? "—")</span>
+                </div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Time</span>
+                    <span class="tds-sidebar-value">@(Ticket.CreatedAt?.ToLocalTime().ToString("HH:mm") ?? "—")</span>
+                </div>
+            </div>
+            <div class="tds-sidebar-divider"></div>
+            <div class="tds-sidebar-section">
+                <div class="tds-sidebar-section-title">People</div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Customer</span>
+                    <span class="tds-sidebar-value">
+                        @if (_customerName is not null)
+                        {
+                            @_customerName
+                        }
+                        else if (Ticket.CustomerId.HasValue)
+                        {
+
+                            <span class="tds-sidebar-mono">Loading…</span>
+                        }
+                        else
+                        {
+
+                            <span>—</span>
+                        }
+                    </span>
+                </div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Assigned to</span>
+                    <span class="tds-sidebar-value">
+                        @if (Ticket.AssignedUserId is null)
+                        {
+                            <span class="tds-assignee-pill tds-assignee-unassigned">Unassigned</span>
+                        }
+                        else if (Ticket.AssignedUserId == UserContext.UserId)
+                        {
+
+                            <span class="tds-assignee-pill tds-assignee-you">You</span>
+                        }
+                        else
+                        {
+
+                            <span class="tds-assignee-pill tds-assignee-other">@GetAssigneeName(Ticket.AssignedUserId)</span>
+                        }
+                    </span>
+                </div>
+            </div>
+            <div class="tds-sidebar-divider"></div>
+            <div class="tds-sidebar-section">
+                <div class="tds-sidebar-section-title">Messages</div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Total</span>
+                    <span class="tds-sidebar-value">@_messages.Count(m => !m.IsInternalNote)</span>
+                </div>
+                <div class="tds-sidebar-row">
+                    <span class="tds-sidebar-label">Internal notes</span>
+                    <span class="tds-sidebar-value">@_messages.Count(m => m.IsInternalNote)</span>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+</div>
