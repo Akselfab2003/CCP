@@ -5,7 +5,6 @@ using ChatService.Infrastructure.LLM.Prompts;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OllamaSharp;
 namespace ChatService.Infrastructure.LLM.Chat
 {
     /// <summary>
@@ -15,14 +14,11 @@ namespace ChatService.Infrastructure.LLM.Chat
     {
         private readonly IChatClient _chatClient;
         private readonly ILogger<ChatService> _logger;
-        private readonly IOllamaApiClient _ollamaApiClient;
 
         public ChatService([FromKeyedServices("qwen")] IChatClient chatClient,
-            [FromKeyedServices("qwen")] IOllamaApiClient ollamaApiClient,
                            ILogger<ChatService> logger)
         {
             _chatClient = chatClient;
-            _ollamaApiClient = ollamaApiClient;
             _logger = logger;
         }
 
@@ -47,7 +43,6 @@ namespace ChatService.Infrastructure.LLM.Chat
                 {
                     Tools = [AiTool],
                 };
-
 
                 var response = await _chatClient.GetResponseAsync(FullPrompt, options);
                 // Create a MessageEntity for the response
