@@ -33,17 +33,11 @@ namespace TicketService.Infrastructure.Persistence
             }
             else
             {
+                modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
                 modelBuilder.ApplyConfiguration<Ticket>(new TicketEntityConfiguration());
                 modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
-                modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
+                modelBuilder.ApplyConfiguration<TicketHistoryEntry>(new TicketHistoryEntryConfiguration());
             }
-        }
-    }
-}
-            modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
-            modelBuilder.ApplyConfiguration<Ticket>(new TicketEntityConfiguration());
-            modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
-            modelBuilder.ApplyConfiguration<TicketHistoryEntry>(new TicketHistoryEntryConfiguration());
         }
     }
 }

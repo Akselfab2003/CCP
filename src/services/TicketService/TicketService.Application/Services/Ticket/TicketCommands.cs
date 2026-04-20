@@ -14,15 +14,10 @@ namespace TicketService.Application.Services.Ticket
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
         private readonly IEmailSdkService _emailSdkService;
-        public TicketCommands(
-             ILogger<TicketCommands> logger,
-             ITicketRepositoryCommands ticketRepository,
-             ICurrentUser currentUser,
-             IAssignmentCommands assignmentCommands,
-             IEmailSdkService emailSdkService)
         private readonly ITicketHistoryRepository _historyRepository;
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, ITicketHistoryRepository historyRepository)
+
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands,IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
