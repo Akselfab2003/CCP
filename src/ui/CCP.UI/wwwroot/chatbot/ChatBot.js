@@ -15,7 +15,7 @@ class ChatBot {
     }
 
     getSession() {
-        const sessionUrl = "https://localhost:7127/session";
+        const sessionUrl = "https://api.northflow.dev/session";
         fetch(sessionUrl, {
             method: "POST",
             credentials: "include",
@@ -288,7 +288,7 @@ class ChatBot {
     }
 
     async createChatConversation() {
-        const conversationUrl = "https://localhost:7127/chat/createConversation";
+        const conversationUrl = "https://api.northflow.dev/chat/createConversation";
         var conversationID = await fetch(conversationUrl, {
             method: "POST",
             credentials: "include",
