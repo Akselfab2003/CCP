@@ -48,7 +48,9 @@ public partial class SaasDashboardCustomer : ComponentBase
         {
             var historyResult = await TicketService.GetCustomerHistoryAsync(UserContext.UserId, limit: 10);
             if (historyResult.IsSuccess && historyResult.Value is not null)
-                _historyEntries = historyResult.Value;
+                _historyEntries = historyResult.Value
+                    .Where(e => !(e.EventType == "StatusChanged" && e.NewValue == "Blocked"))
+                    .ToList();
             else
                 Logger.LogError("History fetch failed: {Code} - {Description}",
                     historyResult.Error.Code, historyResult.Error.Description);
