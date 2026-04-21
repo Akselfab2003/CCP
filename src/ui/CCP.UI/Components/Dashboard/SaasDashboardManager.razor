@@ -1,4 +1,5 @@
 ﻿@using CCP.Shared.UIContext
+@using TicketService.Sdk.Dtos
 
 <!-- Greeting -->
 <div class="dash-greeting">
@@ -144,21 +145,19 @@
                 {
                     <div class="dash-feed-item dash-feed-item--clickable" @onclick="() => NavigateToTicket(entry.TicketId)">
                         <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-                            @(entry.SenderName.Length >= 2 ? entry.SenderName[..2].ToUpper() : entry.SenderName.ToUpper())
+                            @GetHistoryInitials(entry)
                         </div>
                         <div class="dash-feed-body">
                             <div class="dash-feed-top">
                                 <span class="dash-feed-ticket">#TK-@entry.TicketId</span>
                                 <span class="dash-feed-time">@GetRelativeTime(entry.OccurredAt)</span>
                             </div>
-                            <p class="dash-feed-text">
-                                <strong>@entry.SenderName</strong> sent a message — @entry.TicketTitle
-                            </p>
+                            <p class="dash-feed-text">@GetHistoryDescription(entry)</p>
                             <div class="dash-feed-tags">
-                                <span class="dash-tag @GetStatusTagClass(entry.TicketStatus)">@GetStatusLabel(entry.TicketStatus)</span>
+                                <span class="dash-tag @GetHistoryTagClass(entry)">@GetHistoryTagLabel(entry)</span>
                             </div>
                         </div>
-                        <span class="dash-feed-dot @GetDotClass(entry.TicketStatus)"></span>
+                        <span class="dash-feed-dot @GetHistoryDotClass(entry)"></span>
                     </div>
                 }
             }
