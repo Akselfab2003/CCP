@@ -54,7 +54,7 @@ public partial class CreateTicketCustomer : ComponentBase
             _successMessage = "Ticket submitted! Redirecting to your inbox...";
             StateHasChanged();
             await Task.Delay(1200);
-            Navigation.NavigateTo("/inbox");
+            Navigation.NavigateTo("/");
         }
         else
         {
