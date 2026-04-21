@@ -13,5 +13,6 @@ namespace EmailService.Domain.Models
         public required string SenderAddress { get; set; }
         public required string RecipientAddress { get; set; }
         public required DateTime SentAt { get; set; }
+        public int? TicketId { get; set; } = null;
     }
 }

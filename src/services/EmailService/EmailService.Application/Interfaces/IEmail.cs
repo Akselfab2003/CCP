@@ -60,7 +60,7 @@ namespace EmailService.Application.Interfaces
             string to,
             string subject,
             EmailReceived emailReceived,
-            EmailSent emailSent,
+            EmailSent? emailSent,
             int ticketId,
             string organizationName);
 

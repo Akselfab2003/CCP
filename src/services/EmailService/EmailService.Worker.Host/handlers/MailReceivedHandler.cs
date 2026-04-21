@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.Events;
 using CustomerService.Sdk.Services;
 using EmailService.Application.Interfaces;
+using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
 
 namespace EmailService.Worker.Host.handlers
@@ -11,6 +12,7 @@ namespace EmailService.Worker.Host.handlers
         private readonly IEmail _emailSendingService;
         private readonly ICustomerSdkService _customerSdkService;
         private readonly IConfiguration _configuration;
+        private readonly IEmailSent _emailSentRepository;
 
         // Keywords that suggest a customer wants support
         private static readonly string[] SupportKeywords =
@@ -24,13 +26,15 @@ namespace EmailService.Worker.Host.handlers
             ILogger<MailReceivedHandler> logger,
             IEmail emailSendingService,
             ICustomerSdkService customerSdkService,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IEmailSent emailSentRepository
             )
         {
             _logger = logger;
             _emailSendingService = emailSendingService;
             _customerSdkService = customerSdkService;
             _configuration = configuration;
+            _emailSentRepository = emailSentRepository;
         }
 
         public async Task Handle(mail_received mail_Received)
@@ -56,6 +60,8 @@ namespace EmailService.Worker.Host.handlers
                                 Name = ExtractNameFromEmail(mail_Received.MailFrom),
                                 OrganizationId = Guid.Parse(_configuration.GetValue<string>("OrganizationSettings:DefaultOrganizationId") ?? Guid.Empty.ToString())
                             });
+
+                        SendReplyToEmailAsync(mail_Received, ticketId ?? 0).Wait();
 
                         _logger.LogInformation("New customer created from email: {Email}", mail_Received.MailFrom);
                     }
@@ -88,6 +94,58 @@ namespace EmailService.Worker.Host.handlers
             }
         }
 
+        private async Task SendReplyToEmailAsync(mail_received mail_Received, int ticketId)
+        {
+            try
+            {
+                var emailModel = new EmailReceived
+                {
+                    MailId = mail_Received.MessageId,
+                    Subject = mail_Received.Subject,
+                    Body = mail_Received.Body,
+                    SenderAddress = mail_Received.MailFrom,
+                    RecipientAddress = mail_Received.MailTo,
+                    ReceivedAt = DateTime.UtcNow,
+                };
+
+                // Check if there was a previous email sent for this ticket
+                EmailSent? emailSentModel = null;
+                try
+                {
+                    var previousEmailSent = await _emailSentRepository.GetByTicketIdAsync(ticketId);
+                    if (previousEmailSent != null)
+                    {
+                        emailSentModel = previousEmailSent;
+                        _logger.LogInformation("Found previous email sent for ticket #{TicketId}", ticketId);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No previous email found for ticket #{TicketId}, using null", ticketId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to retrieve previous email for ticket #{TicketId}, will use null", ticketId);
+                }
+
+                await _emailSendingService.SendReplyToEmailAsync(
+                    to: mail_Received.MailFrom,
+                    subject: $"Re: {mail_Received.Subject}",
+                    emailReceived: emailModel,
+                    emailSent: emailSentModel,
+                    ticketId: ticketId,
+                    organizationName: _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team");
+
+                _logger.LogInformation(
+                    "Sent reply-to email for ticket #{TicketId} to {CustomerEmail}",
+                    ticketId, mail_Received.MailFrom);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send reply-to email for ticket #{TicketId}", ticketId);
+            }
+        }
+
         private async Task SendSupportCustomerReplyEmailAsync(mail_received mail_Received, int ticketId)
         {
             try
@@ -100,7 +158,6 @@ namespace EmailService.Worker.Host.handlers
 
                 var emailModel = new EmailReceived
                 {
-                    Id = ticketId,
                     MailId = mail_Received.MessageId,
                     Subject = mail_Received.Subject,
                     Body = mail_Received.Body,
