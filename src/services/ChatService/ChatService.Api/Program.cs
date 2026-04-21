@@ -31,15 +31,19 @@ public partial class Program
                         .AddHttpContextAccessor();
 
 
-        var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
 
         builder.Services.AddServiceDefaults("ChatService.Api");
-        builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP", keycloak: keycloakURL);
 
 
         if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         {
-            builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
+            var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+            builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP", keycloak: keycloakURL);
+
+            builder.Services.AddDbContext<ChatDbContext>(opts =>
+            {
+                opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); });
+            });
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
             builder.AddKeyedOllamaApiClient("qwen")
