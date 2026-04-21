@@ -7,6 +7,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System;
 using TicketService.Sdk.Ticket.History.Customer;
+using TicketService.Sdk.Ticket.History.Mine;
+using TicketService.Sdk.Ticket.History.Org;
 namespace TicketService.Sdk.Ticket.History
 {
     /// <summary>
@@ -19,6 +21,16 @@ namespace TicketService.Sdk.Ticket.History
         public global::TicketService.Sdk.Ticket.History.Customer.CustomerRequestBuilder Customer
         {
             get => new global::TicketService.Sdk.Ticket.History.Customer.CustomerRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The mine property</summary>
+        public global::TicketService.Sdk.Ticket.History.Mine.MineRequestBuilder Mine
+        {
+            get => new global::TicketService.Sdk.Ticket.History.Mine.MineRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The org property</summary>
+        public global::TicketService.Sdk.Ticket.History.Org.OrgRequestBuilder Org
+        {
+            get => new global::TicketService.Sdk.Ticket.History.Org.OrgRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::TicketService.Sdk.Ticket.History.HistoryRequestBuilder"/> and sets the default values.

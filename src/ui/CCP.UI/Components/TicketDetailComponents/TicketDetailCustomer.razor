@@ -1,0 +1,96 @@
+﻿@using CCP.Shared.UIContext
+@using CCP.Shared.ValueObjects
+@using TicketService.Sdk.Dtos
+
+@namespace CCP.UI.Pages.Tickets.TicketDetailComponents
+
+<div class="tdc-wrap">
+
+    <!-- Header -->
+    <div class="tdc-header">
+        <div class="tdc-header-left">
+            <button class="tdc-back-btn" @onclick="NavigateBack" title="Back to my tickets">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </button>
+            <div>
+                <div class="tdc-title">@Ticket.Title</div>
+                <div class="tdc-sub">#TK-@Ticket.Id · @GetStatusLabel(Ticket.Status)</div>
+            </div>
+        </div>
+        <div class="tdc-header-right">
+            <span class="tdc-tag @GetStatusTagClass(Ticket.Status)">
+                @GetStatusLabel(Ticket.Status)
+            </span>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="tdc-messages">
+        @if (_isLoadingMessages)
+        {
+            <div class="tdc-messages-state">
+                <svg class="tdc-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+                Loading messages...
+            </div>
+        }
+        else if (!_messages.Any())
+        {
+            <div class="tdc-messages-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" style="color:var(--ccp-border-mid);">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+                No messages yet. Start the conversation!
+            </div>
+        }
+        else
+        {
+            @foreach (var msg in _messages)
+            {
+                <div class="tdc-msg @(IsOwnMessage(msg) ? "tdc-msg--out" : "tdc-msg--in")">
+                    @if (!IsOwnMessage(msg))
+                    {
+                        <div class="tdc-avatar tdc-msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                            @GetInitials(msg.UserId)
+                        </div>
+                    }
+                    <div class="tdc-msg-body @(IsOwnMessage(msg) ? "tdc-msg-body--out" : "")">
+                        <div class="tdc-msg-meta @(IsOwnMessage(msg) ? "tdc-msg-meta--out" : "")">
+                            @GetDisplayName(msg.UserId)
+                            <span>·</span>
+                            @msg.CreatedAtUtc?.ToLocalTime().ToString("HH:mm")
+                        </div>
+                        <div class="tdc-msg-bubble @(IsOwnMessage(msg) ? "tdc-msg-bubble--out" : "tdc-msg-bubble--in")">
+                            @msg.Content
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Composer -->
+    <div class="tdc-composer">
+        <div class="tdc-composer-body">
+            <textarea class="tdc-composer-input"
+                      placeholder="Write a reply..."
+                      rows="3"
+                      @bind="_newMessageContent"
+                      @onkeydown="HandleKeyDown" />
+            <div class="tdc-composer-footer">
+                <div></div>
+                <button class="tdc-send-btn" @onclick="SendMessageAsync" disabled="@_isSending">
+                    Send
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
