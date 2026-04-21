@@ -30,12 +30,16 @@ public partial class Program
         builder.Services.AddAuthorization()
                         .AddHttpContextAccessor();
 
+
+
         builder.Services.AddServiceDefaults("ChatService.Api");
-        builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP");
 
 
         if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         {
+            var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+            builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP", keycloak: keycloakURL);
+
             builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
@@ -54,7 +58,7 @@ public partial class Program
             builder.Services.AddClientCredentialsTokenManagement()
                            .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
                            {
-                               client.TokenEndpoint = new Uri("http://localhost:8080/realms/CCP/protocol/openid-connect/token");
+                               client.TokenEndpoint = new Uri($"{keycloakURL}/realms/CCP/protocol/openid-connect/token");
                                client.ClientId = ClientId.Parse("CCP.ServiceAccount");
                                client.ClientSecret = ClientSecret.Parse(
                                    builder.Configuration["SERVICE_ACCOUNT_SECRET"]
