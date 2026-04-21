@@ -56,5 +56,13 @@ namespace EmailService.Application.Interfaces
             string managementUrl,
             string viewHistoryUrl);
 
+        Task SendReplyToEmailAsync(
+            string to,
+            string subject,
+            EmailReceived emailReceived,
+            EmailSent emailSent,
+            int ticketId,
+            string organizationName);
+
     }
 }

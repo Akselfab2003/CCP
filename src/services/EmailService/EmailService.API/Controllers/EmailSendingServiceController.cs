@@ -220,5 +220,28 @@ namespace EmailService.Api.Controllers
                 return Results.Problem(detail: ex.Message, title: "An error occurred while sending the support reply notification.");
             }
         }
+
+        [HttpPost("reply-to-email")]
+        public async Task<IResult> NotifyReplyToEmail(
+            [FromQuery] EmailReceived emailReceived,
+            [FromQuery] EmailSent emailSent,
+            [FromQuery] int ticketId,
+            [FromQuery] string organizationName)
+        {
+            try
+            {
+                await _ticketEmailService.SendReplyToEmailAsync(
+                    recipientEmail: emailSent.RecipientAddress,
+                    emailReceived: emailReceived,
+                    emailSent: emailSent,
+                    ticketId: ticketId,
+                    organizationName: organizationName);
+                return Results.Accepted($"Reply to email notification sent to {emailSent.RecipientAddress} for ticket #{ticketId}.");
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "An error occurred while sending the reply to email notification.");
+            }
+        }
     }
 }

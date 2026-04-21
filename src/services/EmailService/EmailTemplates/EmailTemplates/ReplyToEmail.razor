@@ -6,7 +6,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Reply – #@Ticket.Id</title>
+    <title>Ticket Reply – #@TicketId</title>
     <!--[if mso]>
     <style>
         table { border-collapse: collapse; }
@@ -25,7 +25,7 @@
                     <tr>
                         <td style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb;">
                             <p style="margin: 0; font-size: 12px; color: #6b7280; letter-spacing: 0.4px; text-transform: uppercase;">
-                                @OrganizationName – Support · Ticket #@Ticket.Id
+                                @OrganizationName – Support · Ticket #@TicketId
                             </p>
                         </td>
                     </tr>
@@ -37,7 +37,7 @@
                                 ##- Please type your reply above this line -##
                             </p>
                             <p style="margin: 6px 0 0; font-size: 13px; color: #374151;">
-                                Your request (@Ticket.Id) has been updated. To add additional comments, reply to this email.
+                                Your request (@TicketId) has been updated. To add additional comments, reply to this email.
                             </p>
                         </td>
                     </tr>
@@ -122,8 +122,8 @@
     [Parameter]
     public EmailReceived? ReceivedEmail { get; set; }
 
-    [Parameter, EditorRequired]
-    public Ticket Ticket { get; set; } = default!;
+    [Parameter]
+    public int TicketId { get; set; } = default!;
 
     [Parameter]
     public string OrganizationName { get; set; } = "Support";

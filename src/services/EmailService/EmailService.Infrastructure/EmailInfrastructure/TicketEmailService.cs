@@ -157,5 +157,31 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     recipientEmail, emailModel.Id);
             }
         }
+
+        public async Task SendReplyToEmailAsync(
+            string recipientEmail,
+            EmailReceived emailReceived,
+            EmailSent emailSent,
+            int ticketId,
+            string organizationName)
+        {
+            try
+            {
+                await _emailSendingService.SendReplyToEmailAsync(
+                    to: recipientEmail,
+                    subject: $"[New Reply] Ticket #{ticketId}",
+                    emailReceived: emailReceived,
+                    emailSent: emailSent,
+                    ticketId: ticketId,
+                    organizationName: organizationName);
+                _logger.LogInformation("Reply-to email sent to {Recipient} for ticket #{TicketId}",
+                    recipientEmail, ticketId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send reply-to email to {Recipient} for ticket #{TicketId}",
+                    recipientEmail, ticketId);
+            }
+        }
     }
 }

@@ -133,6 +133,27 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             await _smtpClient.SendAsync(message);
         }
 
+        public async Task SendReplyToEmailAsync(
+            string to,
+            string subject,
+            EmailReceived emailReceived,
+            EmailSent emailSent,
+            int ticketId,
+            string organizationName)
+        {
+            var htmlContent = await _emailTemplateRenderer.RenderReplyToEmailAsync(
+                emailReceived, emailSent, ticketId, organizationName);
+            var message = BuildMessage(
+                fromAddress: emailSent.SenderAddress,
+                fromName: organizationName,
+                toAddress: to,
+                toName: emailReceived.RecipientAddress,
+                subject: subject
+            );
+            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            await _smtpClient.SendAsync(message);
+        }
+
 
         private static MimeMessage BuildMessage(
         string fromAddress,

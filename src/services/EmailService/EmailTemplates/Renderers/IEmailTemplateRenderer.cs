@@ -34,13 +34,6 @@ namespace EmailTemplates.Renderes
             string portalUrl,
             string reopenUrl);
 
-        Task<string> RenderSupportTicketNotificationAsync(
-            EmailSent email,
-            string customerEmail,
-            string organizationName,
-            string expectedResponseTime,
-            string managementUrl);
-
         Task<string> RenderSupportCustomerReplyNotificationAsync(
             EmailReceived email,
             string customerName,
@@ -51,5 +44,12 @@ namespace EmailTemplates.Renderes
             string replyUrl,
             string managementUrl,
             string viewHistoryUrl);
+
+        Task<string> RenderReplyToEmailAsync(
+            EmailReceived emailReceived,
+            EmailSent emailSent,
+            int ticket,
+            string organizationName
+            );
     }
 }

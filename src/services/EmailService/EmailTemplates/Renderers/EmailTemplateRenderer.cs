@@ -77,17 +77,18 @@ namespace EmailTemplates.Renderes
                 return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
         }
 
-        public Task<string> RenderSupportTicketNotificationAsync(
-            EmailSent email, string customerEmail, string organizationName,
-            string expectedResponseTime, string managementUrl) =>
-            RenderComponentAsync<SupportTicketNotification>(p =>
+        public async Task<string> RenderReplyToEmailAsync(
+            EmailReceived emailReceived, EmailSent emailSent, int ticket, string organizationName)
+        {
+            var component = await RenderComponentAsync<ReplyToEmail>(p =>
             {
-                p.Add(nameof(SupportTicketNotification.Email), email);
-                p.Add(nameof(SupportTicketNotification.CustomerEmail), customerEmail);
-                p.Add(nameof(SupportTicketNotification.OrganizationName), organizationName);
-                p.Add(nameof(SupportTicketNotification.ExpectedResponseTime), expectedResponseTime);
-                p.Add(nameof(SupportTicketNotification.ManagementUrl), managementUrl);
+                p.Add(nameof(ReplyToEmail.ReceivedEmail), emailReceived);
+                p.Add(nameof(ReplyToEmail.SentEmail), emailSent);
+                p.Add(nameof(ReplyToEmail.TicketId), ticket);
+                p.Add(nameof(ReplyToEmail.OrganizationName), organizationName);
             });
+            return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
+        }
 
         public Task<string> RenderSupportCustomerReplyNotificationAsync(
             EmailReceived email, string customerName, string customerEmail,
