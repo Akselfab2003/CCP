@@ -9,7 +9,7 @@
             SassServiceUrl = sassServiceUrl;
         }
 
-        public string Login => $"{SassServiceUrl}/authentication/login?returnUrl=/dashboard";
+        public string Login => $"{SassServiceUrl}/authentication/login?returnUrl=/";
 
         public string Register => $"/Register";
 
