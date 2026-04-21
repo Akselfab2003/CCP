@@ -247,7 +247,7 @@ class ChatBot {
 
     connectToChatHub() {
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7127/chatHub", {
+            .withUrl("https://api.northflow.dev/chatHub", {
                 accessTokenFactory: () => {
                     const sessionId = this.getSessionIdFromCookie();
                     console.log("Retrieved session ID from cookie:", sessionId);
