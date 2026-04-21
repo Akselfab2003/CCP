@@ -23,6 +23,7 @@
     <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.0" />
     <!-- ENTITY FRAMEWORK CORE
          ORM used across data-access projects and API services -->
+    <PackageVersion Include="CommunityToolkit.Aspire.OllamaSharp" Version="13.1.1" />
     <PackageVersion Include="coverlet.MTP" Version="8.0.1" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.5" />
@@ -32,6 +33,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <!-- POSTGRESQL / NPGSQL
          Postgres EF Core provider. Pgvector adds vector similarity search
@@ -41,6 +43,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.5.2" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageVersion Include="OllamaSharp" Version="5.4.25" />
     <PackageVersion Include="Pgvector" Version="0.3.2" />
     <PackageVersion Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
     <!-- AUTHENTICATION & TOKEN MANAGEMENT

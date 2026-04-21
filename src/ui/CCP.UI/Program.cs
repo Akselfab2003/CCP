@@ -4,6 +4,7 @@ using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
+using ChatService.Sdk.ServiceDefaults;
 using CustomerService.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
@@ -146,6 +147,11 @@ namespace CCP.UI
             builder.Services.AddTicketServiceSdk(
                 builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
                 ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddChatServiceSdk(
+                builder.Configuration.GetValue<string>("services:chatservice-api:http:0")
+                ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
                 );
 
             var app = builder.Build();

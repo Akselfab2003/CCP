@@ -1,65 +1,134 @@
 using System.Reflection;
 using CCP.ServiceDefaults;
+using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
-using ChatService.Data;
-using ChatService.Interfaces;
-using ChatService.Models;
-using ChatService.Repositories;
+using CCP.Shared.AuthContext;
+using ChatService.Api.ChatHub;
+using ChatService.Api.Endpoints;
+using ChatService.Api.Middleware;
+using ChatService.Application.ServiceCollection;
+using ChatService.Application.Services.Domain;
+using ChatService.Infrastructure.Persistence;
+using ChatService.Infrastructure.ServiceCollection;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
+using IdentityService.Sdk.ServiceDefaults;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Aspire service defaults — tilføjer service discovery, health checks, OTEL
-builder.Services.AddServiceDefaults("ChatService.Api");
-
-builder.Services.Configure<ChatOptions>(
-    builder.Configuration.GetSection("Chat"));
-
-// EF Core med pgvector via Aspire
-builder.Services.AddDbContext<ChatDbContext>(opts =>
-    opts.UseNpgsql(
-        builder.Configuration.GetConnectionString("chatDB"),
-        o =>
-        {
-            o.UseVector();
-        }));
-
-var ollamaUrl = builder.Configuration["services:ollama:https:0"]
-    ?? builder.Configuration["services:ollama:http:0"]
-    ?? "http://localhost:49234";
-
-builder.Services.AddHttpClient<IEmbeddingService, EmbeddingService>(c =>
-    c.BaseAddress = new Uri(ollamaUrl));
-
-builder.Services.AddHttpClient<IChatService, ChatService.Repositories.ChatService>(c =>
-    c.BaseAddress = new Uri(ollamaUrl));
-
-// Og samme for TicketService:
-var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
-    ?? builder.Configuration["services:ticketservice-api:http:0"]
-    ?? "http://localhost:5001";
-
-builder.Services.AddHttpClient<ITicketClient, TicketClient>(c =>
-    c.BaseAddress = new Uri(ticketUrl));
-
-builder.Services.AddScoped<IFaqRepository, FaqRepository>();
-builder.Services.AddControllers();
-
-// Swagger til debugging
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+public partial class Program
 {
-    app.AppMapSwaggerExtensions();
-    AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddOpenApi()
+                        .AddAuthentication();
+
+        builder.Services.AddAuthorization()
+                        .AddHttpContextAccessor();
+
+        builder.Services.AddServiceDefaults("ChatService.Api");
+        builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP");
+
+
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
+
+            builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
+            builder.AddKeyedOllamaApiClient("qwen")
+                   .AddKeyedChatClient("qwen")
+                   .UseFunctionInvocation()
+                   .UseOpenTelemetry()
+                   .UseLogging();
+
+
+            // Ticket service URL.
+            var ticketUrl = builder.Configuration["services:ticketservice-api:https:0"]
+                            ?? builder.Configuration["services:ticketservice-api:http:0"]
+                            ?? "http://localhost:5001";
+
+            builder.Services.AddClientCredentialsTokenManagement()
+                           .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                           {
+                               client.TokenEndpoint = new Uri("http://localhost:8080/realms/CCP/protocol/openid-connect/token");
+                               client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                               client.ClientSecret = ClientSecret.Parse(
+                                   builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                                   ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                               );
+                               client.Scope = Scope.ParseOrDefault("openid");
+                               client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                           });
+
+
+            builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+                                                   ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
+
+        }
+        builder.Services.AddSignalR(options =>
+        {
+            options.AddFilter<HubFilter>();
+        });
+
+
+        builder.Services.AddControllers();
+        builder.Services.AddApplicationServices();
+
+        builder.Services.AddInfrastructureServices(builder.Configuration);
+
+        builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
+                        .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
+                        .AddEndpointsApiExplorer();
+
+        var app = builder.Build();
+
+        app.UseCors();
+
+        var hubRoute = app.MapHub<ChatHub>("/chatHub");
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            hubRoute.RequireCors(c =>
+            {
+                c.SetIsOriginAllowed(origin =>
+                {
+                    using var scope = app.Services.CreateScope();
+                    var domainservices = scope.ServiceProvider.GetRequiredService<IDomainServices>();
+                    var host = new Uri(origin).Host;
+                    return domainservices.IsDomainAllowed(host);
+                })
+                 .AllowAnyHeader()
+                 .AllowAnyMethod()
+                  .AllowCredentials();
+            });
+        }
+
+        if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+        {
+            app.AppMapSwaggerExtensions();
+            app.UseMiddleware<AuthMiddleware>();
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/chatHub", StringComparison.CurrentCultureIgnoreCase), conf =>
+            {
+                conf.UseMiddleware<UserSessionMiddleware>();
+
+            });
+            AutomaticallyApplyDBMigration<ChatDbContext>.ApplyMigrationsAsync(app).Wait();
+        }
+
+        app.MapOpenApi();
+        app.MapControllers();
+        app.MapSessionEndpoints()
+           .MapFaqManagementEndpoints()
+           .MapChatEndpoints()
+           .MapConfigurationEndpoints();
+
+
+
+
+
+        app.Run();
+    }
 }
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.MapControllers();
-app.Run();
