@@ -1,24 +1,11 @@
-﻿@page "/InviteSupporters"
-@using CCP.Shared.ValueObjects
+﻿@using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
-@layout CCPLayout
 @inject IJSRuntime JS
 @attribute [Authorize(Policy = "RequireAdmin")]
-
-<PageTitle>Supporter Management</PageTitle>
 
 <EditForm Model="InviteSupporterModel" OnValidSubmit="@Submit" OnInvalidSubmit="@OnInvalidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
-
-    <!-- Top Header -->
-    <div class="dash-greeting">
-        <div>
-            <h2 class="dash-greeting-title">Invite Supporter</h2>
-            <p class="dash-greeting-sub">Invite a new supporter to join your team.</p>
-        </div>
-        <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
-    </div>
 
     <!-- Main Grid: Invite form til venstre, info til højre -->
     <div class="Supporter-grid">

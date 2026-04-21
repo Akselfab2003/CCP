@@ -1,23 +1,10 @@
-@page "/PromoteSupporterToManager"
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
-@layout CCPLayout
 @inject IJSRuntime JS
 @attribute [Authorize(Policy = "RequireAdmin")]
 
-<PageTitle>Promote Supporter to Manager</PageTitle>
-
 <EditForm Model="PromoteSupporterModel" OnValidSubmit="@Submit">
     <DataAnnotationsValidator />
-
-    <!-- Top Header -->
-    <div class="dash-greeting">
-        <div>
-            <h2 class="dash-greeting-title">Promote Supporter to Manager</h2>
-            <p class="dash-greeting-sub">Upgrade an existing supporter to manager role.</p>
-        </div>
-        <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
-    </div>
 
     <!-- Main Grid: Promote form til venstre, Manager liste til højre -->
     <div class="promote-grid">

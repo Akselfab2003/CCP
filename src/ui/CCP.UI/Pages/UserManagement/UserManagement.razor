@@ -1,0 +1,67 @@
+@page "/UserManagement"
+@using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
+@using CCP.UI.Pages.PromoteSupporterToManager
+@using CCP.UI.Pages.InviteSupporter
+@using CCP.UI.Pages.InviteCustomer
+@layout CCPLayout
+@inject IJSRuntime JS
+@attribute [Authorize(Policy = "RequireAdmin")]
+
+<PageTitle>User Management</PageTitle>
+
+<!-- Top Header -->
+<div class="dash-greeting">
+    <div>
+        <h2 class="dash-greeting-title">User Management</h2>
+        <p class="dash-greeting-sub">Manage supporters, managers, and customers.</p>
+    </div>
+    <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-container">
+    <button class="tab-button @(activeTab == "promote" ? "active" : "")" 
+            @onclick="@(() => SetActiveTab("promote"))">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+        Promote Supporter
+    </button>
+
+    <button class="tab-button @(activeTab == "invite-supporter" ? "active" : "")" 
+            @onclick="@(() => SetActiveTab("invite-supporter"))">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+        </svg>
+        Invite Supporter
+    </button>
+
+    <button class="tab-button @(activeTab == "invite-customer" ? "active" : "")" 
+            @onclick="@(() => SetActiveTab("invite-customer"))">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <polyline points="17 11 19 13 23 9" />
+        </svg>
+        Invite Customer
+    </button>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content">
+    @if (activeTab == "promote")
+    {
+        <PromoteSupporterToManager />
+    }
+    else if (activeTab == "invite-supporter")
+    {
+        <InviteSupporter />
+    }
+    else if (activeTab == "invite-customer")
+    {
+        <InviteCustomer />
+    }
+</div>
