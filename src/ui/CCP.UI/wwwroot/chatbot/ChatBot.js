@@ -287,6 +287,7 @@ class ChatBot {
         this.connection.start();
     }
 
+    // Creates a new conversation and sets the activeConversationID
     async createChatConversation() {
         const conversationUrl = "https://api.northflow.dev/chat/createConversation";
         var conversationID = await fetch(conversationUrl, {
