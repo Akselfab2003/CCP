@@ -15,33 +15,112 @@
     <![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #f3f5f7; font-family: Arial, sans-serif; color: #1f2937;">
+
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f5f7; padding: 24px 12px;">
         <tr>
             <td align="center">
                 <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; background-color: #ffffff; border: 1px solid #e5e7eb; border-collapse: collapse;">
+
+                    <!-- ── TOP HEADER ── -->
                     <tr>
-                        <td style="padding: 24px 28px; border-bottom: 1px solid #e5e7eb;">
-                            <p style="margin: 0; font-size: 12px; letter-spacing: 0.4px; text-transform: uppercase; color: #6b7280;">@OrganizationName - Support</p>
+                        <td style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb;">
+                            <p style="margin: 0; font-size: 12px; color: #6b7280; letter-spacing: 0.4px; text-transform: uppercase;">
+                                @OrganizationName – Support · Ticket #@Ticket.Id
+                            </p>
                         </td>
                     </tr>
-                    @if (!string.IsNullOrWhiteSpace(Email.Body))
+
+                    <!-- ── SYSTEM NOTE ── -->
+                    <tr>
+                        <td style="padding: 10px 24px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                            <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                                ##- Please type your reply above this line -##
+                            </p>
+                            <p style="margin: 6px 0 0; font-size: 13px; color: #374151;">
+                                Your request (@Ticket.Id) has been updated. To add additional comments, reply to this email.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- ── AGENT / SENDER MESSAGE (EmailSent) ── -->
+                    <tr>
+                        <td style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <!-- Avatar: initial from SenderAddress -->
+                                    <td width="36" valign="top" style="padding-right: 12px;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #d1d5db; text-align: center; line-height: 36px; font-size: 14px; font-weight: bold; color: #4b5563;">
+                                            @(SentEmail.SenderAddress.Substring(0, 1).ToUpper())
+                                        </div>
+                                    </td>
+                                    <!-- Sender address + timestamp -->
+                                    <td valign="top">
+                                        <p style="margin: 0; font-size: 13px; font-weight: bold; color: #111827;">
+                                            @SentEmail.SenderAddress
+                                            @if (!string.IsNullOrWhiteSpace(OrganizationName))
+                                            {
+                                                <span style="font-weight: normal; color: #6b7280;">(@OrganizationName)</span>
+                                            }
+                                        </p>
+                                        <p style="margin: 2px 0 0; font-size: 11px; color: #9ca3af;">@SentEmail.SentAt.ToString("MMM d, HH:mm")</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Agent message body -->
+                            <p style="margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: #111827;">
+                                @SentEmail.Body
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- ── CUSTOMER REPLY (EmailReceived, if present) ── -->
+                    @if (ReceivedEmail != null)
                     {
                         <tr>
-                            <td style="padding: 16px;">
-                                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #111827;">@Email.Body</p>
+                            <td style="padding: 20px 24px;">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <!-- Avatar: initial from SenderAddress -->
+                                        <td width="36" valign="top" style="padding-right: 12px;">
+                                            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #e5e7eb; text-align: center; line-height: 36px; font-size: 14px; font-weight: bold; color: #6b7280;">
+                                                @(ReceivedEmail.SenderAddress.Substring(0, 1).ToUpper())
+                                            </div>
+                                        </td>
+                                        <!-- Sender + timestamp -->
+                                        <td valign="top">
+                                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #111827;">
+                                                @ReceivedEmail.SenderAddress
+                                            </p>
+                                            <p style="margin: 2px 0 0; font-size: 11px; color: #9ca3af;">@ReceivedEmail.ReceivedAt.ToString("MMM d, HH:mm")</p>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Customer reply body -->
+                                <p style="margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: #111827;">
+                                    @ReceivedEmail.Body
+                                </p>
                             </td>
                         </tr>
                     }
+
                 </table>
             </td>
         </tr>
     </table>
+
 </body>
 </html>
 
 @code {
+    /// <summary>The outbound reply sent by the agent.</summary>
     [Parameter, EditorRequired]
-    public EmailReceived Email { get; set; } = default!;
+    public EmailSent SentEmail { get; set; } = default!;
+
+    /// <summary>The inbound email from the customer, shown below the agent reply. Null hides the section.</summary>
+    [Parameter]
+    public EmailReceived? ReceivedEmail { get; set; }
 
     [Parameter, EditorRequired]
     public Ticket Ticket { get; set; } = default!;
