@@ -23,12 +23,13 @@ namespace IdentityService.API
             builder.Services.AddAuthorization();
             builder.Services.ConfigureDefaultOpenTelemetry("IdentityService.API");
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddApiAuthenticationServices("IdentityService.API", "CCP");
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
+
                 var keycloakServiceUrl = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddKeycloakSdk(keycloakServiceUrl);
+                builder.Services.AddApiAuthenticationServices("IdentityService.API", "CCP", keycloakServiceUrl);
 
 
                 builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
