@@ -44,6 +44,7 @@ namespace CPP.UI.Tests.Fixtures.Application
                     ["services:customerservice-api:http:0"] = "http://localhost:5004",
                     ["services:messagingservice-api:http:0"] = "http://localhost:5005",
                     ["services:EmailService:http:0"] = "http://localhost:5006",
+                    ["services:chatservice-api:http:0"] = "http://localhost:5007",
                     ["CircuitOptions.DetailedErrors"] = "true",
                     ["UI_TESTS"] = "true"
                 })

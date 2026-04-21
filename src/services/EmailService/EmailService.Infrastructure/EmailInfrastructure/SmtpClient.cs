@@ -17,7 +17,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             using var client = new MailKit.Net.Smtp.SmtpClient();
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
             await client.ConnectAsync(emailHostUrl, 993, true);
-            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
+            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername")!, configuration.GetValue<string>("emailWorkerServicePassword")!);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }

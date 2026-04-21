@@ -50,7 +50,7 @@ jobs:
       - name: Publish the solution
         run: dotnet publish ./src/CCP.slnx -t:PublishContainer  --configuration Release --no-restore  -p Registry=${{ secrets.REGISTRY_HOST }} -p ContainerImageTags='"${{github.sha}};latest"'
 
-      - name: Build Custom Images
+      - name: Build keycloak Images
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -60,6 +60,31 @@ jobs:
             ${{ secrets.REGISTRY_HOST }}/keycloak:latest
             ${{ secrets.REGISTRY_HOST }}/keycloak:${{ github.sha }}
 
+      - name: Build Koppar Images
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/Koppar/dockerfile
+          push: true
+          tags: |
+            ${{ secrets.REGISTRY_HOST }}/koppar:latest
+            ${{ secrets.REGISTRY_HOST }}/koppar:${{ github.sha }}
+
+      - name: Build CCP UI Images
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./src/ui/CCP.UI/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
+            ${{ secrets.REGISTRY_HOST }}/ccp-ui:${{ github.sha }}
+
+
+            
+
+
+
       - name: Docker Push Images
         run: |
           docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:latest
@@ -68,31 +93,39 @@ jobs:
           docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:latest
           docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:latest
           docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
-          docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:latest
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
           docker push ${{ secrets.REGISTRY_HOST }}/emailworker-service:latest
 
-          
+
           docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/chatservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/emailservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/messagingservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:${{ github.sha }}
-          docker push ${{ secrets.REGISTRY_HOST }}/ccp-ui:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/emailworker-service:${{ github.sha }}
 
-
-
   Deploy:
-      name: Deploy
-      needs: Build-and-Push
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          SERVICES_TO_DEPLOY: [IdentityService, CustomerService, ChatService, EmailService, MessagingService, TicketService, EmailWorkerService, CCP_SAAS_UI, CCP_WEBSITE]
-      steps:
+    name: Deploy
+    needs: Build-and-Push
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        SERVICES_TO_DEPLOY:
+          [
+            IdentityService,
+            CustomerService,
+            ChatService,
+            EmailService,
+            MessagingService,
+            TicketService,
+            EmailWorkerService,
+            CCP_SAAS_UI,
+            CCP_WEBSITE,
+            KOPPAR,
+          ]
+    steps:
       - name: Deploy
         env:
           DEPLOYMENT_WEBHOOK_URL: ${{ secrets[matrix.SERVICES_TO_DEPLOY]}}
