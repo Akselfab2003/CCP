@@ -1,5 +1,5 @@
-﻿using CustomerService.Api.DB.Models;
-using CustomerService.Application.Services;
+﻿using CustomerService.Application.Services;
+using CustomerService.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerService.Api.Controllers

@@ -1,5 +1,5 @@
-﻿using CustomerService.Api.DB.Models;
-using CustomerService.Application.Persistence;
+﻿using CustomerService.Application.Persistence;
+using CustomerService.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace CustomerService.Application.Services

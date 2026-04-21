@@ -1,6 +1,6 @@
 ﻿using CustomerService.Api.DB;
-using CustomerService.Api.DB.Models;
 using CustomerService.Application.Persistence;
+using CustomerService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

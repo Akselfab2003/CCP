@@ -153,8 +153,8 @@ namespace EmailService.Worker.Host.handlers
                 var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
                 var supportTeamEmail = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? "support@example.com";
                 var replyUrl = _configuration.GetValue<string>("ApplicationUrls:TicketReply") ?? "#";
-                var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
-                var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:TicketHistory") ?? "#";
+                var managementUrl = "";
+                var viewHistoryUrl = ""; // Planed
 
                 var emailModel = new EmailReceived
                 {

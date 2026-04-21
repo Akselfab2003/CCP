@@ -1,8 +1,10 @@
-﻿using EmailService.Domain.Models;
+﻿using CustomerService.Domain.Entities;
+using EmailService.Domain.Models;
 using EmailTemplates.EmailTemplates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
+using TicketService.Domain.Entities;
 namespace EmailTemplates.Renderes
 {
     public class EmailTemplateRenderer : IEmailTemplateRenderer
@@ -17,11 +19,14 @@ namespace EmailTemplates.Renderes
         }
 
         public async Task<string> RenderTicketCreatedEmailAsync(
-            EmailSent email, string organizationName, string expectedResponseTime, string portalUrl)
+            EmailSent email,Ticket ticket,
+            string organizationName, string expectedResponseTime,
+            string portalUrl)
         {
             var component = await RenderComponentAsync<TicketCreatedEmail>(p =>
             {
                 p.Add(nameof(TicketCreatedEmail.Email), email);
+                p.Add(nameof(TicketCreatedEmail.Ticket), ticket);
                 p.Add(nameof(TicketCreatedEmail.OrganizationName), organizationName);
                 p.Add(nameof(TicketCreatedEmail.ExpectedResponseTime), expectedResponseTime);
                 p.Add(nameof(TicketCreatedEmail.PortalUrl), portalUrl);
@@ -32,23 +37,21 @@ namespace EmailTemplates.Renderes
         }
 
         public async Task<string> RenderTicketReplyEmailAsync(
-            EmailReceived email, string recipientName, string organizationName,
-            string agentName, string agentRole, string ticketStatus, string ticketStatusLabel,
-            string replyUrl, string portalUrl, string viewHistoryUrl, string reopenUrl)
+            EmailReceived email, Ticket ticket,
+            Customer customer, string organizationName,
+            string agentName, string agentRole,
+            string replyUrl,string viewHistoryUrl)
         {
             var component = await RenderComponentAsync<TicketReplyEmail>(p =>
             {
                 p.Add(nameof(TicketReplyEmail.Email), email);
-                p.Add(nameof(TicketReplyEmail.RecipientName), recipientName);
+                p.Add(nameof(TicketReplyEmail.Ticket), ticket);
+                p.Add(nameof(TicketReplyEmail.Customer), customer);
                 p.Add(nameof(TicketReplyEmail.OrganizationName), organizationName);
                 p.Add(nameof(TicketReplyEmail.AgentName), agentName);
                 p.Add(nameof(TicketReplyEmail.AgentRole), agentRole);
-                p.Add(nameof(TicketReplyEmail.TicketStatus), ticketStatus);
-                p.Add(nameof(TicketReplyEmail.TicketStatusLabel), ticketStatusLabel);
                 p.Add(nameof(TicketReplyEmail.ReplyUrl), replyUrl);
-                p.Add(nameof(TicketReplyEmail.PortalUrl), portalUrl);
                 p.Add(nameof(TicketReplyEmail.ViewHistoryUrl), viewHistoryUrl);
-                p.Add(nameof(TicketReplyEmail.ReopenUrl), reopenUrl);
             });
 
             return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
@@ -57,53 +60,50 @@ namespace EmailTemplates.Renderes
 
 
         public async Task<string> RenderTicketStatusEmailAsync(
-            EmailSent email, string organizationName, string newStatus, string newStatusLabel,
-            string oldStatusLabel, string updatedByAgent, string agentNote,
-            string portalUrl, string reopenUrl)
+            EmailSent email, Ticket ticket,
+            string organizationName, string oldStatusLabel,
+            string portalUrl
+            )
         {
                 var component = await RenderComponentAsync<TicketStatusEmail>(p =>
                 {
                     p.Add(nameof(TicketStatusEmail.Email), email);
+                    p.Add(nameof(TicketStatusEmail.Ticket), ticket);
                     p.Add(nameof(TicketStatusEmail.OrganizationName), organizationName);
-                    p.Add(nameof(TicketStatusEmail.NewStatus), newStatus);
-                    p.Add(nameof(TicketStatusEmail.NewStatusLabel), newStatusLabel);
                     p.Add(nameof(TicketStatusEmail.OldStatusLabel), oldStatusLabel);
-                    p.Add(nameof(TicketStatusEmail.UpdatedByAgent), updatedByAgent);
-                    p.Add(nameof(TicketStatusEmail.AgentNote), agentNote);
                     p.Add(nameof(TicketStatusEmail.PortalUrl), portalUrl);
-                    p.Add(nameof(TicketStatusEmail.ReopenUrl), reopenUrl);
                 });
     
                 return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
         }
 
         public async Task<string> RenderReplyToEmailAsync(
-            EmailReceived emailReceived, EmailSent emailSent, int ticket, string organizationName)
+            EmailReceived emailReceived, EmailSent emailSent,
+            Ticket ticket, string organizationName)
         {
             var component = await RenderComponentAsync<ReplyToEmail>(p =>
             {
                 p.Add(nameof(ReplyToEmail.ReceivedEmail), emailReceived);
                 p.Add(nameof(ReplyToEmail.SentEmail), emailSent);
-                p.Add(nameof(ReplyToEmail.TicketId), ticket);
+                p.Add(nameof(ReplyToEmail.Ticket), ticket);
                 p.Add(nameof(ReplyToEmail.OrganizationName), organizationName);
             });
             return PreMailer.Net.PreMailer.MoveCssInline(component).Html;
         }
 
         public Task<string> RenderSupportCustomerReplyNotificationAsync(
-            EmailReceived email, string customerName, string customerEmail,
-            string organizationName, string ticketStatus, string ticketStatusLabel,
-            string replyUrl, string managementUrl, string viewHistoryUrl) =>
+            EmailReceived email, Ticket ticket,
+            Customer customer, string organizationName,
+            string replyUrl, string mangmentUrl,
+            string viewHistoryUrl) =>
             RenderComponentAsync<SupportCustomerReplyNotification>(p =>
             {
                 p.Add(nameof(SupportCustomerReplyNotification.Email), email);
-                p.Add(nameof(SupportCustomerReplyNotification.CustomerName), customerName);
-                p.Add(nameof(SupportCustomerReplyNotification.CustomerEmail), customerEmail);
+                p.Add(nameof(SupportCustomerReplyNotification.Ticket), ticket);
+                p.Add(nameof(SupportCustomerReplyNotification.Customer), customer);
                 p.Add(nameof(SupportCustomerReplyNotification.OrganizationName), organizationName);
-                p.Add(nameof(SupportCustomerReplyNotification.TicketStatus), ticketStatus);
-                p.Add(nameof(SupportCustomerReplyNotification.TicketStatusLabel), ticketStatusLabel);
                 p.Add(nameof(SupportCustomerReplyNotification.ReplyUrl), replyUrl);
-                p.Add(nameof(SupportCustomerReplyNotification.ManagementUrl), managementUrl);
+                p.Add(nameof(SupportCustomerReplyNotification.ManagementUrl), mangmentUrl);
                 p.Add(nameof(SupportCustomerReplyNotification.ViewHistoryUrl), viewHistoryUrl);
             });
 

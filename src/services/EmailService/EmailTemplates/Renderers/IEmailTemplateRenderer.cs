@@ -1,55 +1,36 @@
-﻿using EmailService.Domain.Models;
+﻿using CustomerService.Domain.Entities;
+using EmailService.Domain.Models;
+using TicketService.Domain.Entities;
 
 namespace EmailTemplates.Renderes
 {
     public interface IEmailTemplateRenderer
     {
         Task<string> RenderTicketCreatedEmailAsync(
-            EmailSent email,
-            string organizationName,
-            string expectedResponseTime,
+            EmailSent email, Ticket ticket,
+            string organizationName, string expectedResponseTime,
             string portalUrl);
 
         Task<string> RenderTicketReplyEmailAsync(
-            EmailReceived email,
-            string recipientName,
-            string organizationName,
-            string agentName,
-            string agentRole,
-            string ticketStatus,
-            string ticketStatusLabel,
-            string replyUrl,
-            string portalUrl,
-            string viewHistoryUrl,
-            string reopenUrl);
+            EmailReceived email, Ticket ticket,
+            Customer customer, string organizationName,
+            string agentName, string agentRole,
+            string replyUrl, string viewHistoryUrl);
 
         Task<string> RenderTicketStatusEmailAsync(
-            EmailSent email,
-            string organizationName,
-            string newStatus,
-            string newStatusLabel,
-            string oldStatusLabel,
-            string updatedByAgent,
-            string agentNote,
-            string portalUrl,
-            string reopenUrl);
+            EmailSent email, Ticket ticket,
+            string organizationName, string OldStatusLabel,
+            string portalUrl);
 
         Task<string> RenderSupportCustomerReplyNotificationAsync(
-            EmailReceived email,
-            string customerName,
-            string customerEmail,
-            string organizationName,
-            string ticketStatus,
-            string ticketStatusLabel,
-            string replyUrl,
-            string managementUrl,
+            EmailReceived email,Ticket ticket,
+            Customer customer, string organizationName,
+            string replyUrl, string mangmentUrl,
             string viewHistoryUrl);
 
         Task<string> RenderReplyToEmailAsync(
-            EmailReceived emailReceived,
-            EmailSent emailSent,
-            int ticket,
-            string organizationName
+            EmailReceived emailReceived,EmailSent emailSent,
+            Ticket ticket,string organizationName
             );
     }
 }

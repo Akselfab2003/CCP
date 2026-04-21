@@ -1,5 +1,7 @@
 ﻿@* SupportCustomerReplyNotification.razor - Sent to support team when customer replies *@
+@using CustomerService.Domain.Entities
 @using EmailService.Domain.Models
+@using TicketService.Domain.Entities
 
 <!DOCTYPE html>
 <html>
@@ -40,8 +42,8 @@
                         <td style="background-color: #1a2433; padding: 12px 28px; border-bottom: 1px solid #2a3447;">
                             <table width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
-                                    <td style="font-size: 13px; color: #8b95b0; font-family: ''Syne', Arial, sans-serif', monospace;">Ticket: <span style="color: #4f94e8; font-weight: 700;">#@Email.Id</span></td>
-                                    <td align="right" style="font-size: 11px;font-weight: 600;padding: 4px 12px;color: #4f94e8;border: 1px solid #4f94e8;border-radius: 6px;width: 30px;text-transform: uppercase;background-color: #1a3d5c;">Open</td>
+                                    <td style="font-size: 13px; color: #8b95b0; font-family: ''Syne', Arial, sans-serif', monospace;">Ticket: <span style="color: #4f94e8; font-weight: 700;">#@Ticket.Id</span></td>
+                                    <td align="right" style="font-size: 11px;font-weight: 600;padding: 4px 12px;color: #4f94e8;border: 1px solid #4f94e8;border-radius: 6px;width: 30px;text-transform: uppercase;background-color: #1a3d5c;">@Ticket.Status</td>
                                 </tr>
                             </table>
                         </td>
@@ -54,11 +56,11 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a2433; padding: 12px; margin-bottom: 16px; border-radius: 6px;">
                                 <tr>
                                     <td width="50" style="padding-right: 12px; vertical-align: top;">
-                                        <div style="width: 38px; height: 38px; background-color: #4f94e8; color: #ffffff; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-align: center; line-height: 38px;">@(CustomerName.Length > 0 ? CustomerName[0].ToString().ToUpper() : "C")</div>
+                                        <div style="width: 38px; height: 38px; background-color: #4f94e8; color: #ffffff; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-align: center; line-height: 38px;">@(Customer.Name.Length > 0 ? Customer.Name[0].ToString().ToUpper() : "C")</div>
                                     </td>
                                     <td style="vertical-align: top;">
-                                        <p style="font-size: 14px; font-weight: 700; color: #4f94e8; margin: 0 0 2px 0; font-family: 'Syne', Arial, sans-serif;">@CustomerName</p>
-                                        <p style="font-size: 12px; color: #8b95b0; margin: 0;">@CustomerEmail</p>
+                                        <p style="font-size: 14px; font-weight: 700; color: #4f94e8; margin: 0 0 2px 0; font-family: 'Syne', Arial, sans-serif;">@Customer.Name</p>
+                                        <p style="font-size: 12px; color: #8b95b0; margin: 0;">@Customer.Email</p>
                                     </td>
                                 </tr>
                             </table>
@@ -67,7 +69,7 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse;">
                                 <tr>
                                     <td style="padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #2a3447; color: #8b95b0; font-weight: 500; width: 40%;">Ticket ID</td>
-                                    <td style="padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #2a3447; color: #e8ecf5; font-family: 'Syne', Arial, sans-serif; font-weight: 700;">#@Email.Id</td>
+                                    <td style="padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #2a3447; color: #e8ecf5; font-family: 'Syne', Arial, sans-serif; font-weight: 700;">#@Ticket.Id</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #2a3447; color: #8b95b0; font-weight: 500;">Subject</td>
@@ -79,7 +81,7 @@
                                 </tr>
                                 <tr>
                                     <td style="padding: 10px 12px; font-size: 13px; color: #8b95b0; font-weight: 500;">Status</td>
-                                    <td style="padding: 10px 12px; font-size: 13px; color: #4f94e8; font-weight: 600;">@TicketStatusLabel</td>
+                                    <td style="padding: 10px 12px; font-size: 13px; color: #4f94e8; font-weight: 600;">@Ticket.Status</td>
                                 </tr>
                             </table>
 
@@ -92,11 +94,6 @@
                                     </td>
                                 </tr>
                             </table>
-
-                            <!-- History Toggle -->
-                            <p style="font-size: 12px; color: #8b95b0; margin: 0 0 20px 0; padding: 0 0 12px 0; border-bottom: 1px solid #2a3447; font-family: 'Syne', Arial, sans-serif;">
-                                Conversation on ticket <strong>#@Email.Id</strong> · <a href="@ViewHistoryUrl" style="color: #4f94e8; text-decoration: none;">View full history</a>
-                            </p>
 
                             <!-- Primary CTA Button -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
@@ -129,19 +126,13 @@
 
 @code {
     [Parameter, EditorRequired]
-    public EmailService.Domain.Models.EmailReceived Email { get; set; } = default!;
+    public EmailReceived Email { get; set; } = default!;
     [Parameter, EditorRequired]
-    public TicketService.Domain.Entities.Ticket Ticket { get; set; } = default!;
-    [Parameter]
-    public string CustomerName { get; set; } = "Customer";
-    [Parameter]
-    public string CustomerEmail { get; set; } = "";
+    public Ticket Ticket { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public Customer Customer { get; set; } = default!;
     [Parameter]
     public string OrganizationName { get; set; } = "Support";
-    [Parameter]
-    public string TicketStatus { get; set; } = "open";
-    [Parameter]
-    public string TicketStatusLabel { get; set; } = "Open";
     [Parameter]
     public string ReplyUrl { get; set; } = "#";
     [Parameter]

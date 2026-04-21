@@ -1,4 +1,4 @@
-﻿using CustomerService.Api.DB.Models;
+﻿using CustomerService.Domain.Entities;
 
 namespace CustomerService.Application.Services
 {

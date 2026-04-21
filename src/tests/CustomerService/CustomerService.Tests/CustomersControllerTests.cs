@@ -1,6 +1,6 @@
 using CustomerService.Api.Controllers;
-using CustomerService.Api.DB.Models;
 using CustomerService.Application.Services;
+using CustomerService.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
