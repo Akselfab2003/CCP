@@ -30,6 +30,16 @@ namespace CustomerService.Application.Services
             return customer;
         }
 
+        public async Task<Customer?> GetCustomerByEmail(string email)
+        {
+            var customer = await _customerRepository.GetCustomerByEmail(email);
+            if (customer == null)
+            {
+                _logger.LogWarning("Customer with email {CustomerEmail} not found.", email);
+            }
+            return customer;
+        }
+
         public Task<Customer> CreateCustomer(Customer customer)
         {
             return _customerRepository.CreateCustomer(customer);

@@ -9,5 +9,6 @@ namespace CustomerService.Sdk.Services
         Task CreateCustomer(CreateCustomerRequest customerRequest);
         Task<List<CustomerDTO>> GetAllCustomers();
         Task<Result<CustomerDTO>> GetCustomerById(Guid id);
+        Task<Result<CustomerDTO>> GetCustomerByEmail(string email);
     }
 }

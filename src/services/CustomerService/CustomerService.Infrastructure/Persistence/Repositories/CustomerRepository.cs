@@ -27,6 +27,11 @@ namespace CustomerService.Infrastructure.Persistence.Repositories
             return await _dbContext.Customers.FindAsync(id);
         }
 
+        public async Task<Customer?> GetCustomerByEmail(string email)
+        {
+            return await _dbContext.Customers.FirstOrDefaultAsync(c => c.Email == email);
+        }
+
         public async Task<Customer> CreateCustomer(Customer customer)
         {
             // Generer en ny GUID for kunden

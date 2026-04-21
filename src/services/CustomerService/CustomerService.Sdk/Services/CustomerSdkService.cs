@@ -59,6 +59,27 @@ namespace CustomerService.Sdk.Services
             }
         }
 
+        public async Task<Result<CustomerDTO>> GetCustomerByEmail(string email)
+        {
+            try
+            {
+                var response = await _apiClient.Client.Api.Customers.GetAsync();
+                var customer = response?.FirstOrDefault(c => c.Email == email);
+                if (customer != null)
+                {
+                    return Result.Success(new CustomerDTO() { Email = customer.Email!, Id = customer.Id!.Value, Name = customer.Name!, OrganizationId = customer.OrganizationId!.Value });
+                }
+                else
+                {
+                    return Result.Failure<CustomerDTO>(Error.NotFound("CustomerNotFound", $"Customer with email {email} was not found."));
+                }
+            }
+            catch (Exception)
+            {
+                return Result.Failure<CustomerDTO>(Error.None);
+            }
+        }
+
         public async Task<List<CustomerDTO>> GetAllCustomers()
         {
             try

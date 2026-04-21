@@ -40,6 +40,19 @@ namespace CustomerService.Api.Controllers
             return Ok(customer); //HTTP 200
         }
 
+        [HttpGet("{email:string}")]
+        [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCustomerByEmail(string email)
+        {
+            var customer = await _customerService.GetCustomerByEmail(email);
+            if (customer == null)
+            {
+                return NotFound(); //HTTP 404
+            }
+            return Ok(customer); //HTTP 200
+        }
+
         //Opretter en ny customer
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]

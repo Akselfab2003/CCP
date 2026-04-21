@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.Events;
+using CustomerService.Sdk.Services;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
 
@@ -8,6 +9,7 @@ namespace EmailService.Worker.Host.handlers
     {
         private readonly ILogger<MailReceivedHandler> _logger;
         private readonly IEmail _emailSendingService;
+        private readonly ICustomerSdkService _customerSdkService;
         private readonly IConfiguration _configuration;
 
         // Keywords that suggest a customer wants support
@@ -21,11 +23,13 @@ namespace EmailService.Worker.Host.handlers
         public MailReceivedHandler(
             ILogger<MailReceivedHandler> logger,
             IEmail emailSendingService,
+            ICustomerSdkService customerSdkService,
             IConfiguration configuration
             )
         {
             _logger = logger;
             _emailSendingService = emailSendingService;
+            _customerSdkService = customerSdkService;
             _configuration = configuration;
         }
 
@@ -38,6 +42,28 @@ namespace EmailService.Worker.Host.handlers
                     mail_Received.Subject, mail_Received.MailFrom, mail_Received.MailTo, mail_Received.MessageId);
 
                 var ticketId = ExtractTicketIdFromSubject(mail_Received.Subject);
+
+                var customerResult = await _customerSdkService.GetCustomerByEmail(mail_Received.MailFrom);
+                if (!customerResult.IsSuccess)
+                {
+                    try
+                    {
+                        await _customerSdkService.CreateCustomer(
+                            new CustomerService.Sdk.Models.CreateCustomerRequest
+                            {
+                                Id = Guid.NewGuid(),
+                                Email = mail_Received.MailFrom,
+                                Name = ExtractNameFromEmail(mail_Received.MailFrom),
+                                OrganizationId = Guid.Parse(_configuration.GetValue<string>("OrganizationSettings:DefaultOrganizationId") ?? Guid.Empty.ToString())
+                            });
+
+                        _logger.LogInformation("New customer created from email: {Email}", mail_Received.MailFrom);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to create customer from email: {Email}. Continuing with email processing.", mail_Received.MailFrom);
+                    }
+                }
 
                 if (ticketId != null)
                 {
@@ -75,6 +101,7 @@ namespace EmailService.Worker.Host.handlers
                 var emailModel = new EmailReceived
                 {
                     Id = ticketId,
+                    MailId = mail_Received.MessageId,
                     Subject = mail_Received.Subject,
                     Body = mail_Received.Body,
                     SenderAddress = mail_Received.MailFrom,

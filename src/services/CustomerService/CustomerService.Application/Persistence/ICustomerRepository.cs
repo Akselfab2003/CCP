@@ -8,6 +8,7 @@ namespace CustomerService.Application.Persistence
         Task<bool> DeleteCustomer(Guid id);
         Task<List<Customer>> GetAllCustomersAsync();
         Task<Customer?> GetCustomerById(Guid id);
+        Task<Customer?> GetCustomerByEmail(string email);
         Task<Customer?> UpdateCustomer(Guid id, Customer updatedCustomer);
     }
 }
