@@ -54,6 +54,7 @@ namespace CCP.Shared.UIContext
             var RolesAndGroups = user.FindAll(ClaimTypes.Role)
                                      .Select(c => c.Value)
                                      .ToList();
+            Roles = RolesAndGroups;
 
             return RolesAndGroups switch
             {

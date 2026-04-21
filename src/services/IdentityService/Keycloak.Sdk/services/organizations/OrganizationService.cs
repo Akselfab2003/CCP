@@ -214,5 +214,68 @@ namespace Keycloak.Sdk.services.organizations
             }
         }
 
+
+        public async Task<Result<KeycloakOrgDetails>> GetOrgDetails(Guid? OrgId = null, string? Domain = null, CancellationToken ct = default)
+        {
+            try
+            {
+                OrganizationRepresentation? organization = null;
+
+                if (OrgId != null)
+                {
+                    organization = await Client.Admin.Realms[Constants.REALM]
+                                                .Organizations[OrgId.ToString()]
+                                                .GetAsync(cancellationToken: ct);
+                }
+                else if (!string.IsNullOrEmpty(Domain))
+                {
+                    var result = await Client.Admin.Realms[Constants.REALM].Organizations.GetAsync(req =>
+                    {
+                        req.QueryParameters.Search = Domain;
+                    });
+
+                    if (result != null)
+                    {
+                        organization = result.FirstOrDefault();
+                    }
+                    else
+                    {
+                        return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.nullResponse", "Received null response from Keycloak API while retrieving organization details."));
+                    }
+                }
+
+
+                if (organization == null)
+                {
+                    return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.nullResponse", "Received null response from Keycloak API while retrieving organization details."));
+                }
+
+                var orgDetails = new KeycloakOrgDetails();
+
+                if (organization.Id == null) return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.missingId", "The organization details retrieved from Keycloak API are missing the organization ID."));
+
+                if (!Guid.TryParse(organization.Id, out Guid organizationId))
+                {
+                    _logger.LogError("Invalid organization ID format for organization with ID {OrganizationId}. Received ID: {OrganizationIdValue}", OrgId, organization.Id);
+                    return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.invalidIdFormat", $"The organization ID retrieved for organization with ID '{OrgId}' is not in a valid GUID format."));
+                }
+
+                orgDetails.Id = organizationId;
+
+                if (string.IsNullOrEmpty(organization.Name)) return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.missingName", "The organization details retrieved from Keycloak API are missing the organization name."));
+
+                orgDetails.Name = organization.Name;
+
+                if (organization.Domains == null || organization.Domains.Count == 0) return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.missingDomains", "The organization details retrieved from Keycloak API are missing organization domains."));
+
+                orgDetails.DomainName = organization.Domains.FirstOrDefault()?.Name ?? string.Empty;
+
+                return Result.Success(orgDetails);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<KeycloakOrgDetails>(Error.Failure("GetOrgDetails.failed", $"An error occurred while retrieving organization details: {ex.Message}"));
+            }
+        }
     }
 }

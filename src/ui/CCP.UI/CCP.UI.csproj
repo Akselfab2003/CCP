@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\services\ChatService\ChatService.Sdk\ChatService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
