@@ -40,7 +40,10 @@ public partial class Program
             var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
             builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP", keycloak: keycloakURL);
 
-            builder.Services.AddDbContext<ChatDbContext>(opts => opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); }));
+            builder.Services.AddDbContext<ChatDbContext>(opts =>
+            {
+                opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); });
+            });
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
             builder.AddKeyedOllamaApiClient("qwen")
