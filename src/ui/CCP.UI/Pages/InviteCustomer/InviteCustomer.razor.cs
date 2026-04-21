@@ -1,42 +1,61 @@
-﻿using IdentityService.Sdk.Services.Customer;
+﻿using System.ComponentModel.DataAnnotations;
+using IdentityService.Sdk.Services.Customer;
 using Microsoft.AspNetCore.Components;
 
 namespace CCP.UI.Pages.InviteCustomer
 {
     public partial class InviteCustomer : ComponentBase
     {
-        private readonly ILogger<InviteCustomer> _logger;
-        private readonly ICustomerService _customerService;
-        private InviteCustomerModel InviteCustomerModel { get; set; } = new InviteCustomerModel();
+        [Inject] private ILogger<InviteCustomer> Logger { get; set; } = default!;
+        [Inject] private ICustomerService CustomerService { get; set; } = default!;
 
-        public InviteCustomer(ILogger<InviteCustomer> logger, ICustomerService customerService)
-        {
-            _logger = logger;
-            _customerService = customerService;
-        }
+        private InviteCustomerModel InviteCustomerModel { get; set; } = new InviteCustomerModel();
+        private bool isSubmitting = false;
+        private string? successMessage = null;
+        private string? errorMessage = null;
 
         private async Task Submit()
         {
+            isSubmitting = true;
+            successMessage = null;
+            errorMessage = null;
+            StateHasChanged();
+
             try
             {
-                var result = await _customerService.InviteCustomer(InviteCustomerModel.Email);
-                if (result.IsFailure)
+                var result = await CustomerService.InviteCustomer(InviteCustomerModel.Email);
+
+                if (result.IsSuccess)
                 {
-                    _logger.LogError("Failed to invite customer with email {Email}: {Error}", InviteCustomerModel.Email, result.Error);
+                    successMessage = $"Invitation sent to {InviteCustomerModel.Email}!";
+                    InviteCustomerModel = new InviteCustomerModel();
                 }
                 else
                 {
+                    errorMessage = $"Failed to send invitation: {result.Error.Description}";
+                    Logger.LogError("Failed to invite customer with email {Email}: {Error}", InviteCustomerModel.Email, result.Error);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inviting customer with email {Email}", InviteCustomerModel.Email);
+                Logger.LogError(ex, "Error inviting customer with email {Email}", InviteCustomerModel.Email);
+                errorMessage = "An unexpected error occurred. Please try again.";
+            }
+            finally
+            {
+                isSubmitting = false;
+                StateHasChanged();
             }
         }
     }
 
     public class InviteCustomerModel
     {
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
         public string Email { get; set; } = string.Empty;
+
+        [MaxLength(500, ErrorMessage = "Welcome message cannot exceed 500 characters")]
+        public string? WelcomeMessage { get; set; }
     }
 }

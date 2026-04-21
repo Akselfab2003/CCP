@@ -1,0 +1,62 @@
+/* ===== USER MANAGEMENT PAGE ===== */
+
+/* Tab Navigation */
+.tab-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--ccp-border);
+    padding-bottom: 0;
+}
+
+.tab-button {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ccp-text-mid);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    bottom: -2px;
+}
+
+.tab-button:hover {
+    color: var(--ccp-text-hi);
+    background: var(--ccp-hover);
+}
+
+.tab-button.active {
+    color: var(--ccp-accent);
+    border-bottom-color: var(--ccp-accent);
+}
+
+.tab-button svg {
+    opacity: 0.7;
+}
+
+.tab-button.active svg {
+    opacity: 1;
+}
+
+/* Tab Content */
+.tab-content {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

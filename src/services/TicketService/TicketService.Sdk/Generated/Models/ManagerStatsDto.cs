@@ -28,6 +28,14 @@ namespace TicketService.Sdk.Models
         public int? ClosedToday { get; set; }
         /// <summary>The openTickets property</summary>
         public int? OpenTickets { get; set; }
+        /// <summary>The teamPerformance property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<global::TicketService.Sdk.Models.SupporterPerformanceDto>? TeamPerformance { get; set; }
+#nullable restore
+#else
+        public List<global::TicketService.Sdk.Models.SupporterPerformanceDto> TeamPerformance { get; set; }
+#endif
         /// <summary>
         /// Instantiates a new <see cref="global::TicketService.Sdk.Models.ManagerStatsDto"/> and sets the default values.
         /// </summary>
@@ -57,6 +65,7 @@ namespace TicketService.Sdk.Models
                 { "awaitingUser", n => { AwaitingUser = n.GetIntValue(); } },
                 { "closedToday", n => { ClosedToday = n.GetIntValue(); } },
                 { "openTickets", n => { OpenTickets = n.GetIntValue(); } },
+                { "teamPerformance", n => { TeamPerformance = n.GetCollectionOfObjectValues<global::TicketService.Sdk.Models.SupporterPerformanceDto>(global::TicketService.Sdk.Models.SupporterPerformanceDto.CreateFromDiscriminatorValue)?.AsList(); } },
             };
         }
         /// <summary>
@@ -70,6 +79,7 @@ namespace TicketService.Sdk.Models
             writer.WriteIntValue("awaitingUser", AwaitingUser);
             writer.WriteIntValue("closedToday", ClosedToday);
             writer.WriteIntValue("openTickets", OpenTickets);
+            writer.WriteCollectionOfObjectValues<global::TicketService.Sdk.Models.SupporterPerformanceDto>("teamPerformance", TeamPerformance);
             writer.WriteAdditionalData(AdditionalData);
         }
     }
