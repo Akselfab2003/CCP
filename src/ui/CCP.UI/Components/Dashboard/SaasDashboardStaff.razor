@@ -1,5 +1,6 @@
 ﻿@using CCP.Shared.UIContext
 @using CCP.Shared.ValueObjects
+@using TicketService.Sdk.Dtos
 
 <!-- Greeting -->
 <div class="dash-greeting">
@@ -119,7 +120,7 @@
 <div class="dash-card dash-updates staff-updates">
     <div class="dash-card-header">
         <span class="dash-card-title">Your Ticket Activity</span>
-        <a href="/inbox" class="dash-card-link">View all →</a>
+        <a href="/tickets" class="dash-card-link">View all →</a>
     </div>
 
     <div class="dash-feed">
@@ -145,21 +146,19 @@
             {
                 <div class="dash-feed-item dash-feed-item--clickable" @onclick="() => NavigateToTicket(entry.TicketId)">
                     <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-                        @GetInitials(entry.SenderName)
+                        @GetHistoryInitials(entry)
                     </div>
                     <div class="dash-feed-body">
                         <div class="dash-feed-top">
                             <span class="dash-feed-ticket">#TK-@entry.TicketId</span>
                             <span class="dash-feed-time">@GetRelativeTime(entry.OccurredAt)</span>
                         </div>
-                        <p class="dash-feed-text">
-                            <strong>@entry.SenderName</strong> @entry.ActionText — @entry.TicketTitle
-                        </p>
+                        <p class="dash-feed-text">@GetHistoryDescription(entry)</p>
                         <div class="dash-feed-tags">
-                            <span class="dash-tag @GetStatusTagClass(entry.TicketStatus)">@GetStatusLabel(entry.TicketStatus)</span>
+                            <span class="dash-tag @GetHistoryTagClass(entry)">@GetHistoryTagLabel(entry)</span>
                         </div>
                     </div>
-                    <span class="dash-feed-dot @GetDotClass(entry.TicketStatus)"></span>
+                    <span class="dash-feed-dot @GetHistoryDotClass(entry)"></span>
                 </div>
             }
         }
