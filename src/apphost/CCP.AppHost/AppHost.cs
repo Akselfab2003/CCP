@@ -171,10 +171,6 @@ TicketService
     .WithReference(Keycloak)
     .WithReference(TicketDB)
     .WithReference(RabbitMq)
-    .WithReference(MessagingService)
-    .WaitFor(MessagingService)
-    .WithReference(CustomerService)
-    .WaitFor(CustomerService)
     .WithReference(EmailService)
     .WaitFor(EmailService)
     .WithUrlForEndpoint("https", endpoint =>
@@ -271,11 +267,24 @@ EmailWorkerService
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+        env.EnvironmentVariables.Add("MAILCOW_API_URL", MAILCOW_API_URL);
+        env.EnvironmentVariables.Add("MAILCOW_API_KEY", MAILCOW_API_KEY);
+        env.EnvironmentVariables.Add("Encryption_Key", EncryptionKey);
     })
+    .WaitFor(EmailDB)
     .WaitFor(RabbitMq)
+    .WaitFor(Keycloak)
+    .WaitFor(CustomerService)
+    .WaitFor(TicketService)
+    .WaitFor(MessagingService)
+    .WithReference(EmailDB)
     .WithReference(RabbitMq)
-    .WithOtlpExporter()
-    .WithExplicitStart();
+    .WithReference(Keycloak)
+    .WithReference(CustomerService)
+    .WithReference(TicketService)
+    .WithReference(MessagingService)
+    .WithOtlpExporter();
 
 
 if (Environment == "DEV")

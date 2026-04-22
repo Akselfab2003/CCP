@@ -19,8 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
     <ProjectReference Include="..\EmailService.Infrastructure\EmailService.Infrastructure.csproj" />
+    <ProjectReference Include="..\EmailTemplates\EmailTemplates.csproj" />
   </ItemGroup>
   
 </Project>

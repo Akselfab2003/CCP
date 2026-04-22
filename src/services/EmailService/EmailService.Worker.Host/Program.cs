@@ -1,6 +1,12 @@
+using CCP.ServiceDefaults;
+using CCP.Shared.AuthContext;
+using CustomerService.Sdk.ServiceDefaults;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
 using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
+using EmailService.Infrastructure.ServiceDefaults;
 using EmailService.Worker.Host;
 using Microsoft.EntityFrameworkCore;
 using Wolverine;
@@ -10,6 +16,8 @@ var builder = Host.CreateApplicationBuilder(args);
 //var emailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl") ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
 //builder.Services.AddSingleton<ImapMailReciver>(_ => new ImapMailReciver(emailHostUrl, builder.Configuration));
 builder.Services.AddHostedService<Worker>();
+builder.Services.AddServiceDefaults("EmailWorker.Host");
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 builder.UseWolverine(opts =>
 {
@@ -26,11 +34,32 @@ builder.UseWolverine(opts =>
 
 });
 
+var keycloakServiceUrl =
+    builder.Configuration.GetValue<string>("services:Keycloak:http:0")
+    ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+
+builder.Services.AddClientCredentialsTokenManagement()
+                        .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                        {
+                            client.TokenEndpoint = new Uri($"{keycloakServiceUrl}/realms/CCP/protocol/openid-connect/token");
+                            client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                            client.ClientSecret = ClientSecret.Parse(
+                                builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                                ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                            );
+                            client.Scope = Scope.ParseOrDefault("openid");
+                            client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                        });
+
+builder.Services.AddCustomerviceSdk(
+    builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
+    ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."), true);
+
 builder.Services.AddDbContext<DBcontext>(option =>
 {
     option.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
 });
 builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
-
+builder.Services.AddInfrastructureServices(builder.Configuration);
 var host = builder.Build();
 host.Run();
