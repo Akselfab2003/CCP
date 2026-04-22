@@ -192,7 +192,7 @@
         }
       }
     },
-    "/api/Customers/{id}": {
+    "/api/Customers/Update/{id}": {
       "put": {
         "tags": [
           "Customers"
@@ -270,7 +270,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/Customers/Delete/{id}": {
       "delete": {
         "tags": [
           "Customers"

@@ -50,6 +50,7 @@ namespace EmailService.Infrastructure.Data
         public DBcontext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DBcontext>();
+            optionsBuilder.UseNpgsql();
             var encryptionService = new AesEncryptionService(Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
             var currentUser = new CurrentUser();
             return new DBcontext(optionsBuilder.Options, encryptionService, currentUser);

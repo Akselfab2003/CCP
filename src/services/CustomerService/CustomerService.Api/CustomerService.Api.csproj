@@ -38,4 +38,8 @@
     <ProjectReference Include="..\CustomerService.Infrastructure\CustomerService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Docs\" />
+  </ItemGroup>
+
 </Project>
