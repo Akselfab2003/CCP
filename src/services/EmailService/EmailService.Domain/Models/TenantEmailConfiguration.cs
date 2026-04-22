@@ -4,7 +4,8 @@
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
-        public required string Domain { get; set; }
-        public string DefaultSenderEmail { get; set; } = string.Empty;
+        public required string InternalEmail { get; set; }
+        public required string InternalEmailPassword { get; set; }
+        public required string DefaultSenderEmail { get; set; }
     }
 }

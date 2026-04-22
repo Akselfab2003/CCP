@@ -25,7 +25,7 @@ namespace CustomerService.Api.Controllers
         }
 
         //Henter en specifik customer via ID
-        [HttpGet("{id:guid}")]
+        [HttpGet("details/{id:guid}")]
         [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCustomerById(Guid id)

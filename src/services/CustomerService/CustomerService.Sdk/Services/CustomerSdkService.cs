@@ -40,7 +40,7 @@ namespace CustomerService.Sdk.Services
         {
             try
             {
-                var response = await _apiClient.Client.Api.Customers[id].GetAsync();
+                var response = await _apiClient.Client.Api.Customers.Details[id].GetAsync();
 
                 if (response != null)
                 {

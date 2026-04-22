@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using CCP.Shared.ValueObjects;
-using EmailService.Application.Interfaces;
+﻿using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
 using EmailTemplates.Renderes;
 using MimeKit;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
 {
-    public class EmailSendingService :IEmail
+    public class EmailSendingService : IEmail
     {
         private readonly ISmtpClient _smtpClient;
         private readonly IEmailTemplateRenderer _emailTemplateRenderer;
@@ -29,20 +24,21 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string expectedResponseTime,
             string portalUrl)
         {
-            var htmlContent = await _emailTemplateRenderer.RenderTicketCreatedEmailAsync(
-                email,organizationName,expectedResponseTime,portalUrl);
+            throw new NotImplementedException();
+            //var htmlContent = await _emailTemplateRenderer.RenderTicketCreatedEmailAsync(
+            //    email, organizationName, expectedResponseTime, portalUrl);
 
-            var message = BuildMessage(
-                fromAddress: email.SenderAddress,
-                fromName: organizationName,
-                toAddress: to,
-                toName: email.RecipientAddress,
-                subject: subject
-            );
+            //var message = BuildMessage(
+            //    fromAddress: email.SenderAddress,
+            //    fromName: organizationName,
+            //    toAddress: to,
+            //    toName: email.RecipientAddress,
+            //    subject: subject
+            //);
 
-            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            //message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
 
-            await _smtpClient.SendAsync(message);
+            //await _smtpClient.SendAsync(message);
         }
 
         public async Task SendTicketReplyEmailAsync(
@@ -60,17 +56,18 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string viewHistoryUrl,
             string reopenUrl)
         {
-            var htmlContent = await _emailTemplateRenderer.RenderTicketReplyEmailAsync(
-                email, organizationName, recipientName, agentName, agentRole, ticketStatus, ticketStatusLabel, replyUrl, portalUrl, viewHistoryUrl, reopenUrl);
-            var message = BuildMessage(
-                fromAddress: email.SenderAddress,
-                fromName: organizationName,
-                toAddress: to,
-                toName: email.RecipientAddress,
-                subject: subject
-            );
-            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
-            await _smtpClient.SendAsync(message);
+            throw new NotImplementedException();
+            //var htmlContent = await _emailTemplateRenderer.RenderTicketReplyEmailAsync(
+            //    email, organizationName, recipientName, agentName, agentRole, ticketStatus, ticketStatusLabel, replyUrl, portalUrl, viewHistoryUrl, reopenUrl);
+            //var message = BuildMessage(
+            //    fromAddress: email.SenderAddress,
+            //    fromName: organizationName,
+            //    toAddress: to,
+            //    toName: email.RecipientAddress,
+            //    subject: subject
+            //);
+            //message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            //await _smtpClient.SendAsync(message);
         }
 
         public async Task SendTicketStatusEmailAsync(
@@ -86,17 +83,18 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string portalUrl,
             string reopenUrl)
         {
-            var htmlContent = await _emailTemplateRenderer.RenderTicketStatusEmailAsync(
-                email, organizationName, newStatus, newStatusLabel, oldStatusLabel, updatedByAgent, agentNote, portalUrl, reopenUrl);
-            var message = BuildMessage(
-                fromAddress: email.SenderAddress,
-                fromName: organizationName,
-                toAddress: to,
-                toName: email.RecipientAddress,
-                subject: subject
-            );
-            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
-            await _smtpClient.SendAsync(message);
+            throw new NotImplementedException();
+            //var htmlContent = await _emailTemplateRenderer.RenderTicketStatusEmailAsync(
+            //    email, organizationName, newStatus, newStatusLabel, oldStatusLabel, updatedByAgent, agentNote, portalUrl, reopenUrl);
+            //var message = BuildMessage(
+            //    fromAddress: email.SenderAddress,
+            //    fromName: organizationName,
+            //    toAddress: to,
+            //    toName: email.RecipientAddress,
+            //    subject: subject
+            //);
+            //message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            //await _smtpClient.SendAsync(message);
         }
 
         public async Task SendSupportCustomerReplyEmailAsync(
@@ -112,46 +110,47 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string managementUrl,
             string viewHistoryUrl)
         {
-            var htmlContent = await _emailTemplateRenderer.RenderSupportCustomerReplyNotificationAsync(
-            email,
-            customerName,
-            customerEmail,
-            organizationName,
-            ticketStatus,
-            ticketStatusLabel,
-            replyUrl,
-            managementUrl,
-            viewHistoryUrl);
-            var message = BuildMessage(
-                fromAddress: email.SenderAddress,
-                fromName: organizationName,
-                toAddress: to,
-                toName: email.RecipientAddress,
-                subject: subject
-            );
-            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
-            await _smtpClient.SendAsync(message);
+            throw new NotImplementedException();
+            //var htmlContent = await _emailTemplateRenderer.RenderSupportCustomerReplyNotificationAsync(email: email,
+            //                                                                                           customerName,
+            //                                                                                           customerEmail,
+            //                                                                                           organizationName,
+            //                                                                                           ticketStatus,
+            //                                                                                           ticketStatusLabel,
+            //                                                                                           replyUrl,
+            //                                                                                           managementUrl,
+            //                                                                                           viewHistoryUrl);
+            //var message = BuildMessage(
+            //    fromAddress: email.SenderAddress,
+            //    fromName: organizationName,
+            //    toAddress: to,
+            //    toName: email.RecipientAddress,
+            //    subject: subject
+            //);
+            //message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            //await _smtpClient.SendAsync(message);
         }
 
         public async Task SendReplyToEmailAsync(
             string to,
             string subject,
             EmailReceived emailReceived,
-            EmailSent emailSent,
+            EmailSent? emailSent,
             int ticketId,
             string organizationName)
         {
-            var htmlContent = await _emailTemplateRenderer.RenderReplyToEmailAsync(
-                emailReceived, emailSent, ticketId, organizationName);
-            var message = BuildMessage(
-                fromAddress: emailSent.SenderAddress,
-                fromName: organizationName,
-                toAddress: to,
-                toName: emailReceived.RecipientAddress,
-                subject: subject
-            );
-            message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
-            await _smtpClient.SendAsync(message);
+            throw new NotImplementedException();
+            //var htmlContent = await _emailTemplateRenderer.RenderReplyToEmailAsync(
+            //    emailReceived, emailSent, ticketId, organizationName);
+            //var message = BuildMessage(
+            //    fromAddress: emailSent.SenderAddress,
+            //    fromName: organizationName,
+            //    toAddress: to,
+            //    toName: emailReceived.RecipientAddress,
+            //    subject: subject
+            //);
+            //message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            //await _smtpClient.SendAsync(message);
         }
 
 

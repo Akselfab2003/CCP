@@ -7,5 +7,6 @@ namespace EmailService.Domain.Interfaces
     {
         Task<Result<List<TenantEmailConfiguration>>> GetAllAsync();
         Task<Result<TenantEmailConfiguration>> GetByIdAsync(Guid id);
+        Task<Result<TenantEmailConfiguration>> GetByInternalEmailAddress(string InternalEmailAddress);
     }
 }

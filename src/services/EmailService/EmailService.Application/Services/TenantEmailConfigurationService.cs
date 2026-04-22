@@ -29,7 +29,8 @@ namespace EmailService.Application.Services
                     Id = Guid.NewGuid(),
                     OrganizationId = _currentUser.OrganizationId,
                     DefaultSenderEmail = request.DefaultSenderEmail,
-                    Domain = request.Domain
+                    InternalEmail = $"{Guid.NewGuid()}@{request.Domain}",
+                    InternalEmailPassword = Guid.NewGuid().ToString(), // temporary password, should be updated by the tenant after creation
                 };
 
                 var addResult = await _tenantEmailConfigurationRepo.AddAsync(tenantEmailConfiguration);

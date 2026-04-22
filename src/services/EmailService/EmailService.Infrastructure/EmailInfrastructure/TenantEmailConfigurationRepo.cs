@@ -108,5 +108,24 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                                                                               description: "Failed to retrieve tenant email configurations."));
             }
         }
+
+
+        public async Task<Result<TenantEmailConfiguration>> GetByInternalEmailAddress(string InternalEmailAddress)
+        {
+            try
+            {
+                var val = await _dbContext.TenantEmailConfigurations.SingleOrDefaultAsync(t => t.InternalEmail.ToLower() == InternalEmailAddress.ToLower());
+
+                return val is null
+                    ? Result.Failure<TenantEmailConfiguration>(Error.NotFound("TenantEmailConfiguration.NotFound", $"Tenant email configuration with internal email address {InternalEmailAddress} not found"))
+                    : Result.Success(val);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving tenant email configuration by internal email address.");
+                return Result.Failure<TenantEmailConfiguration>(Error.Failure(code: "GetTenantEmailConfigurationFailed",
+                                                                              description: "Failed to retrieve tenant email configuration."));
+            }
+        }
     }
 }
