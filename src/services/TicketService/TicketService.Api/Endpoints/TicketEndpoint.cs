@@ -181,7 +181,7 @@ namespace TicketService.Api.Endpoints
         {
             try
             {
-                var result = await ticketCommands.RecordMessageSentAsync(ticketId, request.SenderUserId, request.MessageSnippet);
+                var result = await ticketCommands.RecordMessageSentAsync(ticketId, request.SenderUserId, request.MessageSnippet, request.IsInternalNote);
                 return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
             }
             catch (Exception ex)
