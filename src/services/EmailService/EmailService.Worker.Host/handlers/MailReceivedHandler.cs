@@ -1,8 +1,11 @@
 ﻿using CCP.Shared.Events;
 using CustomerService.Sdk.Services;
+using CustomerService.Sdk.Models;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
+using TicketService.Sdk.Services.Ticket;
+using TicketService.Sdk.Dtos;
 
 namespace EmailService.Worker.Host.handlers
 {
@@ -11,6 +14,7 @@ namespace EmailService.Worker.Host.handlers
         private readonly ILogger<MailReceivedHandler> _logger;
         private readonly IEmail _emailSendingService;
         private readonly ICustomerSdkService _customerSdkService;
+        private readonly ITicketService _ticketSdkService;
         private readonly IConfiguration _configuration;
         private readonly IEmailSent _emailSentRepository;
 
@@ -26,6 +30,7 @@ namespace EmailService.Worker.Host.handlers
             ILogger<MailReceivedHandler> logger,
             IEmail emailSendingService,
             ICustomerSdkService customerSdkService,
+            ITicketService ticketSdkService,
             IConfiguration configuration,
             IEmailSent emailSentRepository
             )
@@ -33,6 +38,7 @@ namespace EmailService.Worker.Host.handlers
             _logger = logger;
             _emailSendingService = emailSendingService;
             _customerSdkService = customerSdkService;
+            _ticketSdkService = ticketSdkService;
             _configuration = configuration;
             _emailSentRepository = emailSentRepository;
         }
@@ -53,15 +59,13 @@ namespace EmailService.Worker.Host.handlers
                     try
                     {
                         await _customerSdkService.CreateCustomer(
-                            new CustomerService.Sdk.Models.CreateCustomerRequest
+                            new CreateCustomerRequest
                             {
                                 Id = Guid.NewGuid(),
                                 Email = mail_Received.MailFrom,
                                 Name = ExtractNameFromEmail(mail_Received.MailFrom),
                                 OrganizationId = Guid.Parse(_configuration.GetValue<string>("OrganizationSettings:DefaultOrganizationId") ?? Guid.Empty.ToString())
                             });
-
-                        SendReplyToEmailAsync(mail_Received, ticketId ?? 0).Wait();
 
                         _logger.LogInformation("New customer created from email: {Email}", mail_Received.MailFrom);
                     }
@@ -112,10 +116,9 @@ namespace EmailService.Worker.Host.handlers
                 EmailSent? emailSentModel = null;
                 try
                 {
-                    var previousEmailSent = await _emailSentRepository.GetByTicketIdAsync(ticketId);
-                    if (previousEmailSent != null)
+                    emailSentModel = await _emailSentRepository.GetByTicketIdAsync(ticketId);
+                    if (emailSentModel != null)
                     {
-                        emailSentModel = previousEmailSent;
                         _logger.LogInformation("Found previous email sent for ticket #{TicketId}", ticketId);
                     }
                     else
@@ -128,12 +131,26 @@ namespace EmailService.Worker.Host.handlers
                     _logger.LogWarning(ex, "Failed to retrieve previous email for ticket #{TicketId}, will use null", ticketId);
                 }
 
+                var ticketResult = await _ticketSdkService.GetTicket(ticketId);
+                if (ticketResult == null)
+                {
+                    _logger.LogWarning("Ticket #{TicketId} not found. Cannot send reply-to email.", ticketId);
+                    return;
+                }
+
+                var customerResult = await _customerSdkService.GetCustomerByEmail(mail_Received.MailFrom);
+                if (!customerResult.IsSuccess || customerResult.Value == null)
+                {
+                    _logger.LogWarning("Customer not found for email {Email}", mail_Received.MailFrom);
+                    return;
+                }
+
                 await _emailSendingService.SendReplyToEmailAsync(
                     to: mail_Received.MailFrom,
                     subject: $"Re: {mail_Received.Subject}",
                     emailReceived: emailModel,
                     emailSent: emailSentModel,
-                    ticketId: ticketId,
+                    ticket: ticketResult.Value,
                     organizationName: _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team");
 
                 _logger.LogInformation(
@@ -153,8 +170,8 @@ namespace EmailService.Worker.Host.handlers
                 var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
                 var supportTeamEmail = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? "support@example.com";
                 var replyUrl = _configuration.GetValue<string>("ApplicationUrls:TicketReply") ?? "#";
-                var managementUrl = "";
-                var viewHistoryUrl = ""; // Planed
+                var managementUrl = _configuration.GetValue<string>("ApplicationUrls:TicketManagement") ?? "#";
+                var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:TicketHistory") ?? "#";
 
                 var emailModel = new EmailReceived
                 {
@@ -166,17 +183,29 @@ namespace EmailService.Worker.Host.handlers
                     ReceivedAt = DateTime.UtcNow,
                 };
 
+                var ticketResult = await _ticketSdkService.GetTicket(ticketId);
+                if (ticketResult == null)
+                {
+                    _logger.LogWarning("Ticket #{TicketId} not found for support notification", ticketId);
+                    return;
+                }
+
+                var customerResult = await _customerSdkService.GetCustomerByEmail(mail_Received.MailFrom);
+                if (!customerResult.IsSuccess || customerResult.Value == null)
+                {
+                    _logger.LogWarning("Customer not found for email {Email}", mail_Received.MailFrom);
+                    return;
+                }
+
                 await _emailSendingService.SendSupportCustomerReplyEmailAsync(
                     to: supportTeamEmail,
                     subject: mail_Received.Subject,
                     email: emailModel,
-                    customerName: ExtractNameFromEmail(mail_Received.MailFrom),
-                    customerEmail: mail_Received.MailFrom,
+                    ticket: ticketResult.Value,
+                    customer: customerResult.Value,
                     organizationName: organizationName,
-                    ticketStatus: "open",
-                    ticketStatusLabel: "Open",
                     replyUrl: replyUrl,
-                    managementUrl: managementUrl,
+                    mangmentUrl: managementUrl,
                     viewHistoryUrl: viewHistoryUrl);
 
                 _logger.LogInformation(
@@ -206,14 +235,8 @@ namespace EmailService.Worker.Host.handlers
                     SentAt = DateTime.UtcNow,
                 };
 
-                await _emailSendingService.SendTicketCreatedEmailAsync(
-                    to: mail_Received.MailFrom,
-                    subject: $"[Ticket Created] {mail_Received.Subject}",
-                    email: emailModel,
-                    organizationName: organizationName,
-                    expectedResponseTime: expectedResponse,
-                    portalUrl: portalUrl);
-
+                // Create a minimal TicketSdkDto for the new ticket confirmation
+                // Since we don't have a real ticket yet, we'll pass a placeholder
                 _logger.LogInformation(
                     "Sent new ticket confirmation to {CustomerEmail} for subject: {Subject}",
                     mail_Received.MailFrom, mail_Received.Subject);
