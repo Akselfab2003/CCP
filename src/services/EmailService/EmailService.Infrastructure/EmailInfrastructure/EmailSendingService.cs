@@ -14,7 +14,7 @@ using TicketService.Sdk.Dtos;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
 {
-    public class EmailSendingService :IEmail
+    public class EmailSendingService : IEmail
     {
         private readonly ISmtpClient _smtpClient;
         private readonly IEmailTemplateRenderer _emailTemplateRenderer;

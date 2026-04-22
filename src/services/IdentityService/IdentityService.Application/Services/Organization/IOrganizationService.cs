@@ -9,6 +9,5 @@ namespace IdentityService.Application.Services.Organization
         Task<Result<KeycloakOrgDetails>> GetOrganizationDetails(Guid? OrgId, string? Domain, CancellationToken ct = default);
         Task<Result> InviteExistingUserToOrganization(Guid OrgId, Guid userId, CancellationToken ct = default);
         Task<Result> InviteNewUserToJoinOrganization(string email, CancellationToken ct = default);
-        Task<Result<string>> GetOrganizationNameById(Guid orgId, CancellationToken ct = default);
     }
 }

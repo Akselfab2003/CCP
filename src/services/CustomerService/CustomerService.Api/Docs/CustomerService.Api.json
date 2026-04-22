@@ -73,7 +73,7 @@
         }
       }
     },
-    "/api/Customers/{id}": {
+    "/api/Customers/details/{id}": {
       "get": {
         "tags": [
           "Customers"
@@ -131,7 +131,68 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/Customers/{email}": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Customers/Update/{id}": {
       "put": {
         "tags": [
           "Customers"
@@ -209,7 +270,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/Customers/Delete/{id}": {
       "delete": {
         "tags": [
           "Customers"

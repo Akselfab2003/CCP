@@ -25,7 +25,7 @@ namespace CustomerService.Api.Controllers
         }
 
         //Henter en specifik customer via ID
-        [HttpGet("{id:guid}")]
+        [HttpGet("details/{id:guid}")]
         [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCustomerById(Guid id)
@@ -68,7 +68,7 @@ namespace CustomerService.Api.Controllers
         }
 
         //Opdaterer en eksisterende customer
-        [HttpPut("{id:guid}")]
+        [HttpPut("Update/{id:guid}")]
         [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] Customer customer)
@@ -87,7 +87,7 @@ namespace CustomerService.Api.Controllers
         }
 
         //Sletter en customer permanent
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("Delete/{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCustomer(Guid id)
