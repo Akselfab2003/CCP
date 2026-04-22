@@ -36,6 +36,13 @@ namespace CCP.Shared.AuthContext
                         }
                     }
                 }
+
+                var orgNameClaim = context.User.Claims.FirstOrDefault(c => c.Type == "organization")
+                            ?? context.User.Claims.FirstOrDefault(c => c.Type == "organization_name");
+                if (orgNameClaim != null)
+                {
+                    userContext.SetOrganizationName(orgNameClaim.Value);
+                }
             }
             await _next(context);
         }

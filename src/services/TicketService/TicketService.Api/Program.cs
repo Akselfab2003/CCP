@@ -58,14 +58,6 @@ namespace TicketService.Api
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure();
 
-            builder.Services.AddHttpClient("MessagingService", client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")!);
-            });
-
-
-
-
             var app = builder.Build();
 
             app.UseAuthentication();

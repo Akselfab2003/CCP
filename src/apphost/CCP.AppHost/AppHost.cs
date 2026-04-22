@@ -22,6 +22,11 @@ string EmailWorkerServicePassword = builder.Configuration.GetValue<string>("emai
     ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
 string EmailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl")
     ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
+
+string MAILCOW_API_KEY = builder.Configuration.GetValue<string>("MAILCOW_API_KEY")
+    ?? throw new InvalidOperationException("MAILCOW_API_KEY configuration value is required when mail infrastructure is enabled.");
+string MAILCOW_API_URL = builder.Configuration.GetValue<string>("MAILCOW_API_URL")
+    ?? throw new InvalidOperationException("MAILCOW_API_URL configuration value is required when mail infrastructure is enabled.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
 
@@ -149,6 +154,10 @@ EmailService
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
         env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
         env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+        env.EnvironmentVariables.Add("MAILCOW_API_URL", MAILCOW_API_URL);
+        env.EnvironmentVariables.Add("MAILCOW_API_KEY", MAILCOW_API_KEY);
+        env.EnvironmentVariables.Add("Encryption_Key", EncryptionKey);
+
     })
     .WaitFor(RabbitMq)
     .WithReference(RabbitMq)

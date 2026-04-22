@@ -1,4 +1,3 @@
-using CCP.Shared.AuthContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,8 +22,10 @@ namespace TicketService.Infrastructure.Persistence
         {
             public Guid UserId => Guid.Empty;
             public Guid OrganizationId => Guid.Empty;
+            public string OrganizationName => string.Empty;
             public void SetCurrentUser(Guid userId) { }
             public void SetOrganizationId(Guid organizationId) { }
+            public void SetOrganizationName(string organizationName) { }
         }
     }
 }

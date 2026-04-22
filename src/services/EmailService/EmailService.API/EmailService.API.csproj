@@ -39,6 +39,7 @@
     <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
     <ProjectReference Include="..\EmailService.Infrastructure\EmailService.Infrastructure.csproj" />
     <ProjectReference Include="..\EmailTemplates\EmailTemplates.csproj" />
+    <ProjectReference Include="..\MailCow.Sdk\MailCow.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

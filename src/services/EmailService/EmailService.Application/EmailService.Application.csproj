@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
+    <ProjectReference Include="..\MailCow.Sdk\MailCow.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

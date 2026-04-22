@@ -28,9 +28,12 @@ namespace CustomerService.Api
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
+                var keycloakServiceUrl =
+                    builder.Configuration.GetValue<string>("services:Keycloak:http:0")
+                    ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
                 builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
-                builder.Services.AddApiAuthenticationServices("CustomerService.Api", "CCP");
+                builder.Services.AddApiAuthenticationServices("CustomerService.Api", "CCP", keycloakServiceUrl);
                 builder.Services.AddApplicationServices();
                 builder.Services.AddInfrastructureServices(builder.Configuration);
                 builder.Services.AddDbContext<CustomerDBContext>(option =>

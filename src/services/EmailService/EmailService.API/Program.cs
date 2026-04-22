@@ -3,6 +3,7 @@ using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
+using ChatApp.Encryption;
 using CustomerService.Sdk.ServiceDefaults;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
@@ -12,8 +13,8 @@ using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
 using EmailTemplates.Renderes;
+using MailCow.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
-using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -60,13 +61,14 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
     builder.Services.AddCustomerviceSdk(
         builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
-        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."),true);
+        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."), true);
 
     builder.Services.AddDbContext<DBcontext>(options =>
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
     });
-    builder.Services.AddApiAuthenticationServices("EmailService.Api", "CCP");
+
+    builder.Services.AddApiAuthenticationServices("EmailService.Api", "CCP", keycloakServiceUrl);
     builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
     builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
     builder.Services.AddScoped<IQueuePublisherService, QueuePublisherService>();
@@ -79,6 +81,17 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         opts.PublishAllMessages().ToRabbitQueue("mailbox.queue").UseDurableOutbox();
     });
 
+
+    var mailCowApiUrl = builder.Configuration.GetValue<string>("MAILCOW_API_URL")
+        ?? throw new InvalidOperationException("MAILCOW_API_URL configuration value is required.");
+
+    var mailCowApiKey = builder.Configuration.GetValue<string>("MAILCOW_API_KEY")
+        ?? throw new InvalidOperationException("MAILCOW_API_KEY configuration value is required.");
+    builder.Services.AddMailCowSdk(mailCowApiUrl, mailCowApiKey);
+
+    var encryptionKey = builder.Configuration["Encryption_Key"]
+        ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
+    builder.Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey));
 }
 
 builder.Services.AddScoped<IEmailReceived, EmailReceivedRepo>();
@@ -88,8 +101,9 @@ builder.Services.AddScoped<ISmtpClient, SmtpClient>();
 builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
 builder.Services.AddScoped<ITenantEmailConfigurationRepo, TenantEmailConfigurationRepo>();
 builder.Services.AddScoped<ITicketEmailService, TicketEmailService>();
-builder.Services.AddScoped<IEmailTemplateRenderer,EmailTemplateRenderer>();
+builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
 builder.Services.AddScoped<ITenantEmailConfigurationService, TenantEmailConfigurationService>();
+builder.Services.AddScoped<IEmailTicketEntitiesRepository, EmailTicketEntitiesRepository>();
 
 var app = builder.Build();
 app.UseAuthentication();

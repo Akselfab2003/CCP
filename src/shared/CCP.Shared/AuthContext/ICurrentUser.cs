@@ -5,7 +5,9 @@
         Guid UserId { get; }
         Guid OrganizationId { get; }
 
+        string OrganizationName { get; }
         void SetCurrentUser(Guid userId);
         void SetOrganizationId(Guid organizationId);
+        void SetOrganizationName(string organizationName);
     }
 }

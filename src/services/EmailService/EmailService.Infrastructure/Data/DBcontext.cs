@@ -19,6 +19,7 @@ namespace EmailService.Infrastructure.Data
 
         public DbSet<EmailSent> EmailSent { get; set; }
         public DbSet<EmailReceived> EmailReceived { get; set; }
+        public DbSet<EmailTicketEntities> EmailTicketLookup { get; set; }
         public DbSet<TenantEmailConfiguration> TenantEmailConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,6 +42,26 @@ namespace EmailService.Infrastructure.Data
                        .IsRequired();
 
                 builder.HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
+            });
+
+            modelBuilder.Entity<EmailTicketEntities>(builder =>
+            {
+                builder.HasKey(e => e.Id);
+
+                builder.Property(e => e.MailId)
+                       .IsRequired();
+                builder.Property(e => e.SenderEmail)
+                       .IsRequired();
+                builder.Property(e => e.OrganizationId)
+                       .IsRequired();
+                builder.Property(e => e.TicketId)
+                       .IsRequired();
+                builder.Property(e => e.CustomerId)
+                       .IsRequired();
+                builder.Property(e => e.MailReferenceIds)
+                       .IsRequired();
+
+                builder.HasQueryFilter(e => e.OrganizationId == _currentUser.OrganizationId);
             });
         }
     }
