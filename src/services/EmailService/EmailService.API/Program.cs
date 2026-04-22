@@ -3,15 +3,13 @@ using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
-using ChatApp.Encryption;
 using CustomerService.Sdk.ServiceDefaults;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Application.Interfaces;
 using EmailService.Application.Services;
-using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
-using EmailService.Infrastructure.EmailInfrastructure;
+using EmailService.Infrastructure.ServiceDefaults;
 using EmailTemplates.Renderes;
 using MailCow.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
@@ -89,21 +87,11 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         ?? throw new InvalidOperationException("MAILCOW_API_KEY configuration value is required.");
     builder.Services.AddMailCowSdk(mailCowApiUrl, mailCowApiKey);
 
-    var encryptionKey = builder.Configuration["Encryption_Key"]
-        ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
-    builder.Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey));
+    builder.Services.AddInfrastructureServices(builder.Configuration);
 }
 
-builder.Services.AddScoped<IEmailReceived, EmailReceivedRepo>();
-builder.Services.AddScoped<IEmailSent, EmailSentRepo>();
-builder.Services.AddScoped<IEmail, EmailSendingService>();
-builder.Services.AddScoped<ISmtpClient, SmtpClient>();
-builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
-builder.Services.AddScoped<ITenantEmailConfigurationRepo, TenantEmailConfigurationRepo>();
-builder.Services.AddScoped<ITicketEmailService, TicketEmailService>();
 builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
 builder.Services.AddScoped<ITenantEmailConfigurationService, TenantEmailConfigurationService>();
-builder.Services.AddScoped<IEmailTicketEntitiesRepository, EmailTicketEntitiesRepository>();
 
 var app = builder.Build();
 app.UseAuthentication();
