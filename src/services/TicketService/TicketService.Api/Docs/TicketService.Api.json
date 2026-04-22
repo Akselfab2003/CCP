@@ -570,6 +570,12 @@
           "title": {
             "type": "string"
           },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "customerId": {
             "type": [
               "null",
@@ -666,6 +672,9 @@
           },
           "messageSnippet": {
             "type": "string"
+          },
+          "isInternalNote": {
+            "type": "boolean"
           }
         }
       },
@@ -694,6 +703,12 @@
           },
           "title": {
             "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/TicketStatus"

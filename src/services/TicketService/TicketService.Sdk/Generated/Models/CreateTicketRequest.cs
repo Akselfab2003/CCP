@@ -18,6 +18,14 @@ namespace TicketService.Sdk.Models
         public Guid? AssignedUserId { get; set; }
         /// <summary>The customerId property</summary>
         public Guid? CustomerId { get; set; }
+        /// <summary>The description property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Description { get; set; }
+#nullable restore
+#else
+        public string Description { get; set; }
+#endif
         /// <summary>The internalNotes property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -61,6 +69,7 @@ namespace TicketService.Sdk.Models
             {
                 { "assignedUserId", n => { AssignedUserId = n.GetGuidValue(); } },
                 { "customerId", n => { CustomerId = n.GetGuidValue(); } },
+                { "description", n => { Description = n.GetStringValue(); } },
                 { "internalNotes", n => { InternalNotes = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
             };
@@ -74,6 +83,7 @@ namespace TicketService.Sdk.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteGuidValue("assignedUserId", AssignedUserId);
             writer.WriteGuidValue("customerId", CustomerId);
+            writer.WriteStringValue("description", Description);
             writer.WriteCollectionOfPrimitiveValues<string>("internalNotes", InternalNotes);
             writer.WriteStringValue("title", Title);
             writer.WriteAdditionalData(AdditionalData);

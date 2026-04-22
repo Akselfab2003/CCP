@@ -28,7 +28,7 @@ namespace TicketService.Application.Services.Ticket
             try
             {
                 var ticket = new Domain.Entities.Ticket();
-                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId);
+                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Description);
                 Result<Domain.Entities.Ticket> result = await _ticketRepository.AddAsync(ticket);
 
                 await _ticketRepository.SaveChangesAsync();
@@ -53,7 +53,26 @@ namespace TicketService.Application.Services.Ticket
 
                 await _ticketRepository.SaveChangesAsync();
 
-                return Result.Success(result.Value.Id); // ← return the ticket ID
+                await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                    result.Value.Id,
+                    actorUserId: request.CustomerId,
+                    eventType: "TicketCreated",
+                    oldValue: null,
+                    newValue: result.Value.Title
+                ));
+
+                if (request.AssignedUserId != null)
+                {
+                    await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                        result.Value.Id,
+                        actorUserId: request.AssignedUserId,
+                        eventType: "AssignedToSupporter",
+                        oldValue: null,
+                        newValue: request.AssignedUserId.ToString()
+                    ));
+                }
+
+                return Result.Success(result.Value.Id);
             }
             catch (Exception ex)
             {
@@ -90,7 +109,7 @@ namespace TicketService.Application.Services.Ticket
             }
         }
 
-        public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet)
+        public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet, bool isInternalNote = false)
         {
             try
             {
@@ -98,7 +117,7 @@ namespace TicketService.Application.Services.Ticket
                 await _historyRepository.AddAsync(TicketHistoryEntry.Create(
                     ticketId,
                     actorUserId: senderUserId,
-                    eventType: "MessageSent",
+                    eventType: isInternalNote ? "InternalNoteAdded" : "MessageSent",
                     oldValue: null,
                     newValue: snippet
                 ));

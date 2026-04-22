@@ -1,7 +1,6 @@
 ﻿using CCP.Shared.UIContext;
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
-using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Services.Ticket;
 
@@ -10,7 +9,6 @@ namespace CCP.UI.Components.CreateTicket;
 public partial class CreateTicketManager : ComponentBase
 {
     [Inject] private ITicketService TicketService { get; set; } = default!;
-    [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -154,24 +152,12 @@ public partial class CreateTicketManager : ComponentBase
         {
             Title = _title.Trim(),
             CustomerId = _selectedCustomer.userId,
-            AssignedUserId = (_selectedSupporter?.userId)
+            AssignedUserId = (_selectedSupporter?.userId),
+            Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
         });
 
         if (result.IsSuccess)
         {
-            if (!string.IsNullOrWhiteSpace(_description))
-            {
-                var messageResult = await MessageSdkService.CreateMessageAsync(
-                    ticketId: result.Value,
-                    organizationId: UserContext.OrganizationId,
-                    userId: UserContext.UserId,
-                    content: _description.Trim());
-
-                if (messageResult.IsFailure)
-                    Logger.LogWarning("Ticket created but failed to send description as message: {Error}",
-                        messageResult.Error.Description);
-            }
-
             _successMessage = "Ticket created! Redirecting to your inbox...";
             StateHasChanged();
             await Task.Delay(1200);
