@@ -1,6 +1,6 @@
+using Gateway.Sdk.Services;
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
-using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
@@ -10,54 +10,36 @@ namespace CCP.UI.Components.Dashboard;
 public partial class SaasDashboardManager : ComponentBase
 {
     [Inject] private ITicketService TicketService { get; set; } = default!;
-    [Inject] private IUserService UserService { get; set; } = default!;
+    [Inject] private IGatewayService GatewayService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private ILogger<SaasDashboardManager> Logger { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private ManagerStatsSdkDto? _stats;
     private List<TicketHistoryEntryDto>? _feedEntries;
-    private Dictionary<Guid, string> _supporterNames = new();
+    private Dictionary<string, string> _supporterNames = new();
 
     protected override async Task OnInitializedAsync()
     {
         if (!RendererInfo.IsInteractive)
             return;
-        await LoadStatsAsync();
+        await Task.WhenAll(LoadDashboardAsync(), LoadFeedAsync());
     }
 
-    private async Task LoadStatsAsync()
+    private async Task LoadDashboardAsync()
     {
-        var result = await TicketService.GetManagerStatsAsync();
-        if (result.IsSuccess && result.Value is not null)
-            _stats = result.Value;
-        else
-            Logger.LogError("Failed to load manager stats: {Code} - {Description}",
-                result.Error.Code, result.Error.Description);
-        StateHasChanged();
-
-        var feedTask = LoadFeedAsync();
-
-        if (_stats?.TeamPerformance?.Any() == true)
+        var result = await GatewayService.GetManagerDashboardAsync();
+        if (result.IsSuccess)
         {
-            var nameTasks = _stats.TeamPerformance.Select(async p =>
-            {
-                try
-                {
-                    var result = await UserService.GetUserDetailsAsync(p.UserId);
-                    return (p.UserId, name: result.IsSuccess ? result.Value.name : p.UserId.ToString()[..8] + "…");
-                }
-                catch
-                {
-                    return (p.UserId, name: p.UserId.ToString()[..8] + "…");
-                }
-            });
-            var nameResults = await Task.WhenAll(nameTasks);
-            _supporterNames = nameResults.ToDictionary(r => r.UserId, r => r.name);
-            StateHasChanged();
+            _stats = result.Value.Stats;
+            _supporterNames = result.Value.UserNames;
         }
-
-        await feedTask;
+        else
+        {
+            Logger.LogError("Failed to load manager dashboard: {Code} - {Description}",
+                result.Error.Code, result.Error.Description);
+        }
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadFeedAsync()
@@ -68,7 +50,7 @@ public partial class SaasDashboardManager : ComponentBase
         else
             Logger.LogError("SaasDashboardManager failed to load org history: {Error}", result.Error);
 
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void NavigateToTicket(int ticketId) =>
@@ -133,6 +115,13 @@ public partial class SaasDashboardManager : ComponentBase
         if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} hrs ago";
         if (diff.TotalDays < 2) return "Yesterday";
         return $"{(int)diff.TotalDays} days ago";
+    }
+
+    private string GetSupporterName(Guid userId)
+    {
+        var key = userId.ToString();
+        if (_supporterNames.TryGetValue(key, out var name)) return name;
+        return userId.ToString()[..8] + "…";
     }
 
     private static string GetInitials(string name)

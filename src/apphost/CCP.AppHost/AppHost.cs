@@ -107,6 +107,7 @@ IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects
 IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
 IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
 IResourceBuilder<ProjectResource> CustomerService = builder.AddProject<Projects.CustomerService_Api>("customerservice-api");
+IResourceBuilder<ProjectResource> Gateway = builder.AddProject<Projects.Gateway_Api>("ccp-gateway");
 IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_Website>("ccp-website");
 IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
 IResourceBuilder<ProjectResource> EmailService = builder.AddProject<Projects.EmailService_API>("emailservice-api");
@@ -224,18 +225,38 @@ ChatService
     .WithOtlpExporter();
 
 
+Gateway
+    .WaitFor(Keycloak)
+    .WaitFor(TicketService)
+    .WaitFor(MessagingService)
+    .WaitFor(IdentityService)
+    .WithReference(Keycloak)
+    .WithReference(TicketService)
+    .WithReference(MessagingService)
+    .WithReference(IdentityService)
+    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
+    .WithUrlForEndpoint("https", endpoint =>
+    {
+        endpoint.Url = "/swagger";
+        endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+        endpoint.DisplayText = "API Swagger";
+    })
+    .WithOtlpExporter();
+
 UI.WaitFor(MessagingService)
   .WaitFor(Keycloak)
   .WaitFor(IdentityService)
   .WaitFor(CustomerService)
   .WaitFor(ChatService)
   .WaitFor(TicketService)
+  .WaitFor(Gateway)
   .WithReference(MessagingService)
   .WithReference(Keycloak)
   .WithReference(ChatService)
   .WithReference(CustomerService)
   .WithReference(IdentityService)
   .WithReference(TicketService)
+  .WithReference(Gateway)
   .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
   .WithOtlpExporter();
 
