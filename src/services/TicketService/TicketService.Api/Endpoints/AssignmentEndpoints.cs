@@ -13,6 +13,7 @@ namespace TicketService.Api.Endpoints
                                          .RequireAuthorization();
 
             assignmentRoute.MapPost("/assign", AssignTicket)
+                           .RequireAuthorization("RequireAssignTickets")
                            .Produces(StatusCodes.Status200OK)
                            .ProducesProblem(StatusCodes.Status404NotFound)
                            .ProducesProblem(StatusCodes.Status400BadRequest)

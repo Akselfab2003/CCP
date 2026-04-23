@@ -2,6 +2,7 @@ using System.Reflection;
 using CCP.ServiceDefaults.Extensions;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
+using CCP.Shared.ValueObjects;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using IdentityService.API.Endpoints;
@@ -20,7 +21,32 @@ namespace IdentityService.API
 
             // Add services to the container.
             builder.Services.AddAuthentication();
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireInviteUsers", policy => policy.RequireRole(
+                    UserRolesExtensions.InviteUsersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                
+                options.AddPolicy("RequireManageUsers", policy => policy.RequireRole(
+                    UserRolesExtensions.ManageUsersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                
+                options.AddPolicy("RequirePromoteUsers", policy => policy.RequireRole(
+                    UserRolesExtensions.PromoteUsersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                
+                options.AddPolicy("RequireViewCustomers", policy => policy.RequireRole(
+                    UserRolesExtensions.ViewCustomersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireCreateCustomers", policy => policy.RequireRole(
+                    UserRolesExtensions.CreateCustomersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireManageCustomers", policy => policy.RequireRole(
+                    UserRolesExtensions.ManageCustomersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+            });
             builder.Services.ConfigureDefaultOpenTelemetry("IdentityService.API");
             builder.Services.AddHttpContextAccessor();
 

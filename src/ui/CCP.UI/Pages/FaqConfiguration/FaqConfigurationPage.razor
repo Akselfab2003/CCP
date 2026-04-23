@@ -2,7 +2,7 @@
 @layout CCPLayout
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
+@attribute [Authorize(Policy = "RequireManageFaq")]
 <div class="container-shell">
     <div class="content">
         <div class="header">

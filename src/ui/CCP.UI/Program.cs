@@ -106,6 +106,7 @@ namespace CCP.UI
             //Authorization Policies
             builder.Services.AddAuthorization(options =>
             {
+                // Base role policies
                 options.AddPolicy("RequireAdmin", policy => policy.RequireRole(
                     UserRolesExtensions.AdminRoleString));
                 options.AddPolicy("RequireManager", policy => policy.RequireRole(
@@ -119,6 +120,51 @@ namespace CCP.UI
                     UserRolesExtensions.CustomerRoleString,
                     UserRolesExtensions.SupporterRoleString,
                     UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                // Granular feature-specific policies
+                options.AddPolicy("RequireInviteUsers", policy => policy.RequireRole(
+                    UserRolesExtensions.InviteUsersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireManageUsers", policy => policy.RequireRole(
+                    UserRolesExtensions.ManageUsersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequirePromoteUsers", policy => policy.RequireRole(
+                    UserRolesExtensions.PromoteUsersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireAssignTickets", policy => policy.RequireRole(
+                    UserRolesExtensions.AssignTicketsRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireViewAllTickets", policy => policy.RequireRole(
+                    UserRolesExtensions.ViewAllTicketsRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireManageOrganization", policy => policy.RequireRole(
+                    UserRolesExtensions.ManageOrganizationRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireManageFaq", policy => policy.RequireRole(
+                    UserRolesExtensions.ManageFaqRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireViewCustomers", policy => policy.RequireRole(
+                    UserRolesExtensions.ViewCustomersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireCreateCustomers", policy => policy.RequireRole(
+                    UserRolesExtensions.CreateCustomersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireManageCustomers", policy => policy.RequireRole(
+                    UserRolesExtensions.ManageCustomersRoleString,
+                    UserRolesExtensions.AdminRoleString));
+
+                options.AddPolicy("RequireViewDashboard", policy => policy.RequireRole(
+                    UserRolesExtensions.ViewDashboardRoleString,
                     UserRolesExtensions.AdminRoleString));
             });
 

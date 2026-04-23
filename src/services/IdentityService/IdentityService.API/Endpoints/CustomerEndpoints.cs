@@ -14,11 +14,13 @@ namespace IdentityService.API.Endpoints
                                             .RequireAuthorization();
 
             customerRoute.MapPost("/Invite", InviteCustomer)
+                        .RequireAuthorization("RequireInviteUsers")
                         .Produces(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             customerRoute.MapGet("/GetAllCustomers", GetAllCustomers)
+            .RequireAuthorization("RequireViewCustomers")
                         .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);

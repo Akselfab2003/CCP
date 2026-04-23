@@ -1,7 +1,7 @@
 ﻿@using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @inject IJSRuntime JS
-@attribute [Authorize(Policy = "RequireAdmin")]
+@attribute [Authorize(Policy = "RequireInviteUsers")]
 
 <EditForm Model="InviteSupporterModel" OnValidSubmit="@Submit" OnInvalidSubmit="@OnInvalidSubmit">
     <DataAnnotationsValidator />

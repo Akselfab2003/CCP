@@ -6,6 +6,7 @@ using TicketService.Infrastructure.Persistence;
 using TicketService.Infrastructure.ServiceCollection;
 using Wolverine;
 using Wolverine.RabbitMQ;
+using CCP.Shared.ValueObjects;
 
 namespace TicketService.Api
 {
@@ -23,7 +24,12 @@ namespace TicketService.Api
             builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
 
             builder.Services.AddAuthentication();
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAssignTickets", policy => policy.RequireRole(
+                    UserRolesExtensions.AssignTicketsRoleString,
+                    UserRolesExtensions.AdminRoleString));
+            });
             builder.Services.AddHttpContextAccessor();
             builder.Services.ConfigureDefaultOpenTelemetry("TicketService.Api");
             builder.Services.AddHttpContextAccessor();

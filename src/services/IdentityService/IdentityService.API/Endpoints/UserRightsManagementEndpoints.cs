@@ -16,6 +16,7 @@ namespace IdentityService.API.Endpoints
 
 
             userRightsRoute.MapPost("/assign", AssignRoleToUser)
+                          .RequireAuthorization("RequirePromoteUsers")
                           .Produces(StatusCodes.Status200OK)
                           .ProducesProblem(StatusCodes.Status400BadRequest)
                           .ProducesProblem(StatusCodes.Status404NotFound)
