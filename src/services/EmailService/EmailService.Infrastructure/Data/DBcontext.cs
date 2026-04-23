@@ -19,7 +19,7 @@ namespace EmailService.Infrastructure.Data
 
         public DbSet<EmailSent> EmailSent { get; set; }
         public DbSet<EmailReceived> EmailReceived { get; set; }
-        public DbSet<EmailTicketEntities> EmailTicketLookup { get; set; }
+        public DbSet<EmailTicketMessage> EmailTicketMessages { get; set; }
         public DbSet<TenantEmailConfiguration> TenantEmailConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,11 +44,10 @@ namespace EmailService.Infrastructure.Data
                 builder.HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
             });
 
-            modelBuilder.Entity<EmailTicketEntities>(builder =>
+            modelBuilder.Entity<EmailTicketMessage>(builder =>
             {
                 builder.HasKey(e => e.Id);
-
-                builder.Property(e => e.MailId)
+                builder.Property(e => e.MessageId)
                        .IsRequired();
                 builder.Property(e => e.SenderEmail)
                        .IsRequired();
@@ -58,9 +57,22 @@ namespace EmailService.Infrastructure.Data
                        .IsRequired();
                 builder.Property(e => e.CustomerId)
                        .IsRequired();
-                builder.Property(e => e.MailReferenceIds)
+                builder.Property(e => e.Subject)
                        .IsRequired();
-
+                builder.Property(e => e.InReplyTo)
+                       .IsRequired();
+                builder.Property(e => e.SenderEmail)
+                       .IsRequired();
+                builder.Property(e => e.SenderName)
+                       .IsRequired();
+                builder.Property(e => e.Body)
+                       .IsRequired();
+                builder.Property(e => e.SentAt)
+                       .IsRequired();
+                builder.Property(e => e.Direction)
+                       .IsRequired();
+                builder.Property(e => e.References)
+                       .IsRequired();
                 builder.HasQueryFilter(e => e.OrganizationId == _currentUser.OrganizationId);
             });
         }

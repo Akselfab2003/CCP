@@ -23,7 +23,7 @@ namespace EmailService.Infrastructure.ServiceDefaults
             services.AddScoped<ISmtpClient, SmtpClient>();
             services.AddScoped<ITenantEmailConfigurationRepo, TenantEmailConfigurationRepo>();
             services.AddScoped<ITicketEmailService, TicketEmailService>();
-            services.AddScoped<IEmailTicketEntitiesRepository, EmailTicketEntitiesRepository>();
+            services.AddScoped<IEmailTicketMessageRepository, EmailTicketMessageRepository>();
             services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
 
             return services;
