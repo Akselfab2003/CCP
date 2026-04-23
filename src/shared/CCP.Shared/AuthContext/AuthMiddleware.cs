@@ -120,11 +120,11 @@ namespace CCP.Shared.AuthContext
                 {
                     return orgNameClaim.Value;
                 }
-                return Result.Failure<string>(Error.Failure("ErrorGettingOrgName", "Error trying to get org name");
+                return Result.Failure<string>(Error.Failure("ErrorGettingOrgName", "Error trying to get org name"));
             }
             catch (Exception)
             {
-                return Result.Failure<string>(Error.Failure("ErrorGettingOrgName", "Error trying to get org name");
+                return Result.Failure<string>(Error.Failure("ErrorGettingOrgName", "Error trying to get org name"));
             }
         }
 

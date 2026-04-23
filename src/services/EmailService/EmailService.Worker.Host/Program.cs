@@ -9,6 +9,7 @@ using EmailService.Infrastructure.EmailInfrastructure;
 using EmailService.Infrastructure.ServiceDefaults;
 using EmailService.Worker.Host;
 using EmailService.Worker.Host.Services;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
@@ -60,6 +61,11 @@ builder.Services.AddCustomerviceSdk(
 builder.Services.AddTicketServiceSdk(
     builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
     ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required."), true);
+
+builder.Services.AddMessageServiceSDK(
+    builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+    ?? throw new InvalidOperationException("MessageServiceUrl configuration value is required."), true);
+
 
 builder.Services.AddDbContext<DBcontext>(option =>
 {
