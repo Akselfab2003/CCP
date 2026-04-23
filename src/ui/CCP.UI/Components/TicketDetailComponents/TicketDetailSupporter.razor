@@ -70,12 +70,6 @@
                         Loading more...
                     </div>
                 }
-                else if (_hasMoreMessages)
-                {
-                    <div class="tds-load-more">
-                        <button class="tds-load-more-btn" @onclick="LoadMoreMessagesAsync">Load older messages</button>
-                    </div>
-                }
                 @if (_isLoadingMessages)
                 {
                     <div class="tds-messages-state">
@@ -111,12 +105,28 @@
                                 <div class="tds-msg-bubble tds-msg-bubble--note">@msg.Content</div>
                                 @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
                                 {
-                                    <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                    <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName, msg.AttachmentContentType)" />
+                                }
+                                else if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("video/") == true)
+                                {
+                                    <div class="tds-msg-video-wrap">
+                                        <video class="tds-msg-video" controls preload="metadata">
+                                            <source src="@msg.AttachmentUrl" type="@msg.AttachmentContentType" />
+                                        </video>
+                                        <button class="tds-msg-video-expand" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName, msg.AttachmentContentType)" title="Expand video">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                                <polyline points="15 3 21 3 21 9" />
+                                                <polyline points="9 21 3 21 3 15" />
+                                                <line x1="21" y1="3" x2="14" y2="10" />
+                                                <line x1="3" y1="21" x2="10" y2="14" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 }
                                 else if (msg.AttachmentUrl is not null)
                                 {
                                     <a href="@msg.AttachmentUrl" target="_blank" class="tds-msg-attachment-link">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" /></svg>
                                         @msg.AttachmentFileName
                                     </a>
                                 }
@@ -140,16 +150,32 @@
                                         @msg.Content
                                         @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
                                         {
-                                            <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                            <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName, msg.AttachmentContentType)" />
                                         }
-                                        else if (msg.AttachmentUrl is not null)
+                                        else if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("video/") != true)
                                         {
                                             <a href="@msg.AttachmentUrl" target="_blank" class="tds-msg-attachment-link">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" /></svg>
                                                 @msg.AttachmentFileName
                                             </a>
                                         }
                                     </div>
+                                    @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("video/") == true)
+                                    {
+                                        <div class="tds-msg-video-wrap">
+                                            <video class="tds-msg-video" controls preload="metadata">
+                                                <source src="@msg.AttachmentUrl" type="@msg.AttachmentContentType" />
+                                            </video>
+                                            <button class="tds-msg-video-expand" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName, msg.AttachmentContentType)" title="Expand video">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                                    <polyline points="15 3 21 3 21 9" />
+                                                    <polyline points="9 21 3 21 3 15" />
+                                                    <line x1="21" y1="3" x2="14" y2="10" />
+                                                    <line x1="3" y1="21" x2="10" y2="14" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -181,14 +207,16 @@
                             {
                                 <div class="tds-attachment-preview-file">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                                        <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/>
+                                        <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" />
+                                        <polyline points="13 2 13 9 20 9" />
                                     </svg>
                                     <span>@_pendingAttachment.FileName</span>
                                 </div>
                             }
                             <button class="tds-attachment-remove-btn" @onclick="RemovePendingAttachment" title="Remove attachment">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
-                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
                                 </svg>
                             </button>
                         </div>
@@ -206,7 +234,7 @@
                             else
                             {
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
                                 </svg>
                             }
                         </label>
@@ -258,12 +286,10 @@
                         }
                         else if (Ticket.CustomerId.HasValue)
                         {
-
                             <span class="tds-sidebar-mono">Loading…</span>
                         }
                         else
                         {
-
                             <span>—</span>
                         }
                     </span>
@@ -277,12 +303,10 @@
                         }
                         else if (Ticket.AssignedUserId == UserContext.UserId)
                         {
-
                             <span class="tds-assignee-pill tds-assignee-you">You</span>
                         }
                         else
                         {
-
                             <span class="tds-assignee-pill tds-assignee-other">@GetAssigneeName(Ticket.AssignedUserId)</span>
                         }
                     </span>
@@ -310,10 +334,20 @@
             <div class="tds-lightbox-content" @onclick:stopPropagation="true">
                 <button class="tds-lightbox-close" @onclick="CloseLightbox">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                 </button>
-                <img src="@_lightboxUrl" alt="@_lightboxFileName" class="tds-lightbox-img" />
+                @if (_lightboxContentType?.StartsWith("video/") == true)
+                {
+                    <video class="tds-lightbox-video" controls autoplay>
+                        <source src="@_lightboxUrl" type="@_lightboxContentType" />
+                    </video>
+                }
+                else
+                {
+                    <img src="@_lightboxUrl" alt="@_lightboxFileName" class="tds-lightbox-img" />
+                }
                 @if (_lightboxFileName is not null)
                 {
                     <div class="tds-lightbox-caption">@_lightboxFileName</div>

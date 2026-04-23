@@ -470,3 +470,43 @@
         background: var(--ccp-surface-2);
         color: var(--ccp-text-primary);
     }
+
+.tdc-msg-video-wrap {
+    position: relative;
+    display: inline-block;
+    margin-top: 6px;
+}
+
+.tdc-msg-video {
+    display: block;
+    max-width: 320px;
+    max-height: 200px;
+    border-radius: 8px;
+    background: #000;
+}
+
+.tdc-msg-video-expand {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0,0,0,0.55);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px 6px;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.13s;
+}
+
+.tdc-msg-video-expand:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+.tdc-lightbox-video {
+    max-width: 90vw;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}

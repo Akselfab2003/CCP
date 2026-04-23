@@ -47,6 +47,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     // Lightbox state
     private string? _lightboxUrl;
     private string? _lightboxFileName;
+    private string? _lightboxContentType;
 
     // Pagination state
     private bool _hasMoreMessages;
@@ -54,10 +55,13 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     private bool _shouldScrollToBottom;
     private ElementReference _messagesContainer;
 
-    private void OpenLightbox(string url, string? fileName)
+    private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
+
+    private void OpenLightbox(string url, string? fileName, string? contentType = null)
     {
         _lightboxUrl = url;
         _lightboxFileName = fileName;
+        _lightboxContentType = contentType;
         StateHasChanged();
     }
 
@@ -65,6 +69,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     {
         _lightboxUrl = null;
         _lightboxFileName = null;
+        _lightboxContentType = null;
         StateHasChanged();
     }
 
@@ -188,12 +193,20 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         var file = e.File;
         if (file is null) return;
 
+        if (file.Size > MaxFileSizeBytes)
+        {
+            Logger.LogWarning("File {FileName} exceeds 50MB limit", file.Name);
+            _isUploadingAttachment = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
         _isUploadingAttachment = true;
         await InvokeAsync(StateHasChanged);
 
         try
         {
-            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024);
             var result = await MessageSdkService.UploadAttachmentAsync(stream, file.Name, file.ContentType);
 
             if (result.IsSuccess)
@@ -244,6 +257,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
             _newMessageContent = string.Empty;
             _pendingAttachment = null;
             _pendingAttachmentPreviewUrl = null;
+            _shouldScrollToBottom = true;
         }
         else
         {
@@ -343,7 +357,12 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     {
         if (message.TicketId != Ticket.Id || _messages.Any(m => m.Id == message.Id)) return;
         _messages.Add(message);
-        _ = ResolveUserNamesAsync(new[] { message }).ContinueWith(_ => InvokeAsync(StateHasChanged));
+        _ = ResolveUserNamesAsync(new[] { message })
+            .ContinueWith(_ => InvokeAsync(async () =>
+            {
+                _shouldScrollToBottom = true;
+                StateHasChanged();
+            }));
     }
 
     private void HandleMessageUpdated(MessageDto message)

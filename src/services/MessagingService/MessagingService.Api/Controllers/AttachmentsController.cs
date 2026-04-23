@@ -21,6 +21,8 @@ public class AttachmentsController : ControllerBase
         _logger = logger;
     }
 
+    private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
+
     [HttpPost]
     public async Task<IActionResult> UploadAttachment(IFormFile file, CancellationToken cancellationToken)
     {
@@ -30,6 +32,9 @@ public class AttachmentsController : ControllerBase
 
         if (file is null || file.Length == 0)
             return BadRequest("No file provided.");
+
+        if (file.Length > MaxFileSizeBytes)
+            return BadRequest("File size exceeds the maximum allowed size of 50 MB.");
 
         await using var stream = file.OpenReadStream();
         var storedFileName = await _storageService.SaveFileAsync(
