@@ -124,8 +124,14 @@ namespace EmailService.Worker.Host.handlers
                 (TicketId, CustomerId) = CreatedNewTicketEmail.Value;
             }
 
+            var saveResult = await SaveMessageAsync(message: fullEmail, ticketId: TicketId, customerId: CustomerId,
+                                     TenantId: EmailTenantDetails.Value.OrganizationId);
 
-
+            if (saveResult.IsFailure)
+            {
+                _logger.LogError("Failed to save email message for ticket #{TicketId} and customer {CustomerId}. Email Subject: {Subject}",
+                    TicketId, CustomerId, mail_Received.Subject);
+            }
 
         }
 
