@@ -4,9 +4,9 @@ namespace CCP.Shared.AuthContext
 {
     public class TenantHeaderInjector : DelegatingHandler
     {
-        private readonly ICurrentUser _currentUser;
+        private readonly ServiceAccountOverrider _currentUser;
         private readonly ILogger<TenantHeaderInjector> _logger;
-        public TenantHeaderInjector(ICurrentUser currentUser, ILogger<TenantHeaderInjector> logger)
+        public TenantHeaderInjector(ServiceAccountOverrider currentUser, ILogger<TenantHeaderInjector> logger)
         {
             _currentUser = currentUser;
             _logger = logger;
