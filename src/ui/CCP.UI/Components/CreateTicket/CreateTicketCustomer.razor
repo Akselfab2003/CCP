@@ -7,7 +7,7 @@
 
     <div class="ct-header">
         <div class="ct-header-left">
-            <a href="/inbox" class="ct-back-btn" title="Back to Inbox">
+            <a href="/" class="ct-back-btn" title="Back to Homepage">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <polyline points="15 18 9 12 15 6" />
                 </svg>
@@ -82,7 +82,7 @@
             </div>
 
             <div class="ct-actions">
-                <a href="/inbox" class="ct-btn ct-btn--ghost">Cancel</a>
+                <a href="/" class="ct-btn ct-btn--ghost">Cancel</a>
                 <button class="ct-btn ct-btn--primary"
                         @onclick="HandleSubmitAsync"
                         disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_title))">

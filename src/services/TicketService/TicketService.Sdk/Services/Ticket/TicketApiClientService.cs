@@ -223,5 +223,52 @@ namespace TicketService.Sdk.Services.Ticket
                     description: "An error occurred while recording message history."));
             }
         }
+
+        public async Task<Result<List<TicketHistoryEntryDto>>> GetOrgHistoryAsync(int limit = 20, CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.GetAsync($"/ticket/history/org?limit={limit}", ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                        code: "HistoryRetrievalFailed",
+                        description: $"Failed to retrieve org history. Status code: {(int)response.StatusCode}"));
+
+                var entries = await response.Content.ReadFromJsonAsync<List<TicketHistoryEntryDto>>(cancellationToken: ct);
+                return Result.Success(entries ?? new List<TicketHistoryEntryDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving org history.");
+                return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                    code: "HistoryRetrievalFailed",
+                    description: "An error occurred while retrieving org history."));
+            }
+        }
+        public async Task<Result<List<TicketHistoryEntryDto>>> GetMyHistoryAsync(int limit = 20, CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.GetAsync($"/ticket/history/mine?limit={limit}", ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                        code: "HistoryRetrievalFailed",
+                        description: $"Failed to retrieve assigned ticket history. Status code: {(int)response.StatusCode}"));
+
+                var entries = await response.Content.ReadFromJsonAsync<List<TicketHistoryEntryDto>>(cancellationToken: ct);
+                return Result.Success(entries ?? new List<TicketHistoryEntryDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving assigned ticket history.");
+                return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                    code: "HistoryRetrievalFailed",
+                    description: "An error occurred while retrieving assigned ticket history."));
+            }
+        }
     }
 }

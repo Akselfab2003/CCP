@@ -1,3 +1,4 @@
+using Gateway.Sdk.ServiceDefaults;
 using CCP.ServiceDefaults;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
@@ -154,6 +155,11 @@ namespace CCP.UI
                 );
 
             builder.Services.AddScoped<ServiceAccountOverrider>();
+            builder.Services.AddGatewayServiceSdk(
+                builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
+                ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")
+                );
+
             var app = builder.Build();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions()

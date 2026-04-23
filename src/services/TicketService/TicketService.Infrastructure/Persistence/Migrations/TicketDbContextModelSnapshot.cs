@@ -67,7 +67,7 @@ namespace TicketService.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
-                        .IsRequired()
+                        .HasMaxLength(2000)
                         .HasColumnType("text");
 
                     b.PrimitiveCollection<List<string>>("InternalNotes")

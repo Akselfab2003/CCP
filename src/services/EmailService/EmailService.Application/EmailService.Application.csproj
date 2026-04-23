@@ -16,6 +16,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\CCP.Encryption\CCP.Encryption.csproj" />
+    <ProjectReference Include="..\..\CustomerService\CustomerService.Domain\CustomerService.Domain.csproj" />
+    <ProjectReference Include="..\..\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
     <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
   </ItemGroup>
 

@@ -21,7 +21,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public StatusChangeRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?customerId*,newStatus*,oldStatus*,ticketId*,ticketTitle*}", pathParameters)
+        public StatusChangeRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?AssignedByUserId*,AssignedUserId*,CreatedAt*,CustomerId*,Id*,OrganizationId*,Status*,Title*,customerId*,newStatus*,oldStatus*,ticketTitle*}", pathParameters)
         {
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public StatusChangeRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?customerId*,newStatus*,oldStatus*,ticketId*,ticketTitle*}", rawUrl)
+        public StatusChangeRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?AssignedByUserId*,AssignedUserId*,CreatedAt*,CustomerId*,Id*,OrganizationId*,Status*,Title*,customerId*,newStatus*,oldStatus*,ticketTitle*}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -76,8 +76,12 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
         internal partial class StatusChangeRequestBuilderPostQueryParameters 
         #pragma warning restore CS1591
         {
+            public Guid? AssignedByUserId { get; set; }
+            public Guid? AssignedUserId { get; set; }
+            public DateTimeOffset? CreatedAt { get; set; }
             [QueryParameter("customerId")]
             public Guid? CustomerId { get; set; }
+            public int? Id { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("newStatus")]
@@ -96,8 +100,8 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
             [QueryParameter("oldStatus")]
             public string OldStatus { get; set; }
 #endif
-            [QueryParameter("ticketId")]
-            public int? TicketId { get; set; }
+            public Guid? OrganizationId { get; set; }
+            public int? Status { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("ticketTitle")]
@@ -106,6 +110,13 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
 #else
             [QueryParameter("ticketTitle")]
             public string TicketTitle { get; set; }
+#endif
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public string? Title { get; set; }
+#nullable restore
+#else
+            public string Title { get; set; }
 #endif
         }
         /// <summary>

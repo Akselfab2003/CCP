@@ -3,9 +3,8 @@
 @using CCP.Shared.UIContext
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 @attribute [Authorize]
-@inject IUIUserContext UserContext
-@inject AuthenticationStateProvider AuthenticationStateProvider
 <div>
     <h3>Role Tests</h3>
     <p>Current user: @UserContext.UserId</p>
@@ -26,5 +25,10 @@
 
 
 @code {
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
+    [Inject]
+    private IUIUserContext UserContext { get; set; } = default!;
 
 }

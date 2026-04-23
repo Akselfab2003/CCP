@@ -4,5 +4,6 @@ namespace TicketService.Domain.RequestObjects
     {
         public Guid? SenderUserId { get; set; }
         public string MessageSnippet { get; set; } = string.Empty;
+        public bool IsInternalNote { get; set; }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using CustomerService.Domain.Entities;
+using CustomerService.Sdk.Models;
 using EmailService.Domain.Models;
 using EmailTemplates.EmailTemplates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using TicketService.Domain.Entities;
+using TicketService.Domain.ResponseObjects;
+using TicketService.Sdk.Dtos;
 namespace EmailTemplates.Renderes
 {
     public class EmailTemplateRenderer : IEmailTemplateRenderer
@@ -19,7 +22,7 @@ namespace EmailTemplates.Renderes
         }
 
         public async Task<string> RenderTicketCreatedEmailAsync(
-            EmailSent email,Ticket ticket,
+            EmailSent email, TicketSdkDto ticket,
             string organizationName, string expectedResponseTime,
             string portalUrl)
         {
@@ -37,8 +40,8 @@ namespace EmailTemplates.Renderes
         }
 
         public async Task<string> RenderTicketReplyEmailAsync(
-            EmailReceived email, Ticket ticket,
-            Customer customer, string organizationName,
+            EmailReceived email, TicketSdkDto ticket,
+            CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
             string replyUrl,string viewHistoryUrl)
         {
@@ -60,10 +63,9 @@ namespace EmailTemplates.Renderes
 
 
         public async Task<string> RenderTicketStatusEmailAsync(
-            EmailSent email, Ticket ticket,
+            EmailSent email, TicketSdkDto ticket,
             string organizationName, string oldStatusLabel,
-            string portalUrl
-            )
+            string portalUrl)
         {
                 var component = await RenderComponentAsync<TicketStatusEmail>(p =>
                 {
@@ -78,8 +80,8 @@ namespace EmailTemplates.Renderes
         }
 
         public async Task<string> RenderReplyToEmailAsync(
-            EmailReceived emailReceived, EmailSent emailSent,
-            Ticket ticket, string organizationName)
+            EmailReceived emailReceived, EmailSent? emailSent,
+            TicketSdkDto ticket, string organizationName)
         {
             var component = await RenderComponentAsync<ReplyToEmail>(p =>
             {
@@ -92,8 +94,8 @@ namespace EmailTemplates.Renderes
         }
 
         public Task<string> RenderSupportCustomerReplyNotificationAsync(
-            EmailReceived email, Ticket ticket,
-            Customer customer, string organizationName,
+            EmailReceived email, TicketSdkDto ticket,
+            CustomerDTO customer, string organizationName,
             string replyUrl, string mangmentUrl,
             string viewHistoryUrl) =>
             RenderComponentAsync<SupportCustomerReplyNotification>(p =>

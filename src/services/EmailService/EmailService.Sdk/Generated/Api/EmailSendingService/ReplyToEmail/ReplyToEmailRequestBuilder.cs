@@ -21,7 +21,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.ReplyToEmail
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ReplyToEmailRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/reply-to-email{?Body*,Id*,MailId*,OrganizationId*,ReceivedAt*,RecipientAddress*,SenderAddress*,SentAt*,Subject*,TicketId*,organizationName*,ticketId*}", pathParameters)
+        public ReplyToEmailRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/reply-to-email{?AssignedByUserId*,AssignedUserId*,Body*,CreatedAt*,CustomerId*,Id*,MailId*,OrganizationId*,ReceivedAt*,RecipientAddress*,SenderAddress*,SentAt*,Status*,Subject*,TicketId*,Title*,organizationName*}", pathParameters)
         {
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.ReplyToEmail
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ReplyToEmailRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/reply-to-email{?Body*,Id*,MailId*,OrganizationId*,ReceivedAt*,RecipientAddress*,SenderAddress*,SentAt*,Subject*,TicketId*,organizationName*,ticketId*}", rawUrl)
+        public ReplyToEmailRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/reply-to-email{?AssignedByUserId*,AssignedUserId*,Body*,CreatedAt*,CustomerId*,Id*,MailId*,OrganizationId*,ReceivedAt*,RecipientAddress*,SenderAddress*,SentAt*,Status*,Subject*,TicketId*,Title*,organizationName*}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -76,6 +76,8 @@ namespace EmailService.Sdk.Api.EmailSendingService.ReplyToEmail
         internal partial class ReplyToEmailRequestBuilderPostQueryParameters 
         #pragma warning restore CS1591
         {
+            public Guid? AssignedByUserId { get; set; }
+            public Guid? AssignedUserId { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             public string? Body { get; set; }
@@ -83,6 +85,8 @@ namespace EmailService.Sdk.Api.EmailSendingService.ReplyToEmail
 #else
             public string Body { get; set; }
 #endif
+            public DateTimeOffset? CreatedAt { get; set; }
+            public Guid? CustomerId { get; set; }
             public int? Id { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -117,6 +121,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.ReplyToEmail
             public string SenderAddress { get; set; }
 #endif
             public DateTimeOffset? SentAt { get; set; }
+            public int? Status { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             public string? Subject { get; set; }
@@ -125,6 +130,13 @@ namespace EmailService.Sdk.Api.EmailSendingService.ReplyToEmail
             public string Subject { get; set; }
 #endif
             public int? TicketId { get; set; }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public string? Title { get; set; }
+#nullable restore
+#else
+            public string Title { get; set; }
+#endif
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

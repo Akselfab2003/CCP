@@ -59,14 +59,15 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
     builder.Services.AddCustomerviceSdk(
         builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
-        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."), true);
+        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."),true);
 
     builder.Services.AddDbContext<DBcontext>(options =>
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
     });
+    var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
 
-    builder.Services.AddApiAuthenticationServices("EmailService.Api", "CCP", keycloakServiceUrl);
+    builder.Services.AddApiAuthenticationServices("EmailService.Api", "CCP", keycloakURL);
     builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
     builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
     builder.Services.AddScoped<IQueuePublisherService, QueuePublisherService>();

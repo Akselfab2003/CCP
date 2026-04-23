@@ -3,8 +3,8 @@
     public class CurrentUser : ICurrentUser
     {
         public Guid UserId { get; private set; }
-
         public Guid OrganizationId { get; private set; }
+        public bool IsServiceAccount { get; private set; }
 
         public string OrganizationName { get; private set; } = string.Empty;
 

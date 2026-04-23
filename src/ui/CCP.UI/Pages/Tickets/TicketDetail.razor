@@ -1,0 +1,43 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using CCP.Shared.ValueObjects
+@using CCP.UI.Layout
+@using CCP.UI.Pages.Tickets.TicketDetailComponents
+@page "/tickets/{TicketId:int}"
+@attribute [Authorize]
+@layout CCPLayout
+
+@if (_isLoading)
+{
+    <div class="td-state-wrap">
+        <svg class="td-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+        Loading ticket...
+    </div>
+}
+else if (_errorMessage is not null)
+{
+    <div class="td-state-wrap td-state-wrap--error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        @_errorMessage
+    </div>
+}
+else if (_ticket is not null)
+{
+    @if (UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin)
+    {
+        <TicketDetailManager Ticket="_ticket" />
+    }
+    else if (UserContext.IsInternalUser)
+    {
+        <TicketDetailSupporter Ticket="_ticket" />
+    }
+    else
+    {
+        <TicketDetailCustomer Ticket="_ticket" />
+    }
+}
