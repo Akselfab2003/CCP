@@ -7,7 +7,6 @@ using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
 using EmailService.Infrastructure.ServiceDefaults;
-using EmailService.Worker.Host;
 using EmailService.Worker.Host.Services;
 using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +15,7 @@ using Wolverine;
 using Wolverine.RabbitMQ;
 
 var builder = Host.CreateApplicationBuilder(args);
-//var emailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl") ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
-//builder.Services.AddSingleton<ImapMailReciver>(_ => new ImapMailReciver(emailHostUrl, builder.Configuration));
-builder.Services.AddHostedService<Worker>();
+
 builder.Services.AddServiceDefaults("EmailWorker.Host");
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 

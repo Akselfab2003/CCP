@@ -15,32 +15,27 @@ namespace EmailService.Worker.Host.handlers
     {
         private readonly ILogger<MailReceivedHandler> _logger;
         private readonly IMailBoxService _mailBoxService;
-        private readonly IMailManagementController _mailManagementController;
         private readonly IEmailTicketMessageRepository _emailTicketMessageRepository;
         private readonly ICustomerSdkService _customerSdkService;
         private readonly IMessageSdkService _messageSdkService;
         private readonly ITicketService _ticketService;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
         public MailReceivedHandler(ILogger<MailReceivedHandler> logger,
                                    IMailBoxService mailBoxService,
                                    ICustomerSdkService customerSdkService,
-                                   IMailManagementController mailManagementController,
                                    IEmailTicketMessageRepository emailTicketMessageRepository,
                                    IMessageSdkService messageSdkService,
                                    ITicketService ticketService,
-                                   ServiceAccountOverrider serviceAccountOverrider,
-                                   IServiceScopeFactory serviceScopeFactory)
+                                   ServiceAccountOverrider serviceAccountOverrider
+                              )
         {
             _logger = logger;
             _mailBoxService = mailBoxService;
             _customerSdkService = customerSdkService;
-            _mailManagementController = mailManagementController;
             _emailTicketMessageRepository = emailTicketMessageRepository;
             _messageSdkService = messageSdkService;
             _ticketService = ticketService;
             _serviceAccountOverrider = serviceAccountOverrider;
-            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task Handle(mail_received mail_Received)
@@ -153,6 +148,10 @@ namespace EmailService.Worker.Host.handlers
                 {
                     CustomerId = Guid.NewGuid();
                     await _customerSdkService.CreateCustomer(new CustomerService.Sdk.Models.CreateCustomerRequest { Id = CustomerId, Email = SenderEmail, Name = SenderName, OrganizationId = TenantId });
+                }
+                else
+                {
+                    CustomerId = FindCustomerByEmailResult.Value.Id;
                 }
 
                 var CreateTicketResult = await _ticketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
