@@ -331,7 +331,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
               "format": "int32"
             }
           }
@@ -632,7 +636,11 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
             "format": "int32"
           },
           "question": {
@@ -655,7 +663,14 @@
             "format": "uuid"
           },
           "embedding": {
-            "$ref": "#/components/schemas/Vector"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Vector"
+              }
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -683,9 +698,11 @@
             ]
           },
           "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
               "null",
-              "integer"
+              "integer",
+              "string"
             ],
             "format": "int32"
           },
@@ -707,7 +724,11 @@
         "type": "object",
         "properties": {
           "faqId": {
-            "type": "integer",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
             "format": "int32"
           },
           "question": {
@@ -727,27 +748,18 @@
           "memory": {
             "type": "array",
             "items": {
-              "type": "number",
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+              "type": [
+                "number",
+                "string"
+              ],
               "format": "float"
             }
           }
         }
       }
-    },
-    "securitySchemes": {
-      "Bearer": {
-        "type": "http",
-        "description": "JWT",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
     }
   },
-  "security": [
-    {
-      "Bearer": [ ]
-    }
-  ],
   "tags": [
     {
       "name": "Sessions"

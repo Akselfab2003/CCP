@@ -20,8 +20,7 @@ namespace TicketService.Api
             {
                 options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
             });
-
-            builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
+            builder.Services.AddOpenApi();
 
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
@@ -32,6 +31,7 @@ namespace TicketService.Api
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
+                builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
 
 
                 builder.Services.AddEmailServiceSdk(

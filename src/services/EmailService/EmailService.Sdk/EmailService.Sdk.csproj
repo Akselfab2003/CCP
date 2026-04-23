@@ -15,8 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
-    <ProjectReference Include="..\EmailService.API\EmailService.API.csproj" />
-    <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

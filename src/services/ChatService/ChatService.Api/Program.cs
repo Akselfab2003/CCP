@@ -68,6 +68,11 @@ public partial class Program
             builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                                                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
+
+            builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
+                .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
+                .AddEndpointsApiExplorer();
+
         }
         builder.Services.AddSignalR(options =>
         {
@@ -80,9 +85,7 @@ public partial class Program
 
         builder.Services.AddInfrastructureServices(builder.Configuration);
 
-        builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
-                        .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
-                        .AddEndpointsApiExplorer();
+
 
         var app = builder.Build();
 
