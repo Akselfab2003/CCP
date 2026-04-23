@@ -1,8 +1,7 @@
 ﻿using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
-using IdentityService.Sdk.Services.User;
-using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
+using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Components.Dashboard;
@@ -10,8 +9,6 @@ namespace CCP.UI.Components.Dashboard;
 public partial class SaasDashboardStaff : ComponentBase
 {
     [Inject] private ITicketService TicketService { get; set; } = default!;
-    [Inject] private IMessageSdkService MessageService { get; set; } = default!;
-    [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private ILogger<SaasDashboardStaff> Logger { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -20,7 +17,7 @@ public partial class SaasDashboardStaff : ComponentBase
     private int? _assignedCount;
     private int? _waitingForSupporterCount;
     private int? _waitingForCustomerCount;
-    private List<StaffFeedEntry>? _feedEntries;
+    private List<TicketHistoryEntryDto>? _feedEntries;
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,131 +62,69 @@ public partial class SaasDashboardStaff : ComponentBase
 
         StateHasChanged();
 
-        // Build feed: fetch the latest message for each open ticket in parallel,
-        // take the 10 most recent, sorted by message time descending.
-        var openTickets = tickets
-            .Where(t => t.Status != (int)TicketStatus.Closed)
-            .OrderByDescending(t => t.CreatedAt)
-            .Take(20) // cap concurrent requests
-            .ToList();
-
-        var feedTasks = openTickets.Select(async ticket =>
-        {
-            try
-            {
-                var msgResult = await MessageService.GetMessagesByTicketIdAsync(ticket.Id, limit: 1);
-                if (msgResult.IsFailure || msgResult.Value is null || !msgResult.Value.Items.Any())
-                    return null;
-
-                var latestMsg = msgResult.Value.Items.First();
-
-                // Skip internal notes — supporters shouldn't see these surfaced in the dashboard
-                if (latestMsg.IsInternalNote)
-                    return null;
-
-                return new StaffFeedEntry
-                {
-                    TicketId = ticket.Id,
-                    TicketTitle = ticket.Title ?? $"Ticket #{ticket.Id}",
-                    TicketStatus = ticket.Status,
-                    SenderUserId = latestMsg.UserId,
-                    SenderName = latestMsg.UserId == UserContext.UserId ? "You" : string.Empty,
-                    ActionText = "sent a message on ticket",
-                    OccurredAt = latestMsg.CreatedAtUtc ?? DateTimeOffset.UtcNow
-                };
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning(ex, "Failed to fetch latest message for ticket {TicketId}", ticket.Id);
-                return null;
-            }
-        });
-
-        var feedResults = await Task.WhenAll(feedTasks);
-
-        var entries = feedResults
-            .Where(e => e is not null)
-            .Cast<StaffFeedEntry>()
-            .OrderByDescending(e => e.OccurredAt)
-            .Take(10)
-            .ToList();
-
-        // Resolve names for senders we don't already know
-        var unknownIds = entries
-            .Where(e => e.SenderUserId.HasValue
-                     && e.SenderUserId.Value != UserContext.UserId
-                     && string.IsNullOrEmpty(e.SenderName))
-            .Select(e => e.SenderUserId!.Value)
-            .Distinct()
-            .ToList();
-
-        var nameTasks = unknownIds.Select(async userId =>
-        {
-            try
-            {
-                var result = await UserService.GetUserDetailsAsync(userId);
-                return (userId, name: result.IsSuccess ? result.Value.name : "Unknown");
-            }
-            catch
-            {
-                return (userId, name: "Unknown");
-            }
-        });
-
-        var nameResults = await Task.WhenAll(nameTasks);
-        var nameMap = nameResults.ToDictionary(r => r.userId, r => r.name);
-
-        _feedEntries = entries.Select(e =>
-        {
-            if (string.IsNullOrEmpty(e.SenderName) && e.SenderUserId.HasValue
-                && nameMap.TryGetValue(e.SenderUserId.Value, out var resolvedName))
-            {
-                return e with { SenderName = resolvedName };
-            }
-            return e;
-        }).ToList();
+        // Load activity feed from history API
+        var historyResult = await TicketService.GetMyHistoryAsync(limit: 10);
+        if (historyResult.IsSuccess && historyResult.Value is not null)
+            _feedEntries = historyResult.Value;
+        else
+            Logger.LogError("SaasDashboardStaff failed to load org history: {Error}", historyResult.Error);
 
         StateHasChanged();
     }
 
     private void NavigateToTicket(int ticketId) =>
-        Navigation.NavigateTo($"/inbox?ticketId={ticketId}");
+        Navigation.NavigateTo($"/tickets/{ticketId}");
 
-    private static string GetInitials(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "?";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpper();
-        return name.Length > 0 ? name[0].ToString().ToUpper() : "?";
-    }
+    private static string GetHistoryInitials(TicketHistoryEntryDto entry) =>
+        entry.EventType switch
+        {
+            "MessageSent" => "💬",
+            "StatusChanged" => "📋",
+            "AssignedToSupporter" => "👤",
+            _ => "?"
+        };
 
-    private static string GetStatusLabel(int status) => status switch
-    {
-        (int)TicketStatus.Open => "Open",
-        (int)TicketStatus.WaitingForCustomer => "Waiting for Customer",
-        (int)TicketStatus.WaitingForSupport => "Waiting for Support",
-        (int)TicketStatus.Closed => "Closed",
-        (int)TicketStatus.Blocked => "Blocked",
-        _ => "Unknown"
-    };
+    private static string GetHistoryDescription(TicketHistoryEntryDto entry) =>
+        entry.EventType switch
+        {
+            "MessageSent" => $"New message on ticket #{entry.TicketId}" +
+                (entry.NewValue is not null ? $" — {entry.NewValue}" : ""),
+            "StatusChanged" => $"Ticket #{entry.TicketId} status changed to {entry.NewValue}",
+            "AssignedToSupporter" => $"A supporter was assigned to ticket #{entry.TicketId}",
+            _ => $"Activity on ticket #{entry.TicketId}"
+        };
 
-    private static string GetStatusTagClass(int status) => status switch
-    {
-        (int)TicketStatus.Open => "tag-teal",
-        (int)TicketStatus.WaitingForCustomer => "tag-amber",
-        (int)TicketStatus.WaitingForSupport => "tag-indigo",
-        (int)TicketStatus.Closed => "tag-slate",
-        (int)TicketStatus.Blocked => "tag-red",
-        _ => "tag-slate"
-    };
+    private static string GetHistoryTagClass(TicketHistoryEntryDto entry) =>
+        entry.EventType switch
+        {
+            "MessageSent" => "tag-indigo",
+            "StatusChanged" when entry.NewValue == "Closed" => "tag-slate",
+            "StatusChanged" when entry.NewValue == "WaitingForCustomer" => "tag-red",
+            "StatusChanged" => "tag-teal",
+            "AssignedToSupporter" => "tag-teal",
+            _ => "tag-slate"
+        };
 
-    private static string GetDotClass(int status) => status switch
-    {
-        (int)TicketStatus.WaitingForSupport => "dot-red",
-        (int)TicketStatus.WaitingForCustomer => "dot-amber",
-        (int)TicketStatus.Open => "dot-green",
-        _ => "dot-slate"
-    };
+    private static string GetHistoryTagLabel(TicketHistoryEntryDto entry) =>
+        entry.EventType switch
+        {
+            "MessageSent" => "New Message",
+            "StatusChanged" when entry.NewValue == "WaitingForCustomer" => "Waiting for Customer",
+            "StatusChanged" when entry.NewValue == "WaitingForSupport" => "Waiting for Support",
+            "StatusChanged" when entry.NewValue == "Closed" => "Closed",
+            "StatusChanged" => entry.NewValue ?? "Status Changed",
+            "AssignedToSupporter" => "Agent Assigned",
+            _ => "Activity"
+        };
+
+    private static string GetHistoryDotClass(TicketHistoryEntryDto entry) =>
+        entry.EventType switch
+        {
+            "MessageSent" => "dot-green",
+            "StatusChanged" when entry.NewValue == "WaitingForCustomer" => "dot-red",
+            "StatusChanged" when entry.NewValue == "Closed" => "dot-slate",
+            _ => "dot-amber"
+        };
 
     private static string GetRelativeTime(DateTimeOffset occurredAt)
     {
@@ -199,16 +134,5 @@ public partial class SaasDashboardStaff : ComponentBase
         if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} hrs ago";
         if (diff.TotalDays < 2) return "Yesterday";
         return $"{(int)diff.TotalDays} days ago";
-    }
-
-    private sealed record StaffFeedEntry
-    {
-        public int TicketId { get; init; }
-        public string TicketTitle { get; init; } = string.Empty;
-        public int TicketStatus { get; init; }
-        public Guid? SenderUserId { get; init; }
-        public string SenderName { get; init; } = string.Empty;
-        public string ActionText { get; init; } = string.Empty;
-        public DateTimeOffset OccurredAt { get; init; }
     }
 }

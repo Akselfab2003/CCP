@@ -7,10 +7,16 @@
   <Folder Name="/src/services/" />
   <Folder Name="/src/services/ChatService/">
     <Project Path="services/ChatService/ChatService.Api/ChatService.Api.csproj" />
-    <Project Path="services/ChatService/ChatService.Application/ChatService.Application.csproj" Id="e4d69a0c-cf51-45b5-9138-3a24f9dbaada" />
-    <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e" />
+    <Project Path="services/ChatService/ChatService.Application/ChatService.Application.csproj" Id="e4d69a0c-cf51-45b5-9138-3a24f9dbaada">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
     <Project Path="services/ChatService/ChatService.Infrastructure/ChatService.Infrastructure.csproj" />
-    <Project Path="services/ChatService/ChatService.Sdk/ChatService.Sdk.csproj" Id="49cc360d-d62a-466b-abf8-1d4d35239432" />
+    <Project Path="services/ChatService/ChatService.Sdk/ChatService.Sdk.csproj" Id="49cc360d-d62a-466b-abf8-1d4d35239432">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
   </Folder>
   <Folder Name="/src/services/CustomerService/">
     <Project Path="services/CustomerService/CustomerService.Api/CustomerService.Api.csproj" Id="ac041ea3-0d13-416f-bdfd-3204ec40793d" />
@@ -18,6 +24,10 @@
     <Project Path="services/CustomerService/CustomerService.Domain/CustomerService.Domain.csproj" Id="4779705f-371e-4713-b5a7-0ab76fb4fd72" />
     <Project Path="services/CustomerService/CustomerService.Infrastructure/CustomerService.Infrastructure.csproj" Id="89a63df1-ea30-49fd-a24e-79567250d400" />
     <Project Path="services/CustomerService/CustomerService.Sdk/CustomerService.Sdk.csproj" />
+  </Folder>
+  <Folder Name="/src/services/Gateway/">
+    <Project Path="services/Gateway/Gateway.Api/Gateway.Api.csproj" />
+    <Project Path="services/Gateway/Gateway.Sdk/Gateway.Sdk.csproj" />
   </Folder>
   <Folder Name="/src/services/EmailService/">
     <Project Path="services/EmailService/EmailService.API/EmailService.API.csproj" />

@@ -43,6 +43,20 @@
     padding: 0;
 }
 
+.ccp-content:has(.tds-wrap) {
+    padding: 0;
+    overflow: hidden;
+}
+
+.ccp-content:has(.tdc-wrap) {
+    padding: 0;
+    overflow: hidden;
+}
+
+.ccp-content:has(.mt-wrap) {
+    padding: 0;
+}
+
 /* SIDEBAR */
 .ccp-sidebar {
     width: var(--ccp-sidebar-w);

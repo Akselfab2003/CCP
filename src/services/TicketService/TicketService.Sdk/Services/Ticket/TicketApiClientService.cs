@@ -27,24 +27,29 @@ namespace TicketService.Sdk.Services.Ticket
         {
             try
             {
-                var result = await Client.Ticket.Create.PostAsync(new Models.CreateTicketRequest()
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.PostAsJsonAsync("/ticket/create", new
                 {
                     Title = request.Title,
                     CustomerId = request.CustomerId,
-                    AssignedUserId = request.AssignedUserId
-                }, cancellationToken: ct);
-                return result;
-            }
-            catch (ApiException ex)
-            {
-                return ex.ResponseStatusCode switch
+                    AssignedUserId = request.AssignedUserId,
+                    Description = request.Description
+                }, ct);
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    400 => Result.Failure<int>(Error.Failure(code: "BadRequest", description: "The request was invalid. Please check the provided data.")),
-                    401 => Result.Failure<int>(Error.Failure(code: "Unauthorized", description: "You are not authorized to perform this action.")),
-                    403 => Result.Failure<int>(Error.Failure(code: "Forbidden", description: "You do not have permission to perform this action.")),
-                    404 => Result.Failure<int>(Error.Failure(code: "NotFound", description: "The specified resource was not found.")),
-                    _ => Result.Failure<int>(Error.Failure(code: "TicketCreationFailed", description: $"An error occurred while creating the ticket. Status code: {ex.ResponseStatusCode}"))
-                };
+                    return response.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.BadRequest => Result.Failure<int>(Error.Failure(code: "BadRequest", description: "The request was invalid. Please check the provided data.")),
+                        System.Net.HttpStatusCode.Unauthorized => Result.Failure<int>(Error.Failure(code: "Unauthorized", description: "You are not authorized to perform this action.")),
+                        System.Net.HttpStatusCode.Forbidden => Result.Failure<int>(Error.Failure(code: "Forbidden", description: "You do not have permission to perform this action.")),
+                        System.Net.HttpStatusCode.NotFound => Result.Failure<int>(Error.Failure(code: "NotFound", description: "The specified resource was not found.")),
+                        _ => Result.Failure<int>(Error.Failure(code: "TicketCreationFailed", description: $"An error occurred while creating the ticket. Status: {(int)response.StatusCode}"))
+                    };
+                }
+
+                var ticketId = await response.Content.ReadFromJsonAsync<int>(cancellationToken: ct);
+                return Result.Success(ticketId);
             }
             catch (Exception ex)
             {
@@ -220,6 +225,53 @@ namespace TicketService.Sdk.Services.Ticket
                 return Result.Failure(Error.Failure(
                     code: "RecordMessageFailed",
                     description: "An error occurred while recording message history."));
+            }
+        }
+
+        public async Task<Result<List<TicketHistoryEntryDto>>> GetOrgHistoryAsync(int limit = 20, CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.GetAsync($"/ticket/history/org?limit={limit}", ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                        code: "HistoryRetrievalFailed",
+                        description: $"Failed to retrieve org history. Status code: {(int)response.StatusCode}"));
+
+                var entries = await response.Content.ReadFromJsonAsync<List<TicketHistoryEntryDto>>(cancellationToken: ct);
+                return Result.Success(entries ?? new List<TicketHistoryEntryDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving org history.");
+                return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                    code: "HistoryRetrievalFailed",
+                    description: "An error occurred while retrieving org history."));
+            }
+        }
+        public async Task<Result<List<TicketHistoryEntryDto>>> GetMyHistoryAsync(int limit = 20, CancellationToken ct = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(ClientName);
+                var response = await httpClient.GetAsync($"/ticket/history/mine?limit={limit}", ct);
+
+                if (!response.IsSuccessStatusCode)
+                    return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                        code: "HistoryRetrievalFailed",
+                        description: $"Failed to retrieve assigned ticket history. Status code: {(int)response.StatusCode}"));
+
+                var entries = await response.Content.ReadFromJsonAsync<List<TicketHistoryEntryDto>>(cancellationToken: ct);
+                return Result.Success(entries ?? new List<TicketHistoryEntryDto>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving assigned ticket history.");
+                return Result.Failure<List<TicketHistoryEntryDto>>(Error.Failure(
+                    code: "HistoryRetrievalFailed",
+                    description: "An error occurred while retrieving assigned ticket history."));
             }
         }
     }

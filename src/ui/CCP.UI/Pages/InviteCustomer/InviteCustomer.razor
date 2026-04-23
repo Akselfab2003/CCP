@@ -1,23 +1,11 @@
-@page "/InviteCustomers"
-@layout CCPLayout
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @inject IJSRuntime JS
 @attribute [Authorize(Policy = "RequireManager")]
 
-
-<PageTitle>Customer Management</PageTitle>
-
 <EditForm Model="InviteCustomerModel" OnValidSubmit="@Submit">
-
-    <!-- Top Header -->
-    <div class="dash-greeting">
-        <div>
-            <h2 class="dash-greeting-title">Invite Customer</h2>
-            <p class="dash-greeting-sub">Invite Your customer to the CCP APP.</p>
-        </div>
-        <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
-    </div>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <!-- Main Grid: Invite form til venstre, Customer liste til højre -->
     <div class="customer-grid">
@@ -36,20 +24,30 @@
                                    type="email"
                                    class="form-input"
                                    placeholder="customer@example.com" />
+                        <ValidationMessage For="@(() => InviteCustomerModel.Email)" />
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Welcome Message</label>
+                        <label class="form-label">Welcome Message (Optional)</label>
                         <textarea class="form-textarea"
+                                  @bind="InviteCustomerModel.WelcomeMessage"
                                   rows="4"
                                   placeholder="Write a welcome message to the customer..."></textarea>
                     </div>
 
-                    <button class="btn-primary" type="submit">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                        </svg>
-                        Send Invitation
+                    <button class="btn-primary" type="submit" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner"></span>
+                            <span>Sending...</span>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                            </svg>
+                            <span>Send Invitation</span>
+                        }
                     </button>
                 </div>
             </div>
@@ -79,3 +77,19 @@
     </div>
 </EditForm>
 
+<!-- Toast Notifications -->
+@if (successMessage != null)
+{
+    <div class="toast toast-success">
+        @successMessage
+        <button @onclick="@(() => successMessage = null)">×</button>
+    </div>
+}
+
+@if (errorMessage != null)
+{
+    <div class="toast toast-error">
+        @errorMessage
+        <button @onclick="@(() => errorMessage = null)">×</button>
+    </div>
+}

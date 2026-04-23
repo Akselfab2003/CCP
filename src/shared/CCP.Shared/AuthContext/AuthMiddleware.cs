@@ -23,8 +23,10 @@ namespace CCP.Shared.AuthContext
                 {
                     userContext.SetCurrentUser(Guid.Parse(userIdClaim.Value));
                 }
+
                 var orgIdClaim = context.User.Claims.FirstOrDefault(c => c.Type == "org")
                             ?? context.User.Claims.FirstOrDefault(c => c.Type == "organization");
+
                 if (orgIdClaim != null)
                 {
                     Dictionary<string, Dictionary<string, string>>? orgData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(orgIdClaim.Value);
@@ -36,7 +38,13 @@ namespace CCP.Shared.AuthContext
                         }
                     }
                 }
+                else
+                {
+                    // No org claim means this is a service account token
+                    userContext.SetIsServiceAccount(true);
+                }
             }
+
             await _next(context);
         }
     }

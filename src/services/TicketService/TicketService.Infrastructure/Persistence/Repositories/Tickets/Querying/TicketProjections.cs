@@ -10,6 +10,7 @@ namespace TicketService.Infrastructure.Persistence.Repositories.Tickets.Querying
         {
             Id = t.Id,
             Title = t.Title,
+            Description = t.Description,
             Status = t.Status,
             OrganizationId = t.OrganizationId,
             CreatedAt = t.CreatedAt,

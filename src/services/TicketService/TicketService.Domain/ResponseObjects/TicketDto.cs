@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public required string Title { get; set; }
+        public string? Description { get; set; }
         public TicketStatus Status { get; set; }
         public Guid OrganizationId { get; set; }
         public AssignmentDto? Assignment { get; set; }

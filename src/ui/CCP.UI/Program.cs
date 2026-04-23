@@ -1,3 +1,4 @@
+using Gateway.Sdk.ServiceDefaults;
 using CCP.ServiceDefaults;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
@@ -152,6 +153,11 @@ namespace CCP.UI
             builder.Services.AddChatServiceSdk(
                 builder.Configuration.GetValue<string>("services:chatservice-api:http:0")
                 ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddGatewayServiceSdk(
+                builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
+                ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")
                 );
 
             var app = builder.Build();

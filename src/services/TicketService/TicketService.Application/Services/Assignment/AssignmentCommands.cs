@@ -69,6 +69,7 @@ namespace TicketService.Application.Services.Assignment
                 else
                 {
                     Domain.Entities.Assignment existingAssignment = assignment.Value;
+                    var previousUserId = existingAssignment.UserId;
                     existingAssignment.UpdateAssignment(assignUserId, _currentUser.UserId);
 
                     Result<Domain.Entities.Assignment> updateResult = await _assignmentRepository.UpdateAsync(existingAssignment);
@@ -81,6 +82,14 @@ namespace TicketService.Application.Services.Assignment
 
                     await _assignmentRepository.SaveChangesAsync();
                     result = Result.Success(existingAssignment.Id);
+
+                    await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                        ticketId,
+                        actorUserId: _currentUser.UserId,
+                        eventType: "AssignmentRemoved",
+                        oldValue: previousUserId.ToString(),
+                        newValue: null
+                    ));
                 }
 
                 if (result.IsSuccess)

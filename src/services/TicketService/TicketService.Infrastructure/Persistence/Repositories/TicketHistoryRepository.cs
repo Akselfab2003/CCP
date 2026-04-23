@@ -40,5 +40,27 @@ namespace TicketService.Infrastructure.Persistence.Repositories
                 .Take(limit)
                 .ToListAsync(ct);
         }
+
+        public async Task<List<TicketHistoryEntry>> GetRecentOrgHistoryAsync(int limit = 20, CancellationToken ct = default)
+        {
+            return await _context.TicketHistory
+                .OrderByDescending(h => h.OccurredAt)
+                .Take(limit)
+                .ToListAsync(ct);
+        }
+
+        public async Task<List<TicketHistoryEntry>> GetByAssignedUserIdAsync(Guid userId, int limit = 20, CancellationToken ct = default)
+        {
+            return await _context.TicketHistory
+                .Where(h => _context.Tickets
+                    .Where(t => t.AssignmentId.HasValue &&
+                                _context.Assignments
+                                    .Any(a => a.Id == t.AssignmentId && a.UserId == userId))
+                    .Select(t => t.Id)
+                    .Contains(h.TicketId))
+                .OrderByDescending(h => h.OccurredAt)
+                .Take(limit)
+                .ToListAsync(ct);
+        }
     }
 }

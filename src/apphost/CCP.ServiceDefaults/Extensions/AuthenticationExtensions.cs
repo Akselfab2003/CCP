@@ -16,7 +16,6 @@ namespace CCP.ServiceDefaults.Extensions
                        {
                            ValidateIssuer = false,
                            ValidateAudience = false,
-                           ValidAudiences = ["CCP"]
                        };
                        options.Authority = $"{keycloak}/realms/{realm}";
                        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents

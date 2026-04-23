@@ -3,6 +3,7 @@ using CCP.Shared.UIContext;
 using CCP.UI.Services;
 using CPP.UI.Tests.Fixtures.Website;
 using CPP.UI.Tests.Utils;
+using Gateway.Sdk.Services;
 using IdentityService.Sdk.Services.Customer;
 using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
@@ -45,6 +46,7 @@ namespace CPP.UI.Tests.Fixtures.Application
                     ["services:messagingservice-api:http:0"] = "http://localhost:5005",
                     ["services:EmailService:http:0"] = "http://localhost:5006",
                     ["services:chatservice-api:http:0"] = "http://localhost:5007",
+                    ["services:ccp-gateway:http:0"] = "http://localhost:5008",
                     ["CircuitOptions.DetailedErrors"] = "true",
                     ["UI_TESTS"] = "true"
                 })
@@ -63,6 +65,9 @@ namespace CPP.UI.Tests.Fixtures.Application
             AddMockedScoped<ChatHubService>(services);
             AddMockedScoped<ICurrentUser>(services);
             AddMockedScoped<IUIUserContext>(services);
+
+            //API Gateway
+            AddMockedScoped<IGatewayService>(services);
 
             // MessagingService Sdk
             AddMockedScoped<IMessageSdkService>(services);

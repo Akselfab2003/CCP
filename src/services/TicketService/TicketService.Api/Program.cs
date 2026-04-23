@@ -28,10 +28,13 @@ namespace TicketService.Api
             builder.Services.AddHttpContextAccessor();
             builder.Services.ConfigureDefaultOpenTelemetry("TicketService.Api");
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddApiAuthenticationServices("TicketService.Api", "CCP");
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
+
+                var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+                builder.Services.AddApiAuthenticationServices("TicketService.Api", "CCP", keycloakURL);
+
 
 
                 builder.Services.AddEmailServiceSdk(

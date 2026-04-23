@@ -26,6 +26,14 @@ namespace TicketService.Sdk.Models
         public DateTimeOffset? CreatedAt { get; set; }
         /// <summary>The customerId property</summary>
         public Guid? CustomerId { get; set; }
+        /// <summary>The description property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Description { get; set; }
+#nullable restore
+#else
+        public string Description { get; set; }
+#endif
         /// <summary>The id property</summary>
         public int? Id { get; set; }
         /// <summary>The internalNotes property</summary>
@@ -76,6 +84,7 @@ namespace TicketService.Sdk.Models
                 { "assignment", n => { Assignment = n.GetObjectValue<global::TicketService.Sdk.Models.AssignmentDto>(global::TicketService.Sdk.Models.AssignmentDto.CreateFromDiscriminatorValue); } },
                 { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
                 { "customerId", n => { CustomerId = n.GetGuidValue(); } },
+                { "description", n => { Description = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetIntValue(); } },
                 { "internalNotes", n => { InternalNotes = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "organizationId", n => { OrganizationId = n.GetGuidValue(); } },
@@ -93,6 +102,7 @@ namespace TicketService.Sdk.Models
             writer.WriteObjectValue<global::TicketService.Sdk.Models.AssignmentDto>("assignment", Assignment);
             writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
             writer.WriteGuidValue("customerId", CustomerId);
+            writer.WriteStringValue("description", Description);
             writer.WriteIntValue("id", Id);
             writer.WriteCollectionOfPrimitiveValues<string>("internalNotes", InternalNotes);
             writer.WriteGuidValue("organizationId", OrganizationId);
