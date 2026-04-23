@@ -237,13 +237,6 @@ namespace MessagingService.Sdk.Services
                 if (dto is null)
                     return Result.Failure<AttachmentDto>(Error.Failure(code: "AttachmentUploadFailed", description: "Empty response from server."));
 
-                // Make the URL absolute so the browser can load it directly
-                if (dto.Url is not null && !dto.Url.StartsWith("http"))
-                {
-                    var baseAddress = httpClient.BaseAddress?.ToString().TrimEnd('/') ?? string.Empty;
-                    dto.Url = $"{baseAddress}{dto.Url}";
-                }
-
                 return dto;
             }
             catch (Exception ex)

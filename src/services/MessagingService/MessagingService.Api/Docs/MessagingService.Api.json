@@ -32,28 +32,6 @@
         }
       }
     },
-    "/api/Attachments/{filename}": {
-      "get": {
-        "tags": [
-          "Attachments"
-        ],
-        "parameters": [
-          {
-            "name": "filename",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Messages": {
       "post": {
         "tags": [
