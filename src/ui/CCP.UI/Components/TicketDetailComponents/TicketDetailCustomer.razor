@@ -28,7 +28,22 @@
     </div>
 
     <!-- Messages -->
-    <div class="tdc-messages">
+    <div class="tdc-messages" @ref="_messagesContainer" @onscroll="OnScrollAsync">
+        @if (_isLoadingMoreMessages)
+        {
+            <div class="tdc-load-more">
+                <svg class="tdc-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+                Loading more...
+            </div>
+        }
+        else if (_hasMoreMessages)
+        {
+            <div class="tdc-load-more">
+                <button class="tdc-load-more-btn" @onclick="LoadMoreMessagesAsync">Load older messages</button>
+            </div>
+        }
         @if (_isLoadingMessages)
         {
             <div class="tdc-messages-state">
@@ -68,7 +83,7 @@
                             @msg.Content
                             @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
                             {
-                                <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tdc-msg-attachment-img" style="cursor:pointer" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tdc-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
                             }
                             else if (msg.AttachmentUrl is not null)
                             {

@@ -7,6 +7,7 @@ using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
 
@@ -22,6 +23,7 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     [Inject] private IGatewayService GatewayService { get; set; } = default!;
     [Inject] private ILogger<TicketDetailSupporter> Logger { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     [Parameter, EditorRequired] public TicketSdkDto Ticket { get; set; } = default!;
 
@@ -42,6 +44,12 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     // Lightbox state
     private string? _lightboxUrl;
     private string? _lightboxFileName;
+
+    // Pagination state
+    private bool _hasMoreMessages;
+    private bool _isLoadingMoreMessages;
+    private bool _shouldScrollToBottom;
+    private ElementReference _messagesContainer;
 
     private void OpenLightbox(string url, string? fileName)
     {
@@ -91,7 +99,65 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         }
 
         _isLoadingMessages = false;
+        _hasMoreMessages = _messages.Count >= 50;
+        _shouldScrollToBottom = true;
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_shouldScrollToBottom)
+        {
+            _shouldScrollToBottom = false;
+            await ScrollToBottomAsync();
+        }
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.scrollToBottom", _messagesContainer); }
+        catch { /* ignore if JS not ready */ }
+    }
+
+    private async Task LoadMoreMessagesAsync()
+    {
+        if (_isLoadingMoreMessages || !_hasMoreMessages || !_messages.Any()) return;
+        _isLoadingMoreMessages = true;
+        await InvokeAsync(StateHasChanged);
+
+        var beforeId = _messages.Min(m => m.Id);
+        double previousScrollHeight = 0;
+        try { previousScrollHeight = await JSRuntime.InvokeAsync<double>("scrollHelpers.getScrollHeight", _messagesContainer); }
+        catch { }
+
+        var result = await MessageSdkService.GetMessagesByTicketIdAsync(Ticket.Id, 50, beforeId);
+        if (result.IsSuccess && result.Value.Items.Any())
+        {
+            var olderMessages = result.Value.Items.ToList();
+            await ResolveUserNamesAsync(olderMessages);
+            _messages.InsertRange(0, olderMessages);
+            _hasMoreMessages = result.Value.HasMore;
+            await InvokeAsync(StateHasChanged);
+            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.preserveScrollPosition", _messagesContainer, previousScrollHeight); }
+            catch { }
+        }
+        else
+        {
+            _hasMoreMessages = false;
+        }
+
+        _isLoadingMoreMessages = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnScrollAsync()
+    {
+        if (_isLoadingMoreMessages || !_hasMoreMessages) return;
+        double scrollTop = 0;
+        try { scrollTop = await JSRuntime.InvokeAsync<double>("scrollHelpers.getScrollTop", _messagesContainer); }
+        catch { return; }
+        if (scrollTop <= 50)
+            await LoadMoreMessagesAsync();
     }
 
     private async Task ConnectHubAsync()

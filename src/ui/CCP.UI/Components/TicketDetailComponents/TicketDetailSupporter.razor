@@ -60,7 +60,22 @@
 
         <div class="tds-chat">
 
-            <div class="tds-messages">
+            <div class="tds-messages" @ref="_messagesContainer" @onscroll="OnScrollAsync">
+                @if (_isLoadingMoreMessages)
+                {
+                    <div class="tds-load-more">
+                        <svg class="tds-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                        </svg>
+                        Loading more...
+                    </div>
+                }
+                else if (_hasMoreMessages)
+                {
+                    <div class="tds-load-more">
+                        <button class="tds-load-more-btn" @onclick="LoadMoreMessagesAsync">Load older messages</button>
+                    </div>
+                }
                 @if (_isLoadingMessages)
                 {
                     <div class="tds-messages-state">
@@ -96,7 +111,7 @@
                                 <div class="tds-msg-bubble tds-msg-bubble--note">@msg.Content</div>
                                 @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
                                 {
-                                    <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                    <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
                                 }
                                 else if (msg.AttachmentUrl is not null)
                                 {
@@ -125,7 +140,7 @@
                                         @msg.Content
                                         @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
                                         {
-                                            <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                            <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" loading="lazy" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
                                         }
                                         else if (msg.AttachmentUrl is not null)
                                         {

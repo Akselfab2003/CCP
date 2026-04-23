@@ -799,3 +799,29 @@
     font-size: 12px;
     color: rgba(255,255,255,0.6);
 }
+
+.tds-load-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 0;
+    font-size: 12px;
+    color: var(--ccp-text-muted);
+}
+
+.tds-load-more-btn {
+    background: none;
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 6px;
+    color: var(--ccp-text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 12px;
+    transition: background 0.13s, color 0.13s;
+}
+
+    .tds-load-more-btn:hover {
+        background: var(--ccp-surface-2);
+        color: var(--ccp-text-primary);
+    }
