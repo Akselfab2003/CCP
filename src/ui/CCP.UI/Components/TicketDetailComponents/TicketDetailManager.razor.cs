@@ -7,6 +7,7 @@ using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Assignment;
 using TicketService.Sdk.Services.Ticket;
@@ -35,6 +36,29 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     private bool _sidebarOpen = true;
     private string? _customerName;
     private readonly Dictionary<Guid, string> _userNameCache = new();
+
+    // Pending attachment state
+    private AttachmentDto? _pendingAttachment;
+    private string? _pendingAttachmentPreviewUrl;
+    private bool _isUploadingAttachment;
+
+    // Lightbox state
+    private string? _lightboxUrl;
+    private string? _lightboxFileName;
+
+    private void OpenLightbox(string url, string? fileName)
+    {
+        _lightboxUrl = url;
+        _lightboxFileName = fileName;
+        StateHasChanged();
+    }
+
+    private void CloseLightbox()
+    {
+        _lightboxUrl = null;
+        _lightboxFileName = null;
+        StateHasChanged();
+    }
 
     // Assignment (manager-only)
     private string _supporterSearch = string.Empty;
@@ -93,10 +117,49 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
             _ = HubService.JoinTicketGroupAsync(Ticket.Id);
     }
 
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file is null) return;
+
+        _isUploadingAttachment = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var result = await MessageSdkService.UploadAttachmentAsync(stream, file.Name, file.ContentType);
+
+            if (result.IsSuccess)
+            {
+                _pendingAttachment = result.Value;
+                _pendingAttachmentPreviewUrl = file.ContentType.StartsWith("image/") ? _pendingAttachment.Url : null;
+            }
+            else
+            {
+                Logger.LogError("Attachment upload failed: {Code} - {Description}", result.Error.Code, result.Error.Description);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Exception while uploading attachment");
+        }
+
+        _isUploadingAttachment = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RemovePendingAttachment()
+    {
+        _pendingAttachment = null;
+        _pendingAttachmentPreviewUrl = null;
+    }
+
     private async Task SendMessageAsync()
     {
-        if (string.IsNullOrWhiteSpace(_newMessageContent) || _isSending)
+        if (string.IsNullOrWhiteSpace(_newMessageContent) && _pendingAttachment is null)
             return;
+        if (_isSending) return;
 
         _isSending = true;
 
@@ -105,13 +168,22 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
             organizationId: Ticket.OrganizationId,
             userId: UserContext.UserId,
             content: _newMessageContent,
-            isInternalNote: _isInternalNoteMode);
+            isInternalNote: _isInternalNoteMode,
+            attachmentUrl: _pendingAttachment?.Url,
+            attachmentFileName: _pendingAttachment?.FileName,
+            attachmentContentType: _pendingAttachment?.ContentType);
 
         if (result.IsSuccess)
+        {
             _newMessageContent = string.Empty;
+            _pendingAttachment = null;
+            _pendingAttachmentPreviewUrl = null;
+        }
         else
+        {
             Logger.LogError("TicketDetailManager failed to send message: {Code} - {Description}",
                 result.Error.Code, result.Error.Description);
+        }
 
         _isSending = false;
         await InvokeAsync(StateHasChanged);

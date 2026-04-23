@@ -24,5 +24,9 @@ namespace MessagingService.Domain.Contracts
         public DateTime? DeletedAtUtc { get; set; }
 
         public float[]? Embedding { get; set; }
+
+        public string? AttachmentUrl { get; set; }
+        public string? AttachmentFileName { get; set; }
+        public string? AttachmentContentType { get; set; }
     }
 }

@@ -5,6 +5,55 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/Attachments": {
+      "post": {
+        "tags": [
+          "Attachments"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "$ref": "#/components/schemas/IFormFile"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Attachments/{filename}": {
+      "get": {
+        "tags": [
+          "Attachments"
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Messages": {
       "post": {
         "tags": [
@@ -302,8 +351,30 @@
           },
           "isInternalNote": {
             "type": "boolean"
+          },
+          "attachmentUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attachmentFileName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attachmentContentType": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
+      },
+      "IFormFile": {
+        "type": "string",
+        "format": "binary"
       },
       "MessageResponse": {
         "type": "object",
@@ -366,6 +437,24 @@
               "type": "number",
               "format": "float"
             }
+          },
+          "attachmentUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attachmentFileName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attachmentContentType": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -434,6 +523,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "Attachments"
+    },
     {
       "name": "Messages"
     },

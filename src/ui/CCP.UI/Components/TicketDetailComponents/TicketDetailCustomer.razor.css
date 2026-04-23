@@ -282,3 +282,165 @@
         opacity: 0.88;
         transform: translateY(-1px);
     }
+
+/* ==========================================================  Attachments  */
+@keyframes tdc-spin {
+    to { transform: rotate(360deg); }
+}
+
+.tdc-spinner {
+    animation: tdc-spin 1s linear infinite;
+}
+
+.tdc-attach-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 6px;
+    color: var(--ccp-text-mid);
+    cursor: pointer;
+    padding: 5px 7px;
+    transition: color 0.13s, border-color 0.13s;
+}
+
+    .tdc-attach-btn:hover {
+        color: var(--ccp-text-hi);
+        border-color: var(--ccp-accent);
+    }
+
+    .tdc-attach-btn--loading {
+        opacity: 0.6;
+        cursor: default;
+    }
+
+.tdc-attachment-preview {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 8px;
+    padding: 6px 8px;
+    gap: 8px;
+    max-width: 260px;
+}
+
+.tdc-attachment-preview-img {
+    max-width: 120px;
+    max-height: 80px;
+    border-radius: 6px;
+    object-fit: cover;
+    display: block;
+}
+
+.tdc-attachment-preview-file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ccp-text-mid);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tdc-attachment-remove-btn {
+    background: none;
+    border: none;
+    color: var(--ccp-text-mid);
+    cursor: pointer;
+    padding: 2px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color 0.13s;
+}
+
+    .tdc-attachment-remove-btn:hover {
+        color: #fca5a5;
+    }
+
+.tdc-msg-attachment-img {
+    display: block;
+    max-width: 280px;
+    max-height: 200px;
+    border-radius: 8px;
+    margin-top: 6px;
+    object-fit: cover;
+}
+
+.tdc-msg-attachment-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ccp-accent);
+    text-decoration: none;
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 6px;
+    padding: 4px 8px;
+    transition: background 0.13s;
+}
+
+    .tdc-msg-attachment-link:hover {
+        background: var(--ccp-hover);
+    }
+
+/* ==========================================================  Lightbox  */
+.tdc-lightbox-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tdc-lightbox-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.tdc-lightbox-img {
+    max-width: 90vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+
+.tdc-lightbox-close {
+    position: absolute;
+    top: -40px;
+    right: -8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px 6px;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.13s;
+}
+
+    .tdc-lightbox-close:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+.tdc-lightbox-caption {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+}

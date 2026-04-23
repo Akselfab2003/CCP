@@ -1,5 +1,6 @@
 ﻿@using CCP.Shared.UIContext
 @using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Components.Forms
 @using TicketService.Sdk.Dtos
 
 @namespace CCP.UI.Pages.Tickets.TicketDetailComponents
@@ -93,6 +94,17 @@
                                     Internal note — @GetDisplayName(msg.UserId)
                                 </div>
                                 <div class="tds-msg-bubble tds-msg-bubble--note">@msg.Content</div>
+                                @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
+                                {
+                                    <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                }
+                                else if (msg.AttachmentUrl is not null)
+                                {
+                                    <a href="@msg.AttachmentUrl" target="_blank" class="tds-msg-attachment-link">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                                        @msg.AttachmentFileName
+                                    </a>
+                                }
                                 <div class="tds-msg-meta" style="padding-left:0;">@msg.CreatedAtUtc?.ToLocalTime().ToString("HH:mm")</div>
                             </div>
                         }
@@ -111,6 +123,17 @@
                                     </div>
                                     <div class="tds-msg-bubble @(IsOwnMessage(msg) ? "tds-msg-bubble--out" : "tds-msg-bubble--in")">
                                         @msg.Content
+                                        @if (msg.AttachmentUrl is not null && msg.AttachmentContentType?.StartsWith("image/") == true)
+                                        {
+                                            <img src="@msg.AttachmentUrl" alt="@msg.AttachmentFileName" class="tds-msg-attachment-img" style="cursor:pointer" @onclick="() => OpenLightbox(msg.AttachmentUrl!, msg.AttachmentFileName)" />
+                                        }
+                                        else if (msg.AttachmentUrl is not null)
+                                        {
+                                            <a href="@msg.AttachmentUrl" target="_blank" class="tds-msg-attachment-link">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                                                @msg.AttachmentFileName
+                                            </a>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -131,8 +154,47 @@
                               style="@(_isInternalNoteMode ? "border-color:#f59e0b;background:rgba(245,158,11,0.04);" : "")"
                               @bind="_newMessageContent"
                               @onkeydown="HandleKeyDown" />
+
+                    @if (_pendingAttachment is not null)
+                    {
+                        <div class="tds-attachment-preview">
+                            @if (_pendingAttachmentPreviewUrl is not null)
+                            {
+                                <img src="@_pendingAttachmentPreviewUrl" alt="@_pendingAttachment.FileName" class="tds-attachment-preview-img" />
+                            }
+                            else
+                            {
+                                <div class="tds-attachment-preview-file">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/>
+                                    </svg>
+                                    <span>@_pendingAttachment.FileName</span>
+                                </div>
+                            }
+                            <button class="tds-attachment-remove-btn" @onclick="RemovePendingAttachment" title="Remove attachment">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    }
+
                     <div class="tds-composer-footer">
-                        <div></div>
+                        <label class="tds-attach-btn @(_isUploadingAttachment ? "tds-attach-btn--loading" : "")" title="Attach file">
+                            <InputFile OnChange="HandleFileSelected" accept="*/*" style="display:none" />
+                            @if (_isUploadingAttachment)
+                            {
+                                <svg class="tds-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+                                </svg>
+                            }
+                        </label>
                         <button class="tds-send-btn"
                                 style="@(_isInternalNoteMode ? "background:#f59e0b;box-shadow:0 0 14px rgba(245,158,11,0.3);" : "")"
                                 @onclick="SendMessageAsync" disabled="@_isSending">
@@ -226,5 +288,23 @@
         </aside>
 
     </div>
+
+    @if (_lightboxUrl is not null)
+    {
+        <div class="tds-lightbox-backdrop" @onclick="CloseLightbox">
+            <div class="tds-lightbox-content" @onclick:stopPropagation="true">
+                <button class="tds-lightbox-close" @onclick="CloseLightbox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+                <img src="@_lightboxUrl" alt="@_lightboxFileName" class="tds-lightbox-img" />
+                @if (_lightboxFileName is not null)
+                {
+                    <div class="tds-lightbox-caption">@_lightboxFileName</div>
+                }
+            </div>
+        </div>
+    }
 
 </div>

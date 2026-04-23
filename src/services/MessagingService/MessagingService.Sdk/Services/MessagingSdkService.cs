@@ -2,17 +2,26 @@
 using MessagingService.Sdk.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace MessagingService.Sdk.Services
 {
     internal class MessagingSdkService : IMessageSdkService
     {
+        private const string HttpClientName = "MessageService";
+
         private readonly IKiotaApiClient<MessagingServiceClient> _client;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<MessagingSdkService> _logger;
 
-        public MessagingSdkService(IKiotaApiClient<MessagingServiceClient> client, ILogger<MessagingSdkService> logger)
+        public MessagingSdkService(
+            IKiotaApiClient<MessagingServiceClient> client,
+            IHttpClientFactory httpClientFactory,
+            ILogger<MessagingSdkService> logger)
         {
             _client = client;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
         }
 
@@ -22,6 +31,9 @@ namespace MessagingService.Sdk.Services
             Guid? userId,
             string content,
             bool isInternalNote = false,
+            string? attachmentUrl = null,
+            string? attachmentFileName = null,
+            string? attachmentContentType = null,
             CancellationToken cancellationToken = default)
         {
             try
@@ -34,6 +46,10 @@ namespace MessagingService.Sdk.Services
                     TicketId = ticketId,
                     IsInternalNote = isInternalNote
                 };
+
+                request.AttachmentUrl = attachmentUrl;
+                request.AttachmentFileName = attachmentFileName;
+                request.AttachmentContentType = attachmentContentType;
 
                 var response = await _client.Client.Api.Messages.PostAsync(
                     request,
@@ -188,6 +204,55 @@ namespace MessagingService.Sdk.Services
             }
         }
 
+        public async Task<Result<AttachmentDto>> UploadAttachmentAsync(
+            Stream fileStream,
+            string fileName,
+            string contentType,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var memoryStream = new MemoryStream();
+                await fileStream.CopyToAsync(memoryStream, cancellationToken);
+                memoryStream.Position = 0;
+
+                using var content = new MultipartFormDataContent();
+                using var streamContent = new StreamContent(memoryStream);
+                streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+                content.Add(streamContent, "file", fileName);
+
+                var httpClient = _httpClientFactory.CreateClient(HttpClientName);
+                var response = await httpClient.PostAsync("api/attachments", content, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Result.Failure<AttachmentDto>(Error.Failure(
+                        code: "AttachmentUploadFailed",
+                        description: $"Upload failed with status {(int)response.StatusCode}."));
+                }
+
+                var dto = await response.Content.ReadFromJsonAsync<AttachmentDto>(
+                    cancellationToken: cancellationToken);
+
+                if (dto is null)
+                    return Result.Failure<AttachmentDto>(Error.Failure(code: "AttachmentUploadFailed", description: "Empty response from server."));
+
+                // Make the URL absolute so the browser can load it directly
+                if (dto.Url is not null && !dto.Url.StartsWith("http"))
+                {
+                    var baseAddress = httpClient.BaseAddress?.ToString().TrimEnd('/') ?? string.Empty;
+                    dto.Url = $"{baseAddress}{dto.Url}";
+                }
+
+                return dto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading attachment {FileName}", fileName);
+                return Result.Failure<AttachmentDto>(Error.Failure(code: "AttachmentUploadError", description: "An error occurred while uploading the attachment."));
+            }
+        }
+
         private static MessageDto? MapMessage(MessageResponse? response)
         {
             if (response is null)
@@ -205,8 +270,12 @@ namespace MessagingService.Sdk.Services
                 IsEdited = response.IsEdited ?? false,
                 IsDeleted = response.IsDeleted ?? false,
                 IsInternalNote = response.IsInternalNote ?? false,
-                DeletedAtUtc = response.DeletedAtUtc
+                DeletedAtUtc = response.DeletedAtUtc,
+                AttachmentUrl = response.AttachmentUrl,
+                AttachmentFileName = response.AttachmentFileName,
+                AttachmentContentType = response.AttachmentContentType
             };
         }
+
     }
 }
