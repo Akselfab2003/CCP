@@ -53,7 +53,7 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
-
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();

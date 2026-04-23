@@ -26,6 +26,8 @@ namespace TicketService.Sdk.Models
 #else
         public List<string> InternalNotes { get; set; }
 #endif
+        /// <summary>The organizationId property</summary>
+        public Guid? OrganizationId { get; set; }
         /// <summary>The title property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -62,6 +64,7 @@ namespace TicketService.Sdk.Models
                 { "assignedUserId", n => { AssignedUserId = n.GetGuidValue(); } },
                 { "customerId", n => { CustomerId = n.GetGuidValue(); } },
                 { "internalNotes", n => { InternalNotes = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
+                { "organizationId", n => { OrganizationId = n.GetGuidValue(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
             };
         }
@@ -75,6 +78,7 @@ namespace TicketService.Sdk.Models
             writer.WriteGuidValue("assignedUserId", AssignedUserId);
             writer.WriteGuidValue("customerId", CustomerId);
             writer.WriteCollectionOfPrimitiveValues<string>("internalNotes", InternalNotes);
+            writer.WriteGuidValue("organizationId", OrganizationId);
             writer.WriteStringValue("title", Title);
             writer.WriteAdditionalData(AdditionalData);
         }

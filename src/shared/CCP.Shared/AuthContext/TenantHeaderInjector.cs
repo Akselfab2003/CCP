@@ -17,8 +17,9 @@ namespace CCP.Shared.AuthContext
             var tenantId = _currentUser.OrganizationId;
             if (tenantId != Guid.Empty)
             {
+                request.Headers.Remove("X-Tenant-ID");
                 request.Headers.Add("X-Tenant-ID", tenantId.ToString());
-                _logger.LogDebug("Added X-Tenant-ID header with value {TenantId} to outgoing request.", tenantId);
+                _logger.LogInformation("Added X-Tenant-ID header with value {TenantId} to outgoing request.", tenantId);
             }
             else
             {

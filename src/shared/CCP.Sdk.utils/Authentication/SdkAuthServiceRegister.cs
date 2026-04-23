@@ -19,8 +19,6 @@ namespace CCP.Sdk.utils.Authentication
             services.AddOpenIdAccessTokenManagement(IsServiceAccount, configuration);
             services.AddHttpClientConnection(clientName, ServiceUrl, IsServiceAccount);
             services.AddTransient<TenantHeaderInjector>();
-            services.AddSingleton<ServiceAccountOverrider>();
-
             return services;
         }
 

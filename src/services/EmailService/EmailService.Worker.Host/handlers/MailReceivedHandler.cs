@@ -21,6 +21,7 @@ namespace EmailService.Worker.Host.handlers
         private readonly IMessageSdkService _messageSdkService;
         private readonly ITicketService _ticketService;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         public MailReceivedHandler(ILogger<MailReceivedHandler> logger,
                                    IMailBoxService mailBoxService,
                                    ICustomerSdkService customerSdkService,
@@ -28,7 +29,8 @@ namespace EmailService.Worker.Host.handlers
                                    IEmailTicketMessageRepository emailTicketMessageRepository,
                                    IMessageSdkService messageSdkService,
                                    ITicketService ticketService,
-                                   ServiceAccountOverrider serviceAccountOverrider)
+                                   ServiceAccountOverrider serviceAccountOverrider,
+                                   IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _mailBoxService = mailBoxService;
@@ -38,6 +40,7 @@ namespace EmailService.Worker.Host.handlers
             _messageSdkService = messageSdkService;
             _ticketService = ticketService;
             _serviceAccountOverrider = serviceAccountOverrider;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task Handle(mail_received mail_Received)
@@ -152,8 +155,6 @@ namespace EmailService.Worker.Host.handlers
                     await _customerSdkService.CreateCustomer(new CustomerService.Sdk.Models.CreateCustomerRequest { Id = CustomerId, Email = SenderEmail, Name = SenderName, OrganizationId = TenantId });
                 }
 
-                _serviceAccountOverrider.SetOrganizationId(TenantId);
-
                 var CreateTicketResult = await _ticketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
                 {
                     Title = Subject,
@@ -167,7 +168,7 @@ namespace EmailService.Worker.Host.handlers
                 }
 
                 await _messageSdkService.CreateMessageAsync(ticketId: CreateTicketResult.Value,
-                                                              organizationId: _serviceAccountOverrider.OrganizationId,
+                                                              organizationId: TenantId,
                                                               userId: null,
                                                               content: Content,
                                                               isInternalNote: false);

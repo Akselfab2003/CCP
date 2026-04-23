@@ -36,7 +36,7 @@ builder.Services.AddScoped<EmailTemplateRenderer>();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureDefaultOpenTelemetry("EmailService.Api");
-
+builder.Services.AddHttpContextAccessor();
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
     var keycloakServiceUrl =

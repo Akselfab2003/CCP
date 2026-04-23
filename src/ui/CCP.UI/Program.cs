@@ -122,7 +122,6 @@ namespace CCP.UI
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
             });
-
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
             builder.Services.AddScoped<IUIUserContext, UIUserContext>();
@@ -154,6 +153,7 @@ namespace CCP.UI
                 ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
                 );
 
+            builder.Services.AddScoped<ServiceAccountOverrider>();
             var app = builder.Build();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions()

@@ -66,6 +66,7 @@ builder.Services.AddMessageServiceSDK(
     builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
     ?? throw new InvalidOperationException("MessageServiceUrl configuration value is required."), true);
 
+builder.Services.AddSingleton<ServiceAccountOverrider>();
 
 builder.Services.AddDbContext<DBcontext>(option =>
 {
@@ -78,6 +79,7 @@ builder.Services.AddScoped<IMailBoxService, MailBoxService>(s => new MailBoxServ
                                                                                     emailhostUrl: mailServer));
 builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
 builder.Services.AddScoped<IMailManagementController, MailManagementController>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 var host = builder.Build();
 host.Run();
