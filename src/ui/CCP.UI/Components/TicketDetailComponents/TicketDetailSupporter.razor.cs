@@ -1,4 +1,5 @@
-﻿using CCP.Shared.UIContext;
+using Gateway.Sdk.Services;
+using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
 using IdentityService.Sdk.Services.User;
@@ -17,6 +18,7 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
+    [Inject] private IGatewayService GatewayService { get; set; } = default!;
     [Inject] private ILogger<TicketDetailSupporter> Logger { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
@@ -40,26 +42,28 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         HubService.OnMessageUpdated += HandleMessageUpdated;
         HubService.OnMessageDeleted += HandleMessageDeleted;
 
-        if (Ticket.CustomerId.HasValue)
-            _ = ResolveCustomerNameAsync(Ticket.CustomerId.Value);
-
-        await LoadMessagesAsync();
+        await LoadDetailAsync();
         _ = ConnectHubAsync();
     }
 
-    private async Task LoadMessagesAsync()
+    private async Task LoadDetailAsync()
     {
         _isLoadingMessages = true;
 
-        var result = await MessageSdkService.GetMessagesByTicketIdAsync(Ticket.Id);
-        if (result.IsSuccess && result.Value is not null)
+        var result = await GatewayService.GetTicketDetailAsync(Ticket.Id);
+        if (result.IsSuccess)
         {
-            _messages = result.Value.Items.ToList();
-            await ResolveUserNamesAsync(_messages);
+            _messages = result.Value.Messages;
+            foreach (var (key, name) in result.Value.UserNames)
+                if (Guid.TryParse(key, out var id))
+                    _userNameCache[id] = name;
+
+            if (Ticket.CustomerId.HasValue && _userNameCache.TryGetValue(Ticket.CustomerId.Value, out var customerName))
+                _customerName = customerName;
         }
         else
         {
-            Logger.LogError("TicketDetailSupporter failed to load messages for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+            Logger.LogError("TicketDetailSupporter failed to load detail for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
         }
 
         _isLoadingMessages = false;
@@ -76,20 +80,6 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
 
         if (HubService.IsConnected)
             _ = HubService.JoinTicketGroupAsync(Ticket.Id);
-    }
-
-    private async Task ResolveCustomerNameAsync(Guid customerId)
-    {
-        try
-        {
-            var result = await UserService.GetUserDetailsAsync(customerId);
-            _customerName = result.IsSuccess ? result.Value.name : null;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Could not resolve customer name for {CustomerId}", customerId);
-        }
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task SendMessageAsync()

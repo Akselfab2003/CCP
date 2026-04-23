@@ -5,6 +5,7 @@ using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
 using IdentityService.Sdk.Services.UserRights;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityService.Sdk.ServiceDefaults
@@ -13,9 +14,9 @@ namespace IdentityService.Sdk.ServiceDefaults
     {
         private const string IdentityServiceClientName = "IdentityServiceClient";
 
-        public static IServiceCollection AddIdentityServiceSdk(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false)
+        public static IServiceCollection AddIdentityServiceSdk(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false, IConfiguration ? configuration = null)
         {
-            services.AddSdkAuthentication(IdentityServiceClientName, serviceUrl, IsServiceAccount);
+            services.AddSdkAuthentication(IdentityServiceClientName, serviceUrl, IsServiceAccount, configuration);
 
             services.AddScoped<IKiotaApiClient<IdentityServiceClient>>(sp =>
             {

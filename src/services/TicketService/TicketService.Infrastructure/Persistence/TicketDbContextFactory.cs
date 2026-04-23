@@ -21,10 +21,13 @@ namespace TicketService.Infrastructure.Persistence
 
         private class DesignTimeCurrentUser : ICurrentUser
         {
-            public Guid UserId => Guid.Empty;
-            public Guid OrganizationId => Guid.Empty;
-            public void SetCurrentUser(Guid userId) { }
-            public void SetOrganizationId(Guid organizationId) { }
+            public Guid UserId { get; private set; }
+            public Guid OrganizationId { get; private set; }
+            public bool IsServiceAccount { get; private set; }
+
+            public void SetCurrentUser(Guid userId) => UserId = userId;
+            public void SetOrganizationId(Guid organizationId) => OrganizationId = organizationId;
+            public void SetIsServiceAccount(bool isServiceAccount) => IsServiceAccount = isServiceAccount;
         }
     }
 }

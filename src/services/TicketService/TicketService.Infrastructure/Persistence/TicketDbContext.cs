@@ -19,7 +19,7 @@ namespace TicketService.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Ticket>().HasQueryFilter(t => t.OrganizationId == _currentUser.OrganizationId);
+            modelBuilder.Entity<Ticket>().HasQueryFilter(t => _currentUser.IsServiceAccount || t.OrganizationId == _currentUser.OrganizationId);
             modelBuilder.ApplyConfiguration<Ticket>(new TicketEntityConfiguration());
             modelBuilder.ApplyConfiguration<Assignment>(new AssignmentEntityConfiguration());
             modelBuilder.ApplyConfiguration<TicketHistoryEntry>(new TicketHistoryEntryConfiguration());

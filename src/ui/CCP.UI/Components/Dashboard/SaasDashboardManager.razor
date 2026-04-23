@@ -195,7 +195,7 @@
                 var maxCount = _stats.TeamPerformance.Max(p => p.ResolvedCount);
                 @foreach (var supporter in _stats.TeamPerformance)
                 {
-                    var name = _supporterNames.TryGetValue(supporter.UserId, out var n) ? n : supporter.UserId.ToString()[..8] + "…";
+                    var name = GetSupporterName(supporter.UserId);
                     var barWidth = maxCount > 0 ? (int)((supporter.ResolvedCount / (double)maxCount) * 100) : 0;
                     <div class="dash-team-row">
                         <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
