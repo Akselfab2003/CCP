@@ -8,8 +8,6 @@ using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
 using EmailTemplates.Renderes;
 using MimeKit;
-using TicketService.Domain.Entities;
-using TicketService.Domain.ResponseObjects;
 using TicketService.Sdk.Dtos;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
