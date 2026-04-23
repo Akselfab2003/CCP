@@ -11,7 +11,6 @@
         public Guid? AssignmentId { get; set; }
         public Assignment? Assignment { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public string Description { get; set; } = string.Empty;
         public List<string> InternalNotes { get; set; } = [];
 
 
@@ -21,7 +20,6 @@
             OrganizationId = organizationId;
             CustomerId = customerId;
             CreatedAt = DateTime.UtcNow;
-            Description = "";
             InternalNotes = [];
             Status = TicketStatus.Open;
             Description = description;

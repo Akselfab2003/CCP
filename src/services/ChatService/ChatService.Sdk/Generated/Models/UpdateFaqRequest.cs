@@ -31,7 +31,13 @@ namespace ChatService.Sdk.Models
         public string Category { get; set; }
 #endif
         /// <summary>The faqId property</summary>
-        public int? FaqId { get; set; }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public UntypedNode? FaqId { get; set; }
+#nullable restore
+#else
+        public UntypedNode FaqId { get; set; }
+#endif
         /// <summary>The question property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -67,7 +73,7 @@ namespace ChatService.Sdk.Models
             {
                 { "answer", n => { Answer = n.GetStringValue(); } },
                 { "category", n => { Category = n.GetStringValue(); } },
-                { "faqId", n => { FaqId = n.GetIntValue(); } },
+                { "faqId", n => { FaqId = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "question", n => { Question = n.GetStringValue(); } },
             };
         }
@@ -80,7 +86,7 @@ namespace ChatService.Sdk.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("answer", Answer);
             writer.WriteStringValue("category", Category);
-            writer.WriteIntValue("faqId", FaqId);
+            writer.WriteObjectValue<UntypedNode>("faqId", FaqId);
             writer.WriteStringValue("question", Question);
             writer.WriteAdditionalData(AdditionalData);
         }

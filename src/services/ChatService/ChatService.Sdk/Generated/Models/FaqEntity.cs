@@ -35,13 +35,19 @@ namespace ChatService.Sdk.Models
         /// <summary>The embedding property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::ChatService.Sdk.Models.Vector? Embedding { get; set; }
+        public global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding? Embedding { get; set; }
 #nullable restore
 #else
-        public global::ChatService.Sdk.Models.Vector Embedding { get; set; }
+        public global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding Embedding { get; set; }
 #endif
         /// <summary>The id property</summary>
-        public int? Id { get; set; }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public UntypedNode? Id { get; set; }
+#nullable restore
+#else
+        public UntypedNode Id { get; set; }
+#endif
         /// <summary>The orgId property</summary>
         public Guid? OrgId { get; set; }
         /// <summary>The question property</summary>
@@ -82,8 +88,8 @@ namespace ChatService.Sdk.Models
                 { "answer", n => { Answer = n.GetStringValue(); } },
                 { "category", n => { Category = n.GetStringValue(); } },
                 { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
-                { "embedding", n => { Embedding = n.GetObjectValue<global::ChatService.Sdk.Models.Vector>(global::ChatService.Sdk.Models.Vector.CreateFromDiscriminatorValue); } },
-                { "id", n => { Id = n.GetIntValue(); } },
+                { "embedding", n => { Embedding = n.GetObjectValue<global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding>(global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding.CreateFromDiscriminatorValue); } },
+                { "id", n => { Id = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
                 { "orgId", n => { OrgId = n.GetGuidValue(); } },
                 { "question", n => { Question = n.GetStringValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
@@ -99,12 +105,87 @@ namespace ChatService.Sdk.Models
             writer.WriteStringValue("answer", Answer);
             writer.WriteStringValue("category", Category);
             writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
-            writer.WriteObjectValue<global::ChatService.Sdk.Models.Vector>("embedding", Embedding);
-            writer.WriteIntValue("id", Id);
+            writer.WriteObjectValue<global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding>("embedding", Embedding);
+            writer.WriteObjectValue<UntypedNode>("id", Id);
             writer.WriteGuidValue("orgId", OrgId);
             writer.WriteStringValue("question", Question);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteAdditionalData(AdditionalData);
+        }
+        /// <summary>
+        /// Composed type wrapper for classes <see cref="global::ChatService.Sdk.Models.FaqEntity_embeddingMember1"/>, <see cref="global::ChatService.Sdk.Models.Vector"/>
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
+        internal partial class FaqEntity_embedding : IComposedTypeWrapper, IParsable
+        {
+            /// <summary>Composed type representation for type <see cref="global::ChatService.Sdk.Models.FaqEntity_embeddingMember1"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::ChatService.Sdk.Models.FaqEntity_embeddingMember1? FaqEntityEmbeddingMember1 { get; set; }
+#nullable restore
+#else
+            public global::ChatService.Sdk.Models.FaqEntity_embeddingMember1 FaqEntityEmbeddingMember1 { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::ChatService.Sdk.Models.Vector"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::ChatService.Sdk.Models.Vector? Vector { get; set; }
+#nullable restore
+#else
+            public global::ChatService.Sdk.Models.Vector Vector { get; set; }
+#endif
+            /// <summary>
+            /// Creates a new instance of the appropriate class based on discriminator value
+            /// </summary>
+            /// <returns>A <see cref="global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding"/></returns>
+            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
+            public static global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding CreateFromDiscriminatorValue(IParseNode parseNode)
+            {
+                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
+                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
+                var result = new global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding();
+                if("".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.FaqEntityEmbeddingMember1 = new global::ChatService.Sdk.Models.FaqEntity_embeddingMember1();
+                }
+                else if("Vector".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Vector = new global::ChatService.Sdk.Models.Vector();
+                }
+                return result;
+            }
+            /// <summary>
+            /// The deserialization information for the current model
+            /// </summary>
+            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
+            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
+            {
+                if(FaqEntityEmbeddingMember1 != null)
+                {
+                    return FaqEntityEmbeddingMember1.GetFieldDeserializers();
+                }
+                else if(Vector != null)
+                {
+                    return Vector.GetFieldDeserializers();
+                }
+                return new Dictionary<string, Action<IParseNode>>();
+            }
+            /// <summary>
+            /// Serializes information the current object
+            /// </summary>
+            /// <param name="writer">Serialization writer to use to serialize this model</param>
+            public virtual void Serialize(ISerializationWriter writer)
+            {
+                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+                if(FaqEntityEmbeddingMember1 != null)
+                {
+                    writer.WriteObjectValue<global::ChatService.Sdk.Models.FaqEntity_embeddingMember1>(null, FaqEntityEmbeddingMember1);
+                }
+                else if(Vector != null)
+                {
+                    writer.WriteObjectValue<global::ChatService.Sdk.Models.Vector>(null, Vector);
+                }
+            }
         }
     }
 }

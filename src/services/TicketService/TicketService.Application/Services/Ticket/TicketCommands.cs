@@ -76,7 +76,6 @@ namespace TicketService.Application.Services.Ticket
                     ));
                 }
 
-                return Result.Success(result.Value.Id);
                 try
                 {
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)

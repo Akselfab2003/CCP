@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using CCP.Sdk.utils.Abstractions;
-using EmailService.Sdk.Models;
+﻿using CCP.Sdk.utils.Abstractions;
 
 namespace EmailService.Sdk.Services
 {
@@ -43,7 +41,7 @@ namespace EmailService.Sdk.Services
                 .PostAsync(request =>
                 {
                     request.QueryParameters.CustomerId = customerId;
-                    request.QueryParameters.TicketTitle= ticketTitle;
+                    request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.NewStatus = newStatus;
                     request.QueryParameters.OldStatus = oldStatus;
@@ -66,7 +64,7 @@ namespace EmailService.Sdk.Services
                 .PostAsync(request =>
                 {
                     request.QueryParameters.CustomerId = customerId;
-                    request.QueryParameters.TicketTitle= ticketTitle;
+                    request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.AgentRole = agentRole;
