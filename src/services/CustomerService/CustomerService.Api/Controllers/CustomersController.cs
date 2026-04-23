@@ -40,7 +40,7 @@ namespace CustomerService.Api.Controllers
             return Ok(customer); //HTTP 200
         }
 
-        [HttpGet("{email:string}")]
+        [HttpGet("{email}")]
         [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCustomerByEmail(string email)
@@ -54,7 +54,7 @@ namespace CustomerService.Api.Controllers
         }
 
         //Opretter en ny customer
-        [HttpPost]
+        [HttpPost("add")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
         {

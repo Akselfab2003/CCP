@@ -22,7 +22,7 @@ namespace CustomerService.Sdk.Services
             try
             // Send POST request til Customer API
             {
-                await _apiClient.Client.Api.Customers.PostAsync(new Customer()
+                await _apiClient.Client.Api.Customers.Add.PostAsync(new Customer()
                 {
                     Name = customerRequest.Name,
                     Email = customerRequest.Email,
@@ -76,7 +76,7 @@ namespace CustomerService.Sdk.Services
             }
             catch (Exception)
             {
-                return Result.Failure<CustomerDTO>(Error.None);
+                return Result.Failure<CustomerDTO>(Error.Failure("CustomerRetrievalFailed", $"An error occurred while retrieving customer with email {email}."));
             }
         }
 

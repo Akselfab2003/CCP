@@ -114,7 +114,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         {
             try
             {
-                var val = await _dbContext.TenantEmailConfigurations.SingleOrDefaultAsync(t => t.InternalEmail.ToLower() == InternalEmailAddress.ToLower());
+                var val = await _dbContext.TenantEmailConfigurations.IgnoreQueryFilters().SingleOrDefaultAsync(t => t.InternalEmail.ToLower() == InternalEmailAddress.ToLower());
 
                 return val is null
                     ? Result.Failure<TenantEmailConfiguration>(Error.NotFound("TenantEmailConfiguration.NotFound", $"Tenant email configuration with internal email address {InternalEmailAddress} not found"))

@@ -8,6 +8,7 @@ using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
 using EmailService.Infrastructure.ServiceDefaults;
 using EmailService.Worker.Host;
+using EmailService.Worker.Host.Services;
 using Microsoft.EntityFrameworkCore;
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -59,7 +60,13 @@ builder.Services.AddDbContext<DBcontext>(option =>
 {
     option.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
 });
+
+var mailServer = builder.Configuration.GetValue<string>("emailHostUrl") ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
+builder.Services.AddScoped<IMailBoxService, MailBoxService>(s => new MailBoxService(logger: s.GetRequiredService<ILogger<MailBoxService>>(),
+                                                                                    emailWorkerConfigurationRepo: s.GetRequiredService<IEmailWorkerConfigurationRepo>(),
+                                                                                    emailhostUrl: mailServer));
 builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
+builder.Services.AddScoped<IMailManagementController, MailManagementController>();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 var host = builder.Build();
 host.Run();
