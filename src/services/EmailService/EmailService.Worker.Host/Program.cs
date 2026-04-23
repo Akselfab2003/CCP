@@ -75,7 +75,7 @@ builder.Services.AddScoped<IMailBoxService, MailBoxService>(s => new MailBoxServ
                                                                                     emailWorkerConfigurationRepo: s.GetRequiredService<IEmailWorkerConfigurationRepo>(),
                                                                                     emailhostUrl: mailServer));
 builder.Services.AddScoped<IEmailWorkerConfigurationRepo, TenantEmailConfigurationRepo>();
-builder.Services.AddScoped<IMailManagementController, MailManagementController>();
+builder.Services.AddScoped<IMailProcessingService, MailProcessingService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 var host = builder.Build();

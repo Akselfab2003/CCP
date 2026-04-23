@@ -1,13 +1,10 @@
 ﻿using CCP.Shared.AuthContext;
 using CCP.Shared.Events;
 using CCP.Shared.ResultAbstraction;
-using CustomerService.Sdk.Services;
 using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
 using EmailService.Worker.Host.Services;
-using MessagingService.Sdk.Services;
 using MimeKit;
-using TicketService.Sdk.Services.Ticket;
 
 namespace EmailService.Worker.Host.handlers
 {
@@ -16,25 +13,19 @@ namespace EmailService.Worker.Host.handlers
         private readonly ILogger<MailReceivedHandler> _logger;
         private readonly IMailBoxService _mailBoxService;
         private readonly IEmailTicketMessageRepository _emailTicketMessageRepository;
-        private readonly ICustomerSdkService _customerSdkService;
-        private readonly IMessageSdkService _messageSdkService;
-        private readonly ITicketService _ticketService;
+        private readonly IMailProcessingService _mailProcessingService;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
+
         public MailReceivedHandler(ILogger<MailReceivedHandler> logger,
                                    IMailBoxService mailBoxService,
-                                   ICustomerSdkService customerSdkService,
                                    IEmailTicketMessageRepository emailTicketMessageRepository,
-                                   IMessageSdkService messageSdkService,
-                                   ITicketService ticketService,
-                                   ServiceAccountOverrider serviceAccountOverrider
-                              )
+                                   IMailProcessingService mailProcessingService,
+                                   ServiceAccountOverrider serviceAccountOverrider)
         {
             _logger = logger;
             _mailBoxService = mailBoxService;
-            _customerSdkService = customerSdkService;
             _emailTicketMessageRepository = emailTicketMessageRepository;
-            _messageSdkService = messageSdkService;
-            _ticketService = ticketService;
+            _mailProcessingService = mailProcessingService;
             _serviceAccountOverrider = serviceAccountOverrider;
         }
 
@@ -67,65 +58,15 @@ namespace EmailService.Worker.Host.handlers
 
             MimeMessage fullEmail = mailResult.Value;
 
-            var inReplyTo = fullEmail.InReplyTo;
-            var messageId = fullEmail.MessageId;
-            var senderEmail = fullEmail.From.Mailboxes.First().Address;
-            var senderName = fullEmail.From.Mailboxes.First().Name ?? senderEmail.Split("@").First();
-            var content = fullEmail.TextBody ?? fullEmail.HtmlBody ?? string.Empty;
-
-            int TicketId = 0;
-            Guid CustomerId = Guid.Empty;
-
-
-            if (!string.IsNullOrEmpty(inReplyTo))
+            var ProcessResult = await _mailProcessingService.ProcessIncomingMailAsync(fullEmail);
+            if (ProcessResult.IsFailure)
             {
-                _logger.LogInformation("Email is a reply. In-Reply-To: {InReplyTo}", inReplyTo);
-
-                var QueryOriginalEmailResult = await _emailTicketMessageRepository.GetByMessageIdAsync(messageId: inReplyTo);
-
-                if (QueryOriginalEmailResult.IsFailure)
-                {
-                    _logger.LogWarning("Failed to find original email for In-Reply-To: {InReplyTo}. MessageId: {MessageId}. Subject: {Subject}",
-                        inReplyTo, messageId, mail_Received.Subject);
-
-                    var CreatedNewTicketEmail = await NewEmailReceivedFlow(senderEmail, senderName, mail_Received.Subject, content, EmailTenantDetails.Value.OrganizationId);
-
-                    if (CreatedNewTicketEmail.IsFailure)
-                    {
-                        _logger.LogError("Failed to create new ticket for email from {From} with subject {Subject} after failing to find original email for In-Reply-To: {InReplyTo}",
-                            mail_Received.MailFrom, mail_Received.Subject, inReplyTo);
-                        return;
-                    }
-                    (TicketId, CustomerId) = CreatedNewTicketEmail.Value;
-
-                }
-                else
-                {
-                    EmailTicketMessage originalEmail = QueryOriginalEmailResult.Value;
-                    _logger.LogInformation("Found original email for In-Reply-To: {InReplyTo}. Original Sender: {OriginalSender}. Original Subject: {OriginalSubject}",
-                        inReplyTo, originalEmail.SenderEmail, originalEmail.Subject);
-
-                    CustomerId = originalEmail.CustomerId;
-                    TicketId = originalEmail.TicketId;
-                    await _messageSdkService.CreateMessageAsync(ticketId: TicketId,
-                                                                organizationId: _serviceAccountOverrider.OrganizationId,
-                                                                userId: null,
-                                                                content: content,
-                                                                isInternalNote: false);
-                }
+                _logger.LogError("Failed to process incoming email from {From}. Subject: {Subject}. Error: {Error}",
+                    mail_Received.MailFrom, mail_Received.Subject, ProcessResult.Error.Description);
+                return;
             }
-            else
-            {
-                // No In-Reply-To header, treat as new email and create a new ticket and customer if needed
-                var CreatedNewTicketEmail = await NewEmailReceivedFlow(senderEmail, senderName, mail_Received.Subject, content, EmailTenantDetails.Value.OrganizationId);
 
-                if (CreatedNewTicketEmail.IsFailure)
-                {
-                    _logger.LogError("Failed to create new ticket for email from {From} with subject {Subject}", mail_Received.MailFrom, mail_Received.Subject);
-                    return;
-                }
-                (TicketId, CustomerId) = CreatedNewTicketEmail.Value;
-            }
+            (int TicketId, Guid CustomerId) = ProcessResult.Value;
 
             var saveResult = await SaveMessageAsync(message: fullEmail, ticketId: TicketId, customerId: CustomerId,
                                      TenantId: EmailTenantDetails.Value.OrganizationId);
@@ -136,50 +77,6 @@ namespace EmailService.Worker.Host.handlers
                     TicketId, CustomerId, mail_Received.Subject);
             }
 
-        }
-
-        public async Task<Result<(int TicketId, Guid CustomerId)>> NewEmailReceivedFlow(string SenderEmail, string SenderName, string Subject, string Content, Guid TenantId)
-        {
-            try
-            {
-                Guid CustomerId = Guid.Empty;
-                var FindCustomerByEmailResult = await _customerSdkService.GetCustomerByEmail(SenderEmail);
-                if (FindCustomerByEmailResult.IsFailure)
-                {
-                    CustomerId = Guid.NewGuid();
-                    await _customerSdkService.CreateCustomer(new CustomerService.Sdk.Models.CreateCustomerRequest { Id = CustomerId, Email = SenderEmail, Name = SenderName, OrganizationId = TenantId });
-                }
-                else
-                {
-                    CustomerId = FindCustomerByEmailResult.Value.Id;
-                }
-
-                var CreateTicketResult = await _ticketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
-                {
-                    Title = Subject,
-                    CustomerId = CustomerId,
-                    AssignedUserId = null
-                });
-
-                if (CreateTicketResult.IsFailure)
-                {
-                    return Result.Failure<(int, Guid)>(Error.Failure(code: "TicketCreationFailed", description: "Failed to create a ticket for the incoming email."));
-                }
-
-                await _messageSdkService.CreateMessageAsync(ticketId: CreateTicketResult.Value,
-                                                              organizationId: TenantId,
-                                                              userId: null,
-                                                              content: Content,
-                                                              isInternalNote: false);
-
-                return Result.Success((CreateTicketResult.Value, CustomerId));
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while processing the incoming email from {SenderEmail} with subject {Subject}", SenderEmail, Subject);
-                return Result.Failure<(int, Guid)>(Error.Failure(code: "EmailProcessingError", description: "An error occurred while processing the incoming email."));
-            }
         }
 
         public async Task<Result> SaveMessageAsync(MimeMessage message, int ticketId, Guid customerId, Guid TenantId)
