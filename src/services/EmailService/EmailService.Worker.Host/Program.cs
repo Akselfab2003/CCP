@@ -10,6 +10,7 @@ using EmailService.Infrastructure.ServiceDefaults;
 using EmailService.Worker.Host;
 using EmailService.Worker.Host.Services;
 using Microsoft.EntityFrameworkCore;
+using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -55,6 +56,10 @@ builder.Services.AddClientCredentialsTokenManagement()
 builder.Services.AddCustomerviceSdk(
     builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
     ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."), true);
+
+builder.Services.AddTicketServiceSdk(
+    builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+    ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required."), true);
 
 builder.Services.AddDbContext<DBcontext>(option =>
 {

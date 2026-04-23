@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using EmailService.Sdk.Services;
+using Microsoft.Extensions.Logging;
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
-using EmailService.Sdk.Services;
 
 namespace TicketService.Application.Services.Ticket
 {
@@ -17,7 +17,7 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketHistoryRepository _historyRepository;
 
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands,IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository)
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
@@ -57,15 +57,15 @@ namespace TicketService.Application.Services.Ticket
 
                 await _ticketRepository.SaveChangesAsync();
 
-                    try
-                    {
-                        if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value,result.Value.Title, result.Value.Id);
+                try
+                {
+                    if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id);
                 }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
-                    }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
+                }
 
                 return Result.Success(result.Value.Id); // ← return the ticket ID
             }

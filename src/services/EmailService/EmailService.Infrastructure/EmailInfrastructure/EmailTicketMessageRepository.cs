@@ -33,21 +33,21 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             }
         }
 
-        public async Task<Result<EmailTicketMessage>> GetByMailIdAsync(string mailId)
+        public async Task<Result<EmailTicketMessage>> GetByMessageIdAsync(string messageId)
         {
             try
             {
-                var entity = await _context.EmailTicketMessages.FirstOrDefaultAsync(e => e.MessageId == mailId);
+                var entity = await _context.EmailTicketMessages.FirstOrDefaultAsync(e => e.MessageId == messageId);
                 if (entity == null)
                 {
-                    return Result.Failure<EmailTicketMessage>(Error.Failure(code: "EmailTicketEntityNotFound", description: $"No EmailTicketEntity found with MailId {mailId}."));
+                    return Result.Failure<EmailTicketMessage>(Error.Failure(code: "EmailTicketEntityNotFound", description: $"No EmailTicketEntity found with MailId {messageId}."));
                 }
                 return Result.Success(entity);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving EmailTicketEntity with MailId {MailId}", mailId);
-                return Result.Failure<EmailTicketMessage>(Error.Failure(code: "EmailTicketEntityRetrievalError", description: $"An error occurred while retrieving the EmailTicketEntity with MailId {mailId}."));
+                _logger.LogError(ex, "Error retrieving EmailTicketEntity with MailId {MessageId}", messageId);
+                return Result.Failure<EmailTicketMessage>(Error.Failure(code: "EmailTicketEntityRetrievalError", description: $"An error occurred while retrieving the EmailTicketEntity with MailId {messageId}."));
             }
         }
 

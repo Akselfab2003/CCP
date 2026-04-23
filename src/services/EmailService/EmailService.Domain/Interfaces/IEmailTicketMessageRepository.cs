@@ -6,7 +6,7 @@ namespace EmailService.Domain.Interfaces
     public interface IEmailTicketMessageRepository
     {
         Task<Result> AddAsync(EmailTicketMessage emailTicketEntity);
-        Task<Result<EmailTicketMessage>> GetByMailIdAsync(string mailId);
+        Task<Result<EmailTicketMessage>> GetByMessageIdAsync(string messageId);
         Task<Result<List<EmailTicketMessage>>> GetByTicketIdAsync(int ticketId);
     }
 }
