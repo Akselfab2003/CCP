@@ -182,6 +182,24 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "attachmentUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attachmentFileName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attachmentContentType": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
