@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using CCP.Shared.ValueObjects;
+﻿using CCP.Shared.ValueObjects;
 using CustomerService.Sdk.Models;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
 using EmailTemplates.Renderes;
 using MimeKit;
-using TicketService.Sdk.Dtos;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
 {
@@ -24,15 +19,15 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendTicketCreatedEmailAsync(
-            string to,string subject,
-            EmailSent email, TicketSdkDto ticket,
+            string to, string subject,
+            EmailSent email, int ticketId, TicketStatus ticketStatus,
             string organizationName, string expectedResponseTime,
             string portalUrl)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketCreatedEmailAsync(
-                email,ticket,
-                organizationName,expectedResponseTime,
+                email, ticketId, ticketStatus,
+                organizationName, expectedResponseTime,
                 portalUrl);
 
             var message = BuildMessage(
@@ -49,17 +44,18 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendTicketReplyEmailAsync(
-            string to,string subject,
-            EmailReceived email, TicketSdkDto ticket,
+            string to, string subject,
+            EmailReceived email, int ticketId, TicketStatus ticketStatus,
+
             CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
             string replyUrl, string viewHistoryUrl)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketReplyEmailAsync(
-                email,ticket,
-                customer,organizationName,
-                agentName,agentRole,
+                email, ticketId, ticketStatus,
+                customer, organizationName,
+                agentName, agentRole,
                 replyUrl, viewHistoryUrl);
 
             var message = BuildMessage(
@@ -74,17 +70,17 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendTicketStatusEmailAsync(
-            string to,string subject,
-            EmailSent email, TicketSdkDto ticket,
+            string to, string subject,
+            EmailSent email, int ticketId, TicketStatus ticketStatus,
             string organizationName, string oldStatusLabel,
             string portalUrl)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketStatusEmailAsync(
-                email,ticket,
-                organizationName,oldStatusLabel,
+                email, ticketId, ticketStatus,
+                organizationName, oldStatusLabel,
                 portalUrl);
-            
+
             var message = BuildMessage(
                 fromAddress: email.SenderAddress,
                 fromName: organizationName,
@@ -97,17 +93,17 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendSupportCustomerReplyEmailAsync(
-            string to,string subject,
-            EmailReceived email, TicketSdkDto ticket,
+            string to, string subject,
+            EmailReceived email, int ticketId, TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
-            string replyUrl, string mangmentUrl,
+            string replyUrl, string managementUrl,
             string viewHistoryUrl)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderSupportCustomerReplyNotificationAsync(
-                email,ticket,
-                customer,organizationName,
-                replyUrl,mangmentUrl,
+                email, ticketId, ticketStatus,
+                customer, organizationName,
+                replyUrl, managementUrl,
                 viewHistoryUrl);
 
             var message = BuildMessage(
@@ -124,12 +120,12 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         public async Task SendReplyToEmailAsync(
             string to, string subject,
             EmailReceived emailReceived, EmailSent? emailSent,
-            TicketSdkDto ticket, string organizationName)
+            int ticketId, TicketStatus ticketStatus, string organizationName)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderReplyToEmailAsync(
                 emailReceived, emailSent,
-                ticket, organizationName);
+                ticketId, organizationName);
 
             var message = BuildMessage(
                 fromAddress: emailReceived.SenderAddress,
@@ -144,8 +140,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
 
 
         private static MimeMessage BuildMessage(
-        string fromAddress,string fromName,
-        string toAddress,string toName,
+        string fromAddress, string fromName,
+        string toAddress, string toName,
         string subject)
         {
             var message = new MimeMessage();

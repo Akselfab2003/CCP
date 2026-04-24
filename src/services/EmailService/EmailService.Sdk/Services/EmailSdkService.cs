@@ -1,4 +1,5 @@
 ﻿using CCP.Sdk.utils.Abstractions;
+using CCP.Shared.ValueObjects;
 
 namespace EmailService.Sdk.Services
 {
@@ -27,11 +28,9 @@ namespace EmailService.Sdk.Services
             Guid customerId,
             string ticketTitle,
             int ticketId,
-            string oldStatus,
-            string newStatus,
-            string agentName,
-            string agentRole,
-            string agentNote)
+            TicketStatus oldStatus,
+            TicketStatus newStatus)
+
         {
             var api = _client.Client;
 
@@ -43,8 +42,8 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.CustomerId = customerId;
                     request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
-                    request.QueryParameters.NewStatus = newStatus;
-                    request.QueryParameters.OldStatus = oldStatus;
+                    request.QueryParameters.OldStatus = oldStatus.ToString();
+                    request.QueryParameters.NewStatus = newStatus.ToString();
                 });
         }
 
@@ -53,8 +52,7 @@ namespace EmailService.Sdk.Services
             string ticketTitle,
             int ticketId,
             string agentName,
-            string agentRole,
-            string replyContent)
+            string agentRole)
         {
             var api = _client.Client;
 
@@ -68,7 +66,6 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.AgentRole = agentRole;
-                    request.QueryParameters.ReplyContent = replyContent;
                 });
         }
 
@@ -78,8 +75,7 @@ namespace EmailService.Sdk.Services
             string agentName,
             int ticketId,
             string ticketTitle,
-            string ticketStatus,
-            string ticketStatusLabel,
+            TicketStatus ticketStatus,
             string replyContent)
         {
             var api = _client.Client;
@@ -95,8 +91,7 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.TicketTitle = ticketTitle;
-                    request.QueryParameters.TicketStatus = ticketStatus;
-                    request.QueryParameters.TicketStatusLabel = ticketStatusLabel;
+                    request.QueryParameters.TicketStatus = ticketStatus.ToString();
                     request.QueryParameters.ReplyContent = replyContent;
                 });
         }

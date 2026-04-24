@@ -27,7 +27,7 @@
             }
           },
           {
-            "name": "Id",
+            "name": "TicketId",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -35,58 +35,10 @@
             }
           },
           {
-            "name": "Title",
+            "name": "TicketStatus",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "Status",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CustomerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CreatedAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "AssignedUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "AssignedByUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
             }
           }
         ],
@@ -119,66 +71,11 @@
             }
           },
           {
-            "name": "Id",
+            "name": "TicketId",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "Title",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Status",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CustomerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CreatedAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "AssignedUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "AssignedByUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
             }
           },
           {
@@ -225,7 +122,7 @@
             }
           },
           {
-            "name": "Id",
+            "name": "TicketId",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -233,58 +130,10 @@
             }
           },
           {
-            "name": "Title",
+            "name": "TicketStatus",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "Status",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CustomerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CreatedAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "AssignedUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "AssignedByUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
             }
           },
           {
@@ -338,7 +187,7 @@
             }
           },
           {
-            "name": "Id",
+            "name": "TicketId",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -346,58 +195,10 @@
             }
           },
           {
-            "name": "Title",
+            "name": "TicketStatus",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "Status",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CustomerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CreatedAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "AssignedUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "AssignedByUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
             }
           },
           {
@@ -548,7 +349,7 @@
             }
           },
           {
-            "name": "Id",
+            "name": "TicketId",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -556,58 +357,10 @@
             }
           },
           {
-            "name": "Title",
+            "name": "TicketStatus",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "Status",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CustomerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "CreatedAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "AssignedUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "AssignedByUserId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
             }
           },
           {

@@ -99,6 +99,14 @@ namespace TicketService.Application.Services.Ticket
         {
             try
             {
+                var CurrentTicketEntityResult = await _ticketRepository.GetTicket(id: ticketId);
+
+                if (CurrentTicketEntityResult.IsFailure)
+                    return Result.Failure(Error.Failure("TicketNotFound", $"Ticket with ID {ticketId} was not found."));
+
+                Domain.Entities.Ticket ticketEntity = CurrentTicketEntityResult.Value;
+                TicketStatus oldStatus = ticketEntity.Status;
+
                 var result = await _ticketRepository.UpdateStatusAsync(ticketId, newStatus);
                 if (result.IsFailure)
                 {
@@ -107,12 +115,28 @@ namespace TicketService.Application.Services.Ticket
                 }
 
                 await _historyRepository.AddAsync(TicketHistoryEntry.Create(
-                    ticketId,
-                    actorUserId: null,
+                    ticketId: ticketId,
+                    actorUserId: _currentUser.UserId,
                     eventType: "StatusChanged",
-                    oldValue: null,
+                    oldValue: ticketEntity.Status.ToString(),
                     newValue: newStatus.ToString()
                 ));
+
+
+                try
+                {
+                    if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
+                        await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
+                                                                              ticketTitle: ticketEntity.Title,
+                                                                              ticketId: ticketId,
+                                                                              newStatus: newStatus,
+                                                                              oldStatus: oldStatus);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send ticket status update email for ticket {TicketId}, but status was updated successfully", ticketId);
+                }
+
 
                 return Result.Success();
             }

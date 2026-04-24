@@ -23,7 +23,9 @@ namespace TicketService.Infrastructure.Persistence
             public Guid UserId => Guid.Empty;
             public Guid OrganizationId => Guid.Empty;
             public string OrganizationName => string.Empty;
+            public bool IsServiceAccount => false;
             public void SetCurrentUser(Guid userId) { }
+            public void SetIsServiceAccount(bool isServiceAccount) { }
             public void SetOrganizationId(Guid organizationId) { }
             public void SetOrganizationName(string organizationName) { }
         }

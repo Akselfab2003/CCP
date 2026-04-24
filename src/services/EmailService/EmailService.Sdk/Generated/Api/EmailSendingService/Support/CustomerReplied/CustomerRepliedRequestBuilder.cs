@@ -21,7 +21,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public CustomerRepliedRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?AssignedByUserId*,AssignedUserId*,CreatedAt*,CustomerId*,Id*,OrganizationId*,Status*,Title*,agentEmail*,agentName*,customerId*,replyContent*,ticketTitle*}", pathParameters)
+        public CustomerRepliedRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?TicketId*,TicketStatus*,agentEmail*,agentName*,customerId*,replyContent*,ticketTitle*}", pathParameters)
         {
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public CustomerRepliedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?AssignedByUserId*,AssignedUserId*,CreatedAt*,CustomerId*,Id*,OrganizationId*,Status*,Title*,agentEmail*,agentName*,customerId*,replyContent*,ticketTitle*}", rawUrl)
+        public CustomerRepliedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?TicketId*,TicketStatus*,agentEmail*,agentName*,customerId*,replyContent*,ticketTitle*}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -94,13 +94,8 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
             [QueryParameter("agentName")]
             public string AgentName { get; set; }
 #endif
-            public Guid? AssignedByUserId { get; set; }
-            public Guid? AssignedUserId { get; set; }
-            public DateTimeOffset? CreatedAt { get; set; }
             [QueryParameter("customerId")]
             public Guid? CustomerId { get; set; }
-            public int? Id { get; set; }
-            public Guid? OrganizationId { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("replyContent")]
@@ -110,7 +105,14 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
             [QueryParameter("replyContent")]
             public string ReplyContent { get; set; }
 #endif
-            public int? Status { get; set; }
+            public int? TicketId { get; set; }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public string? TicketStatus { get; set; }
+#nullable restore
+#else
+            public string TicketStatus { get; set; }
+#endif
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("ticketTitle")]
@@ -119,13 +121,6 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
 #else
             [QueryParameter("ticketTitle")]
             public string TicketTitle { get; set; }
-#endif
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public string? Title { get; set; }
-#nullable restore
-#else
-            public string Title { get; set; }
 #endif
         }
         /// <summary>

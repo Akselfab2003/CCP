@@ -13,6 +13,11 @@
             UserId = userId;
         }
 
+        public void SetIsServiceAccount(bool isServiceAccount)
+        {
+            IsServiceAccount = isServiceAccount;
+        }
+
         public void SetOrganizationId(Guid organizationId)
         {
             OrganizationId = organizationId;

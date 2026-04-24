@@ -1,8 +1,8 @@
-﻿using CustomerService.Sdk.Models;
+﻿using CCP.Shared.ValueObjects;
+using CustomerService.Sdk.Models;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
 using Microsoft.Extensions.Logging;
-using TicketService.Sdk.Dtos;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
 {
@@ -18,8 +18,9 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendTicketCreatedNotificationAsync(
-            string recipientEmail,string ticketTitle,
-            EmailSent emailModel, TicketSdkDto ticket,
+            string recipientEmail, string ticketTitle,
+            EmailSent emailModel, int ticketId,
+            TicketStatus ticketStatus,
             string organizationName, string expectedResponseTime,
             string portalUrl)
         {
@@ -29,7 +30,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     to: recipientEmail,
                     subject: $"[New Ticket] {ticketTitle}",
                     email: emailModel,
-                    ticket: ticket,
+                    ticketId: ticketId,
+                    ticketStatus: ticketStatus,
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
                     portalUrl: portalUrl);
@@ -44,10 +46,11 @@ namespace EmailService.Infrastructure.EmailInfrastructure
 
         public async Task SendTicketReplyNotificationAsync(
             string recipientEmail, string ticketTitle,
-            EmailReceived emailModel, TicketSdkDto ticket,
+            EmailReceived emailModel, int ticketId,
+            TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
-            string agentName,string agentRole,
-            string replyUrl,string viewHistoryUrl)
+            string agentName, string agentRole,
+            string replyUrl, string viewHistoryUrl)
         {
             try
             {
@@ -55,7 +58,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     to: recipientEmail,
                     subject: $"[Reply] {ticketTitle}",
                     email: emailModel,
-                    ticket: ticket,
+                    ticketId: ticketId,
+                    ticketStatus: ticketStatus,
                     customer: customer,
                     organizationName: organizationName,
                     agentName: agentName,
@@ -73,8 +77,9 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendTicketStatusChangeNotificationAsync(
-            string recipientEmail,string ticketTitle,
-            EmailSent emailModel, TicketSdkDto ticket,
+            string recipientEmail, string ticketTitle,
+            EmailSent emailModel, int ticketId,
+            TicketStatus ticketStatus,
             string organizationName, string oldStatusLabel,
             string portalUrl)
         {
@@ -82,14 +87,15 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             {
                 await _emailSendingService.SendTicketStatusEmailAsync(
                     to: recipientEmail,
-                    subject: $"[Status Update] {ticketTitle} - Now {ticket.Status}",
+                    subject: $"[Status Update] {ticketTitle} - Now {ticketStatus}",
                     email: emailModel,
-                    ticket : ticket,
+                    ticketId: ticketId,
+                    ticketStatus: ticketStatus,
                     organizationName: organizationName,
                     oldStatusLabel: oldStatusLabel,
                     portalUrl: portalUrl);
 
-                _logger.LogInformation($"Ticket status change email sent to {recipientEmail} for ticket: {ticketTitle}. Status: {ticket.Status}");
+                _logger.LogInformation($"Ticket status change email sent to {recipientEmail} for ticket: {ticketTitle}. Status: {ticketStatus}");
             }
             catch (Exception ex)
             {
@@ -97,24 +103,28 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             }
         }
         public async Task SendSupportCustomerReplyNotificationAsync(
-            string recipientEmail,EmailReceived emailModel,
-            TicketSdkDto ticket, CustomerDTO customer,
-            string organizationName, string replyUrl,
-            string mangmentUrl, string viewHistoryUrl)
+            string recipientEmail,
+            EmailReceived emailModel,
+            int ticketId,
+            TicketStatus ticketStatus,
+            CustomerDTO customer,
+            string organizationName,
+            string replyUrl,
+            string managementUrl,
+            string viewHistoryUrl)
         {
             try
             {
-                await _emailSendingService.SendSupportCustomerReplyEmailAsync(
-                    to: recipientEmail,
-                    subject: $"[Customer Reply] {customer.Name} has replied to their support ticket",
-                    email: emailModel,
-                    ticket : ticket,
-                    customer: customer,
-                    organizationName: organizationName,
-                    replyUrl: replyUrl,
-                    mangmentUrl: mangmentUrl,
-                    viewHistoryUrl: viewHistoryUrl
-                    );
+                await _emailSendingService.SendSupportCustomerReplyEmailAsync(to: recipientEmail,
+                                                                              subject: $"[Customer Reply] {customer.Name} has replied to their support ticket",
+                                                                              email: emailModel,
+                                                                              customer: customer,
+                                                                              ticketId: ticketId,
+                                                                              ticketStatus: ticketStatus,
+                                                                              organizationName: organizationName,
+                                                                              replyUrl: replyUrl,
+                                                                              managementUrl: managementUrl,
+                                                                              viewHistoryUrl: viewHistoryUrl);
 
                 _logger.LogInformation("Support customer-reply notification sent to {Recipient} for ticket #{TicketId}",
                     recipientEmail, emailModel.Id);
@@ -127,27 +137,28 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         }
 
         public async Task SendReplyToEmailAsync(
-            string recipientEmail,EmailReceived emailReceived,
-            EmailSent emailSent, TicketSdkDto ticket,
+            string recipientEmail, EmailReceived emailReceived,
+            EmailSent emailSent, int ticketId, TicketStatus ticketStatus,
             string organizationName)
         {
             try
             {
                 await _emailSendingService.SendReplyToEmailAsync(
                     to: recipientEmail,
-                    subject: $"[New Reply] Ticket #{ticket.Id}",
+                    subject: $"[New Reply] Ticket #{ticketId}",
                     emailReceived: emailReceived,
                     emailSent: emailSent,
-                    ticket: ticket,
+                    ticketId: ticketId,
+                    ticketStatus: ticketStatus,
                     organizationName: organizationName);
 
                 _logger.LogInformation("Reply-to email sent to {Recipient} for ticket #{TicketId}",
-                    recipientEmail, ticket.Id);
+                    recipientEmail, ticketId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send reply-to email to {Recipient} for ticket #{TicketId}",
-                    recipientEmail, ticket.Id);
+                    recipientEmail, ticketId);
             }
         }
     }
