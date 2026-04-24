@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
@@ -96,7 +97,7 @@ public partial class CreateTicketSupporter : ComponentBase
             CustomerId = _selectedCustomer.userId,
             AssignedUserId = _assignToSelf ? UserContext.UserId : null,
             Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
-        });
+        }, origin: TicketOrigin.Manual);
 
         if (result.IsSuccess)
         {

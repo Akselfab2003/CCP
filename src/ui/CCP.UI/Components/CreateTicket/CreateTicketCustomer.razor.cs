@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using Microsoft.AspNetCore.Components;
 
 namespace CCP.UI.Components.CreateTicket;
@@ -33,7 +34,7 @@ public partial class CreateTicketCustomer : ComponentBase
             CustomerId = UserContext.UserId,
             AssignedUserId = null,
             Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
-        });
+        }, origin: TicketOrigin.Manual);
 
         if (result.IsSuccess)
         {
