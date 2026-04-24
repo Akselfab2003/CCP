@@ -1,0 +1,22 @@
+﻿@page "/tenant-configuration"
+@layout CCPLayout
+@rendermode InteractiveServer
+
+<h3>TenantConfigurationPage</h3>
+<div class="email-form">
+    <div class="form-group">
+        <label for="email-input" class="form-label">Email configuration</label>
+        <div class="form-input-group">
+            <input type="text"
+                   id="email-input"
+                   class="email-input"
+                   placeholder="example@example.com"
+                   @bind-value="Email"
+                   aria-label="Enter default email" />
+            <button class="btn btn-primary" @onclick="SaveEmailConfig">Save Email</button>
+        </div>
+    </div>
+</div>
+@code {
+
+}
