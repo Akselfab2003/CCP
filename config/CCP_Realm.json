@@ -304,6 +304,69 @@
       "broker": [],
       "CCP": [
         {
+          "id": "c3f51420-125a-4219-be0f-f909cc6548bd",
+          "name": "org.InviteUsers",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "e7d9139c-c2f7-4fc2-b851-faa07a7c86c6",
+          "name": "org.ViewTicketHistory",
+          "description": "Can view full ticket history",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "c23813e5-f373-41ff-84aa-610d6abafa62",
+          "name": "org.ReopenTickets",
+          "description": "Can reopen closed tickets",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "40441267-9f41-4c2f-9c48-04333b9143dd",
+          "name": "org.ManageTenant",
+          "description": "Can manage tenant/organization settings",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "1c6a8af1-a84f-4772-9eda-719ad6d03709",
+          "name": "org.ManageTicketStatus",
+          "description": "Can change ticket status",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "faa11951-ccd1-4e03-8104-ddd290b3c5ee",
+          "name": "org.ViewStatistics",
+          "description": "Can view detailed statistics",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "be122334-ea4d-423a-8bb0-94a9d824bb03",
+          "name": "org.CreateCustomers",
+          "description": "Can create new customers",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
           "id": "eec44108-939f-42b4-bf39-5b8b8ad12229",
           "name": "org.Customer",
           "description": "",
@@ -312,7 +375,8 @@
             "client": {
               "CCP": [
                 "org.CreateTickets",
-                "org.ViewCustomerTickets"
+                "org.ViewCustomerTickets",
+                "org.RespondToTickets"
               ]
             }
           },
@@ -321,18 +385,18 @@
           "attributes": {}
         },
         {
-          "id": "a7fa7737-d7b1-4625-99f0-a14fb636a7d2",
-          "name": "org.ManageUsers",
-          "description": "Rettigheder til at tilføje nye bruger/supporter og redigere brugers roller",
+          "id": "e6c0884e-01cf-46c5-9a30-85ff9fe049e1",
+          "name": "org.EscalateTickets",
+          "description": "Can escalate tickets to other roles",
           "composite": false,
           "clientRole": true,
           "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
           "attributes": {}
         },
         {
-          "id": "a0532b5b-f5e4-4fc8-81ec-87a909d891b0",
-          "name": "org.CreateTickets",
-          "description": "Rettigheder til at oprette Tickets",
+          "id": "f7957caa-bc7b-4a88-91b1-c21438f3d80f",
+          "name": "org.ViewDashboard",
+          "description": "Can view dashboard with statistics",
           "composite": false,
           "clientRole": true,
           "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
@@ -348,18 +412,27 @@
           "attributes": {}
         },
         {
-          "id": "12e9fa77-466d-4aab-8448-d60614166ae3",
-          "name": "org.AssignTickets",
-          "description": "Rettigheder til at tildele tickets til supporter/brugere",
+          "id": "53b324e1-c265-4407-935b-1f066a58b6b0",
+          "name": "org.ViewAllTickets",
+          "description": "",
           "composite": false,
           "clientRole": true,
           "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
           "attributes": {}
         },
         {
-          "id": "592b6175-f3e5-4f7c-b9e7-23e51f58c837",
-          "name": "org.ManageCustomers",
-          "description": "Rettigheder til at oprette nye customers og til at redigere eksisterende\n",
+          "id": "45d41c92-fb56-49f0-9fed-d21427af22e2",
+          "name": "org.ViewCustomers",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "12e9fa77-466d-4aab-8448-d60614166ae3",
+          "name": "org.AssignTickets",
+          "description": "Rettigheder til at tildele tickets til supporter/brugere",
           "composite": false,
           "clientRole": true,
           "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
@@ -373,12 +446,63 @@
           "composites": {
             "client": {
               "CCP": [
-                "org.ManageUsers",
-                "org.CreateTickets",
+                "org.ViewTicketHistory",
+                "org.ManageTenant",
+                "org.CreateCustomers",
+                "org.EscalateTickets",
                 "org.ViewAllTenantTickets",
+                "org.ViewCustomerTickets",
+                "org.Manager",
+                "org.ManageOrganization",
+                "org.ManageFaq",
+                "org.AddInternalNotes",
+                "org.Supporter",
+                "org.ManageUsers",
+                "org.ViewTenantTickets",
+                "org.InviteUsers",
+                "org.ReopenTickets",
+                "org.ManageTicketStatus",
+                "org.ViewStatistics",
+                "org.Customer",
+                "org.ViewDashboard",
+                "org.ViewCustomers",
+                "org.ViewAllTickets",
                 "org.AssignTickets",
+                "org.CreateSupporters",
+                "org.CloseTickets",
+                "org.CreateTickets",
+                "org.DeleteTickets",
                 "org.ManageCustomers",
-                "org.ViewCustomerTickets"
+                "org.ViewUsers",
+                "org.PromoteUsers",
+                "CCP.Rolesorg.Manager",
+                "org.RespondToTickets"
+              ],
+              "realm-management": [
+                "realm-admin",
+                "view-users",
+                "view-events",
+                "manage-authorization",
+                "query-clients",
+                "manage-identity-providers",
+                "manage-events",
+                "view-clients",
+                "manage-users",
+                "view-authorization",
+                "query-users",
+                "query-realms",
+                "create-client",
+                "manage-realm",
+                "manage-clients",
+                "query-groups",
+                "view-realm",
+                "view-identity-providers",
+                "impersonation"
+              ],
+              "account": [
+                "delete-account",
+                "manage-account",
+                "view-groups"
               ]
             }
           },
@@ -394,9 +518,22 @@
           "composites": {
             "client": {
               "CCP": [
+                "org.InviteUsers",
+                "org.ViewTicketHistory",
+                "org.CloseTickets",
                 "org.CreateTickets",
+                "org.ManageFaq",
+                "org.ReopenTickets",
+                "org.ManageTicketStatus",
+                "org.ViewStatistics",
+                "org.EscalateTickets",
+                "org.ViewDashboard",
+                "org.ViewCustomers",
+                "org.ViewAllTickets",
                 "org.ViewAllTenantTickets",
-                "org.AssignTickets"
+                "org.AssignTickets",
+                "org.ViewTenantTickets",
+                "org.RespondToTickets"
               ]
             }
           },
@@ -414,6 +551,78 @@
           "attributes": {}
         },
         {
+          "id": "3295f55c-2a48-43cc-bbb6-ffe05909b915",
+          "name": "org.ManageOrganization",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "45db4586-2b5c-41c6-919d-c3ed9b7f3c1f",
+          "name": "org.CreateSupporters",
+          "description": "Can invite new supporters",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "8693499e-ade2-4930-b4ea-2076d6766360",
+          "name": "org.CloseTickets",
+          "description": "Can close tickets",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "a0532b5b-f5e4-4fc8-81ec-87a909d891b0",
+          "name": "org.CreateTickets",
+          "description": "Rettigheder til at oprette Tickets",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "452096ac-1f17-430a-80b4-ab3577d656ae",
+          "name": "org.DeleteTickets",
+          "description": "Can delete tickets (Admin only)",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "592b6175-f3e5-4f7c-b9e7-23e51f58c837",
+          "name": "org.ManageCustomers",
+          "description": "Rettigheder til at oprette nye customers og til at redigere eksisterende\n",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "83f60c09-0085-47ae-8fe5-adcb1b3397f0",
+          "name": "org.AddInternalNotes",
+          "description": "Can add internal notes to tickets",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "3e93c10b-c5b7-4719-a853-a06fc4f0842a",
+          "name": "org.ManageFaq",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
           "id": "8361992b-500f-42ba-a87b-25d744d7a237",
           "name": "org.Supporter",
           "description": "",
@@ -421,10 +630,73 @@
           "composites": {
             "client": {
               "CCP": [
-                "org.CreateTickets"
+                "org.ManageTicketStatus",
+                "org.EscalateTickets",
+                "org.CloseTickets",
+                "org.CreateTickets",
+                "org.ViewDashboard",
+                "org.AssignTickets",
+                "org.ViewTenantTickets",
+                "org.RespondToTickets",
+                "org.AddInternalNotes",
+                "org.ReopenTickets"
               ]
             }
           },
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "ad076b23-8eaa-4c2e-9903-1883fdb6dc71",
+          "name": "org.ViewUsers",
+          "description": "Can view user lists",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "a7fa7737-d7b1-4625-99f0-a14fb636a7d2",
+          "name": "org.ManageUsers",
+          "description": "Rettigheder til at tilføje nye bruger/supporter og redigere brugers roller",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "6c526d5a-e5ea-451c-8d07-4676396fd669",
+          "name": "org.PromoteUsers",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "6c963b32-a4da-40e8-a652-2c770b1a5a6f",
+          "name": "org.ViewTenantTickets",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "827db79c-9c64-48e8-894c-a298b271f8d6",
+          "name": "CCP.Rolesorg.Manager",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
+          "attributes": {}
+        },
+        {
+          "id": "82d5cd50-48bc-4ac6-a665-762bd118d4bb",
+          "name": "org.RespondToTickets",
+          "description": "Can respond to tickets",
+          "composite": false,
           "clientRole": true,
           "containerId": "7eedb8a2-de7a-46c1-9936-6d47d5b6e477",
           "attributes": {}
@@ -464,7 +736,140 @@
       ]
     }
   },
-  "groups": [],
+  "groups": [
+    {
+      "id": "b31b5111-f3c3-40f5-969b-5c41dc43d8d6",
+      "name": "org-3db4af80-d719-404a-870c-762290d496ce",
+      "path": "/org-3db4af80-d719-404a-870c-762290d496ce",
+      "subGroups": [
+        {
+          "id": "8ba9df2a-dba0-46e2-bd18-20b04cd06e17",
+          "name": "Admins",
+          "path": "/org-3db4af80-d719-404a-870c-762290d496ce/Admins",
+          "parentId": "b31b5111-f3c3-40f5-969b-5c41dc43d8d6",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Admin"
+            ]
+          }
+        },
+        {
+          "id": "50cf7aaa-8427-4195-b924-77d972ddfeaf",
+          "name": "Customers",
+          "path": "/org-3db4af80-d719-404a-870c-762290d496ce/Customers",
+          "parentId": "b31b5111-f3c3-40f5-969b-5c41dc43d8d6",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Customer"
+            ]
+          }
+        },
+        {
+          "id": "cd6478ca-a5b4-441a-839c-81e227206c35",
+          "name": "Managers",
+          "path": "/org-3db4af80-d719-404a-870c-762290d496ce/Managers",
+          "parentId": "b31b5111-f3c3-40f5-969b-5c41dc43d8d6",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Manager"
+            ]
+          }
+        },
+        {
+          "id": "f7b1e17a-fd81-482e-9c83-57a4d794c84d",
+          "name": "Supporters",
+          "path": "/org-3db4af80-d719-404a-870c-762290d496ce/Supporters",
+          "parentId": "b31b5111-f3c3-40f5-969b-5c41dc43d8d6",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Supporter"
+            ]
+          }
+        }
+      ],
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {}
+    },
+    {
+      "id": "e44a835e-904e-44e8-926d-fa17d1554575",
+      "name": "org-a8378e7f-0cb4-401b-b0cb-313e3b898e2e",
+      "path": "/org-a8378e7f-0cb4-401b-b0cb-313e3b898e2e",
+      "subGroups": [
+        {
+          "id": "5a0f069b-8754-4a5d-a080-dddaacf5d478",
+          "name": "Admins",
+          "path": "/org-a8378e7f-0cb4-401b-b0cb-313e3b898e2e/Admins",
+          "parentId": "e44a835e-904e-44e8-926d-fa17d1554575",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Admin"
+            ]
+          }
+        },
+        {
+          "id": "04bd65b2-78ee-4830-9a84-7b2cc4aad0cd",
+          "name": "Customers",
+          "path": "/org-a8378e7f-0cb4-401b-b0cb-313e3b898e2e/Customers",
+          "parentId": "e44a835e-904e-44e8-926d-fa17d1554575",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Customer"
+            ]
+          }
+        },
+        {
+          "id": "4f05e19a-57db-4d8a-bd35-aa1f327c348b",
+          "name": "Managers",
+          "path": "/org-a8378e7f-0cb4-401b-b0cb-313e3b898e2e/Managers",
+          "parentId": "e44a835e-904e-44e8-926d-fa17d1554575",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Manager"
+            ]
+          }
+        },
+        {
+          "id": "a2cf41a9-f71e-4ad7-a8c8-a0668faa1470",
+          "name": "Supporters",
+          "path": "/org-a8378e7f-0cb4-401b-b0cb-313e3b898e2e/Supporters",
+          "parentId": "e44a835e-904e-44e8-926d-fa17d1554575",
+          "subGroups": [],
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {
+            "CCP": [
+              "org.Supporter"
+            ]
+          }
+        }
+      ],
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {}
+    }
+  ],
   "defaultRole": {
     "id": "2989a1ae-8022-4056-95bd-7f006f960f9e",
     "name": "default-roles-chatapp",
@@ -2065,7 +2470,6 @@
           "protocolMapper": "oidc-usermodel-client-role-mapper",
           "consentRequired": false,
           "config": {
-            "usermodel.clientRoleMapping.rolePrefix": "CCP.Roles",
             "introspection.token.claim": "true",
             "multivalued": "true",
             "userinfo.token.claim": "true",
@@ -2314,13 +2718,13 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-role-list-mapper",
             "oidc-full-name-mapper",
-            "oidc-usermodel-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
             "saml-user-attribute-mapper",
-            "oidc-address-mapper",
+            "oidc-usermodel-property-mapper",
             "oidc-usermodel-attribute-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
+            "oidc-address-mapper",
             "saml-user-property-mapper"
           ]
         }
@@ -2333,14 +2737,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
             "saml-role-list-mapper",
-            "oidc-usermodel-attribute-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
             "oidc-address-mapper",
+            "oidc-usermodel-attribute-mapper",
             "saml-user-property-mapper",
-            "oidc-usermodel-property-mapper",
-            "oidc-full-name-mapper"
+            "oidc-usermodel-property-mapper"
           ]
         }
       },
@@ -3258,7 +3662,7 @@
     "acr.loa.map": "{}",
     "adminEventsExpiration": ""
   },
-  "keycloakVersion": "26.4.7",
+  "keycloakVersion": "26.5.7",
   "userManagedAccessAllowed": false,
   "organizationsEnabled": true,
   "verifiableCredentialsEnabled": false,
