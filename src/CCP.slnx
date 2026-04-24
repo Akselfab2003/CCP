@@ -11,7 +11,6 @@
     <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e" />
     <Project Path="services/ChatService/ChatService.Infrastructure/ChatService.Infrastructure.csproj" />
     <Project Path="services/ChatService/ChatService.Sdk/ChatService.Sdk.csproj" Id="49cc360d-d62a-466b-abf8-1d4d35239432">
-      <BuildDependency Project="services/ChatService/ChatService.Api/ChatService.Api.csproj" />
     </Project>
   </Folder>
   <Folder Name="/src/services/CustomerService/">
@@ -56,7 +55,6 @@
     <Project Path="services/TicketService/TicketService.Domain/TicketService.Domain.csproj" />
     <Project Path="services/TicketService/TicketService.Infrastructure/TicketService.Infrastructure.csproj" />
     <Project Path="services/TicketService/TicketService.Sdk/TicketService.Sdk.csproj">
-      <BuildDependency Project="services/TicketService/TicketService.Api/TicketService.Api.csproj" />
     </Project>
   </Folder>
   <Folder Name="/src/shared/">

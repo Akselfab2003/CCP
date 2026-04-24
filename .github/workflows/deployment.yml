@@ -95,7 +95,7 @@ jobs:
           docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:latest
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:latest
           docker push ${{ secrets.REGISTRY_HOST }}/emailworker-service:latest
-
+          docker push ${{ secrets.REGISTRY_HOST }}/gatewayservice-api:latest
 
           docker push ${{ secrets.REGISTRY_HOST }}/identityservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/customerservice-api:${{ github.sha }}
@@ -105,7 +105,7 @@ jobs:
           docker push ${{ secrets.REGISTRY_HOST }}/ticketservice-api:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/ccp-website:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_HOST }}/emailworker-service:${{ github.sha }}
-
+          docker push ${{ secrets.REGISTRY_HOST }}/gatewayservice-api:${{ github.sha }}
   Deploy:
     name: Deploy
     needs: Build-and-Push
@@ -124,6 +124,8 @@ jobs:
             CCP_SAAS_UI,
             CCP_WEBSITE,
             KOPPAR,
+            GATEWAYSERVICE,
+            Keycloak
           ]
     steps:
       - name: Deploy
