@@ -586,6 +586,13 @@
             ],
             "format": "uuid"
           },
+          "organizationId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "assignedUserId": {
             "type": [
               "null",
@@ -724,7 +731,14 @@
             "format": "uuid"
           },
           "assignment": {
-            "$ref": "#/components/schemas/AssignmentDto"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AssignmentDto"
+              }
+            ]
           },
           "customerId": {
             "type": [
@@ -811,21 +825,8 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "Bearer": {
-        "type": "http",
-        "description": "JWT",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
     }
   },
-  "security": [
-    {
-      "Bearer": [ ]
-    }
-  ],
   "tags": [
     {
       "name": "Ticket"

@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
-using System.Net.Http.Json;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Mappers;
 

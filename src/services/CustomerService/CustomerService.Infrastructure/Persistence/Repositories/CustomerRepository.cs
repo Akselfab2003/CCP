@@ -1,6 +1,6 @@
 ﻿using CustomerService.Api.DB;
-using CustomerService.Api.DB.Models;
 using CustomerService.Application.Persistence;
+using CustomerService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -27,10 +27,15 @@ namespace CustomerService.Infrastructure.Persistence.Repositories
             return await _dbContext.Customers.FindAsync(id);
         }
 
+        public async Task<Customer?> GetCustomerByEmail(string email)
+        {
+            return await _dbContext.Customers.FirstOrDefaultAsync(c => c.Email == email);
+        }
+
         public async Task<Customer> CreateCustomer(Customer customer)
         {
             // Generer en ny GUID for kunden
-            customer.Id = Guid.NewGuid();
+            customer.Id = customer.Id;
             // Tilføj kunden til databasen
             _dbContext.Customers.Add(customer);
             //Gem ændringerne

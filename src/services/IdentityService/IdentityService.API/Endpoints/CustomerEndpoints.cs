@@ -14,7 +14,7 @@ namespace IdentityService.API.Endpoints
                                             .RequireAuthorization();
 
             customerRoute.MapPost("/Invite", InviteCustomer)
-                        .Produces(StatusCodes.Status200OK)
+                        .Produces<Guid>(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
@@ -44,10 +44,10 @@ namespace IdentityService.API.Endpoints
         {
             try
             {
-                Result InviteResult = await customerService.InviteCustomer(Email);
+                Result<Guid> InviteResult = await customerService.InviteCustomer(Email);
 
                 return InviteResult.IsSuccess
-                                   ? Results.Ok()
+                                   ? Results.Ok(InviteResult.Value)
                                    : InviteResult.ToProblemDetails();
 
             }
