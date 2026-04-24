@@ -21,7 +21,7 @@ namespace TestUtils.Integration
 
         internal DistributedApplication App = null!;
         private IDistributedApplicationTestingBuilder AppHost = null!;
-        public TimeSpan DefaultTimeout = TimeSpan.FromMinutes(5);
+        public TimeSpan DefaultTimeout = TimeSpan.FromMinutes(1);
         public bool IsRemoveNotNeededResourcesForTestingEnabled = true;
         public IConfiguration GetConfiguration() => App.Services.GetRequiredService<IConfiguration>();
 
@@ -67,7 +67,9 @@ namespace TestUtils.Integration
                 "emailWorkerServiceUsername=test@test.test",
                 "emailWorkerServicePassword=test",
                 $"Encryption_Key={encryption_key}",
-                "emailHostUrl=localhost"
+                "emailHostUrl=localhost",
+                $"MAILCOW_API_KEY={Guid.NewGuid()}",
+                $"MAILCOW_API_URL=http://localhost:8080/api/v1"
             ], configureBuilder: (config, host) =>
             {
                 config.TrustDeveloperCertificate = true;
