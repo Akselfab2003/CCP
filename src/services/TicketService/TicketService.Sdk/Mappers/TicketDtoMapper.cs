@@ -10,10 +10,10 @@ namespace TicketService.Sdk.Mappers
         {
             Id = t.Id ?? 0,
             Title = t.Title ?? string.Empty,
-            AssignedUserId = t.Assignment == null ? null : t.Assignment.UserId,
+            AssignedUserId = t.Assignment == null ? null : t.Assignment!.AssignmentDto!.UserId,
             Status = t.Status ?? 0,
             OrganizationId = t.OrganizationId ?? Guid.Empty,
-            AssignedByUserId = t.Assignment == null ? null : t.Assignment.AssignedByUserId,
+            AssignedByUserId = t.Assignment == null ? null : t.Assignment!.AssignmentDto!.AssignedByUserId,
             CreatedAt = t.CreatedAt,
             CustomerId = t.CustomerId,
         };

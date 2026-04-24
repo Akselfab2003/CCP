@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
-using System.Net.Http.Json;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Mappers;
 
@@ -27,29 +27,25 @@ namespace TicketService.Sdk.Services.Ticket
         {
             try
             {
-                var httpClient = _httpClientFactory.CreateClient(ClientName);
-                var response = await httpClient.PostAsJsonAsync("/ticket/create", new
+                var result = await Client.Ticket.Create.PostAsync(new Models.CreateTicketRequest()
                 {
                     Title = request.Title,
                     CustomerId = request.CustomerId,
                     AssignedUserId = request.AssignedUserId,
-                    Description = request.Description
-                }, ct);
-
-                if (!response.IsSuccessStatusCode)
+                    OrganizationId = request.OrganizationId,
+                }, cancellationToken: ct);
+                return result;
+            }
+            catch (ApiException ex)
+            {
+                return ex.ResponseStatusCode switch
                 {
-                    return response.StatusCode switch
-                    {
-                        System.Net.HttpStatusCode.BadRequest => Result.Failure<int>(Error.Failure(code: "BadRequest", description: "The request was invalid. Please check the provided data.")),
-                        System.Net.HttpStatusCode.Unauthorized => Result.Failure<int>(Error.Failure(code: "Unauthorized", description: "You are not authorized to perform this action.")),
-                        System.Net.HttpStatusCode.Forbidden => Result.Failure<int>(Error.Failure(code: "Forbidden", description: "You do not have permission to perform this action.")),
-                        System.Net.HttpStatusCode.NotFound => Result.Failure<int>(Error.Failure(code: "NotFound", description: "The specified resource was not found.")),
-                        _ => Result.Failure<int>(Error.Failure(code: "TicketCreationFailed", description: $"An error occurred while creating the ticket. Status: {(int)response.StatusCode}"))
-                    };
-                }
-
-                var ticketId = await response.Content.ReadFromJsonAsync<int>(cancellationToken: ct);
-                return Result.Success(ticketId);
+                    400 => Result.Failure<int>(Error.Failure(code: "BadRequest", description: "The request was invalid. Please check the provided data.")),
+                    401 => Result.Failure<int>(Error.Failure(code: "Unauthorized", description: "You are not authorized to perform this action.")),
+                    403 => Result.Failure<int>(Error.Failure(code: "Forbidden", description: "You do not have permission to perform this action.")),
+                    404 => Result.Failure<int>(Error.Failure(code: "NotFound", description: "The specified resource was not found.")),
+                    _ => Result.Failure<int>(Error.Failure(code: "TicketCreationFailed", description: $"An error occurred while creating the ticket. Status code: {ex.ResponseStatusCode}"))
+                };
             }
             catch (Exception ex)
             {

@@ -46,16 +46,15 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             })
             .UseDurableInbox();
     });
+    builder.Services.AddTicketServiceSdk(
+        builder.Configuration.GetConnectionString("ticketservice-api") ?? builder.Configuration["services:ticketservice-api:https:0"] ?? string.Empty,
+        IsServiceAccount: true,
+        configuration: builder.Configuration);
 }
-
-builder.Services.AddTicketServiceSdk(
-    builder.Configuration.GetConnectionString("ticketservice-api") ?? builder.Configuration["services:ticketservice-api:https:0"] ?? string.Empty,
-    IsServiceAccount: true,
-    configuration: builder.Configuration);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
-
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();

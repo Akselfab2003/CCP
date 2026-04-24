@@ -88,7 +88,21 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                                                                               description: "Failed to retrieve tenant email configuration."));
             }
         }
-
+        public async Task<Result<TenantEmailConfiguration>> GetByTenantIdAsync(Guid tenantId)
+        {
+            try
+            {
+                var val = await _dbContext.TenantEmailConfigurations.SingleOrDefaultAsync(t => t.OrganizationId == tenantId);
+                return val is null
+                    ? Result.Failure<TenantEmailConfiguration>(Error.NotFound("TenantEmailConfiguration.NotFound", $"Tenant email configuration with tenant ID {tenantId} not found"))
+                    : Result.Success(val);
+            }
+            catch (Exception)
+            {
+                return Result.Failure<TenantEmailConfiguration>(Error.Failure(code: "GetTenantEmailConfigurationFailed",
+                                                                              description: "Failed to retrieve tenant email configuration."));
+            }
+        }
 
         public async Task<Result<List<TenantEmailConfiguration>>> GetAllAsync()
         {
@@ -106,6 +120,25 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 _logger.LogError(ex, "An error occurred while retrieving tenant email configurations.");
                 return Result.Failure<List<TenantEmailConfiguration>>(Error.Failure(code: "GetAllTenantEmailConfigurationsFailed",
                                                                               description: "Failed to retrieve tenant email configurations."));
+            }
+        }
+
+
+        public async Task<Result<TenantEmailConfiguration>> GetByInternalEmailAddress(string InternalEmailAddress)
+        {
+            try
+            {
+                var val = await _dbContext.TenantEmailConfigurations.IgnoreQueryFilters().SingleOrDefaultAsync(t => t.InternalEmail.ToLower() == InternalEmailAddress.ToLower());
+
+                return val is null
+                    ? Result.Failure<TenantEmailConfiguration>(Error.NotFound("TenantEmailConfiguration.NotFound", $"Tenant email configuration with internal email address {InternalEmailAddress} not found"))
+                    : Result.Success(val);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving tenant email configuration by internal email address.");
+                return Result.Failure<TenantEmailConfiguration>(Error.Failure(code: "GetTenantEmailConfigurationFailed",
+                                                                              description: "Failed to retrieve tenant email configuration."));
             }
         }
     }
