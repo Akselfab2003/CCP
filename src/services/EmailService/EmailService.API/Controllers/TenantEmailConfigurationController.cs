@@ -1,11 +1,13 @@
 ﻿using CCP.Shared.ResultAbstraction;
 using EmailService.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmailService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TenantEmailConfigurationController : Controller
     {
         private readonly ILogger<TenantEmailConfigurationController> _logger;
