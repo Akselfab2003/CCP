@@ -415,26 +415,15 @@
         "tags": [
           "TenantEmailConfiguration"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
-              }
+        "parameters": [
+          {
+            "name": "DefaultSenderEmail",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -445,21 +434,6 @@
   },
   "components": {
     "schemas": {
-      "AddTenantEmailConfigurationRequest": {
-        "required": [
-          "domain",
-          "defaultSenderEmail"
-        ],
-        "type": "object",
-        "properties": {
-          "domain": {
-            "type": "string"
-          },
-          "defaultSenderEmail": {
-            "type": "string"
-          }
-        }
-      },
       "DovecotEvent": {
         "type": "object",
         "properties": {

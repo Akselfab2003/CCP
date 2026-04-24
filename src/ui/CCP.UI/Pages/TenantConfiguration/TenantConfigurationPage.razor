@@ -1,22 +1,30 @@
 ﻿@page "/tenant-configuration"
 @layout CCPLayout
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
+<div class="container">
+    <div class="header">
+        <h1 class="header-title">Email Configuration</h1>
+        <p class="header-subtitle">Set up your email integration to automatically create tickets from incoming messages</p>
+    </div>
 
-<h3>TenantConfigurationPage</h3>
-<div class="email-form">
-    <div class="form-group">
-        <label for="email-input" class="form-label">Email configuration</label>
-        <div class="form-input-group">
-            <input type="text"
-                   id="email-input"
-                   class="email-input"
-                   placeholder="example@example.com"
-                   @bind-value="Email"
-                   aria-label="Enter default email" />
-            <button class="btn btn-primary" @onclick="SaveEmailConfig">Save Email</button>
+    <div class="email-form">
+        <div class="form-group">
+            <label for="email-input" class="form-label">Default Email Address</label>
+            <div class="form-input-group">
+                <input type="email"
+                       id="email-input"
+                       class="email-input"
+                       placeholder="example@company.com"
+                       @bind-value="Email"
+                       aria-label="Enter default email" />
+                <button class="btn btn-primary" @onclick="SaveEmailConfig">Save Email</button>
+            </div>
         </div>
     </div>
 </div>
+
 @code {
 
 }
