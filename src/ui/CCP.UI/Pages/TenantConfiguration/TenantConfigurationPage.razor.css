@@ -1,0 +1,406 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+/* Layout */
+.container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--ccp-bg-content);
+    padding: 24px 20px;
+}
+
+/* Header Section */
+.header {
+    margin-bottom: 32px;
+}
+
+.header-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--ccp-text-hi);
+    letter-spacing: -0.5px;
+}
+
+.header-subtitle {
+    font-size: 13px;
+    color: var(--ccp-text-mid);
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+/* Success Message */
+.success-message {
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: #d4edda;
+    border-radius: 8px;
+    animation: slideIn 0.3s ease-out;
+}
+
+    .success-message p {
+        margin: 0;
+        font-size: 14px;
+        color: #155724;
+        line-height: 1.6;
+    }
+
+    .success-message strong {
+        font-weight: 600;
+        color: #0c3622;
+    }
+
+/* Email Form Section */
+.email-form {
+    background-color: var(--ccp-bg-sidebar);
+    border: 1px solid var(--ccp-border-mid);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    max-width: 600px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ccp-text-hi);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.form-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Input Styling */
+.email-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--ccp-border);
+    background: var(--ccp-bg-content);
+    font-size: 14px;
+    color: var(--ccp-text-hi);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+    .email-input::placeholder {
+        color: var(--ccp-text-mid);
+    }
+
+    .email-input:hover {
+        border-color: var(--ccp-border-mid);
+    }
+
+    .email-input:focus {
+        border-color: var(--ccp-accent);
+        box-shadow: 0 0 0 3px var(--ccp-accent-mute);
+    }
+
+/* Button Styling */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.btn-primary {
+    background-color: var(--ccp-accent);
+    color: #fff;
+    border: 1px solid var(--ccp-accent);
+}
+
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+        border-color: #1d4ed8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary:active {
+        background-color: #1e40af;
+        transform: translateY(1px);
+    }
+
+    .btn-primary:disabled {
+        background-color: #cbd5e1;
+        border-color: #cbd5e1;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+/* Configuration Section */
+.config-section {
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+.config-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ccp-text-mid);
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.config-item {
+    background-color: var(--ccp-bg-sidebar);
+    border: 1px solid var(--ccp-border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+    .config-item:hover {
+        border-color: var(--ccp-border-mid);
+        background-color: var(--ccp-hover);
+    }
+
+.config-item-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ccp-text-hi);
+    margin-bottom: 4px;
+}
+
+.config-item-value {
+    font-size: 13px;
+    color: var(--ccp-text-mid);
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: var(--ccp-accent-mute);
+    color: var(--ccp-accent);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-error {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        padding: 20px 16px;
+    }
+
+    .header-title {
+        font-size: 24px;
+    }
+
+    .email-form {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .form-input-group {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+
+    .header {
+        margin-bottom: 24px;
+    }
+
+    .header-title {
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+
+    .header-subtitle {
+        font-size: 12px;
+    }
+
+    .success-message {
+        margin-bottom: 20px;
+        padding: 12px;
+    }
+
+        .success-message p {
+            font-size: 13px;
+        }
+
+    .email-form {
+        padding: 16px;
+    }
+
+    .form-label {
+        font-size: 13px;
+    }
+
+    .form-input-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .email-input,
+    .btn {
+        width: 100%;
+    }
+
+    .email-input {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .btn {
+        padding: 11px 18px;
+        font-size: 13px;
+    }
+
+    .config-section {
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+
+    .config-section-title {
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .config-item {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    .config-item-label {
+        font-size: 12px;
+    }
+
+    .config-item-value {
+        font-size: 12px;
+    }
+
+    .badge {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    .header {
+        margin-bottom: 20px;
+    }
+
+    .header-title {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+
+    .header-subtitle {
+        font-size: 11px;
+    }
+
+    .success-message {
+        margin-bottom: 16px;
+        padding: 10px;
+    }
+
+        .success-message p {
+            font-size: 12px;
+        }
+
+    .email-form {
+        padding: 12px;
+    }
+
+    .form-group {
+        gap: 10px;
+    }
+
+    .form-label {
+        font-size: 12px;
+    }
+
+    .form-input-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .email-input {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 12px;
+        width: 100%;
+    }
+
+    .config-section {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .config-section-title {
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    .config-item {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .config-item-label {
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .config-item-value {
+        font-size: 11px;
+    }
+}

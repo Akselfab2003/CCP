@@ -9,5 +9,6 @@ namespace EmailService.Sdk.Services
         Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus status);
         Task NotifyTicketRepliedAsync(Guid customerId, string ticketTitle, int ticketId, string agentName, string agentRole);
         Task NotifyTicketStatusChangedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus oldStatus, TicketStatus newStatus);
+        Task CreateTenantEmailAsync(string DefaultSenderEmail);
     }
 }

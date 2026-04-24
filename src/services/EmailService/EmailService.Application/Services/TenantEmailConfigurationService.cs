@@ -3,7 +3,6 @@ using CCP.Shared.AuthContext;
 using CCP.Shared.ResultAbstraction;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Interfaces;
-using EmailService.Domain.Requests;
 using MailCow.Sdk.services.MailBox;
 using Microsoft.Extensions.Logging;
 
@@ -27,7 +26,7 @@ namespace EmailService.Application.Services
         }
 
 
-        public async Task<Result> AddTenantEmailConfigurationAsync(AddTenantEmailConfigurationRequest request)
+        public async Task<Result> AddTenantEmailConfigurationAsync(string DefaultSenderEmail)
         {
             try
             {
@@ -46,7 +45,7 @@ namespace EmailService.Application.Services
                 {
                     Id = Guid.NewGuid(),
                     OrganizationId = _currentUser.OrganizationId,
-                    DefaultSenderEmail = request.DefaultSenderEmail,
+                    DefaultSenderEmail = DefaultSenderEmail,
                     InternalEmail = $"{companyAlias}@northflow.dev",
                     InternalEmailPassword = password,
                 };

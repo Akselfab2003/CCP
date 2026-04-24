@@ -1,5 +1,6 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ValueObjects;
+using EmailService.Sdk.Models;
 
 namespace EmailService.Sdk.Services
 {
@@ -94,6 +95,18 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketStatus = ticketStatus.ToString();
                     request.QueryParameters.ReplyContent = replyContent;
+                });
+        }
+        public async Task CreateTenantEmailAsync(string DefaultSenderEmail)
+        {
+            var api = _client.Client;
+
+            await api.Api
+                .TenantEmailConfiguration
+                .Create
+                .PostAsync(request=>
+                {
+                    request.QueryParameters.DefaultSenderEmail = DefaultSenderEmail;
                 });
         }
     }
