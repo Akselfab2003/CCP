@@ -6,22 +6,37 @@ namespace CCP.UI.Pages.TenantConfiguration
     public partial class TenantConfigurationPage
     {
         [Inject]
-        public IEmailSdkService emailSdkService { get; set; } = null!;
+        public IEmailSdkService EmailSdkService { get; set; } = null!;
 
-        public required string Email { get; set; }
+        [Inject]
+        public NavigationManager NavigationManager { get; set; } = null!;
+
+
+        public string Email { get; set; } = string.Empty;
+        public bool EmailSaved { get; set; }
+        public bool IsSaving { get; set; }
 
         public async Task SaveEmailConfig()
         {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                return;
+            }
+
             try
             {
-                await emailSdkService.CreateTenantEmailAsync(Email);
+                IsSaving = true;
+                await EmailSdkService.CreateTenantEmailAsync(Email);
+                EmailSaved = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                
+                Console.WriteLine($"Error: {ex.Message}");
             }
-
-
+            finally
+            {
+                IsSaving = false;
+            }
         }
     }
 }

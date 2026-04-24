@@ -9,6 +9,16 @@
         <p class="header-subtitle">Set up your email integration to automatically create tickets from incoming messages</p>
     </div>
 
+    @if (EmailSaved)
+    {
+        <div class="success-message">
+            <p>
+                Please redirect your customers to use <strong>@Email</strong> for all support inquiries.
+                New emails sent to this address will automatically create support tickets in your system.
+            </p>
+        </div>
+    }
+
     <div class="email-form">
         <div class="form-group">
             <label for="email-input" class="form-label">Default Email Address</label>
@@ -19,11 +29,21 @@
                        placeholder="example@company.com"
                        @bind-value="Email"
                        aria-label="Enter default email" />
-                <button class="btn btn-primary" @onclick="SaveEmailConfig">Save Email</button>
+                <button class="btn btn-primary" @onclick="SaveEmailConfig" disabled="@IsSaving">
+                    @if (IsSaving)
+                    {
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Save Email</span>
+                    }
+                </button>
             </div>
         </div>
     </div>
 </div>
+
 
 @code {
 
