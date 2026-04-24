@@ -39,12 +39,25 @@ namespace ChatService.Sdk.Faqs
         /// <summary>Gets an item from the ChatService.Sdk.faqs.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
         /// <returns>A <see cref="global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder"/></returns>
-        public global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder this[string position]
+        public global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder this[int position]
         {
             get
             {
                 var urlTplParams = new Dictionary<string, object>(PathParameters);
                 urlTplParams.Add("faqId", position);
+                return new global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder(urlTplParams, RequestAdapter);
+            }
+        }
+        /// <summary>Gets an item from the ChatService.Sdk.faqs.item collection</summary>
+        /// <param name="position">Unique identifier of the item</param>
+        /// <returns>A <see cref="global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder"/></returns>
+        [Obsolete("This indexer is deprecated and will be removed in the next major version. Use the one with the typed parameter instead.")]
+        public global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder this[string position]
+        {
+            get
+            {
+                var urlTplParams = new Dictionary<string, object>(PathParameters);
+                if (!string.IsNullOrWhiteSpace(position)) urlTplParams.Add("faqId", position);
                 return new global::ChatService.Sdk.Faqs.Item.WithFaqItemRequestBuilder(urlTplParams, RequestAdapter);
             }
         }

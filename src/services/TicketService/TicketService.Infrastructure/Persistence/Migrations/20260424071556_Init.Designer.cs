@@ -13,15 +13,15 @@ using TicketService.Infrastructure.Persistence;
 namespace TicketService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TicketDbContext))]
-    [Migration("20260415091223_AddTicketHistory")]
-    partial class AddTicketHistory
+    [Migration("20260424071556_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -68,6 +68,10 @@ namespace TicketService.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("CustomerId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("text");
 
                     b.PrimitiveCollection<List<string>>("InternalNotes")
                         .IsRequired()

@@ -41,13 +41,7 @@ namespace ChatService.Sdk.Models
         public global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding Embedding { get; set; }
 #endif
         /// <summary>The id property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public UntypedNode? Id { get; set; }
-#nullable restore
-#else
-        public UntypedNode Id { get; set; }
-#endif
+        public int? Id { get; set; }
         /// <summary>The orgId property</summary>
         public Guid? OrgId { get; set; }
         /// <summary>The question property</summary>
@@ -89,7 +83,7 @@ namespace ChatService.Sdk.Models
                 { "category", n => { Category = n.GetStringValue(); } },
                 { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
                 { "embedding", n => { Embedding = n.GetObjectValue<global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding>(global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding.CreateFromDiscriminatorValue); } },
-                { "id", n => { Id = n.GetObjectValue<UntypedNode>(UntypedNode.CreateFromDiscriminatorValue); } },
+                { "id", n => { Id = n.GetIntValue(); } },
                 { "orgId", n => { OrgId = n.GetGuidValue(); } },
                 { "question", n => { Question = n.GetStringValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
@@ -106,7 +100,7 @@ namespace ChatService.Sdk.Models
             writer.WriteStringValue("category", Category);
             writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
             writer.WriteObjectValue<global::ChatService.Sdk.Models.FaqEntity.FaqEntity_embedding>("embedding", Embedding);
-            writer.WriteObjectValue<UntypedNode>("id", Id);
+            writer.WriteIntValue("id", Id);
             writer.WriteGuidValue("orgId", OrgId);
             writer.WriteStringValue("question", Question);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);

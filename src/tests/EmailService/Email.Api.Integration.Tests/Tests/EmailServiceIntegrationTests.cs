@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CCP.Shared.ValueObjects;
 using Email.Api.Integration.Tests.Fixtures;
 using EmailService.Domain.Interfaces;
 using EmailService.Sdk.Services;
@@ -35,21 +36,17 @@ namespace Email.Api.Integration.Tests.Tests
             IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var oldStatus = "open";
-            var newStatus = "assigned";
-            var agentName = "John Doe";
-            var agentRole = "Support Agent";
-            var agentNote = "Ticket assigned to me";
+            TicketStatus oldStatus = TicketStatus.Open;
+            TicketStatus newStatus = TicketStatus.WaitingForCustomer;
 
             await emailService.NotifyTicketStatusChangedAsync(
                 customerId,
                 "test2",
                 ticketId,
                 oldStatus,
-                newStatus,
-                agentName,
-                agentRole,
-                agentNote);
+                newStatus);
+
+
 
             _output.WriteLine($"Notification sent for status change: TicketId={ticketId}, Status={oldStatus} -> {newStatus}");
         }
@@ -62,15 +59,14 @@ namespace Email.Api.Integration.Tests.Tests
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
             var agentName = "Jane Smith";
             var agentRole = "Support Specialist";
-            var replyContent = "Thank you for your inquiry. We are working on your issue.";
 
             await emailService.NotifyTicketRepliedAsync(
                 customerId,
                 "test3",
                 ticketId,
                 agentName,
-                agentRole,
-                replyContent);
+                agentRole
+              );
 
             _output.WriteLine($"Notification sent for reply: TicketId={ticketId}, Agent={agentName}");
         }
@@ -88,7 +84,7 @@ namespace Email.Api.Integration.Tests.Tests
                 var ticketId = Random.Shared.Next(1000, int.MaxValue);
                 ticketIds.Add(ticketId);
 
-                await emailService.NotifyTicketCreatedAsync(customerId,"test4", ticketId);
+                await emailService.NotifyTicketCreatedAsync(customerId, "test4", ticketId);
             }
 
             _output.WriteLine($"Successfully sent {notificationCount} ticket creation notifications");
@@ -103,9 +99,9 @@ namespace Email.Api.Integration.Tests.Tests
 
             var statusTransitions = new[]
             {
-                ("open", "assigned"),
-                ("assigned", "in_progress"),
-                ("in_progress", "closed")
+                (TicketStatus.Open, TicketStatus.WaitingForCustomer),
+                (TicketStatus.WaitingForCustomer, TicketStatus.WaitingForSupport),
+                (TicketStatus.Blocked, TicketStatus.Closed)
             };
 
             foreach (var (oldStatus, newStatus) in statusTransitions)
@@ -115,10 +111,7 @@ namespace Email.Api.Integration.Tests.Tests
                     "test5",
                     ticketId,
                     oldStatus,
-                    newStatus,
-                    "Support Agent",
-                    "Agent Role",
-                    $"Status changed to {newStatus}");
+                    newStatus);
             }
 
             _output.WriteLine($"Successfully sent {statusTransitions.Length} status change notifications");
@@ -130,15 +123,14 @@ namespace Email.Api.Integration.Tests.Tests
             IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var replyContent = "Reply with special chars: æøå ÆØÅ !@#$%^&*() <html>";
 
             await emailService.NotifyTicketRepliedAsync(
                 customerId,
                 "test6",
-                ticketId,
-                "Agent Name",
-                "Agent Role",
-                replyContent);
+                ticketId: ticketId,
+                agentName: "Agent with Special Chars",
+                agentRole: "Support & Service"
+               );
 
             _output.WriteLine($"Notification sent with special characters");
         }
@@ -161,11 +153,8 @@ namespace Email.Api.Integration.Tests.Tests
                 customerId,
                 "test7",
                 ticketId,
-                "open",
-                "closed",
-                "Senior Agent",
-                "Support Manager",
-                longNote.ToString());
+                TicketStatus.Open,
+                TicketStatus.Closed);
 
             _output.WriteLine($"Notification sent with long agent note ({longNote.Length} chars)");
         }
@@ -182,8 +171,8 @@ namespace Email.Api.Integration.Tests.Tests
                 "test8",
                 ticketId,
                 "Agent",
-                "Support",
-                "");
+                "Support"
+                );
 
             _output.WriteLine($"Notification sent with empty reply content");
         }
@@ -195,7 +184,7 @@ namespace Email.Api.Integration.Tests.Tests
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.NotifyTicketCreatedAsync(customerId,"test9", ticketId);
+            await emailService.NotifyTicketCreatedAsync(customerId, "test9", ticketId);
 
             Assert.True(customerId != Guid.Empty);
             Assert.True(ticketId > 0);
@@ -208,21 +197,16 @@ namespace Email.Api.Integration.Tests.Tests
             IEmailSdkService emailService = _fixture.SDK.GetRequiredService<IEmailSdkService>();
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
-            var agentName = "Support Agent";
-            var agentRole = "Specialist";
-            var oldStatus = "pending";
-            var newStatus = "resolved";
-            var agentNote = "Issue resolved by updating configuration";
+            var oldStatus = TicketStatus.Open;
+            var newStatus = TicketStatus.Open;
 
             await emailService.NotifyTicketStatusChangedAsync(
                 customerId,
                 "test10",
                 ticketId,
                 oldStatus,
-                newStatus,
-                agentName,
-                agentRole,
-                agentNote);
+                newStatus);
+
 
             _output.WriteLine($"All parameters verified for status change notification");
         }

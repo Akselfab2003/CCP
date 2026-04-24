@@ -79,7 +79,7 @@ namespace TicketService.Application.Services.Ticket
                 try
                 {
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id);
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status);
                 }
                 catch (Exception ex)
                 {

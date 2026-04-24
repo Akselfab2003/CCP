@@ -45,8 +45,6 @@ namespace CCP.UI.Pages.InviteCustomer
                     Name = InviteCustomerModel.Email, // Assuming name is same as email for this example
                     OrganizationId = _uIUserContext.OrganizationId,
                 });
-                if (result.IsFailure)
-                var result = await CustomerService.InviteCustomer(InviteCustomerModel.Email);
 
                 if (result.IsSuccess)
                 {

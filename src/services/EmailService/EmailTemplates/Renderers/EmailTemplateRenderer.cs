@@ -70,6 +70,7 @@ namespace EmailTemplates.Renderes
             {
                 p.Add(nameof(TicketStatusEmail.Email), email);
                 p.Add(nameof(TicketStatusEmail.TicketId), ticketId);
+                p.Add(nameof(TicketStatusEmail.TicketStatus), ticketStatus);
                 p.Add(nameof(TicketStatusEmail.OrganizationName), organizationName);
                 p.Add(nameof(TicketStatusEmail.OldStatusLabel), oldStatusLabel);
                 p.Add(nameof(TicketStatusEmail.PortalUrl), portalUrl);

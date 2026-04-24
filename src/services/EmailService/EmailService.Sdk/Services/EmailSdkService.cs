@@ -10,7 +10,7 @@ namespace EmailService.Sdk.Services
         {
             _client = client;
         }
-        public async Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId)
+        public async Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus status)
         {
             var api = _client.Client;
 
@@ -21,6 +21,7 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.CustomerId = customerId;
                     request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
+                    request.QueryParameters.TicketStatus = status.ToString();
                 });
         }
 

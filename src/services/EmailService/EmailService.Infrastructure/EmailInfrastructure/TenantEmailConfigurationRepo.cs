@@ -88,7 +88,21 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                                                                               description: "Failed to retrieve tenant email configuration."));
             }
         }
-
+        public async Task<Result<TenantEmailConfiguration>> GetByTenantIdAsync(Guid tenantId)
+        {
+            try
+            {
+                var val = await _dbContext.TenantEmailConfigurations.SingleOrDefaultAsync(t => t.OrganizationId == tenantId);
+                return val is null
+                    ? Result.Failure<TenantEmailConfiguration>(Error.NotFound("TenantEmailConfiguration.NotFound", $"Tenant email configuration with tenant ID {tenantId} not found"))
+                    : Result.Success(val);
+            }
+            catch (Exception)
+            {
+                return Result.Failure<TenantEmailConfiguration>(Error.Failure(code: "GetTenantEmailConfigurationFailed",
+                                                                              description: "Failed to retrieve tenant email configuration."));
+            }
+        }
 
         public async Task<Result<List<TenantEmailConfiguration>>> GetAllAsync()
         {

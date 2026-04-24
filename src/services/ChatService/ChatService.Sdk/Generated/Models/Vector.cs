@@ -17,10 +17,10 @@ namespace ChatService.Sdk.Models
         /// <summary>The memory property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public List<UntypedNode>? Memory { get; set; }
+        public List<float?>? Memory { get; set; }
 #nullable restore
 #else
-        public List<UntypedNode> Memory { get; set; }
+        public List<float?> Memory { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::ChatService.Sdk.Models.Vector"/> and sets the default values.
@@ -47,7 +47,7 @@ namespace ChatService.Sdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "memory", n => { Memory = n.GetCollectionOfPrimitiveValues<UntypedNode>()?.AsList(); } },
+                { "memory", n => { Memory = n.GetCollectionOfPrimitiveValues<float?>()?.AsList(); } },
             };
         }
         /// <summary>
@@ -57,7 +57,7 @@ namespace ChatService.Sdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteCollectionOfPrimitiveValues<UntypedNode>("memory", Memory);
+            writer.WriteCollectionOfPrimitiveValues<float?>("memory", Memory);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

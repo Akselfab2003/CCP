@@ -23,6 +23,10 @@ public partial class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
+        });
 
         builder.Services.AddOpenApi()
                         .AddAuthentication();
