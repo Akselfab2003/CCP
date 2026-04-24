@@ -11,6 +11,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="PreMailer.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\CustomerService\CustomerService.Domain\CustomerService.Domain.csproj" />
+    <ProjectReference Include="..\..\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Domain\TicketService.Domain.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
     <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
   </ItemGroup>
 

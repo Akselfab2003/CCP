@@ -6,8 +6,10 @@
         Guid OrganizationId { get; }
         bool IsServiceAccount { get; }
 
+        string OrganizationName { get; }
         void SetCurrentUser(Guid userId);
-        void SetOrganizationId(Guid organizationId);
         void SetIsServiceAccount(bool isServiceAccount);
+        void SetOrganizationId(Guid organizationId);
+        void SetOrganizationName(string organizationName);
     }
 }

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
+    <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -17,26 +17,27 @@ namespace IdentityService.Sdk.Services.Customer
             _client = client;
         }
 
-        public async Task<Result> InviteCustomer(string Email, CancellationToken ct = default)
+        public async Task<Result<Guid>> InviteCustomer(string Email, CancellationToken ct = default)
         {
             try
             {
-                await _client.Client.Customer.Invite.PostAsync(req =>
+                var id = await _client.Client.Customer.Invite.PostAsync(req =>
                 {
                     req.QueryParameters.Email = Email;
                 }, cancellationToken: ct);
 
-                return Result.Success();
+                return id.HasValue ? Result.Success(id.Value) : Result.Failure<Guid>(Error.Failure("InviteCustomer.NullId", "Received null ID when inviting customer"));
+
             }
             catch (ApiException apiEx)
             {
                 _logger.LogError(apiEx, "API error inviting customer with email: {Email}", Email);
-                return Result.Failure(Error.Failure("InviteCustomer.ApiError", $"API error occurred while inviting the customer: {apiEx.Message}"));
+                return Result.Failure<Guid>(Error.Failure("InviteCustomer.ApiError", $"API error occurred while inviting the customer: {apiEx.Message}"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error inviting customer with email: {Email}", Email);
-                return Result.Failure(Error.Failure("InviteCustomer.Error", $"An error occurred while inviting the customer: {ex.Message}"));
+                return Result.Failure<Guid>(Error.Failure("InviteCustomer.Error", $"An error occurred while inviting the customer: {ex.Message}"));
             }
         }
 

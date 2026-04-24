@@ -655,7 +655,14 @@
             "format": "uuid"
           },
           "embedding": {
-            "$ref": "#/components/schemas/Vector"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Vector"
+              }
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -733,21 +740,8 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "Bearer": {
-        "type": "http",
-        "description": "JWT",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
     }
   },
-  "security": [
-    {
-      "Bearer": [ ]
-    }
-  ],
   "tags": [
     {
       "name": "Sessions"

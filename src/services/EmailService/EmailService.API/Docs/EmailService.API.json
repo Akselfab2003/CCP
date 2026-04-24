@@ -5,31 +5,43 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/EmailSendingService/send-ticket-created": {
+    "/api/EmailSendingService": {
       "post": {
         "tags": [
           "EmailSendingService"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketCreatedRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketCreatedRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketCreatedRequest"
-              }
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
-          "required": true
-        },
+          {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TicketId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TicketStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -37,31 +49,50 @@
         }
       }
     },
-    "/api/EmailSendingService/send-ticket-reply": {
+    "/api/EmailSendingService/status-change": {
       "post": {
         "tags": [
           "EmailSendingService"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketReplyRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketReplyRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketReplyRequest"
-              }
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
-          "required": true
-        },
+          {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TicketId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "newStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "oldStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -69,31 +100,277 @@
         }
       }
     },
-    "/api/EmailSendingService/send-ticket-status": {
+    "/api/EmailSendingService/reply": {
       "post": {
         "tags": [
           "EmailSendingService"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketStatusRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketStatusRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/TicketStatusRequest"
-              }
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
-          "required": true
-        },
+          {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TicketId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TicketStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentRole",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/EmailSendingService/support/customer-replied": {
+      "post": {
+        "tags": [
+          "EmailSendingService"
+        ],
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "agentEmail",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TicketId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TicketStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ticketTitle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "replyContent",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/EmailSendingService/reply-to-email": {
+      "post": {
+        "tags": [
+          "EmailSendingService"
+        ],
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "MailId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "OrganizationId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Subject",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Body",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SenderAddress",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "RecipientAddress",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ReceivedAt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrganizationId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Subject",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Body",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SenderAddress",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "RecipientAddress",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SentAt",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "TicketId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TicketId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TicketStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "organizationName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -299,258 +576,6 @@
             ]
           },
           "messageFrom": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "EmailReceived": {
-        "required": [
-          "subject",
-          "body",
-          "senderAddress",
-          "recipientAddress",
-          "receivedAt"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "organizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "subject": {
-            "type": "string"
-          },
-          "body": {
-            "type": "string"
-          },
-          "senderAddress": {
-            "type": "string"
-          },
-          "recipientAddress": {
-            "type": "string"
-          },
-          "receivedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "EmailSent": {
-        "required": [
-          "subject",
-          "body",
-          "senderAddress",
-          "recipientAddress",
-          "sentAt"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "organizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "subject": {
-            "type": "string"
-          },
-          "body": {
-            "type": "string"
-          },
-          "senderAddress": {
-            "type": "string"
-          },
-          "recipientAddress": {
-            "type": "string"
-          },
-          "sentAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "TicketCreatedRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/EmailSent"
-          },
-          "recipientName": {
-            "type": "string"
-          },
-          "organizationName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "expectedResponseTime": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "portalUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "supportTeamEmail": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "managementUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "TicketReplyRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/EmailReceived"
-          },
-          "recipientName": {
-            "type": "string"
-          },
-          "organizationName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "agentName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "agentRole": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "ticketStatus": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "ticketStatusLabel": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "replyUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "portalUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "viewHistoryUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "reopenUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "supportTeamEmail": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "managementUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "isCustomerReply": {
-            "type": "boolean"
-          }
-        }
-      },
-      "TicketStatusRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/EmailSent"
-          },
-          "recipientName": {
-            "type": "string"
-          },
-          "organizationName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "newStatus": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "newStatusLabel": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "oldStatusLabel": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "updatedByAgent": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "agentNote": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "portalUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "reopenUrl": {
             "type": [
               "null",
               "string"
