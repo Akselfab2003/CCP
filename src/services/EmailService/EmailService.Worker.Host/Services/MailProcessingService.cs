@@ -1,5 +1,6 @@
 ﻿using CCP.Shared.AuthContext;
 using CCP.Shared.ResultAbstraction;
+using CCP.Shared.ValueObjects;
 using CustomerService.Sdk.Services;
 using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
@@ -123,7 +124,7 @@ namespace EmailService.Worker.Host.Services
                     Title = Subject,
                     CustomerId = CustomerId,
                     AssignedUserId = null
-                });
+                }, origin: TicketOrigin.Email);
 
                 if (CreateTicketResult.IsFailure)
                 {

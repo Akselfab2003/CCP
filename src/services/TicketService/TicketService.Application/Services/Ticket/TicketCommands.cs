@@ -32,7 +32,7 @@ namespace TicketService.Application.Services.Ticket
             try
             {
                 var ticket = new Domain.Entities.Ticket();
-                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Description);
+                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Origin, request.Description);
                 Result<Domain.Entities.Ticket> result = await _ticketRepository.AddAsync(ticket);
 
                 await _ticketRepository.SaveChangesAsync();
