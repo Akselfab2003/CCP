@@ -1,0 +1,140 @@
+﻿@using CCP.Shared.UIContext
+@using CCP.Shared.ValueObjects
+
+<!-- Greeting -->
+<div class="dash-greeting">
+    <div>
+        <h2 class="dash-greeting-title">Good morning, @UserContext.FirstName 👋</h2>
+        <p class="dash-greeting-sub">Here's the latest on your support tickets.</p>
+    </div>
+    <span class="dash-date">@DateTime.Now.ToString("dddd, MMMM d")</span>
+</div>
+
+<!-- Stat Cards -->
+<div class="dash-stats customer-stats">
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-header">
+            <span class="dash-stat-label">Open Tickets</span>
+            <span class="dash-stat-icon" style="color:#818cf8;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                </svg>
+            </span>
+        </div>
+        <div class="dash-stat-value">
+            @if (_openCount is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_openCount
+            }
+        </div>
+        <div class="dash-stat-delta delta-neutral">across all your tickets</div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-header">
+            <span class="dash-stat-label">Awaiting Your Reply</span>
+            <span class="dash-stat-icon" style="color:#f87171;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+            </span>
+        </div>
+        <div class="dash-stat-value">
+            @if (_waitingForCustomerCount is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_waitingForCustomerCount
+            }
+        </div>
+        <div class="dash-stat-delta delta-neutral">needs your attention</div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-header">
+            <span class="dash-stat-label">Waiting for Supporter</span>
+            <span class="dash-stat-icon" style="color:#34d399;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </span>
+        </div>
+        <div class="dash-stat-value">
+            @if (_waitingForSupporterCount is null)
+            {
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+            }
+            else
+            {
+                @_waitingForSupporterCount
+            }
+        </div>
+        <div class="dash-stat-delta delta-neutral">waiting for a supporter to take action</div>
+    </div>
+
+</div>
+
+<!-- Full-width activity feed -->
+<div class="dash-card dash-updates customer-updates">
+    <div class="dash-card-header">
+        <span class="dash-card-title">Ticket Activity</span>
+        <a href="/tickets" class="dash-card-link">View all →</a>
+    </div>
+
+    <div class="dash-feed">
+
+        @if (_historyEntries is null)
+        {
+            <div class="dash-feed-loading">
+                <svg class="dash-stat-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+                Loading activity...
+            </div>
+        }
+        else if (!_historyEntries.Any())
+        {
+            <div style="padding: 20px 0; text-align:center; color:var(--ccp-text-lo); font-size:13px;">
+                No recent activity yet.
+            </div>
+        }
+        else
+        {
+            @foreach (var entry in _historyEntries)
+            {
+                <div class="dash-feed-item dash-feed-item--clickable" @onclick="() => NavigateToTicket(entry.TicketId)">
+                    <div class="dash-feed-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                        @GetHistoryInitials(entry)
+                    </div>
+                    <div class="dash-feed-body">
+                        <div class="dash-feed-top">
+                            <span class="dash-feed-ticket">#TK-@entry.TicketId</span>
+                            <span class="dash-feed-time">@GetRelativeTime(entry.OccurredAt)</span>
+                        </div>
+                        <p class="dash-feed-text">@GetHistoryDescription(entry)</p>
+                        <div class="dash-feed-tags">
+                            <span class="dash-tag @GetHistoryTagClass(entry)">@GetHistoryTagLabel(entry)</span>
+                        </div>
+                    </div>
+                    <span class="dash-feed-dot @GetHistoryDotClass(entry)"></span>
+                </div>
+            }
+        }
+
+    </div>
+</div>

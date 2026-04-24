@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Mail;
-using System.Text;
-using MailKit;
+﻿using MailKit;
 using MailKit.Net.Imap;
 
 namespace EmailService.Worker.Host.Services
@@ -11,7 +7,7 @@ namespace EmailService.Worker.Host.Services
     {
         private readonly string hostUrl;
         private readonly IConfiguration configuration;
-        private readonly int port = 143;
+        private readonly int port = 993;
 
         public ImapMailReciver(string hostUrl, IConfiguration configuration)
         {
@@ -21,34 +17,42 @@ namespace EmailService.Worker.Host.Services
         public async Task ListenerAsync()
         {
             using var client = new ImapClient();
+            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await client.ConnectAsync(hostUrl, port, false);
-            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
+            await client.ConnectAsync(hostUrl, port, true);
+            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername")!, configuration.GetValue<string>("emailWorkerServicePassword")!);
+            if (client.Inbox == null)
+                return;
 
             await client.Inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
             client.Inbox.CountChanged += async (sender, e) =>
             {
                 var inbox = sender as IMailFolder;
-                var mails = await inbox.FetchAsync(0, -1, MailKit.MessageSummaryItems.Full | MailKit.MessageSummaryItems.UniqueId);
-                foreach (var item in mails)
+                if (inbox != null)
                 {
-                    Console.WriteLine(item.Body);
-                    Console.WriteLine(item.Date);
-                    Console.WriteLine(item.NormalizedSubject);
+                    var mails = await inbox.FetchAsync(0, -1, MailKit.MessageSummaryItems.Full | MailKit.MessageSummaryItems.UniqueId);
+                    foreach (var item in mails)
+                    {
+                        Console.WriteLine(item.Body);
+                        Console.WriteLine(item.Date);
+                        Console.WriteLine(item.NormalizedSubject);
+                    }
                 }
             };
-            await Task.Delay(-1);
         }
 
         public async Task ConnectAsync()
         {
             using var client = new ImapClient();
+            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await client.ConnectAsync(hostUrl, port, false);
-            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername"), configuration.GetValue<string>("emailWorkerServicePassword"));
+            await client.ConnectAsync(hostUrl, port, true);
+            await client.AuthenticateAsync(configuration.GetValue<string>("emailWorkerServiceUsername")!, configuration.GetValue<string>("emailWorkerServicePassword")!);
 
             var inbox = client.Inbox;
-            inbox.Open(MailKit.FolderAccess.ReadOnly);
+            if (inbox == null)
+                return;
+            await inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
 
             Console.WriteLine("Total messages: {0}", inbox.Count);
             Console.WriteLine("Recent messages: {0}", inbox.Recent);

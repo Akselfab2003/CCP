@@ -8,17 +8,17 @@ namespace TicketService.Infrastructure.Tests.Fixtures
     {
         public override string DBResourceName => "ticketdb";
 
-        public override string APIResourceName => "ticketservice-api";
+        public override string APIResourceName => "postgres";
         public override List<string> RequiredResources =>
         [
-            APIResourceName,
-            "keycloak",
             "postgres",
+            "RabbitMQ",
             DBResourceName
         ];
 
         public async ValueTask InitializeAsync()
         {
+            DefaultTimeout = TimeSpan.FromSeconds(30);
             await Initialize();
             DB_Services.AddInfrastructure();
             await BuildProviders();

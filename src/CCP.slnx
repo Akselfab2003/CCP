@@ -7,7 +7,16 @@
   <Folder Name="/src/services/" />
   <Folder Name="/src/services/ChatService/">
     <Project Path="services/ChatService/ChatService.Api/ChatService.Api.csproj" />
+    <Project Path="services/ChatService/ChatService.Application/ChatService.Application.csproj" Id="e4d69a0c-cf51-45b5-9138-3a24f9dbaada">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="services/ChatService/ChatService.Domain/ChatService.Domain.csproj" Id="d0f65ece-7327-4c2a-a9d3-42dc08f2017e">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
     <Project Path="services/ChatService/ChatService.Infrastructure/ChatService.Infrastructure.csproj" />
+    <Project Path="services/ChatService/ChatService.Sdk/ChatService.Sdk.csproj" Id="49cc360d-d62a-466b-abf8-1d4d35239432">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
   </Folder>
   <Folder Name="/src/services/CustomerService/">
     <Project Path="services/CustomerService/CustomerService.Api/CustomerService.Api.csproj" Id="ac041ea3-0d13-416f-bdfd-3204ec40793d" />
@@ -16,6 +25,10 @@
     <Project Path="services/CustomerService/CustomerService.Infrastructure/CustomerService.Infrastructure.csproj" Id="89a63df1-ea30-49fd-a24e-79567250d400" />
     <Project Path="services/CustomerService/CustomerService.Sdk/CustomerService.Sdk.csproj" />
   </Folder>
+  <Folder Name="/src/services/Gateway/">
+    <Project Path="services/Gateway/Gateway.Api/Gateway.Api.csproj" />
+    <Project Path="services/Gateway/Gateway.Sdk/Gateway.Sdk.csproj" />
+  </Folder>
   <Folder Name="/src/services/EmailService/">
     <Project Path="services/EmailService/EmailService.API/EmailService.API.csproj" />
     <Project Path="services/EmailService/EmailService.Application/EmailService.Application.csproj" Id="96010c8e-4318-417b-9fa8-971c1c1f9699" />
@@ -23,6 +36,10 @@
     <Project Path="services/EmailService/EmailService.Infrastructure/EmailService.Infrastructure.csproj" Id="fb559eea-ca47-42f7-9464-b1d95344e0a6" />
     <Project Path="services/EmailService/EmailService.Sdk/EmailService.Sdk.csproj" Id="24c1b4b2-ec7d-499e-957a-0f9e721796ed" />
     <Project Path="services/EmailService/EmailTemplates/EmailTemplates.csproj" Id="40b34755-f455-469f-b1d2-2759ba89a77b" />
+    <Project Path="services/EmailService/MailCow.Sdk/MailCow.Sdk.csproj" Id="79add53b-9992-4da0-b44b-c064c935d1bf" />
+  </Folder>
+  <Folder Name="/src/services/EmailService/Worker/">
+    <Project Path="services/EmailService/EmailService.Worker.Host/EmailService.Worker.Host.csproj" />
   </Folder>
   <Folder Name="/src/services/IdentityService/">
     <Project Path="services/IdentityService/IdentityService.API/IdentityService.API.csproj" />

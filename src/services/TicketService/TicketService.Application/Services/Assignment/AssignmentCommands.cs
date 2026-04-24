@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
+using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
+using Wolverine;
 
 namespace TicketService.Application.Services.Assignment
 {
@@ -9,17 +11,23 @@ namespace TicketService.Application.Services.Assignment
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly ICurrentUser _currentUser;
+        private readonly IMessageBus _messageBus;
+        private readonly ITicketHistoryRepository _historyRepository;
 
         public AssignmentCommands(
             ILogger<AssignmentCommands> logger,
             IAssignmentRepository assignmentRepository,
             ITicketRepositoryCommands ticketRepository,
-            ICurrentUser currentUser)
+            ICurrentUser currentUser,
+            IMessageBus messageBus,
+            ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _assignmentRepository = assignmentRepository;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
+            _messageBus = messageBus;
+            _historyRepository = historyRepository;
         }
 
         public async Task<Result<Guid>> CreateAssignmentAsync(int ticketId, Guid AssignUserId)
@@ -37,7 +45,6 @@ namespace TicketService.Application.Services.Assignment
                 }
 
                 await _assignmentRepository.SaveChangesAsync();
-
                 return Result.Success(result.Value.Id);
             }
             catch (Exception ex)
@@ -62,6 +69,7 @@ namespace TicketService.Application.Services.Assignment
                 else
                 {
                     Domain.Entities.Assignment existingAssignment = assignment.Value;
+                    var previousUserId = existingAssignment.UserId;
                     existingAssignment.UpdateAssignment(assignUserId, _currentUser.UserId);
 
                     Result<Domain.Entities.Assignment> updateResult = await _assignmentRepository.UpdateAsync(existingAssignment);
@@ -74,11 +82,18 @@ namespace TicketService.Application.Services.Assignment
 
                     await _assignmentRepository.SaveChangesAsync();
                     result = Result.Success(existingAssignment.Id);
+
+                    await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                        ticketId,
+                        actorUserId: _currentUser.UserId,
+                        eventType: "AssignmentRemoved",
+                        oldValue: previousUserId.ToString(),
+                        newValue: null
+                    ));
                 }
 
                 if (result.IsSuccess)
                 {
-                    // ← Write the assignment ID back onto the ticket
                     var ticketResult = await _ticketRepository.GetTicket(ticketId);
                     if (ticketResult.IsSuccess)
                     {
@@ -89,6 +104,16 @@ namespace TicketService.Application.Services.Assignment
                     {
                         _logger.LogWarning("Assignment saved but could not update AssignmentId on ticket {TicketId}: {Error}", ticketId, ticketResult.Error);
                     }
+
+                    await _historyRepository.AddAsync(TicketHistoryEntry.Create(
+                        ticketId,
+                        actorUserId: assignUserId,
+                        eventType: "AssignedToSupporter",
+                        oldValue: null,
+                        newValue: null
+                    ));
+
+                    await NotifyAssignmentAsync(ticketId, assignUserId);
                 }
 
                 return result;
@@ -97,6 +122,24 @@ namespace TicketService.Application.Services.Assignment
             {
                 _logger.LogError(ex, "An error occurred while creating or updating the assignment.");
                 return Result.Failure<Guid>(Error.Failure(code: "AssignmentCreationOrUpdateFailed", description: "An error occurred while creating or updating the assignment."));
+            }
+        }
+
+        private async Task NotifyAssignmentAsync(int ticketId, Guid assignedUserId)
+        {
+            try
+            {
+                var assignmentUpdateEvent = new CCP.Shared.Events.TicketAssignmentUpdated
+                {
+                    ticketId = ticketId,
+                    assignedUserId = assignedUserId
+                };
+
+                await _messageBus.PublishAsync(assignmentUpdateEvent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to notify MessagingService of assignment update for ticket {TicketId}", ticketId);
             }
         }
     }

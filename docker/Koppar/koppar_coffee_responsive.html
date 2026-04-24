@@ -1,0 +1,1422 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ccp.northflow.dev/chatbot.bundle.js"></script>
+    <link href="https://ccp.northflow.dev/ChatBot.css" rel="stylesheet" />
+    <title>Koppar — Small-batch coffee roasters</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --cream: #faf7f2;
+        --parchment: #f0ead8;
+        --brown: #2c1a0e;
+        --brown2: #5c3d25;
+        --brown3: #9b6b45;
+        --warm: #c8863c;
+        --muted: #9e8c7a;
+        --border: #e0d6c4;
+        --white: #ffffff;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Jost", sans-serif;
+        background: var(--cream);
+        color: var(--brown);
+        font-size: 16px;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      nav {
+        background: var(--brown);
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+      }
+      .logo-type {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: var(--cream);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .logo-type em {
+        color: var(--warm);
+        font-style: normal;
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: rgba(250, 247, 242, 0.7);
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--cream);
+      }
+      .nav-cart {
+        background: var(--warm);
+        color: var(--white);
+        padding: 0.4rem 1rem;
+        border-radius: 2px;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .hamburger {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        padding: 4px;
+      }
+      .hamburger span {
+        display: block;
+        width: 22px;
+        height: 1.5px;
+        background: var(--cream);
+        transition: all 0.3s;
+      }
+      .mobile-menu {
+        display: none;
+        background: var(--brown);
+        flex-direction: column;
+        gap: 0;
+        border-top: 1px solid rgba(250, 247, 242, 0.1);
+      }
+      .mobile-menu.open {
+        display: flex;
+      }
+      .mobile-menu a {
+        text-decoration: none;
+        color: rgba(250, 247, 242, 0.75);
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(250, 247, 242, 0.06);
+        transition: color 0.2s;
+      }
+      .mobile-menu a:hover {
+        color: var(--cream);
+      }
+      .mobile-menu .m-cart {
+        color: var(--warm);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 88vh;
+      }
+      .hero-left {
+        background: var(--brown);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 5rem 3.5rem 5rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-left::after {
+        content: "";
+        position: absolute;
+        bottom: -40px;
+        right: -40px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        border: 50px solid rgba(200, 134, 60, 0.1);
+      }
+      .hero-eyebrow {
+        font-size: 0.65rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--warm);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .hero-eyebrow::before {
+        content: "";
+        display: block;
+        width: 24px;
+        height: 1px;
+        background: var(--warm);
+      }
+      h1 {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(2.4rem, 5vw, 4.6rem);
+        line-height: 1.06;
+        color: var(--cream);
+        letter-spacing: -0.01em;
+        margin-bottom: 1.25rem;
+      }
+      h1 em {
+        color: var(--warm);
+        font-style: italic;
+      }
+      .hero-desc {
+        font-size: 0.95rem;
+        color: rgba(250, 247, 242, 0.62);
+        max-width: 380px;
+        line-height: 1.8;
+        font-weight: 300;
+        margin-bottom: 2rem;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .btn-primary {
+        background: var(--warm);
+        color: var(--white);
+        padding: 0.8rem 1.6rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 2px;
+        transition: opacity 0.2s;
+        display: inline-block;
+      }
+      .btn-primary:hover {
+        opacity: 0.85;
+      }
+      .btn-outline {
+        border: 1px solid rgba(250, 247, 242, 0.3);
+        color: rgba(250, 247, 242, 0.8);
+        padding: 0.8rem 1.6rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 2px;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+        display: inline-block;
+      }
+      .btn-outline:hover {
+        border-color: var(--cream);
+        color: var(--cream);
+      }
+      .hero-right {
+        background: var(--parchment);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem;
+        position: relative;
+      }
+      .hero-img-wrap {
+        width: 100%;
+        max-width: 340px;
+        position: relative;
+      }
+      .hero-photo-placeholder {
+        width: 100%;
+        aspect-ratio: 3/4;
+        background: var(--brown2);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-tag {
+        position: absolute;
+        bottom: -14px;
+        right: -12px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .tag-roast {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--warm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .tag-info .label {
+        font-size: 0.6rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .tag-info .val {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--brown);
+      }
+      .origin-tag {
+        position: absolute;
+        top: 1rem;
+        left: -16px;
+        background: var(--brown);
+        color: var(--cream);
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.8rem;
+        border-radius: 2px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .strip {
+        background: var(--brown);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem 2rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(250, 247, 242, 0.08);
+      }
+      .strip-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(250, 247, 242, 0.5);
+        font-size: 0.7rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .strip-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--warm);
+        flex-shrink: 0;
+      }
+
+      .section {
+        padding: 4rem 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .section-label {
+        font-size: 0.62rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--warm);
+        margin-bottom: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-label::before {
+        content: "";
+        display: block;
+        width: 18px;
+        height: 1px;
+        background: var(--warm);
+      }
+      h2 {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        line-height: 1.1;
+        color: var(--brown);
+        letter-spacing: -0.01em;
+        margin-bottom: 0.85rem;
+      }
+      .section-sub {
+        font-size: 0.9rem;
+        color: var(--brown2);
+        max-width: 480px;
+        font-weight: 300;
+        line-height: 1.8;
+        margin-bottom: 2.5rem;
+      }
+
+      .coffees-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+      }
+      .coffee-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: transform 0.25s;
+      }
+      .coffee-card:hover {
+        transform: translateY(-3px);
+      }
+      .coffee-img {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .roast-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.58rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 500;
+        padding: 3px 9px;
+        border-radius: 2px;
+      }
+      .badge-light {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .badge-medium {
+        background: #fed7aa;
+        color: #7c2d12;
+      }
+      .badge-dark {
+        background: var(--brown);
+        color: var(--cream);
+      }
+      .coffee-body {
+        padding: 1.1rem;
+      }
+      .coffee-origin {
+        font-size: 0.62rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--warm);
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+      .coffee-name {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--brown);
+        margin-bottom: 0.35rem;
+      }
+      .coffee-desc {
+        font-size: 0.78rem;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 0.9rem;
+      }
+      .coffee-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .coffee-price {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--brown);
+      }
+      .coffee-price span {
+        font-size: 0.72rem;
+        font-family: "Jost", sans-serif;
+        color: var(--muted);
+        font-weight: 300;
+      }
+      .add-btn {
+        background: var(--warm);
+        color: var(--white);
+        border: none;
+        padding: 0.42rem 0.9rem;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 500;
+        transition: opacity 0.2s;
+        font-family: "Jost", sans-serif;
+        min-height: 36px;
+      }
+      .add-btn:hover {
+        opacity: 0.85;
+      }
+
+      .values-wrap {
+        background: var(--parchment);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 4rem 1.5rem;
+      }
+      .values-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 4rem;
+        align-items: start;
+      }
+      .values-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+      }
+      .value-item {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+      .value-num {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: var(--border);
+        line-height: 1;
+        min-width: 36px;
+      }
+      .value-item h4 {
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: var(--brown);
+        margin-bottom: 0.2rem;
+      }
+      .value-item p {
+        font-size: 0.78rem;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .origins-section {
+        background: var(--brown);
+        padding: 4rem 1.5rem;
+      }
+      .origins-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .origins-inner .section-label {
+        color: var(--warm);
+      }
+      .origins-inner h2 {
+        color: var(--cream);
+      }
+      .origins-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2.5rem;
+      }
+      .origin-card {
+        border: 1px solid rgba(250, 247, 242, 0.12);
+        border-radius: 4px;
+        padding: 1.25rem 1rem;
+        transition: border-color 0.2s;
+      }
+      .origin-card:hover {
+        border-color: var(--warm);
+      }
+      .origin-flag {
+        font-size: 1.6rem;
+        margin-bottom: 0.6rem;
+        display: block;
+      }
+      .origin-country {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1.15rem;
+        color: var(--cream);
+        margin-bottom: 0.2rem;
+      }
+      .origin-region {
+        font-size: 0.65rem;
+        color: rgba(250, 247, 242, 0.42);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
+      }
+      .origin-notes {
+        font-size: 0.76rem;
+        color: rgba(250, 247, 242, 0.58);
+        line-height: 1.6;
+      }
+      .altitude-pill {
+        display: inline-block;
+        margin-top: 0.65rem;
+        background: rgba(200, 134, 60, 0.18);
+        color: var(--warm);
+        font-size: 0.58rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 3px 9px;
+        border-radius: 100px;
+        font-weight: 500;
+      }
+
+      .subscription-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .sub-left {
+        background: var(--warm);
+        padding: 4rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .sub-left .section-label {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .sub-left .section-label::before {
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .sub-left h2 {
+        color: var(--white);
+      }
+      .sub-left p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        font-weight: 300;
+        line-height: 1.75;
+        margin-bottom: 1.75rem;
+        max-width: 340px;
+      }
+      .btn-dark {
+        background: var(--brown);
+        color: var(--cream);
+        padding: 0.8rem 1.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 2px;
+        display: inline-block;
+        transition: opacity 0.2s;
+      }
+      .btn-dark:hover {
+        opacity: 0.85;
+      }
+      .sub-right {
+        background: var(--parchment);
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1rem;
+      }
+      .plan-row {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1.1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: border-color 0.2s;
+        cursor: pointer;
+      }
+      .plan-row:hover,
+      .plan-row.active {
+        border-color: var(--warm);
+      }
+      .plan-row.active {
+        background: #fffdf9;
+      }
+      .plan-info h4 {
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: var(--brown);
+        margin-bottom: 0.12rem;
+      }
+      .plan-info p {
+        font-size: 0.72rem;
+        color: var(--muted);
+        font-weight: 300;
+      }
+      .plan-price-tag {
+        text-align: right;
+        flex-shrink: 0;
+        margin-left: 0.75rem;
+      }
+      .plan-price-tag strong {
+        display: block;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1.3rem;
+        color: var(--brown);
+      }
+      .plan-price-tag small {
+        font-size: 0.67rem;
+        color: var(--muted);
+      }
+      .plan-check {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        margin-right: 0.85rem;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .plan-row.active .plan-check {
+        background: var(--warm);
+        border-color: var(--warm);
+      }
+      .plan-row.active .plan-check::after {
+        content: "";
+        display: block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: white;
+      }
+
+      .press-wrap {
+        background: var(--cream);
+        border-top: 1px solid var(--border);
+        padding: 2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem 2.5rem;
+      }
+      .press-label {
+        font-size: 0.62rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .press-name {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: rgba(44, 26, 14, 0.28);
+        letter-spacing: 0.04em;
+      }
+
+      footer {
+        background: var(--brown);
+        padding: 3rem 1.5rem 1.75rem;
+      }
+      .footer-top {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 2.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-bottom: 2.5rem;
+        border-bottom: 1px solid rgba(250, 247, 242, 0.1);
+      }
+      .footer-brand .logo-type {
+        font-size: 1.3rem;
+        display: block;
+        margin-bottom: 0.85rem;
+      }
+      .footer-brand p {
+        font-size: 0.78rem;
+        color: rgba(250, 247, 242, 0.42);
+        line-height: 1.7;
+        max-width: 240px;
+        font-weight: 300;
+      }
+      .footer-col h5 {
+        font-size: 0.62rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--warm);
+        margin-bottom: 0.85rem;
+        font-weight: 500;
+      }
+      .footer-col a {
+        display: block;
+        color: rgba(250, 247, 242, 0.45);
+        font-size: 0.78rem;
+        text-decoration: none;
+        margin-bottom: 0.45rem;
+        transition: color 0.2s;
+        font-weight: 300;
+      }
+      .footer-col a:hover {
+        color: var(--cream);
+      }
+      .footer-bottom {
+        max-width: 1200px;
+        margin: 1.75rem auto 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .footer-bottom p {
+        font-size: 0.7rem;
+        color: rgba(250, 247, 242, 0.28);
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          padding: 0 1rem;
+        }
+        .nav-links {
+          display: none;
+        }
+        .nav-cart {
+          display: none;
+        }
+        .hamburger {
+          display: flex;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+        .hero-right {
+          display: none;
+        }
+        .hero-left {
+          padding: 3rem 1.25rem 3.5rem;
+          min-height: 88vw;
+          justify-content: flex-end;
+          background: linear-gradient(160deg, var(--brown) 60%, #3d2010);
+        }
+        .hero-left::after {
+          display: none;
+        }
+        h1 {
+          font-size: clamp(2.2rem, 9vw, 3rem);
+        }
+        .hero-desc {
+          font-size: 0.88rem;
+          max-width: 100%;
+        }
+        .hero-actions {
+          flex-direction: column;
+          gap: 0.65rem;
+        }
+        .btn-primary,
+        .btn-outline {
+          text-align: center;
+          padding: 0.9rem 1.5rem;
+          font-size: 0.78rem;
+        }
+
+        .strip {
+          gap: 0.4rem 1.25rem;
+          padding: 0.85rem 1rem;
+        }
+        .strip-item {
+          font-size: 0.65rem;
+        }
+
+        .section {
+          padding: 3rem 1.1rem;
+        }
+        .coffees-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .values-wrap {
+          padding: 3rem 1.1rem;
+        }
+        .values-grid {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+
+        .origins-section {
+          padding: 3rem 1.1rem;
+        }
+        .origins-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 0.85rem;
+        }
+        .origin-card {
+          padding: 1rem 0.85rem;
+        }
+
+        .subscription-wrap {
+          grid-template-columns: 1fr;
+        }
+        .sub-left {
+          padding: 3rem 1.25rem;
+        }
+        .sub-left p {
+          max-width: 100%;
+        }
+        .sub-right {
+          padding: 2rem 1.25rem;
+        }
+
+        .footer-top {
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+        }
+        .footer-brand {
+          grid-column: 1/-1;
+        }
+        .footer-bottom {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.3rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .origins-grid {
+          grid-template-columns: 1fr;
+        }
+        .footer-top {
+          grid-template-columns: 1fr 1fr;
+        }
+        h1 {
+          font-size: 2.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="logo-type">K<em>o</em>ppar</div>
+      <div class="nav-links">
+        <a href="#coffees">Shop</a>
+        <a href="#origins">Origins</a>
+        <a href="#subscribe">Subscribe</a>
+        <a href="#">Our story</a>
+        <a href="#">Wholesale</a>
+        <a href="#" class="nav-cart">Basket (0)</a>
+      </div>
+      <div class="hamburger" onclick="toggleMenu()" id="ham">
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#coffees" onclick="closeMenu()">Shop coffees</a>
+      <a href="#origins" onclick="closeMenu()">Our origins</a>
+      <a href="#subscribe" onclick="closeMenu()">Subscribe</a>
+      <a href="#" onclick="closeMenu()">Our story</a>
+      <a href="#" onclick="closeMenu()">Wholesale</a>
+      <a href="#" class="m-cart" onclick="closeMenu()">Basket (0)</a>
+    </div>
+
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">Single-origin roasters · Est. 2017</div>
+        <h1>Coffee worth<br />waking up<br /><em>early for.</em></h1>
+        <p class="hero-desc">
+          We travel to the farm, select the harvest, and roast every batch in
+          Copenhagen. Each bag ships within 48 hours of roasting.
+        </p>
+        <div class="hero-actions">
+          <a href="#coffees" class="btn-primary">Shop all coffees</a>
+          <a href="#subscribe" class="btn-outline">Start a subscription</a>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-img-wrap">
+          <div class="hero-photo-placeholder">
+            <svg
+              width="140"
+              height="140"
+              viewBox="0 0 120 120"
+              fill="none"
+              style="opacity: 0.18"
+            >
+              <ellipse cx="60" cy="85" rx="32" ry="8" fill="white" />
+              <path d="M28 45 Q30 90 60 90 Q90 90 92 45 Z" fill="white" />
+              <path
+                d="M92 55 Q108 55 108 65 Q108 75 92 75"
+                stroke="white"
+                stroke-width="4"
+                fill="none"
+              />
+              <path
+                d="M45 30 Q45 20 55 15"
+                stroke="white"
+                stroke-width="2.5"
+                fill="none"
+                stroke-linecap="round"
+              />
+              <path
+                d="M60 28 Q60 18 70 13"
+                stroke="white"
+                stroke-width="2.5"
+                fill="none"
+                stroke-linecap="round"
+              />
+            </svg>
+            <div
+              style="
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 40%;
+                background: linear-gradient(
+                  transparent,
+                  rgba(44, 26, 14, 0.55)
+                );
+              "
+            ></div>
+            <div
+              style="
+                position: absolute;
+                bottom: 14px;
+                left: 14px;
+                right: 14px;
+                color: rgba(250, 247, 242, 0.85);
+                font-size: 0.72rem;
+                font-weight: 300;
+                letter-spacing: 0.04em;
+              "
+            >
+              Fresh-roasted. Direct trade. Carbon neutral.
+            </div>
+          </div>
+          <div class="origin-tag">Ethiopia · Yirgacheffe</div>
+          <div class="hero-tag">
+            <div class="tag-roast">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="white">
+                <circle cx="8" cy="8" r="4.5" />
+                <path
+                  d="M8 2V1M8 15v-1M2 8H1M15 8h-1M4.2 4.2l-.7-.7M12.5 12.5l-.7-.7M12.5 4.2l.7-.7M3.5 12.5l.7-.7"
+                  stroke="white"
+                  stroke-width="1.2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <div class="tag-info">
+              <div class="label">Roasted on</div>
+              <div class="val">Today, 06:30am</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="strip">
+      <div class="strip-item">
+        <span class="strip-dot"></span>Free shipping over €40
+      </div>
+      <div class="strip-item">
+        <span class="strip-dot"></span>Roasted to order
+      </div>
+      <div class="strip-item"><span class="strip-dot"></span>Direct trade</div>
+      <div class="strip-item">
+        <span class="strip-dot"></span>Ships to 38 countries
+      </div>
+      <div class="strip-item"><span class="strip-dot"></span>Pause anytime</div>
+    </div>
+
+    <section class="section" id="coffees">
+      <div class="section-label">Current harvest</div>
+      <h2>This season's roasts</h2>
+      <p class="section-sub">
+        We roast in small batches every Tuesday and Friday. When it's gone, it's
+        gone.
+      </p>
+      <div class="coffees-grid">
+        <div class="coffee-card">
+          <div class="coffee-img" style="background: #f5e6c8">
+            <svg width="72" height="72" viewBox="0 0 80 80" fill="none">
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="28"
+                ry="20"
+                fill="#c8863c"
+                opacity="0.22"
+              />
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="18"
+                ry="12"
+                fill="#c8863c"
+                opacity="0.38"
+              />
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="8"
+                ry="5"
+                fill="#c8863c"
+                opacity="0.65"
+              />
+            </svg>
+            <span class="roast-badge badge-light">Light roast</span>
+          </div>
+          <div class="coffee-body">
+            <div class="coffee-origin">Ethiopia · Yirgacheffe</div>
+            <div class="coffee-name">Birhan Natural</div>
+            <p class="coffee-desc">
+              Strawberry jam, jasmine, and a long sweet finish. A natural
+              process that rewards a slow pour.
+            </p>
+            <div class="coffee-footer">
+              <div class="coffee-price">€16.50 <span>/ 250g</span></div>
+              <button class="add-btn">Add to bag</button>
+            </div>
+          </div>
+        </div>
+        <div class="coffee-card">
+          <div class="coffee-img" style="background: #e8d5b0">
+            <svg width="72" height="72" viewBox="0 0 80 80" fill="none">
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="28"
+                ry="20"
+                fill="#9b6b45"
+                opacity="0.22"
+              />
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="18"
+                ry="12"
+                fill="#9b6b45"
+                opacity="0.38"
+              />
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="8"
+                ry="5"
+                fill="#9b6b45"
+                opacity="0.65"
+              />
+            </svg>
+            <span class="roast-badge badge-medium">Medium roast</span>
+          </div>
+          <div class="coffee-body">
+            <div class="coffee-origin">Colombia · Huila</div>
+            <div class="coffee-name">Finca La Palma</div>
+            <p class="coffee-desc">
+              Caramel apple, hazelnut, and a silky body. Perfect for espresso
+              and filter alike.
+            </p>
+            <div class="coffee-footer">
+              <div class="coffee-price">€15.00 <span>/ 250g</span></div>
+              <button class="add-btn">Add to bag</button>
+            </div>
+          </div>
+        </div>
+        <div class="coffee-card">
+          <div class="coffee-img" style="background: #d4bfa0">
+            <svg width="72" height="72" viewBox="0 0 80 80" fill="none">
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="28"
+                ry="20"
+                fill="#5c3d25"
+                opacity="0.22"
+              />
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="18"
+                ry="12"
+                fill="#5c3d25"
+                opacity="0.38"
+              />
+              <ellipse
+                cx="40"
+                cy="40"
+                rx="8"
+                ry="5"
+                fill="#5c3d25"
+                opacity="0.65"
+              />
+            </svg>
+            <span class="roast-badge badge-dark">Dark roast</span>
+          </div>
+          <div class="coffee-body">
+            <div class="coffee-origin">Sumatra · Mandheling</div>
+            <div class="coffee-name">Gunung Tua</div>
+            <p class="coffee-desc">
+              Dark chocolate, tobacco, and cedar. Full-bodied and earthy — the
+              one for moka pot mornings.
+            </p>
+            <div class="coffee-footer">
+              <div class="coffee-price">€14.50 <span>/ 250g</span></div>
+              <button class="add-btn">Add to bag</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="values-wrap">
+      <div class="values-grid">
+        <div>
+          <div class="section-label">Why Koppar</div>
+          <h2>The obsessive<br />details matter</h2>
+        </div>
+        <div class="values-list">
+          <div class="value-item">
+            <div class="value-num">01</div>
+            <div>
+              <h4>Direct from farmers</h4>
+              <p>
+                We visit every farm we buy from. Prices paid are above Fair
+                Trade minimums — always. You can trace every bag back to the
+                picker.
+              </p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-num">02</div>
+            <div>
+              <h4>48-hour freshness guarantee</h4>
+              <p>
+                Roasted Tuesday and Friday only. Your order ships the next
+                business day. We never stockpile roasted coffee.
+              </p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-num">03</div>
+            <div>
+              <h4>Compostable packaging</h4>
+              <p>
+                Our bags are fully home-compostable. The mailer is recycled
+                content. Carbon offset shipping on every order.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="origins-section" id="origins">
+      <div class="origins-inner">
+        <div class="section-label">Where we travel</div>
+        <h2 style="color: var(--cream)">Four origins,<br />one obsession</h2>
+        <div class="origins-grid">
+          <div class="origin-card">
+            <span
+              class="origin-flag"
+              style="font-size: 1.6rem; margin-bottom: 0.6rem; display: block"
+              >🇪🇹</span
+            >
+            <div class="origin-country">Ethiopia</div>
+            <div class="origin-region">Yirgacheffe & Guji</div>
+            <p class="origin-notes">
+              The birthplace of coffee. Fruity naturals and bright florals from
+              heirloom varieties grown in forest gardens.
+            </p>
+            <span class="altitude-pill">1,800 – 2,200 m</span>
+          </div>
+          <div class="origin-card">
+            <span
+              class="origin-flag"
+              style="font-size: 1.6rem; margin-bottom: 0.6rem; display: block"
+              >🇨🇴</span
+            >
+            <div class="origin-country">Colombia</div>
+            <div class="origin-region">Huila & Nariño</div>
+            <p class="origin-notes">
+              Small family farms perched above the clouds. Clean, sweet washed
+              coffees with classic caramel balance.
+            </p>
+            <span class="altitude-pill">1,600 – 2,000 m</span>
+          </div>
+          <div class="origin-card">
+            <span
+              class="origin-flag"
+              style="font-size: 1.6rem; margin-bottom: 0.6rem; display: block"
+              >🇮🇩</span
+            >
+            <div class="origin-country">Indonesia</div>
+            <div class="origin-region">Sumatra · Aceh</div>
+            <p class="origin-notes">
+              Wet-hulled process gives Sumatran lots their signature earthy
+              depth. Rich, heavy, and deeply comforting.
+            </p>
+            <span class="altitude-pill">1,200 – 1,600 m</span>
+          </div>
+          <div class="origin-card">
+            <span
+              class="origin-flag"
+              style="font-size: 1.6rem; margin-bottom: 0.6rem; display: block"
+              >🇬🇹</span
+            >
+            <div class="origin-country">Guatemala</div>
+            <div class="origin-region">Antigua & Atitlán</div>
+            <p class="origin-notes">
+              Volcanic soil and dry mountain air produce toffee-sweet coffees
+              with a touch of spice and lasting warmth.
+            </p>
+            <span class="altitude-pill">1,500 – 1,900 m</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subscription-wrap" id="subscribe">
+      <div class="sub-left">
+        <div class="section-label">Never run out</div>
+        <h2>Coffee on your schedule</h2>
+        <p>
+          Pick your cadence, we'll pick the best bean of the moment. Pause,
+          skip, or cancel with one click — no questions asked.
+        </p>
+        <a href="#" class="btn-dark">Start your subscription</a>
+      </div>
+      <div class="sub-right">
+        <div class="plan-row active" onclick="setActive(this)">
+          <div class="plan-check"></div>
+          <div class="plan-info">
+            <h4>Every week</h4>
+            <p>250g · freshest batch</p>
+          </div>
+          <div class="plan-price-tag">
+            <strong>€13.50</strong>
+            <small>per delivery</small>
+          </div>
+        </div>
+        <div class="plan-row" onclick="setActive(this)">
+          <div class="plan-check"></div>
+          <div class="plan-info">
+            <h4>Every two weeks</h4>
+            <p>500g · most popular</p>
+          </div>
+          <div class="plan-price-tag">
+            <strong>€26.00</strong>
+            <small>per delivery</small>
+          </div>
+        </div>
+        <div class="plan-row" onclick="setActive(this)">
+          <div class="plan-check"></div>
+          <div class="plan-info">
+            <h4>Monthly</h4>
+            <p>1kg · best value</p>
+          </div>
+          <div class="plan-price-tag">
+            <strong>€48.00</strong>
+            <small>per delivery</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="press-wrap">
+      <span class="press-label">As seen in</span>
+      <span class="press-name">Kinfolk</span>
+      <span class="press-name">The Guardian</span>
+      <span class="press-name">Monocle</span>
+      <span class="press-name">Bon Appétit</span>
+      <span class="press-name">Imbibe</span>
+    </div>
+
+    <footer>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo-type">K<em>o</em>ppar</span>
+          <p>
+            Small-batch specialty coffee roasted in Copenhagen. Every bag tells
+            the story of a farm, a farmer, and a harvest.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h5>Shop</h5>
+          <a href="#">All coffees</a>
+          <a href="#">Subscriptions</a>
+          <a href="#">Gift cards</a>
+          <a href="#">Brewing gear</a>
+        </div>
+        <div class="footer-col">
+          <h5>Learn</h5>
+          <a href="#">Our story</a>
+          <a href="#">Farm visits</a>
+          <a href="#">Brew guides</a>
+          <a href="#">Wholesale</a>
+        </div>
+        <div class="footer-col">
+          <h5>Help</h5>
+          <a href="#">Track my order</a>
+          <a href="#">Shipping info</a>
+          <a href="#">Returns</a>
+          <a href="#">Contact us</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Koppar ApS · Copenhagen, Denmark</p>
+        <p>Privacy · Terms</p>
+      </div>
+    </footer>
+
+    <script>
+      function setActive(el) {
+        document
+          .querySelectorAll(".plan-row")
+          .forEach((r) => r.classList.remove("active"));
+        el.classList.add("active");
+      }
+      function toggleMenu() {
+        var m = document.getElementById("mobileMenu");
+        var h = document.getElementById("ham");
+        var open = m.classList.toggle("open");
+        h.style.gap = open ? "4px" : "5px";
+        h.querySelectorAll("span")[0].style.transform = open
+          ? "rotate(45deg) translate(5px,5px)"
+          : "";
+        h.querySelectorAll("span")[1].style.opacity = open ? "0" : "1";
+        h.querySelectorAll("span")[2].style.transform = open
+          ? "rotate(-45deg) translate(5px,-5px)"
+          : "";
+      }
+      function closeMenu() {
+        document.getElementById("mobileMenu").classList.remove("open");
+        var h = document.getElementById("ham");
+        h.querySelectorAll("span").forEach((s) => {
+          s.style.transform = "";
+          s.style.opacity = "1";
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -2,19 +2,20 @@
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
-using TicketService.Sdk.Services.TicketSdk;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Components.CreateTicket;
 
 public partial class CreateTicketSupporter : ComponentBase
 {
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ILogger<CreateTicketSupporter> Logger { get; set; } = default!;
 
     private string _title = string.Empty;
+    private string _description = string.Empty;
     private bool _titleTouched;
     private bool _customerTouched;
     private bool _assignToSelf;
@@ -35,7 +36,6 @@ public partial class CreateTicketSupporter : ComponentBase
         if (_customerSearch.Length < 2)
             return;
 
-        // Debounce — cancel previous search if still running
         _searchCts?.Cancel();
         _searchCts = new CancellationTokenSource();
         var token = _searchCts.Token;
@@ -46,18 +46,13 @@ public partial class CreateTicketSupporter : ComponentBase
         try
         {
             await Task.Delay(300, token);
-
-            if (token.IsCancellationRequested)
-                return;
+            if (token.IsCancellationRequested) return;
 
             var result = await UserService.SearchUsers(_customerSearch, token);
             if (result.IsSuccess && result.Value is not null)
                 _searchResults = result.Value;
         }
-        catch (OperationCanceledException)
-        {
-            // Search was cancelled by a newer keystroke — ignore
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Customer search failed for term {Term}", _customerSearch);
@@ -95,10 +90,13 @@ public partial class CreateTicketSupporter : ComponentBase
 
         _isSubmitting = true;
 
-        var result = await TicketSdkService.CreateTicketAsync(
-            title: _title.Trim(),
-            customerId: _selectedCustomer.userId,
-            assignedUserId: _assignToSelf ? UserContext.UserId : null);
+        var result = await TicketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
+        {
+            Title = _title.Trim(),
+            CustomerId = _selectedCustomer.userId,
+            AssignedUserId = _assignToSelf ? UserContext.UserId : null,
+            Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
+        });
 
         if (result.IsSuccess)
         {

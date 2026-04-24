@@ -1,0 +1,15 @@
+{
+  "name": "ccp-chatbot",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^10.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0"
+  }
+}

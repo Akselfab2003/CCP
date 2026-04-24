@@ -1,6 +1,6 @@
 ﻿namespace CCP.Website.Services
 {
-    public class WebsiteReferencesService
+    public class WebsiteReferencesService : IWebsiteReferencesService
     {
         private string SassServiceUrl { get; set; }
 
@@ -9,7 +9,7 @@
             SassServiceUrl = sassServiceUrl;
         }
 
-        public string Login => $"{SassServiceUrl}/authentication/login?returnUrl=/dashboard";
+        public string Login => $"{SassServiceUrl}/authentication/login?returnUrl=/";
 
         public string Register => $"/Register";
 

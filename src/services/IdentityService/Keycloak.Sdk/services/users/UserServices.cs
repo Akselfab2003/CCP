@@ -79,6 +79,7 @@ namespace Keycloak.Sdk.services.users
             }
         }
 
+
         public async Task<Result<Guid>> CreateCustomer(string email, CancellationToken ct = default)
         {
             try
@@ -128,6 +129,55 @@ namespace Keycloak.Sdk.services.users
             }
         }
 
+
+        public async Task<Result<Guid>> CreateSupporter(string email, CancellationToken ct = default)
+        {
+            try
+            {
+                var newUser = new UserRepresentation
+                {
+                    Email = email,
+                    FirstName = "",
+                    LastName = "",
+                    Username = email,
+                    Enabled = true,
+                };
+
+                await Client.Admin.Realms[Constants.REALM].Users.PostAsync(newUser, cancellationToken: ct);
+
+                var createdUser = await Client.Admin.Realms[Constants.REALM].Users.GetAsync(requestConfiguration =>
+                {
+                    requestConfiguration.QueryParameters.Email = email;
+                    requestConfiguration.QueryParameters.Max = 1;
+                }, cancellationToken: ct);
+
+                if (createdUser == null || createdUser.Count == 0)
+                {
+                    _logger.LogWarning("User created but not found with email: {Email}", email);
+                    return Result.Failure<Guid>(Error.Failure("CreateSupporter.failed", "User was created but could not be retrieved"));
+                }
+
+                if (Guid.TryParse(createdUser[0].Id, out var userId))
+                {
+                    return Result.Success(userId);
+                }
+                else
+                {
+                    _logger.LogWarning("User created but has invalid ID format: {UserId}", createdUser[0].Id);
+                    return Result.Failure<Guid>(Error.Failure("CreateSupporter.failed", "User was created but has an invalid ID format"));
+                }
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error creating user with email: {Email}", email);
+                return Result.Failure<Guid>(Error.Failure("CreateSupporter.failed", $"An error occurred while creating the user: {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error creating user with email: {Email}", email);
+                return Result.Failure<Guid>(Error.Failure("CreateSupporter.failed", $"An unexpected error occurred: {ex.Message}"));
+            }
+        }
 
 
 

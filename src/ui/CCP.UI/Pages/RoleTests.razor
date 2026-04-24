@@ -1,0 +1,34 @@
+﻿@page "/test"
+@layout CCPLayout
+@using CCP.Shared.UIContext
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@attribute [Authorize]
+<div>
+    <h3>Role Tests</h3>
+    <p>Current user: @UserContext.UserId</p>
+    <p>Current role: @UserContext.Role</p>
+    <p>email: @UserContext.Email</p>
+    <p>tenantId: @UserContext.OrganizationId</p>
+    <p>role: @UserContext.Role</p>
+    <p>roles: @string.Join(", ", UserContext.Roles)</p>
+</div>
+
+<div>
+    <h4>Claims</h4>
+    @foreach (var claim in AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Claims)
+    {
+        <div>@claim.Type: @claim.Value</div>
+    }
+</div>
+
+
+@code {
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
+    [Inject]
+    private IUIUserContext UserContext { get; set; } = default!;
+
+}

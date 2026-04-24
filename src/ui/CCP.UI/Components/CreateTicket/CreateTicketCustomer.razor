@@ -7,7 +7,7 @@
 
     <div class="ct-header">
         <div class="ct-header-left">
-            <a href="/inbox" class="ct-back-btn" title="Back to Inbox">
+            <a href="/" class="ct-back-btn" title="Back to Homepage">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <polyline points="15 18 9 12 15 6" />
                 </svg>
@@ -20,6 +20,7 @@
     </div>
 
     <div class="ct-body">
+
         <div class="ct-card">
 
             @if (_successMessage is not null)
@@ -51,7 +52,7 @@
                 <input id="ct-title"
                        type="text"
                        class="ct-input @(_titleTouched && string.IsNullOrWhiteSpace(_title) ? "ct-input--error" : "")"
-                       placeholder="Brief summary of your issue..."
+                       placeholder="Brief topic of your issue, e.g. 'Payment issue'..."
                        maxlength="200"
                        @bind="_title"
                        @bind:event="oninput"
@@ -64,8 +65,24 @@
                 <span class="ct-char-count">@(_title?.Length ?? 0) / 200</span>
             </div>
 
+            <div class="ct-field">
+                <label class="ct-label" for="ct-description">
+                    Description
+                    <span style="font-size:11px; font-weight:400; color:var(--ccp-text-mid); margin-left:6px;">optional</span>
+                </label>
+                <textarea id="ct-description"
+                          class="ct-input ct-textarea"
+                          placeholder="Describe your issue in detail — what happened, when, and any steps to reproduce..."
+                          maxlength="2000"
+                          rows="5"
+                          @bind="_description"
+                          @bind:event="oninput"
+                          disabled="@_isSubmitting"></textarea>
+                <span class="ct-char-count">@(_description?.Length ?? 0) / 2000</span>
+            </div>
+
             <div class="ct-actions">
-                <a href="/inbox" class="ct-btn ct-btn--ghost">Cancel</a>
+                <a href="/" class="ct-btn ct-btn--ghost">Cancel</a>
                 <button class="ct-btn ct-btn--primary"
                         @onclick="HandleSubmitAsync"
                         disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_title))">
@@ -86,6 +103,7 @@
                     }
                 </button>
             </div>
+
         </div>
 
         <aside class="ct-aside">
@@ -105,5 +123,6 @@
                 </ul>
             </div>
         </aside>
+
     </div>
 </div>

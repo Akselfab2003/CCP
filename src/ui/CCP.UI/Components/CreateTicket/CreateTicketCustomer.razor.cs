@@ -1,17 +1,17 @@
 ﻿using CCP.Shared.UIContext;
 using Microsoft.AspNetCore.Components;
-using TicketService.Sdk.Services.TicketSdk;
 
 namespace CCP.UI.Components.CreateTicket;
 
 public partial class CreateTicketCustomer : ComponentBase
 {
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private TicketService.Sdk.Services.Ticket.ITicketService TicketService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ILogger<CreateTicketCustomer> Logger { get; set; } = default!;
 
     private string _title = string.Empty;
+    private string _description = string.Empty;
     private bool _titleTouched;
     private bool _isSubmitting;
     private string? _successMessage;
@@ -27,17 +27,20 @@ public partial class CreateTicketCustomer : ComponentBase
 
         _isSubmitting = true;
 
-        var result = await TicketSdkService.CreateTicketAsync(
-            title: _title.Trim(),
-            customerId: UserContext.UserId,
-            assignedUserId: null);
+        var result = await TicketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
+        {
+            Title = _title.Trim(),
+            CustomerId = UserContext.UserId,
+            AssignedUserId = null,
+            Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
+        });
 
         if (result.IsSuccess)
         {
             _successMessage = "Ticket submitted! Redirecting to your inbox...";
             StateHasChanged();
             await Task.Delay(1200);
-            Navigation.NavigateTo("/inbox");
+            Navigation.NavigateTo("/");
         }
         else
         {

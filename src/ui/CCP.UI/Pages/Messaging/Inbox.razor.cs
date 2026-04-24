@@ -1,10 +1,12 @@
 ﻿using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
+using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
-using TicketService.Sdk.Services.TicketSdk;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CCP.UI.Pages.Messaging;
 
@@ -13,9 +15,12 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     [Inject] private ChatHubService HubService { get; set; } = default!;
     [Inject] private IMessageSdkService MessageSdkService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
-    [Inject] private ITicketSdkService TicketSdkService { get; set; } = default!;
+    [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private ILogger<Inbox> Logger { get; set; } = default!;
-    [Inject] private IdentityService.Sdk.Services.User.IUserService UserService { get; set; } = default!;
+    [Inject] private IUserService UserService { get; set; } = default!;
+
+    [SupplyParameterFromQuery(Name = "ticketId")]
+    [Parameter] public int? TicketId { get; set; }
 
     private List<TicketSdkDto> _tickets = new();
     private List<MessageDto> _messages = new();
@@ -54,15 +59,15 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         HubService.OnMessageDeleted += HandleMessageDeleted;
         HubService.OnTicketAssigned += HandleTicketAssigned;
 
-        // Start the SignalR connection independently — a hub failure must not prevent tickets from loading
-        _ = HubService.StartAsync().ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-                Logger.LogError(t.Exception, "Failed to start hub connection");
-        }, TaskScheduler.Default);
-
-        // Load tickets for the current user
+        // Load tickets from HTTP — renders the list immediately
         await LoadTicketsAsync();
+
+        // Connect hub and join groups in the background — non-blocking
+        _ = ConnectHubAndJoinGroupsAsync();
+
+        // Pre-select ticket from query parameter if provided
+        if (TicketId.HasValue)
+            await PreSelectTicketAsync(TicketId.Value);
     }
 
     private async Task LoadTicketsAsync()
@@ -73,14 +78,14 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         var allTickets = new List<TicketSdkDto>();
 
         // Get tickets assigned to the user (supporter role)
-        var assignedResult = await TicketSdkService.GetTicketsAsync(assignedUserId: userId);
+        var assignedResult = await TicketService.GetTickets(assignedUserId: userId);
         if (assignedResult.IsSuccess && assignedResult.Value is not null)
         {
             allTickets.AddRange(assignedResult.Value);
         }
 
         // Get tickets created by the user (customer role)
-        var customerResult = await TicketSdkService.GetTicketsAsync(customerId: userId);
+        var customerResult = await TicketService.GetTickets(CustomerId: userId);
         if (customerResult.IsSuccess && customerResult.Value is not null)
         {
             // Only add tickets we don't already have (avoid duplicates)
@@ -105,9 +110,22 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
         _tickets = allTickets.OrderByDescending(t => t.CreatedAt).ToList();
         _isLoadingTickets = false;
+        StateHasChanged();
+    }
 
-        // Wait for hub connection before joining groups
-        // Poll briefly — hub start is fire-and-forget so we can't await it directly
+    private async Task ConnectHubAndJoinGroupsAsync()
+    {
+        try
+        {
+            await HubService.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to start hub connection");
+            return;
+        }
+
+        // Poll briefly until the hub reports connected
         var waited = 0;
         while (!HubService.IsConnected && waited < 5000)
         {
@@ -117,7 +135,7 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
         if (HubService.IsConnected)
         {
-            Logger.LogInformation("Hub connected: {IsConnected} after {Waited}ms", HubService.IsConnected, waited);
+            Logger.LogInformation("Hub connected after {Waited}ms", waited);
 
             foreach (var ticket in _tickets)
             {
@@ -139,8 +157,8 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
 
     private async Task OnTicketSelectedAsync(int? ticketId)
     {
-        _messages.Clear();
         _isLoadingMessages = true;
+        _messages = new();
         await InvokeAsync(StateHasChanged);
 
         if (ticketId is null)
@@ -149,7 +167,13 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
             return;
         }
 
-        await HubService.JoinTicketAsync(ticketId.Value);
+        _ = HubService.JoinTicketAsync(ticketId.Value)
+            .ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Logger.LogWarning("Failed to join ticket group {TicketId}: {Error}",
+                        ticketId, t.Exception?.Message);
+            }, TaskScheduler.Default);
 
         var result = await MessageSdkService.GetMessagesByTicketIdAsync(ticketId.Value);
 
@@ -259,6 +283,34 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
         }
     }
 
+    private async Task PreSelectTicketAsync(int ticketId)
+    {
+        // Check if ticket is already in our loaded list
+        var existing = _tickets.FirstOrDefault(t => t.Id == ticketId);
+        if (existing is not null)
+        {
+            ActiveTicketId = ticketId;
+            return;
+        }
+
+        // Managers may navigate to tickets not in their assigned list.
+        // Fetch the ticket directly and inject it if found.
+        if (UserContext.IsInternalUser)
+        {
+            var result = await TicketService.GetTicket(ticketId);
+            if (result.IsSuccess)
+            {
+                _tickets.Insert(0, result.Value);
+                ActiveTicketId = ticketId;
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                Logger.LogWarning("PreSelectTicketAsync: ticket {TicketId} not found or not accessible", ticketId);
+            }
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         HubService.OnMessageReceived -= HandleMessageReceived;
@@ -312,30 +364,69 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
             .Where(id => !_userNameCache.ContainsKey(id))
             .ToList();
 
-        // Look up each unknown user
-        foreach (var userId in unknownUserIds)
+        // Look up all unknown users in parallel
+        var tasks = unknownUserIds.Select(async userId =>
         {
             try
             {
                 var result = await UserService.GetUserDetailsAsync(userId);
-                if (result.IsSuccess)
-                {
-                    _userNameCache[userId] = result.Value.name;
-                }
+                return (userId, name: result.IsSuccess ? result.Value.name : (string?)null);
             }
             catch (Exception ex)
             {
                 Logger.LogWarning(ex, "Could not resolve name for user {UserId}", userId);
+                return (userId, name: (string?)null);
+            }
+        });
+
+        var results = await Task.WhenAll(tasks);
+        foreach (var (userId, name) in results)
+        {
+            if (name is not null)
+                _userNameCache[userId] = name;
+        }
+    }
+
+    private async Task UpdateTicketStatusAsync(TicketStatus newStatus)
+    {
+        if (_activeTicketId is null) return;
+        var result = await TicketService.UpdateTicketStatusAsync(_activeTicketId.Value, newStatus);
+        if (result.IsSuccess)
+        {
+            var ticket = _tickets.FirstOrDefault(t => t.Id == _activeTicketId);
+            if (ticket is not null)
+            {
+                ticket.Status = (int)newStatus;
+                StateHasChanged();
             }
         }
+        else
+        {
+            Logger.LogError("Failed to update ticket status: {Error}", result.Error);
+        }
+    }
+
+    private string GetCustomerFacingStatusLabel(int status)
+    {
+        if (!UserContext.IsInternalUser && status == (int)TicketStatus.Blocked)
+            return GetStatusLabel((int)TicketStatus.Open);
+        return GetStatusLabel(status);
+    }
+
+    private string GetCustomerFacingStatusTagClass(int status)
+    {
+        if (!UserContext.IsInternalUser && status == (int)TicketStatus.Blocked)
+            return GetStatusTagClass((int)TicketStatus.Open);
+        return GetStatusTagClass(status);
     }
 
     private string GetStatusLabel(int status) => status switch
     {
         0 => "Open",
-        1 => "Pending",
-        2 => "Resolved",
+        1 => "Waiting for customer",
+        2 => "Waiting for support",
         3 => "Closed",
+        4 => "Blocked",
         _ => "Unknown"
     };
 
@@ -343,8 +434,9 @@ public partial class Inbox : ComponentBase, IAsyncDisposable
     {
         0 => "tag-teal",
         1 => "tag-amber",
-        2 => "tag-slate",
+        2 => "tag-indigo",
         3 => "tag-slate",
+        4 => "tag-red",
         _ => "tag-slate"
     };
 

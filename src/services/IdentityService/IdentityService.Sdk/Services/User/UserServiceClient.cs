@@ -43,11 +43,19 @@ namespace IdentityService.Sdk.Services.User
                 long? timestamp = null;
                 if (userDetails.CreatedTimestamp != null)
                 {
-                    var timestampValue = userDetails.CreatedTimestamp.GetValue();
-                    if (timestampValue is long longValue)
-                        timestamp = longValue;
-                    else if (timestampValue is int intValue)
-                        timestamp = intValue;
+                    try
+                    {
+                        var timestampValue = userDetails.CreatedTimestamp.GetValue();
+                        if (timestampValue is long longValue)
+                            timestamp = longValue;
+                        else if (timestampValue is int intValue)
+                            timestamp = intValue;
+                    }
+                    catch (NotImplementedException)
+                    {
+                        // Kiota UntypedNode.GetValue() is not implemented for createdTimestamp
+                        // Safe to ignore — timestamp is optional and only used for display
+                    }
                 }
 
                 Models.UserAccount userAccount = new(

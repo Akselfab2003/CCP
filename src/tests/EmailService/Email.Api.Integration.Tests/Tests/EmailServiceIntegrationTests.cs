@@ -166,6 +166,7 @@ namespace Email.Api.Integration.Tests.Tests
         [Fact]
         public async Task SendEmail_WithUniqueTicketId_ShouldBeRetrievable()
         {
+
             IEmailService emailService = _fixture.SDK.GetRequiredService<IEmailService>();
             IEmailSent emailSentRepo = _fixture.DB.GetRequiredService<IEmailSent>();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);

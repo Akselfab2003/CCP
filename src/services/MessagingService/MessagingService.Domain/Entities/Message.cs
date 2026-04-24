@@ -27,5 +27,9 @@ namespace MessagingService.Domain.Entities
 
         [Column(TypeName = "vector(1536)")]
         public Vector? Embedding { get; set; }
+
+        public string? AttachmentUrl { get; set; }
+        public string? AttachmentFileName { get; set; }
+        public string? AttachmentContentType { get; set; }
     }
 }

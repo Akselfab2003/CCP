@@ -11,13 +11,13 @@ namespace CCP.Website.Pages
     {
         private readonly ITenantService _tenantService;
         private readonly NavigationManager _navigationManager;
-        private readonly WebsiteReferencesService _websiteReferencesService;
+        private readonly IWebsiteReferencesService _websiteReferencesService;
         private readonly IDialogService _dialogService;
         private readonly ILogger<Register> _logger;
         private int _currentStep = 0;
         private RegisterOrganizationModel? RegisterOrganizationModel { get; set; }
         private RegisterAccountModel? RegisterAccountModel { get; set; }
-        public Register(ITenantService tenantService, ILogger<Register> logger, NavigationManager navigationManager, WebsiteReferencesService websiteReferencesService, IDialogService dialogService)
+        public Register(ITenantService tenantService, ILogger<Register> logger, NavigationManager navigationManager, IWebsiteReferencesService websiteReferencesService, IDialogService dialogService)
         {
             _tenantService = tenantService;
             _logger = logger;

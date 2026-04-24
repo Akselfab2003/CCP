@@ -100,10 +100,212 @@
           }
         }
       }
+    },
+    "/api/EmailEvent": {
+      "post": {
+        "tags": [
+          "EmailEvent"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DovecotEvent"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DovecotEvent"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DovecotEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/TenantEmailConfiguration/create": {
+      "post": {
+        "tags": [
+          "TenantEmailConfiguration"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AddTenantEmailConfigurationRequest": {
+        "required": [
+          "domain",
+          "defaultSenderEmail"
+        ],
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "defaultSenderEmail": {
+            "type": "string"
+          }
+        }
+      },
+      "DovecotEvent": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fields": {
+            "type": "object"
+          },
+          "reasonCode": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "user": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "duration": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "protocol": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "remoteIp": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "remotePort": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "connectionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "session": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "transactionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mailFrom": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mailFromRaw": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rcptTo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "messageId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "messageFrom": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "EmailReceived": {
         "required": [
           "subject",
@@ -361,6 +563,12 @@
   "tags": [
     {
       "name": "EmailSendingService"
+    },
+    {
+      "name": "EmailEvent"
+    },
+    {
+      "name": "TenantEmailConfiguration"
     }
   ]
 }

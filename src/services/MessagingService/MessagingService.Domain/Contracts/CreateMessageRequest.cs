@@ -12,5 +12,9 @@ namespace MessagingService.Domain.Contracts
 
         public float[]? Embedding { get; set; }
         public bool IsInternalNote { get; set; }
+
+        public string? AttachmentUrl { get; set; }
+        public string? AttachmentFileName { get; set; }
+        public string? AttachmentContentType { get; set; }
     }
 }

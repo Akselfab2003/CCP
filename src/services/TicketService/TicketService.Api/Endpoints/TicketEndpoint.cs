@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TicketService.Application.Services.Ticket;
+using TicketService.Domain.Entities;
+using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
 using TicketService.Domain.ResponseObjects;
 
@@ -14,7 +16,7 @@ namespace TicketService.Api.Endpoints
                                      .RequireAuthorization();
 
             ticketRoute.MapPost("/create", CreateTicket)
-                       .Produces(StatusCodes.Status200OK)
+                       .Produces<int>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
@@ -27,6 +29,38 @@ namespace TicketService.Api.Endpoints
             ticketRoute.MapGet("/GetTickets", GetTicketsByParameters)
                        .Produces<List<TicketDto>>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
+                       .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            ticketRoute.MapPatch("/{ticketId:int}/status", UpdateTicketStatus)
+                       .Produces(StatusCodes.Status200OK)
+                       .ProducesProblem(StatusCodes.Status404NotFound)
+                       .ProducesProblem(StatusCodes.Status400BadRequest)
+                       .ProducesProblem(StatusCodes.Status401Unauthorized)
+                       .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            var historyRoute = builder.MapGroup("/ticket")
+                                      .WithTags("Ticket")
+                                      .RequireAuthorization();
+
+            historyRoute.MapGet("/history/customer/{customerId:guid}", GetCustomerHistory)
+                        .Produces<List<TicketHistoryEntry>>(StatusCodes.Status200OK)
+                        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            historyRoute.MapGet("/history/org", GetOrgHistory)
+            .Produces<List<TicketHistoryEntry>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            historyRoute.MapGet("/history/mine", GetMyHistory)
+            .Produces<List<TicketHistoryEntry>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            historyRoute.MapPost("/{ticketId:int}/history/message", RecordMessageSent)
+                        .Produces(StatusCodes.Status200OK)
+                        .ProducesProblem(StatusCodes.Status400BadRequest)
+                        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+            ticketRoute.MapGet("/manager-stats", GetManagerStats)
+                       .Produces<ManagerStatsDto>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             return builder;
@@ -63,18 +97,112 @@ namespace TicketService.Api.Endpoints
         }
 
 
+        private static async Task<IResult> UpdateTicketStatus(
+            [FromServices] ITicketCommands ticketCommands,
+            [FromRoute] int ticketId,
+            [FromBody] UpdateTicketStatusRequest request)
+        {
+            try
+            {
+                var result = await ticketCommands.UpdateTicketStatusAsync(ticketId, request.NewStatus);
+                return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
+            }
+            catch (Exception)
+            {
+                return Results.Problem("An error occurred while updating the ticket status.");
+            }
+        }
+
         private static async Task<IResult> CreateTicket([FromServices] ITicketCommands ticketCommands, [FromBody] CreateTicketRequest request)
         {
             try
             {
                 var result = await ticketCommands.CreateTicketAsync(request);
                 return result.IsSuccess
-                    ? Results.Ok()
+                    ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             }
             catch (Exception ex)
             {
                 return Results.Problem("An error occurred while creating the ticket: " + ex.Message);
+            }
+        }
+
+        private static async Task<IResult> GetCustomerHistory(
+            [FromServices] ITicketHistoryRepository historyRepository,
+            [FromRoute] Guid customerId,
+            [FromQuery] int limit = 20)
+        {
+            try
+            {
+                var entries = await historyRepository.GetByCustomerIdAsync(customerId, limit);
+                return Results.Ok(entries);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving customer history: " + ex.Message);
+            }
+        }
+
+        private static async Task<IResult> GetOrgHistory(
+            [FromServices] ITicketHistoryRepository historyRepository,
+            [FromQuery] int limit = 20)
+        {
+            try
+            {
+                var entries = await historyRepository.GetRecentOrgHistoryAsync(limit);
+                return Results.Ok(entries);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving org history: " + ex.Message);
+            }
+        }
+
+        private static async Task<IResult> GetManagerStats(
+            [FromServices] IManagerStatsQuery statsQuery,
+            [FromServices] ICurrentUser currentUser)
+        {
+            try
+            {
+                var stats = await statsQuery.GetManagerStatsAsync(currentUser.UserId);
+                return Results.Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving manager stats: " + ex.Message);
+            }
+        }
+
+        private static async Task<IResult> RecordMessageSent(
+            [FromServices] ITicketCommands ticketCommands,
+            [FromRoute] int ticketId,
+            [FromBody] RecordMessageSentRequest request)
+        {
+            try
+            {
+                var result = await ticketCommands.RecordMessageSentAsync(ticketId, request.SenderUserId, request.MessageSnippet, request.IsInternalNote);
+                return result.IsSuccess ? Results.Ok() : result.ToProblemDetails();
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while recording message history: " + ex.Message);
+            }
+        }
+
+        private static async Task<IResult> GetMyHistory(
+            [FromServices] ITicketHistoryRepository historyRepository,
+            [FromServices] ICurrentUser currentUser,
+            [FromQuery] int limit = 20)
+        {
+            try
+            {
+                var entries = await historyRepository.GetByAssignedUserIdAsync(currentUser.UserId, limit);
+                return Results.Ok(entries);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving assigned ticket history: " + ex.Message);
             }
         }
     }

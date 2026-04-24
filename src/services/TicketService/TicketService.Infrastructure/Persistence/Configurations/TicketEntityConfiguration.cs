@@ -13,6 +13,11 @@ namespace TicketService.Infrastructure.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(200);
 
+            builder.Property(t => t.Description)
+                   .IsRequired(false)
+                   .HasColumnType("text")
+                   .HasMaxLength(2000);
+
             builder.Property(t => t.Status)
                    .IsRequired();
 

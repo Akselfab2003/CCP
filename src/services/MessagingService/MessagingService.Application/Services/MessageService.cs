@@ -3,7 +3,9 @@ using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
 using MessagingService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Pgvector;
+using TicketService.Sdk.Services.Ticket;
 
 namespace MessagingService.Application.Services;
 
@@ -16,11 +18,15 @@ public class MessageService : IMessageService
 
     private readonly MessagingDbContext _dbContext;
     private readonly IMessageAccessValidator _messageAccessValidator;
+    private readonly ITicketService _ticketService;
+    private readonly ILogger<MessageService> _logger;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator)
+    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
+        _ticketService = ticketService;
+        _logger = logger;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -66,11 +72,25 @@ public class MessageService : IMessageService
             IsEdited = false,
             IsDeleted = false,
             IsInternalNote = request.IsInternalNote,
-            Embedding = request.Embedding is null ? null : new Vector(request.Embedding)
+            Embedding = request.Embedding is null ? null : new Vector(request.Embedding),
+            AttachmentUrl = request.AttachmentUrl,
+            AttachmentFileName = request.AttachmentFileName,
+            AttachmentContentType = request.AttachmentContentType
         };
 
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _ = _ticketService.RecordMessageSentAsync(
+            message.TicketId,
+            message.UserId,
+            message.Content.Length > 120 ? message.Content[..120] : message.Content
+        ).ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+                _logger.LogWarning("Failed to record message history for ticket {TicketId}: {Error}",
+                    message.TicketId, t.Exception?.Message);
+        }, TaskScheduler.Default);
 
         return MessageServiceResult.Succeeded(MapToResponse(message));
     }
@@ -113,7 +133,10 @@ public class MessageService : IMessageService
                 IsDeleted = m.IsDeleted,
                 DeletedAtUtc = m.DeletedAtUtc,
                 IsInternalNote = m.IsInternalNote,
-                Embedding = m.Embedding == null ? null : m.Embedding.ToArray()
+                Embedding = m.Embedding == null ? null : m.Embedding.ToArray(),
+                AttachmentUrl = m.AttachmentUrl,
+                AttachmentFileName = m.AttachmentFileName,
+                AttachmentContentType = m.AttachmentContentType
             })
             .ToListAsync(cancellationToken);
 
@@ -225,7 +248,10 @@ public class MessageService : IMessageService
             IsDeleted = message.IsDeleted,
             DeletedAtUtc = message.DeletedAtUtc,
             IsInternalNote = message.IsInternalNote,
-            Embedding = message.Embedding?.ToArray()
+            Embedding = message.Embedding?.ToArray(),
+            AttachmentUrl = message.AttachmentUrl,
+            AttachmentFileName = message.AttachmentFileName,
+            AttachmentContentType = message.AttachmentContentType
         };
     }
 }

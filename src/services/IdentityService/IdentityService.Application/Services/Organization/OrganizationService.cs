@@ -102,5 +102,26 @@ namespace IdentityService.Application.Services.Organization
                 return Result.Failure(Error.Failure("InviteNewUser.Error", $"An error occurred while inviting the new user to the organization: {ex.Message}"));
             }
         }
+
+
+        public async Task<Result<Keycloak.Sdk.Models.KeycloakOrgDetails>> GetOrganizationDetails(Guid? OrgId, string? Domain, CancellationToken ct = default)
+        {
+            try
+            {
+                var result = await _organizationKeycloakService.GetOrgDetails(OrgId, Domain, ct);
+                if (result.IsFailure)
+                {
+                    _logger.LogWarning("Failed to get details for organization with ID: {OrgId}. Error: {Error}", OrgId, result.Error);
+                    return Result.Failure<Keycloak.Sdk.Models.KeycloakOrgDetails>(result.Error);
+                }
+                _logger.LogInformation("Successfully retrieved details for organization with ID: {OrgId}", OrgId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving details for organization with ID: {OrgId}", OrgId);
+                return Result.Failure<Keycloak.Sdk.Models.KeycloakOrgDetails>(Error.Failure("GetOrganizationDetails.Error", $"An error occurred while retrieving organization details: {ex.Message}"));
+            }
+        }
     }
 }

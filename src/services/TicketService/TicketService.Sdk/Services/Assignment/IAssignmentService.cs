@@ -1,7 +1,7 @@
 ﻿namespace TicketService.Sdk.Services.Assignment
 {
-    internal interface IAssignmentService
+    public interface IAssignmentService
     {
-        Task AssignTicketToUserAsync(int ticketId, Guid userId, CancellationToken cancellationToken = default);
+        Task<Result> AssignTicketToUserAsync(int ticketId, Guid userId, CancellationToken cancellationToken = default);
     }
 }

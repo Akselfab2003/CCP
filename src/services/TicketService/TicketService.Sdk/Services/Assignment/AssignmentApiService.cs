@@ -15,7 +15,7 @@ namespace TicketService.Sdk.Services.Assignment
             _client = client;
         }
 
-        public async Task AssignTicketToUserAsync(int ticketId, Guid userId, CancellationToken cancellationToken = default)
+        public async Task<Result> AssignTicketToUserAsync(int ticketId, Guid userId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -26,11 +26,13 @@ namespace TicketService.Sdk.Services.Assignment
                 });
 
                 _logger.LogInformation("Successfully assigned ticket {TicketId} to user {UserId}", ticketId, userId);
+
+                return Result.Success();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error assigning ticket {TicketId} to user {UserId}: {Message}", ticketId, userId, ex.Message);
-                throw;
+                return Result.Failure(Error.Failure(code: "AssignmentError", description: $"An error occurred while assigning the ticket: {ex.Message}"));
             }
 
         }

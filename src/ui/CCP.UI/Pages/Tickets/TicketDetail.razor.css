@@ -1,0 +1,23 @@
+﻿@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.td-spinner {
+    animation: spin 1s linear infinite;
+}
+
+.td-state-wrap {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ccp-text-lo);
+}
+
+.td-state-wrap--error {
+    color: #fca5a5;
+}

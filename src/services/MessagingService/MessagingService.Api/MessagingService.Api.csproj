@@ -30,12 +30,15 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+    <PackageReference Include="Aspire.RabbitMQ.Client" />
+    <PackageReference Include="WolverineFx.RabbitMQ" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\MessagingService.Application\MessagingService.Application.csproj" />
     <ProjectReference Include="..\MessagingService.Infrastructure\MessagingService.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

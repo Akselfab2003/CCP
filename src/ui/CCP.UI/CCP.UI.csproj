@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\services\Gateway\Gateway.Sdk\Gateway.Sdk.csproj" />
+    <ProjectReference Include="..\..\services\ChatService\ChatService.Sdk\ChatService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
@@ -34,6 +36,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\CSS\" />
   </ItemGroup>
 
 </Project>

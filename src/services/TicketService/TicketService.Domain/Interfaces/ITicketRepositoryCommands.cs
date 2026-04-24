@@ -8,5 +8,6 @@ namespace TicketService.Domain.Interfaces
         Task<Result<Ticket>> GetTicket(int? id, Guid? AssignmentId = null);
         Task<Result<List<Ticket>>> GetTicketsBasedOnParameters(Guid? assignedUserId = null, Guid? CustomerId = null, TicketStatus? status = null);
         Task SaveChangesAsync();
+        Task<Result> UpdateStatusAsync(int ticketId, TicketStatus newStatus);
     }
 }

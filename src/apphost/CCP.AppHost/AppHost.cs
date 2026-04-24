@@ -20,6 +20,8 @@ string EmailWorkerServiceUsername = builder.Configuration.GetValue<string>("emai
     ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
 string EmailWorkerServicePassword = builder.Configuration.GetValue<string>("emailWorkerServicePassword")
     ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
+string EmailHostUrl = builder.Configuration.GetValue<string>("emailHostUrl")
+    ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
 ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persistent : ContainerLifetime.Session;
 
 
@@ -27,8 +29,8 @@ ContainerLifetime LifeTimeMode = Environment == "DEV" ? ContainerLifetime.Persis
 IResourceBuilder<OllamaResource> Ollama = builder.AddOllama("ollama");
 IResourceBuilder<KeycloakResource> Keycloak = builder.AddKeycloak("keycloak", 8080);
 IResourceBuilder<PostgresServerResource> Postgres = builder.AddPostgres("postgres");
-IResourceBuilder<ContainerResource> DockerEmailServer = builder.AddContainer("MailServer", "mailserver/docker-mailserver");
 IResourceBuilder<ContainerResource> Roundcube = builder.AddContainer("Roundcube", "roundcube/roundcubemail:latest");
+IResourceBuilder<RabbitMQServerResource> RabbitMq = builder.AddRabbitMQ("RabbitMQ");
 
 // Configure External Services
 Postgres.WithImage("pgvector/pgvector", "pg16")
@@ -39,40 +41,30 @@ Postgres.WithImage("pgvector/pgvector", "pg16")
 Ollama.WithOtlpExporter()
       .WithLifetime(LifeTimeMode);
 
-DockerEmailServer
-    .WithEnvironment(env =>
-    {
-        env.EnvironmentVariables.Add("ENABLE_FAIL2BAN", "1");
-        env.EnvironmentVariables.Add("PERMIT_DOCKER", "network");
-        env.EnvironmentVariables.Add("SPOOF_PROTECTION", "0");
-        env.EnvironmentVariables.Add("OVERRIDE_HOSTNAME", "mail.local");
-    })
-    .WithEndpoint("smtp", config =>
-    {
-        config.TargetPort = 25;
-        config.Port = 25;
-    })
-    .WithEndpoint("submission", config =>
-    {
-        config.TargetPort = 587;
-        config.Port = 587;
-    })
-    .WithEndpoint("smtps", config =>
-    {
-        config.TargetPort = 465;
-        config.Port = 465;
-    })
-    .WithLifetime(LifeTimeMode);
+var mailhog = builder.AddContainer("MailHog", "mailhog/mailhog")
+                     .WithLifetime(LifeTimeMode)
+                     .WithEndpoint("smtp", config =>
+                     {
+                         config.TargetPort = 1025;
+                         config.Port = 1025;
+                     })
+                     .WithEndpoint("ui", config =>
+                     {
+                         config.Protocol = System.Net.Sockets.ProtocolType.Tcp;
+                         config.UriScheme = "http";
+                         config.TargetPort = 8025;
+                         config.Port = 8025;
+                     });
 
 
 Roundcube
        .WithEnvironment(env =>
        {
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", "MailServer");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", "MailServer");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_HOST", EmailHostUrl);
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_SERVER", EmailHostUrl);
            env.EnvironmentVariables.Add("ROUNDCUBEMAIL_SMTP_PORT", "587");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "143");
-           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "143");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_IMAP_PORT", "993");
+           env.EnvironmentVariables.Add("ROUNDCUBEMAIL_DEFAULT_PORT", "993");
        })
        .WithEndpoint("webmail", config =>
        {
@@ -81,7 +73,6 @@ Roundcube
            config.TargetPort = 80;
            config.Port = 8081;
        })
-       .WaitFor(DockerEmailServer)
        .WithLifetime(LifeTimeMode);
 
 Keycloak.WithRealmImport(RealmImportPath)
@@ -96,6 +87,13 @@ Keycloak.WithRealmImport(RealmImportPath)
         .WithLifetime(LifeTimeMode);
 
 
+RabbitMq.WithOtlpExporter()
+    .WithLifetime(LifeTimeMode);
+
+// Add AI Models
+IResourceBuilder<OllamaModelResource> EmbeddingModel = Ollama.AddModel("embedding", "nomic-embed-text:latest");
+IResourceBuilder<OllamaModelResource> QwenModel = Ollama.AddModel("qwen", "qwen2.5:1.5b");
+
 // Add Databases
 IResourceBuilder<PostgresDatabaseResource> EmailDB = Postgres.AddDatabase(name: "emaildb", databaseName: "emaildb");
 IResourceBuilder<PostgresDatabaseResource> ChatDB = Postgres.AddDatabase(name: "chatDB", databaseName: "chatDB");
@@ -109,6 +107,7 @@ IResourceBuilder<ProjectResource> MessagingService = builder.AddProject<Projects
 IResourceBuilder<ProjectResource> ChatService = builder.AddProject<Projects.ChatService_Api>("chatservice-api");
 IResourceBuilder<ProjectResource> TicketService = builder.AddProject<Projects.TicketService_Api>("ticketservice-api");
 IResourceBuilder<ProjectResource> CustomerService = builder.AddProject<Projects.CustomerService_Api>("customerservice-api");
+IResourceBuilder<ProjectResource> Gateway = builder.AddProject<Projects.Gateway_Api>("ccp-gateway");
 IResourceBuilder<ProjectResource> CCPWebsite = builder.AddProject<Projects.CCP_Website>("ccp-website");
 IResourceBuilder<ProjectResource> UI = builder.AddProject<Projects.CCP_UI>("ccp-ui");
 IResourceBuilder<ProjectResource> EmailService = builder.AddProject<Projects.EmailService_API>("emailservice-api");
@@ -132,6 +131,7 @@ IdentityService
     .WithOtlpExporter();
 
 EmailService
+    .WithExplicitStart()
     .WithReference(EmailDB)
     .WaitFor(EmailDB)
     .WaitFor(Keycloak)
@@ -145,18 +145,22 @@ EmailService
     })
     .WithEnvironment(env =>
     {
-        env.EnvironmentVariables.Add("CCP.ServiceAccount", ServiceAccountSecret);
+        env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
+        env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+        env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
     .WithOtlpExporter();
 
 
 TicketService
-    .WithReference(Keycloak)
     .WaitFor(Keycloak)
-    .WithReference(TicketDB)
     .WaitFor(TicketDB)
-    .WithReference(MessagingService)
-    .WaitFor(MessagingService)
+    .WaitFor(RabbitMq)
+    .WithReference(Keycloak)
+    .WithReference(TicketDB)
+    .WithReference(RabbitMq)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
@@ -165,10 +169,16 @@ TicketService
     })
     .WithOtlpExporter();
 
-MessagingService.WaitFor(Keycloak)
+MessagingService
+    .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
+    .WaitFor(TicketService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
+    .WithReference(RabbitMq)
+    .WithReference(TicketService)
+    .WaitFor(RabbitMq)
+    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
@@ -194,30 +204,61 @@ CustomerService.WaitFor(Keycloak)
         });
 
 ChatService
+    .WaitFor(IdentityService)
     .WaitFor(Keycloak)
     .WaitFor(ChatDB)
     .WaitFor(Ollama)
     .WaitFor(TicketService)
+    .WaitFor(EmbeddingModel)
+    .WaitFor(QwenModel)
+    .WithReference(IdentityService)
     .WithReference(Keycloak)
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
-    .WithOtlpExporter().WithExplicitStart();
-
-
-UI
-    .WaitFor(MessagingService)
-    .WaitFor(Keycloak)
-    .WaitFor(IdentityService)
-    .WaitFor(CustomerService)
-    .WaitFor(TicketService)
-    .WithReference(MessagingService)
-    .WithReference(Keycloak)
-    .WithReference(CustomerService)
-    .WithReference(IdentityService)
-    .WithReference(TicketService)
-    .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+    .WithReference(EmbeddingModel)
+    .WithReference(QwenModel)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithOtlpExporter();
+
+
+Gateway
+    .WaitFor(Keycloak)
+    .WaitFor(TicketService)
+    .WaitFor(MessagingService)
+    .WaitFor(IdentityService)
+    .WithReference(Keycloak)
+    .WithReference(TicketService)
+    .WithReference(MessagingService)
+    .WithReference(IdentityService)
+    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
+    .WithUrlForEndpoint("https", endpoint =>
+    {
+        endpoint.Url = "/swagger";
+        endpoint.DisplayLocation = UrlDisplayLocation.SummaryAndDetails;
+        endpoint.DisplayText = "API Swagger";
+    })
+    .WithOtlpExporter();
+
+UI.WaitFor(MessagingService)
+  .WaitFor(Keycloak)
+  .WaitFor(IdentityService)
+  .WaitFor(CustomerService)
+  .WaitFor(ChatService)
+  .WaitFor(TicketService)
+  .WaitFor(Gateway)
+  .WithReference(MessagingService)
+  .WithReference(Keycloak)
+  .WithReference(ChatService)
+  .WithReference(CustomerService)
+  .WithReference(IdentityService)
+  .WithReference(TicketService)
+  .WithReference(Gateway)
+  .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
+  .WithOtlpExporter();
 
 CCPWebsite
     .WaitFor(UI)
@@ -229,29 +270,31 @@ CCPWebsite
     .WithOtlpExporter();
 
 EmailWorkerService
-    .WaitFor(DockerEmailServer)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("emailWorkerServiceUsername", EmailWorkerServiceUsername);
         env.EnvironmentVariables.Add("emailWorkerServicePassword", EmailWorkerServicePassword);
+        env.EnvironmentVariables.Add("emailHostUrl", EmailHostUrl);
     })
-    .WithOtlpExporter();
+    .WaitFor(RabbitMq)
+    .WithReference(RabbitMq)
+    .WithOtlpExporter()
+    .WithExplicitStart();
 
 
 if (Environment == "DEV")
 {
-   Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode));
+    Ollama.WithOpenWebUI(c => c.WithLifetime(LifeTimeMode))
+        .WithDataVolume()
+        .WithGPUSupport();
 
     Postgres.WithPgWeb(c => c.WithLifetime(LifeTimeMode))
             .WithVolume("pgdata", "/var/lib/postgresql/data");
 
-    DockerEmailServer.WithVolume("dms_mail_data", "/var/mail")
-                     .WithVolume("dms_mail_state", "/var/mail-state")
-                     .WithVolume("dms_mail_logs", "/var/log/mail")
-                     .WithVolume("dms_config", "/tmp/docker-mailserver")
-                     .WithBindMount("/etc/localtime", "/etc/localtime", isReadOnly: true);
-
     Keycloak.WithVolume("keycloak_data", "/opt/keycloak/data");
+
+    RabbitMq.WithDataVolume("rabbitmq_data").WithOtlpExporter().WithManagementPlugin(port: 15672);
 }
+
 
 builder.Build().Run();

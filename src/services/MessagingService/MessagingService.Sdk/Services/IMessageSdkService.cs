@@ -10,6 +10,15 @@ namespace MessagingService.Sdk.Services
             Guid? userId,
             string content,
             bool isInternalNote = false,
+            string? attachmentUrl = null,
+            string? attachmentFileName = null,
+            string? attachmentContentType = null,
+            CancellationToken cancellationToken = default);
+
+        Task<Result<AttachmentDto>> UploadAttachmentAsync(
+            Stream fileStream,
+            string fileName,
+            string contentType,
             CancellationToken cancellationToken = default);
 
         Task<Result<PagedMessagesDto>> GetMessagesByTicketIdAsync(

@@ -4,6 +4,7 @@ using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ChatApp.MessagingService.Tests;
 
@@ -73,7 +74,7 @@ public class MessagesControllerTests
             }))
         };
 
-        var controller = new MessagesController(fakeService, new FakeHubContext());
+        var controller = new MessagesController(fakeService, new FakeHubContext(), NullLogger<MessagesController>.Instance);
 
         var result = await controller.CreateMessage(new CreateMessageRequest
         {
@@ -98,7 +99,7 @@ public class MessagesControllerTests
             OnGetById = _ => Task.FromResult<MessageResponse?>(null)
         };
 
-        var controller = new MessagesController(fakeService, new FakeHubContext());
+        var controller = new MessagesController(fakeService, new FakeHubContext(), NullLogger<MessagesController>.Instance);
 
         var result = await controller.GetMessageById(999, CancellationToken.None);
 
@@ -113,7 +114,7 @@ public class MessagesControllerTests
             OnDelete = _ => Task.FromResult((false, (int?)null))
         };
 
-        var controller = new MessagesController(fakeService, new FakeHubContext());
+        var controller = new MessagesController(fakeService, new FakeHubContext(), NullLogger<MessagesController>.Instance);
 
         var result = await controller.DeleteMessage(999, CancellationToken.None);
 
@@ -124,7 +125,7 @@ public class MessagesControllerTests
     public async Task GetMessagesByTicketId_WithInvalidTicketId_ReturnsBadRequest()
     {
         var fakeService = new FakeMessageService();
-        var controller = new MessagesController(fakeService, new FakeHubContext());
+        var controller = new MessagesController(fakeService, new FakeHubContext(), NullLogger<MessagesController>.Instance);
 
         var result = await controller.GetMessagesByTicketId(0, 50, null, CancellationToken.None);
 

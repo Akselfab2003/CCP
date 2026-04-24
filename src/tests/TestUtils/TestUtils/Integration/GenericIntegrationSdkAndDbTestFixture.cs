@@ -1,4 +1,5 @@
 ﻿using Aspire.Hosting.Testing;
+using CCP.Shared.AuthContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,6 +34,7 @@ namespace TestUtils.Integration
         private async Task InitializeDB()
         {
             var ConnectionString = await App.GetConnectionStringAsync(DBResourceName);
+            DB_Services.AddScoped<ICurrentUser, CurrentUser>();
             DB_Services.AddLogging();
             DB_Services.AddDbContext<DBContext>(options =>
             {

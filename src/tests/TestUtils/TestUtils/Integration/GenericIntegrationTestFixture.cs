@@ -66,7 +66,8 @@ namespace TestUtils.Integration
                 "ROUNDCUBE_DEFAULT_USER_PASSWORD=test",
                 "emailWorkerServiceUsername=test@test.test",
                 "emailWorkerServicePassword=test",
-                $"Encryption_Key={encryption_key}"
+                $"Encryption_Key={encryption_key}",
+                "emailHostUrl=localhost"
             ], configureBuilder: (config, host) =>
             {
                 config.TrustDeveloperCertificate = true;

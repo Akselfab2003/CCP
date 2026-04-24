@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.ResultAbstraction;
+using IdentityService.API.Endpoints;
 using IdentityService.Application.Models;
 using IdentityService.Application.Services.Group;
 using IdentityService.Application.Services.Organization;
@@ -84,6 +85,37 @@ namespace IdentityService.Application.Services.Tenant
             {
                 _logger.LogError(ex, "Error creating tenant");
                 return Result.Failure(Error.Failure(code: "TenantCreationFailed", description: "An error occurred while creating the tenant."));
+            }
+        }
+
+
+        public async Task<Result<TenantInfoDto>> GetTenantDetails(Guid? tenantId, string? Domain)
+        {
+            try
+            {
+                var organizationResult = await _organizationService.GetOrganizationDetails(tenantId, Domain, CancellationToken.None);
+
+                if (organizationResult.IsFailure)
+                {
+                    _logger.LogError("Failed to retrieve organization details: {Error}", organizationResult.Error.ToLogString());
+                    return Result.Failure<TenantInfoDto>(Error.Failure(code: "OrganizationRetrievalFailed", description: "Failed to retrieve organization details for the tenant."));
+                }
+
+                var organization = organizationResult.Value;
+
+                var tenantInfo = new TenantInfoDto
+                {
+                    OrgName = organization.Name,
+                    DomainName = organization.DomainName,
+                    TenantId = organization.Id
+                };
+
+                return Result.Success(tenantInfo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving tenant details");
+                return Result.Failure<TenantInfoDto>(Error.Failure(code: "TenantDetailsRetrievalFailed", description: "An error occurred while retrieving tenant details."));
             }
         }
     }

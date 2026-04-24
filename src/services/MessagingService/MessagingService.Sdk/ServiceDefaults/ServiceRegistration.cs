@@ -1,4 +1,5 @@
 ﻿using MessagingService.Sdk.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MessagingService.Sdk.ServiceDefaults
@@ -7,9 +8,9 @@ namespace MessagingService.Sdk.ServiceDefaults
     {
         private const string ServiceName = "MessageService";
 
-        public static IServiceCollection AddMessageServiceSDK(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false)
+        public static IServiceCollection AddMessageServiceSDK(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false, IConfiguration? configuration = null)
         {
-            services.AddSdkAuthentication(ServiceName, serviceUrl, IsServiceAccount);
+            services.AddSdkAuthentication(ServiceName, serviceUrl, IsServiceAccount, configuration);
 
             services.AddScoped<IKiotaApiClient<MessagingServiceClient>>(sp =>
             {

@@ -1,5 +1,8 @@
 ﻿@page "/ticketdetails"
+@using CCP.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveServer
+@attribute [Authorize(Policy = "RequireSupporter")]
 
 <PageTitle>Helix — Ticket Details</PageTitle>
 <div class="Body">

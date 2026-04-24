@@ -1,14 +1,19 @@
 using CCP.ServiceDefaults;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
+using ChatService.Sdk.ServiceDefaults;
+using Gateway.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TicketService.Sdk.ServiceDefaults;
 
@@ -42,17 +47,23 @@ namespace CCP.UI
             var metadataAddress = builder.Configuration.GetValue<string>("services:Keycloak:metadataAddress") ?? $"{keycloakURL}/realms/CCP/.well-known/openid-configuration";
 
 
-            builder.Services.AddAuthentication(options =>
+            if (builder.Configuration.GetValue<bool>("UI_TESTS", defaultValue: false))
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            }).AddCookie(options =>
+                builder.Services.AddAuthenticationCore();
+            }
+            else
             {
-                options.SlidingExpiration = false;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
-            })
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                }).AddCookie(options =>
+                {
+                    options.SlidingExpiration = false;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+                })
             .AddOpenIdConnect(options =>
             {
                 options.Authority = $"{keycloakURL}/realms/CCP";
@@ -91,6 +102,27 @@ namespace CCP.UI
                     };
                 }
             });
+            }
+
+
+            //Authorization Policies
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdmin", policy => policy.RequireRole(
+                    UserRolesExtensions.AdminRoleString));
+                options.AddPolicy("RequireManager", policy => policy.RequireRole(
+                    UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                options.AddPolicy("RequireSupporter", policy => policy.RequireRole(
+                    UserRolesExtensions.SupporterRoleString,
+                    UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+                options.AddPolicy("RequireInitialUser", policy => policy.RequireRole(
+                    UserRolesExtensions.CustomerRoleString,
+                    UserRolesExtensions.SupporterRoleString,
+                    UserRolesExtensions.ManagerRoleString,
+                    UserRolesExtensions.AdminRoleString));
+            });
 
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -116,6 +148,16 @@ namespace CCP.UI
             builder.Services.AddTicketServiceSdk(
                 builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
                 ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddChatServiceSdk(
+                builder.Configuration.GetValue<string>("services:chatservice-api:http:0")
+                ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddGatewayServiceSdk(
+                builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
+                ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")
                 );
 
             var app = builder.Build();
@@ -152,13 +194,32 @@ namespace CCP.UI
                 return loginChallenged;
             });
 
-            app.MapGet("/authentication/logout", async (HttpContext context) =>
+            app.MapGet("/authentication/logout", async (HttpContext context, IMemoryCache memoryCache) =>
             {
+                // Evict the cached access token before signing out so that re-login always fetches a fresh token rather than serving the stale cached one.
+                var sub = context.User.FindFirst("sub")?.Value
+                       ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (sub is not null)
+                    memoryCache.Remove($"user_token:{sub}:");
+
                 await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties
                 {
                     RedirectUri = "/"
                 });
+            });
+
+            var attachmentsPath = builder.Configuration["Attachments:StoragePath"] ?? "./attachments";
+            var attachmentsFullPath = Path.IsPathRooted(attachmentsPath)
+                ? attachmentsPath
+                : Path.Combine(builder.Environment.ContentRootPath, attachmentsPath);
+
+            Directory.CreateDirectory(attachmentsFullPath);
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(attachmentsFullPath),
+                RequestPath = "/attachments"
             });
 
             app.Run();

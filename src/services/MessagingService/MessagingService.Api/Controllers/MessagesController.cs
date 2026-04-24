@@ -12,11 +12,13 @@ public class MessagesController : ControllerBase
 {
     private readonly IMessageService _messageService;
     private readonly IHubContext<ChatHub> _hubContext;
+    private readonly ILogger<MessagesController> _logger;
 
-    public MessagesController(IMessageService messageService, IHubContext<ChatHub> hubContext)
+    public MessagesController(IMessageService messageService, IHubContext<ChatHub> hubContext, ILogger<MessagesController> logger)
     {
         _messageService = messageService;
         _hubContext = hubContext;
+        _logger = logger;
     }
 
     [HttpPost]

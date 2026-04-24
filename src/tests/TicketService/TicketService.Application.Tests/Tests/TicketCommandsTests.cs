@@ -18,6 +18,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly ICurrentUser _currentUser;
         private readonly IAssignmentCommands _assignmentCommands;
+        private readonly ITicketHistoryRepository _historyRepository;
         private readonly TicketCommands _sut; // System Under Test
 
         public TicketCommandsTests()
@@ -27,6 +28,7 @@ namespace TicketService.Application.Tests.Tests
             _ticketRepository = Substitute.For<ITicketRepositoryCommands>();
             _currentUser = Substitute.For<ICurrentUser>();
             _assignmentCommands = Substitute.For<IAssignmentCommands>();
+            _historyRepository = Substitute.For<ITicketHistoryRepository>();
 
             // Setup standard værdier
             _currentUser.OrganizationId.Returns(Guid.NewGuid());
@@ -36,7 +38,8 @@ namespace TicketService.Application.Tests.Tests
                 _logger,
                 _ticketRepository,
                 _currentUser,
-                _assignmentCommands
+                _assignmentCommands,
+                _historyRepository
             );
         }
 

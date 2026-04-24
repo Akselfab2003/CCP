@@ -11,9 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.RabbitMQ.Client" />
+    <PackageReference Include="WolverineFx.RabbitMQ" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EmailService.Infrastructure\EmailService.Infrastructure.csproj" />
   </ItemGroup>
   
 </Project>

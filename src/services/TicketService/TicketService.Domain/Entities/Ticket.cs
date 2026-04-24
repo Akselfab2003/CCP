@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string? Description { get; private set; }
         public TicketStatus Status { get; set; }
         public Guid OrganizationId { get; set; }
         public Guid? CustomerId { get; set; }
@@ -13,7 +14,7 @@
         public List<string> InternalNotes { get; set; } = [];
 
 
-        public void AddRequiredInfo(string title, Guid? customerId, Guid organizationId)
+        public void AddRequiredInfo(string title, Guid? customerId, Guid organizationId, string? description = null)
         {
             Title = title;
             OrganizationId = organizationId;
@@ -21,6 +22,12 @@
             CreatedAt = DateTime.UtcNow;
             InternalNotes = [];
             Status = TicketStatus.Open;
+            Description = description;
+        }
+
+        public void UpdateDescription(string? description)
+        {
+            Description = description;
         }
 
         public void AddInternalNote(string note)

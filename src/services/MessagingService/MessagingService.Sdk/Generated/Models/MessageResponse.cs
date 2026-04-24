@@ -14,6 +14,30 @@ namespace MessagingService.Sdk.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The attachmentContentType property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? AttachmentContentType { get; set; }
+#nullable restore
+#else
+        public string AttachmentContentType { get; set; }
+#endif
+        /// <summary>The attachmentFileName property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? AttachmentFileName { get; set; }
+#nullable restore
+#else
+        public string AttachmentFileName { get; set; }
+#endif
+        /// <summary>The attachmentUrl property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? AttachmentUrl { get; set; }
+#nullable restore
+#else
+        public string AttachmentUrl { get; set; }
+#endif
         /// <summary>The content property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -75,6 +99,9 @@ namespace MessagingService.Sdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "attachmentContentType", n => { AttachmentContentType = n.GetStringValue(); } },
+                { "attachmentFileName", n => { AttachmentFileName = n.GetStringValue(); } },
+                { "attachmentUrl", n => { AttachmentUrl = n.GetStringValue(); } },
                 { "content", n => { Content = n.GetStringValue(); } },
                 { "createdAtUtc", n => { CreatedAtUtc = n.GetDateTimeOffsetValue(); } },
                 { "deletedAtUtc", n => { DeletedAtUtc = n.GetDateTimeOffsetValue(); } },
@@ -96,6 +123,9 @@ namespace MessagingService.Sdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteStringValue("attachmentContentType", AttachmentContentType);
+            writer.WriteStringValue("attachmentFileName", AttachmentFileName);
+            writer.WriteStringValue("attachmentUrl", AttachmentUrl);
             writer.WriteStringValue("content", Content);
             writer.WriteDateTimeOffsetValue("createdAtUtc", CreatedAtUtc);
             writer.WriteDateTimeOffsetValue("deletedAtUtc", DeletedAtUtc);

@@ -11,7 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
@@ -25,6 +30,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
+    <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
+    <ProjectReference Include="..\ChatService.Application\ChatService.Application.csproj" />
     <ProjectReference Include="..\ChatService.Infrastructure\ChatService.Infrastructure.csproj" />
   </ItemGroup>
 

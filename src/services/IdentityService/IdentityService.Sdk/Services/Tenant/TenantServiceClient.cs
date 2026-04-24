@@ -103,5 +103,46 @@ namespace IdentityService.Sdk.Services.Tenant
                 return Result.Failure(Error.Failure(code: "InviteTenantMemberFailed", description: $"An error occurred while inviting a new tenant member with email '{email}'"));
             }
         }
+
+        public async Task<Result<TenantDetails>> GetTenantDetailsAsync(Guid? tenantId = null, string? domain = null, CancellationToken ct = default)
+        {
+            try
+            {
+                var tenantDetailsDto = await _apiClient.Client.Tenant.Info.GetAsync(req =>
+                {
+                    if (tenantId.HasValue)
+                    {
+                        req.QueryParameters.TenantId = tenantId.Value;
+                    }
+                    if (!string.IsNullOrEmpty(domain))
+                    {
+                        req.QueryParameters.Domain = domain;
+                    }
+
+                }, cancellationToken: ct);
+                if (tenantDetailsDto == null)
+                {
+                    _logger.LogWarning("Tenant details not found for TenantId: '{TenantId}' or Domain: '{Domain}'", tenantId, domain);
+                    return Result.Failure<TenantDetails>(Error.Failure(code: "TenantDetailsNotFound", description: $"Tenant details not found for TenantId: '{tenantId}' or Domain: '{domain}'"));
+                }
+                var tenantDetails = new TenantDetails
+                {
+                    OrgId = tenantDetailsDto.TenantId != null ? tenantDetailsDto.TenantId.Value : Guid.Empty,
+                    Name = tenantDetailsDto.OrgName ?? string.Empty,
+                    DomainName = tenantDetailsDto.DomainName ?? string.Empty,
+                };
+                return Result.Success(tenantDetails);
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "API error occurred while retrieving tenant details for TenantId: '{TenantId}' or Domain: '{Domain}'", tenantId, domain);
+                return Result.Failure<TenantDetails>(Error.Failure(code: "GetTenantDetailsApiError", description: $"API error occurred while retrieving tenant details for TenantId: '{tenantId}' or Domain: '{domain}': {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving tenant details for TenantId: '{TenantId}' or Domain: '{Domain}'", tenantId, domain);
+                return Result.Failure<TenantDetails>(Error.Failure(code: "GetTenantDetailsFailed", description: $"An error occurred while retrieving tenant details for TenantId: '{tenantId}' or Domain: '{domain}'"));
+            }
+        }
     }
 }

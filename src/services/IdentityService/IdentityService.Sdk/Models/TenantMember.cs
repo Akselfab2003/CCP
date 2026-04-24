@@ -9,5 +9,8 @@
         public string Email { get; set; } = string.Empty;
         public List<string> Roles { get; set; } = [];
         public List<string> Groups { get; set; } = [];
+
+        // Computed property til at få fulde navn
+        public string Name => $"{FirstName} {LastName}".Trim();
     }
 }
