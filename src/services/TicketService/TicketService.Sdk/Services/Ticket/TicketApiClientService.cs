@@ -23,7 +23,7 @@ namespace TicketService.Sdk.Services.Ticket
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<Result<int>> CreateTicket(CreateTicketRequestDto request, CancellationToken ct = default)
+        public async Task<Result<int>> CreateTicket(CreateTicketRequestDto request, TicketOrigin origin = TicketOrigin.Manual, CancellationToken ct = default)
         {
             try
             {
@@ -33,7 +33,8 @@ namespace TicketService.Sdk.Services.Ticket
                     Title = request.Title,
                     CustomerId = request.CustomerId,
                     AssignedUserId = request.AssignedUserId,
-                    Description = request.Description
+                    Description = request.Description,
+                    Origin = (int)origin
                 }, ct);
 
                 if (!response.IsSuccessStatusCode)
