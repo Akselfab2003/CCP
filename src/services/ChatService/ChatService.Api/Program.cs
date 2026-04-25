@@ -14,9 +14,11 @@ using ChatService.Infrastructure.ServiceCollection;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using IdentityService.Sdk.ServiceDefaults;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
+using TicketService.Sdk.ServiceDefaults;
 
 public partial class Program
 {
@@ -48,6 +50,17 @@ public partial class Program
             {
                 opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); });
             });
+
+
+            builder.Services.AddTicketServiceSdk(
+                builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+                ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddMessageServiceSDK(
+              builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+              ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
+
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
             builder.AddKeyedOllamaApiClient("qwen")
@@ -137,7 +150,8 @@ public partial class Program
         app.MapSessionEndpoints()
            .MapFaqManagementEndpoints()
            .MapChatEndpoints()
-           .MapConfigurationEndpoints();
+           .MapConfigurationEndpoints()
+           .MapAutomaticMessageGenerationEndpoints();
 
 
 

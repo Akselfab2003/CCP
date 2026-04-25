@@ -30,6 +30,8 @@
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
     <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
+    <ProjectReference Include="..\..\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
     <ProjectReference Include="..\ChatService.Application\ChatService.Application.csproj" />
     <ProjectReference Include="..\ChatService.Infrastructure\ChatService.Infrastructure.csproj" />
   </ItemGroup>

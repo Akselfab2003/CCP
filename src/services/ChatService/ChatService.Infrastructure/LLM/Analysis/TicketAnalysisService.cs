@@ -1,12 +1,11 @@
 ﻿using CCP.Shared.ResultAbstraction;
-using ChatService.Domain.Dtos;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ChatService.Infrastructure.LLM.Analysis
 {
-    public class TicketAnalysisService
+    public class TicketAnalysisService : ITicketAnalysisService
     {
         private readonly ILogger<TicketAnalysisService> _logger;
         private readonly IChatClient _chatClient;
@@ -18,7 +17,7 @@ namespace ChatService.Infrastructure.LLM.Analysis
         }
 
 
-        public async Task<Result<string>> ExtractProblemAsync(SupportTicket ticket)
+        public async Task<Result<TicketProblemAnalysis>> ExtractProblemAsync(SupportTicket ticket)
         {
             try
             {
@@ -56,11 +55,15 @@ namespace ChatService.Infrastructure.LLM.Analysis
                 var response = await _chatClient.GetResponseAsync<TicketProblemAnalysis>(message);
 
 
+                if (response == null)
+                    return Result.Failure<TicketProblemAnalysis>(Error.NotFound(code: "TicketProblemNotFound", description: $"Could not extract problem information from ticket {ticket.TicketId}."));
+
+                return response.Result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error extracting problem from ticket {TicketId}", ticket.TicketId);
-                return Result.Failure<string>(Error.Failure(code: "TicketProblemExtractionError", description: $"An error occurred while extracting the problem from ticket {ticket.TicketId}."));
+                return Result.Failure<TicketProblemAnalysis>(Error.Failure(code: "TicketProblemExtractionError", description: $"An error occurred while extracting the problem from ticket {ticket.TicketId}."));
             }
         }
     }

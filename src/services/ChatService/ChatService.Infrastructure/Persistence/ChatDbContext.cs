@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.AuthContext;
 using ChatService.Application.AuthContext;
 using ChatService.Domain.Entities;
+using ChatService.Domain.Entities.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -27,6 +28,8 @@ public class ChatDbContext : DbContext
     public DbSet<ConversationEntity> Conversations => Set<ConversationEntity>();
     public DbSet<MessageEntity> Messages => Set<MessageEntity>();
     public DbSet<DomainDetails> DomainDetails => Set<DomainDetails>();
+    public DbSet<TicketAnalysis> TicketAnalysis => Set<TicketAnalysis>();
+    public DbSet<TicketEmbedding> TicketEmbedding => Set<TicketEmbedding>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

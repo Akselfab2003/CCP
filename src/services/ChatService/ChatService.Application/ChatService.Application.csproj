@@ -8,10 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" />
+    <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
+    <ProjectReference Include="..\..\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
     <ProjectReference Include="..\ChatService.Domain\ChatService.Domain.csproj" />
   </ItemGroup>
 
