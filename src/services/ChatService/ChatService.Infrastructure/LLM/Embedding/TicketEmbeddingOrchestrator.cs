@@ -1,4 +1,5 @@
 ﻿using ChatService.Domain.Dtos;
+using ChatService.Domain.Entities.AI;
 using ChatService.Infrastructure.LLM.Analysis;
 using ChatService.Infrastructure.Persistence;
 using Microsoft.Extensions.AI;
@@ -11,7 +12,6 @@ namespace ChatService.Infrastructure.LLM.Embedding
     {
         private readonly ILogger<TicketEmbeddingOrchestrator> _logger;
         private readonly ITicketAnalysisService _ticketAnalysisService;
-        private readonly ChatDbContext _chatDbContext;
         private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
 
         public TicketEmbeddingOrchestrator(ILogger<TicketEmbeddingOrchestrator> logger,
@@ -29,6 +29,28 @@ namespace ChatService.Infrastructure.LLM.Embedding
         {
             try
             {
+                var analysisResult = await _ticketAnalysisService.ExtractProblemAsync(ticket);
+
+                if (analysisResult.IsFailure)
+                {
+                    _logger.LogWarning("Problem extraction failed for ticket {TicketId}: {ErrorMessage}", ticket.TicketId, analysisResult.ErrorMessage);
+                    return;
+                }
+                var analysisData = analysisResult.Value;
+
+                var entity = new TicketAnalysis()
+                {
+                    TicketId = ticket.TicketId,
+                    OrgId = ticket.OrgId,
+                    ProblemSummary = analysisData.Summary,
+                    Category = analysisData.Category,
+                    Component = analysisData.Component,
+                    Symptoms = analysisData.Symptoms,
+                    ErrorCodes = analysisData.ErrorCodes,
+                    Tags = analysisData.Tags,
+                    ProblemAnalysedAt = DateTime.UtcNow
+                };
+
 
             }
             catch (Exception ex)
