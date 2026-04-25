@@ -5,7 +5,6 @@ using ChatService.Application.Models;
 using ChatService.Application.Services.Chat;
 using ChatService.Application.Services.Domain;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace ChatService.Api.Endpoints
 {
@@ -49,8 +48,6 @@ namespace ChatService.Api.Endpoints
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status401Unauthorized);
 
-            chatGroup.MapPost("/test", testsignalR);
-
 
             return builder;
         }
@@ -70,12 +67,6 @@ namespace ChatService.Api.Endpoints
                 return Results.Problem("An error occurred while creating the conversation.", statusCode: 500);
             }
         }
-
-        private static async Task testsignalR([FromServices] IHubContext<ChatHub.ChatHub> hubContext, [FromQuery] string session, [FromQuery] string domain, [FromQuery] string message)
-        {
-            await hubContext.Clients.Group($"{domain}:{session}").SendAsync("test", message);
-        }
-
         private static async Task<IResult> SendMessage([FromServices] IChatManagementService chatManagement, [FromBody] ChatMessageRequest request)
         {
             try

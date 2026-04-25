@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using TicketService.Sdk.ServiceDefaults;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 public partial class Program
 {
@@ -96,6 +98,22 @@ public partial class Program
             builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
                 .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
                 .AddEndpointsApiExplorer();
+
+
+            builder.UseWolverine(opts =>
+            {
+                opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
+                    .AutoProvision();
+
+                opts.ListenToRabbitQueue("ticket.created")
+                    .UseDurableInbox();
+
+                opts.ListenToRabbitQueue("MessageCreated")
+                    .UseDurableInbox();
+
+                opts.ListenToRabbitQueue("ticket.closed")
+                    .UseDurableInbox();
+            });
 
         }
         builder.Services.AddSignalR(options =>

@@ -169,11 +169,11 @@ TicketService
     .WaitFor(Keycloak)
     .WaitFor(TicketDB)
     .WaitFor(RabbitMq)
+    .WaitFor(EmailService)
     .WithReference(Keycloak)
     .WithReference(TicketDB)
     .WithReference(RabbitMq)
     .WithReference(EmailService)
-    .WaitFor(EmailService)
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

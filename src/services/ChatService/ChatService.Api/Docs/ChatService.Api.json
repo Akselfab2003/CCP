@@ -471,44 +471,6 @@
         }
       }
     },
-    "/chat/test": {
-      "post": {
-        "tags": [
-          "Chat"
-        ],
-        "parameters": [
-          {
-            "name": "session",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "domain",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "message",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/configuration/AddOrUpdateDomain": {
       "post": {
         "tags": [

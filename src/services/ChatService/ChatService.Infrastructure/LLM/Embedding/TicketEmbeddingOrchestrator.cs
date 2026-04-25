@@ -19,7 +19,7 @@ namespace ChatService.Infrastructure.LLM.Embedding
         private readonly EmbeddingTextBuilder _embeddingTextBuilder;
         public TicketEmbeddingOrchestrator(ILogger<TicketEmbeddingOrchestrator> logger,
                                            ITicketAnalysisService ticketAnalysisService,
-                                           [FromKeyedServices("qwen")] IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
+                                           [FromKeyedServices("embedding")] IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
                                            ChatDbContext chatDbContext)
         {
             _logger = logger;

@@ -1,9 +1,11 @@
-﻿using EmailService.Sdk.Services;
+﻿using CCP.Shared.Events;
+using EmailService.Sdk.Services;
 using Microsoft.Extensions.Logging;
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using Wolverine;
 
 namespace TicketService.Application.Services.Ticket
 {
@@ -15,9 +17,9 @@ namespace TicketService.Application.Services.Ticket
         private readonly ICurrentUser _currentUser;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly IMessageBus _messageBus;
 
-
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository)
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, IMessageBus messageBus)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
@@ -25,6 +27,7 @@ namespace TicketService.Application.Services.Ticket
             _assignmentCommands = assignmentCommands;
             _emailSdkService = emailSdkService;
             _historyRepository = historyRepository;
+            _messageBus = messageBus;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -86,6 +89,21 @@ namespace TicketService.Application.Services.Ticket
                     _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
                 }
 
+                try
+                {
+                    await _messageBus.PublishAsync<TicketCreated>(new TicketCreated
+                    {
+                        TicketId = result.Value.Id,
+                        OrgId = _currentUser.OrganizationId,
+                        CreatedAt = DateTime.UtcNow,
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish ticket created event for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
+                }
+
+
                 return Result.Success(result.Value.Id); // ← return the ticket ID
             }
             catch (Exception ex)
@@ -138,12 +156,34 @@ namespace TicketService.Application.Services.Ticket
                 }
 
 
+                if (newStatus == TicketStatus.Closed)
+                {
+                    await SendTicketClosedEvent(ticketId);
+                }
+
                 return Result.Success();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating status for ticket {TicketId}.", ticketId);
                 return Result.Failure(Error.Failure("StatusUpdateFailed", "An error occurred while updating the ticket status."));
+            }
+        }
+
+        private async Task SendTicketClosedEvent(int ticketId)
+        {
+            try
+            {
+                await _messageBus.PublishAsync<TicketClosed>(new TicketClosed
+                {
+                    TicketId = ticketId,
+                    OrgId = _currentUser.OrganizationId,
+                    ClosedAt = DateTime.UtcNow,
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to publish ticket closed event for ticket {TicketId}, but ticket was closed successfully", ticketId);
             }
         }
 

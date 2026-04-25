@@ -1,4 +1,5 @@
 using System.Reflection;
+using CCP.Shared.Events;
 using EmailService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Api.Endpoints;
@@ -54,7 +55,18 @@ namespace TicketService.Api
                     opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
                         .AutoProvision();
 
-                    opts.PublishAllMessages().ToRabbitQueue("ticket.assignment.updated").UseDurableOutbox();
+                    opts.PublishMessage<TicketAssignmentUpdated>()
+                        .ToRabbitQueue("ticket.assignment.updated")
+                        .UseDurableOutbox();
+
+                    opts.PublishMessage<TicketCreated>()
+                        .ToRabbitQueue("ticket.created")
+                        .UseDurableOutbox();
+
+                    opts.PublishMessage<TicketClosed>()
+                        .ToRabbitQueue("ticket.closed")
+                        .UseDurableOutbox();
+
                 });
             }
 
