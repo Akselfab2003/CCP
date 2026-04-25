@@ -53,6 +53,8 @@ namespace EmailService.Sdk.Services
             Guid customerId,
             string ticketTitle,
             int ticketId,
+            TicketStatus status,
+            TicketOrigin origin,
             string agentName,
             string agentRole)
         {
@@ -68,6 +70,8 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.AgentRole = agentRole;
+                    request.QueryParameters.Origin = (int?)origin;
+                    request.QueryParameters.TicketStatus = status.ToString();
                 });
         }
 

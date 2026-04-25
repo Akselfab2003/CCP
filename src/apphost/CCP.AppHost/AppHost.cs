@@ -192,12 +192,17 @@ MessagingService
     .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
     .WaitFor(TicketService)
+    .WaitFor(EmailService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(RabbitMq)
     .WithReference(TicketService)
+    .WithReference(EmailService)
     .WaitFor(RabbitMq)
-    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

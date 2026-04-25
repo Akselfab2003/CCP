@@ -7,7 +7,7 @@ namespace EmailService.Sdk.Services
     {
         Task NotifySupportCustomerReplyAsync(Guid customerId, string agentEmail, string agentName, int ticketId, string ticketTitle, TicketStatus ticketStatus, string replyContent);
         Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus status);
-        Task NotifyTicketRepliedAsync(Guid customerId, string ticketTitle, int ticketId, string agentName, string agentRole);
+        Task NotifyTicketRepliedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus status, TicketOrigin origin, string agentName, string agentRole);
         Task NotifyTicketStatusChangedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus oldStatus, TicketStatus newStatus);
         Task CreateTenantEmailAsync(string DefaultSenderEmail);
     }

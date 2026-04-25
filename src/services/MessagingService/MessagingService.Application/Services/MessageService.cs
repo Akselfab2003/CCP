@@ -1,3 +1,6 @@
+using CCP.Shared.AuthContext;
+using CCP.Shared.ValueObjects;
+using EmailService.Sdk.Services;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
@@ -19,13 +22,17 @@ public class MessageService : IMessageService
     private readonly MessagingDbContext _dbContext;
     private readonly IMessageAccessValidator _messageAccessValidator;
     private readonly ITicketService _ticketService;
+    private readonly IEmailSdkService _emailSdkService;
+    private readonly ServiceAccountOverrider _serviceAccountOverrider;
     private readonly ILogger<MessageService> _logger;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator,ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
+        _emailSdkService = emailSdkService;
         _ticketService = ticketService;
+        _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
     }
 
@@ -80,6 +87,14 @@ public class MessageService : IMessageService
 
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        if (request.UserId.HasValue)
+        {
+            //TODO : Der skal ændres i nogle parametre;
+            _serviceAccountOverrider.SetOrganizationId(request.OrganizationId);
+            await _emailSdkService.NotifyTicketRepliedAsync(request.UserId.Value,"", request.TicketId,TicketStatus.Open,TicketOrigin.Email,"","");
+        }
+
 
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
