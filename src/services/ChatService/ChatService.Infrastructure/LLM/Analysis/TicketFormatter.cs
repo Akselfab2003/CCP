@@ -18,7 +18,7 @@ namespace ChatService.Infrastructure.LLM.Analysis
                 var role = msg.AuthorType switch
                 {
                     MessageAuthorType.User => "User",
-                    MessageAuthorType.Supporter => "Supporter",
+                    MessageAuthorType.Support => "Supporter",
                     _ => "Unknown"
                 };
 
