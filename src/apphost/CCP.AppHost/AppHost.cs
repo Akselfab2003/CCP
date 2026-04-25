@@ -142,6 +142,8 @@ EmailService
     .WaitFor(CustomerService)
     .WaitFor(Keycloak)
     .WithReference(Keycloak)
+    .WaitFor(MessagingService)
+    .WithReference(MessagingService)
     .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
     .WithUrlForEndpoint("https", endpoint =>
     {

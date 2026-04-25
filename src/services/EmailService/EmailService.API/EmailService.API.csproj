@@ -31,6 +31,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="NSwag.Annotations">
     </PackageReference>
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger">
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI">

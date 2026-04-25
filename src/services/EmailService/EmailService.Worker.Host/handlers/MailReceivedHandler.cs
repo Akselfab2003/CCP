@@ -16,11 +16,10 @@ namespace EmailService.Worker.Host.handlers
         private readonly IMailProcessingService _mailProcessingService;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
 
-        public MailReceivedHandler(ILogger<MailReceivedHandler> logger,
-                                   IMailBoxService mailBoxService,
-                                   IEmailTicketMessageRepository emailTicketMessageRepository,
-                                   IMailProcessingService mailProcessingService,
-                                   ServiceAccountOverrider serviceAccountOverrider)
+        public MailReceivedHandler(
+            ILogger<MailReceivedHandler> logger, IMailBoxService mailBoxService,
+            IEmailTicketMessageRepository emailTicketMessageRepository, IMailProcessingService mailProcessingService,
+            ServiceAccountOverrider serviceAccountOverrider)
         {
             _logger = logger;
             _mailBoxService = mailBoxService;
@@ -68,8 +67,9 @@ namespace EmailService.Worker.Host.handlers
 
             (int TicketId, Guid CustomerId) = ProcessResult.Value;
 
-            var saveResult = await SaveMessageAsync(message: fullEmail, ticketId: TicketId, customerId: CustomerId,
-                                     TenantId: EmailTenantDetails.Value.OrganizationId);
+            var saveResult = await SaveMessageAsync(
+                message: fullEmail, ticketId: TicketId,
+                customerId: CustomerId, TenantId: EmailTenantDetails.Value.OrganizationId);
 
             if (saveResult.IsFailure)
             {

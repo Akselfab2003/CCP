@@ -1,9 +1,12 @@
 ﻿using CCP.Shared.ValueObjects;
 using CustomerService.Sdk.Models;
 using EmailService.Application.Interfaces;
+using EmailService.Domain.Interfaces;
 using EmailService.Domain.Models;
 using EmailTemplates.Renderes;
+using MessagingService.Sdk.Dtos;
 using MimeKit;
+using MimeKit.Utils;
 
 namespace EmailService.Infrastructure.EmailInfrastructure
 {
@@ -11,18 +14,20 @@ namespace EmailService.Infrastructure.EmailInfrastructure
     {
         private readonly ISmtpClient _smtpClient;
         private readonly IEmailTemplateRenderer _emailTemplateRenderer;
+        private readonly IEmailTicketMessageRepository _emailTicketMessageRepository;
 
-        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer)
+        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer, IEmailTicketMessageRepository emailTicketMessageRepository)
         {
             _smtpClient = smtpClient;
             _emailTemplateRenderer = emailTemplateRenderer;
+            _emailTicketMessageRepository = emailTicketMessageRepository;
         }
 
         public async Task SendTicketCreatedEmailAsync(
             string to, string subject,
             EmailSent email, int ticketId, TicketStatus ticketStatus,
             string organizationName, string expectedResponseTime,
-            string portalUrl)
+            string portalUrl, TicketOrigin origin)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketCreatedEmailAsync(
@@ -30,12 +35,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 organizationName, expectedResponseTime,
                 portalUrl);
 
-            var message = BuildMessage(
+            var message = await BuildMessage(
                 fromAddress: email.SenderAddress,
                 fromName: organizationName,
                 toAddress: to,
                 toName: email.RecipientAddress,
-                subject: subject
+                subject: subject,
+                origin: origin,
+                ticketId: ticketId
             );
 
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
@@ -49,7 +56,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
 
             CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
-            string replyUrl, string viewHistoryUrl)
+            string replyUrl, string viewHistoryUrl, TicketOrigin origin)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketReplyEmailAsync(
@@ -58,12 +65,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 agentName, agentRole,
                 replyUrl, viewHistoryUrl);
 
-            var message = BuildMessage(
+            var message = await BuildMessage(
                 fromAddress: email.SenderAddress,
                 fromName: organizationName,
                 toAddress: to,
                 toName: email.RecipientAddress,
-                subject: subject
+                subject: subject,
+                origin: origin,
+                ticketId: ticketId
             );
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
             await _smtpClient.SendAsync(message);
@@ -73,7 +82,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string to, string subject,
             EmailSent email, int ticketId, TicketStatus ticketStatus,
             string organizationName, string oldStatusLabel,
-            string portalUrl)
+            string portalUrl, TicketOrigin origin)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketStatusEmailAsync(
@@ -81,12 +90,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 organizationName, oldStatusLabel,
                 portalUrl);
 
-            var message = BuildMessage(
+            var message = await BuildMessage(
                 fromAddress: email.SenderAddress,
                 fromName: organizationName,
                 toAddress: to,
                 toName: email.RecipientAddress,
-                subject: subject
+                subject: subject,
+                origin: origin,
+                ticketId: ticketId
             );
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
             await _smtpClient.SendAsync(message);
@@ -97,7 +108,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             EmailReceived email, int ticketId, TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string replyUrl, string managementUrl,
-            string viewHistoryUrl)
+            string viewHistoryUrl, TicketOrigin origin)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderSupportCustomerReplyNotificationAsync(
@@ -106,12 +117,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 replyUrl, managementUrl,
                 viewHistoryUrl);
 
-            var message = BuildMessage(
+            var message = await BuildMessage(
                 fromAddress: email.SenderAddress,
                 fromName: organizationName,
                 toAddress: to,
                 toName: email.RecipientAddress,
-                subject: subject
+                subject: subject,
+                origin: origin,
+                ticketId: ticketId
             );
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
             await _smtpClient.SendAsync(message);
@@ -119,38 +132,62 @@ namespace EmailService.Infrastructure.EmailInfrastructure
 
         public async Task SendReplyToEmailAsync(
             string to, string subject,
-            EmailReceived emailReceived, EmailSent? emailSent,
-            int ticketId, TicketStatus ticketStatus, string organizationName)
+            List<MessageDto> messages, EmailSent emailSent,
+            int ticketId, TicketStatus ticketStatus,
+            string organizationName,TicketOrigin origin)
         {
             var htmlContent = await _emailTemplateRenderer
                 .RenderReplyToEmailAsync(
-                emailReceived, emailSent,
+                messages, emailSent,
                 ticketId, organizationName);
 
-            var message = BuildMessage(
-                fromAddress: emailReceived.SenderAddress,
+            var message = await BuildMessage(
+                fromAddress: emailSent.SenderAddress,
                 fromName: organizationName,
                 toAddress: to,
-                toName: emailReceived.RecipientAddress,
-                subject: subject
+                toName: emailSent.RecipientAddress,
+                subject: subject,
+                origin: origin,
+                ticketId: ticketId
             );
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
             await _smtpClient.SendAsync(message);
         }
 
 
-        private static MimeMessage BuildMessage(
+        private async Task<MimeMessage> BuildMessage(
         string fromAddress, string fromName,
         string toAddress, string toName,
-        string subject)
+        string subject, TicketOrigin origin, int ticketId)
         {
             var message = new MimeMessage();
+            if (origin == TicketOrigin.Email)
+            {
+                message = await GetLastEmail(ticketId: ticketId, message);
+            }
+
             message.From.Add(new MailboxAddress(fromName, fromAddress));
             message.To.Add(new MailboxAddress(toName, toAddress));
             message.Subject = subject;
             return message;
+
         }
 
+        private async Task<MimeMessage> GetLastEmail(int ticketId, MimeMessage message)
+        {
+            var allEmailsFromTicket = await _emailTicketMessageRepository.GetByTicketIdAsync(ticketId);
+            if (allEmailsFromTicket.IsFailure) { return message; }
+
+            var lastEmail = allEmailsFromTicket.Value.OrderByDescending(e => e.SentAt).FirstOrDefault();
+            if (lastEmail == null) { return message; }
+
+                message.InReplyTo = lastEmail.MessageId;
+                message.MessageId = MimeUtils.GenerateMessageId();
+                message.References.AddRange(lastEmail.References);
+                message.References.Add(lastEmail.MessageId);
+
+            return message;
+        }
 
     }
 }

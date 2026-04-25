@@ -1,7 +1,11 @@
-﻿using CCP.Shared.ValueObjects;
+﻿using CCP.Shared.ResultAbstraction;
+using CCP.Shared.ValueObjects;
+using CustomerService.Domain.Entities;
 using CustomerService.Sdk.Services;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
+using MessagingService.Sdk.Dtos;
+using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -14,20 +18,21 @@ namespace EmailService.Api.Controllers
     {
         private readonly ITicketEmailService _ticketEmailService;
         private readonly ICustomerSdkService _customerSdkService;
+        private readonly IMessageSdkService _messageSdkService;
         private readonly IConfiguration _configuration;
 
-        public EmailSendingServiceController(ITicketEmailService ticketEmailService, ICustomerSdkService customerSdkService, IConfiguration configuration)
+        public EmailSendingServiceController(ITicketEmailService ticketEmailService,IMessageSdkService messageSdkService, ICustomerSdkService customerSdkService, IConfiguration configuration)
         {
             _ticketEmailService = ticketEmailService;
+            _messageSdkService = messageSdkService;
             _customerSdkService = customerSdkService;
             _configuration = configuration;
         }
 
         [HttpPost]
-        public async Task<IResult> NotifyNewTicketCreation([FromQuery] Guid customerId,
-                                                           [FromQuery] string ticketTitle,
-                                                           [FromQuery] int TicketId,
-                                                           [FromQuery] string TicketStatus)
+        public async Task<IResult> NotifyNewTicketCreation(
+            [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
+            [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery]TicketOrigin origin)
         {
             try
             {
@@ -64,7 +69,8 @@ namespace EmailService.Api.Controllers
                     ticketStatus: parsedStatus,
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
-                    portalUrl: portalUrl);
+                    portalUrl: portalUrl,
+                    origin:origin);
 
                 return Results.Accepted($"Email notification for ticket creation has been sent with ticket ID {TicketId} to {customer.Email}.");
             }
@@ -78,7 +84,7 @@ namespace EmailService.Api.Controllers
         public async Task<IResult> NotifyTicketStatusChange(
             [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
             [FromQuery] int TicketId, [FromQuery] string newStatus,
-            [FromQuery] string oldStatus)
+            [FromQuery] string oldStatus, [FromQuery]TicketOrigin origin)
         {
             try
             {
@@ -114,7 +120,8 @@ namespace EmailService.Api.Controllers
                     ticketStatus: parsedStatus,
                     organizationName: organizationName,
                     oldStatusLabel: oldStatus,
-                    portalUrl: portalUrl
+                    portalUrl: portalUrl,
+                    origin: origin
                     );
 
                 return Results.Accepted($"Email notification for status change has been sent for ticket ID {TicketId} to {customer.Email}.");
@@ -130,52 +137,107 @@ namespace EmailService.Api.Controllers
         public async Task<IResult> NotifyTicketReply(
             [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
             [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] string agentName,
-            [FromQuery] string agentRole)
+            [FromQuery] string agentRole, [FromQuery] TicketOrigin origin)
         {
             try
             {
-                if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
+                if (origin == TicketOrigin.Manual)
                 {
-                    return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
+                    if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
+                    {
+                        return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
+                    }
+                    var customerResult = await _customerSdkService.GetCustomerById(customerId);
+
+                    if (customerResult.IsFailure)
+                        return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
+
+                    var customer = customerResult.Value;
+
+                    // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
+                    var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
+                    var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
+                    var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
+                    var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+
+                    var emailModel = new EmailReceived
+                    {
+                        Subject = $"[Reply] {ticketTitle}",
+                        Body = $"A support agent has replied to your ticket (ID: {TicketId}).",
+                        SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
+                        RecipientAddress = customer.Email ?? "",
+                        ReceivedAt = DateTime.UtcNow,
+                    };
+
+                    await _ticketEmailService.SendTicketReplyNotificationAsync(
+                        recipientEmail: customer.Email ?? "",
+                        ticketTitle: ticketTitle,
+                        emailModel: emailModel,
+                        ticketId: TicketId,
+                        ticketStatus: parsedStatus,
+                        customer: customer,
+                        organizationName: organizationName,
+                        agentName: agentName,
+                        agentRole: agentRole,
+                        replyUrl: replyUrl,
+                        viewHistoryUrl: viewHistoryUrl,
+                        origin: origin
+                        );
                 }
-                var customerResult = await _customerSdkService.GetCustomerById(customerId);
-
-                if (customerResult.IsFailure)
-                    return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
-
-                var customer = customerResult.Value;
-
-                // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
-                var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
-                var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
-                var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
-                var reopenUrl = _configuration.GetValue<string>("ApplicationUrls:ReopenTicket") ?? "#";
-                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
-
-                var emailModel = new EmailReceived
+                else if (origin == TicketOrigin.Email)
                 {
-                    Subject = $"[Reply] {ticketTitle}",
-                    Body = $"A support agent has replied to your ticket (ID: {TicketId}).",
-                    SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
-                    RecipientAddress = customer.Email ?? "",
-                    ReceivedAt = DateTime.UtcNow,
-                };
+                    if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
+                    {
+                        return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
+                    }
+                    // For email and chatbot origins, we can have a more generic notification without agent details
+                    var customerResult = await _customerSdkService.GetCustomerById(customerId);
+                    if (customerResult.IsFailure)
+                        return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
 
-                await _ticketEmailService.SendTicketReplyNotificationAsync(
-                    recipientEmail: customer.Email ?? "",
-                    ticketTitle: ticketTitle,
-                    emailModel: emailModel,
-                    ticketId: TicketId,
-                    ticketStatus: parsedStatus,
-                    customer: customer,
-                    organizationName: organizationName,
-                    agentName: agentName,
-                    agentRole: agentRole,
-                    replyUrl: replyUrl,
-                    viewHistoryUrl: viewHistoryUrl
-                    );
+                    var customer = customerResult.Value;
 
-                return Results.Accepted($"Reply notification email for ticket ID {TicketId} has been sent to {customer.Email}.");
+                    var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
+                    var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
+                    var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
+                    var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+
+                    var messagePageResult = await _messageSdkService.GetMessagesByTicketIdAsync(TicketId);
+
+                    if (messagePageResult.IsFailure)
+                    {
+                        return messagePageResult.ToProblemDetails();
+                    }
+
+                    var messages = messagePageResult.Value.Items;
+
+                    if (messages == null || !messages.Any())
+                    {
+                        return Results.Problem(detail: $"No messages found for ticket ID {TicketId}.", title: "Messages Not Found");
+                    }
+
+                    var emailModel = new EmailSent()
+                    {
+                        Subject = $"[Reply] {ticketTitle}",
+                        Body = $"There is a new reply to your ticket (ID: {TicketId}).",
+                        SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
+                        RecipientAddress = customer.Email ?? "",
+                        SentAt = DateTime.UtcNow,
+                    };
+
+                    await _ticketEmailService.SendReplyToEmailAsync(
+                        recipientEmail: customer.Email ?? "",
+                        email: emailModel,
+                        messages: messages.ToList(),
+                        ticketId: TicketId,
+                        organizationName: organizationName,
+                        origin: origin,
+                        ticketStatus: parsedStatus
+                        );
+                }
+
+                return Results.Accepted($"Reply notification email for ticket ID {TicketId} has been sent.");
+
             }
             catch (Exception ex)
             {
@@ -186,7 +248,7 @@ namespace EmailService.Api.Controllers
         public async Task<IResult> NotifySupportCustomerReply(
             [FromQuery] Guid customerId, [FromQuery] string agentEmail,
             [FromQuery] string agentName, [FromQuery] int TicketId, [FromQuery] string TicketStatus,
-            [FromQuery] string ticketTitle, [FromQuery] string replyContent)
+            [FromQuery] string ticketTitle, [FromQuery] string replyContent, [FromQuery] TicketOrigin origin)
         {
             try
             {
@@ -225,7 +287,8 @@ namespace EmailService.Api.Controllers
                     organizationName: organizationName,
                     replyUrl: replyUrl,
                     managementUrl: managementUrl,
-                    viewHistoryUrl: viewHistoryUrl
+                    viewHistoryUrl: viewHistoryUrl,
+                    origin: origin
                     );
 
                 return Results.Accepted($"Support reply notification sent to {agentEmail} for ticket #{TicketId}.");
@@ -233,35 +296,6 @@ namespace EmailService.Api.Controllers
             catch (Exception ex)
             {
                 return Results.Problem(detail: ex.Message, title: "An error occurred while sending the support reply notification.");
-            }
-        }
-
-        [HttpPost("reply-to-email")]
-        public async Task<IResult> NotifyReplyToEmail(
-            [FromQuery] EmailReceived emailReceived, [FromQuery] EmailSent emailSent,
-            [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] string organizationName)
-        {
-            try
-            {
-                if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
-                {
-                    return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
-                }
-                else
-                {
-                    await _ticketEmailService.SendReplyToEmailAsync(recipientEmail: emailReceived.RecipientAddress,
-                                                                    emailReceived: emailReceived,
-                                                                    emailSent: emailSent,
-                                                                    ticketId: TicketId,
-                                                                    ticketStatus: parsedStatus,
-                                                                    organizationName: organizationName);
-                }
-
-                return Results.Accepted($"Reply to email notification sent to {emailSent.RecipientAddress} for ticket #{TicketId}.");
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(detail: ex.Message, title: "An error occurred while sending the reply to email notification.");
             }
         }
     }
