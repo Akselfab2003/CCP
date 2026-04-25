@@ -9,5 +9,6 @@ namespace Keycloak.Sdk.services.organizations
         Task<Result<Guid>> CreateOrganizationAsync(string organizationName, string DomainName, CancellationToken ct = default);
         Task<Result<KeycloakOrgDetails>> GetOrgDetails(Guid? OrgId = null, string? Domain = null, CancellationToken ct = default);
         Task<Result> InviteMemberToOrg(Guid OrgId, string email, CancellationToken ct = default);
+        Task<Result<string>> GetOrganizationNameByIdAsync(Guid orgId, CancellationToken ct = default);
     }
 }

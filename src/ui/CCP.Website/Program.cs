@@ -1,3 +1,4 @@
+using CCP.Shared.AuthContext;
 using CCP.Website.Components;
 using CCP.Website.Services;
 using IdentityService.Sdk.ServiceDefaults;
@@ -61,9 +62,9 @@ namespace CCP.Website
             builder.Services.AddFluentUIComponents();
 
             var IdentityServiceUrl = builder.Configuration.GetValue<string>("services:identityservice-api:https:0") ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required.");
+            builder.Services.AddScoped<ServiceAccountOverrider>();
 
             builder.Services.AddIdentityServiceSdk(IdentityServiceUrl);
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

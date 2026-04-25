@@ -6,6 +6,7 @@
         public required string Title { get; set; }
         public string? Description { get; set; }
         public TicketStatus Status { get; set; }
+        public TicketOrigin Origin { get; set; }
         public Guid OrganizationId { get; set; }
         public AssignmentDto? Assignment { get; set; }
         public Guid? CustomerId { get; set; }

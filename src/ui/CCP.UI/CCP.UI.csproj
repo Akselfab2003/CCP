@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\services\Gateway\Gateway.Sdk\Gateway.Sdk.csproj" />
     <ProjectReference Include="..\..\services\ChatService\ChatService.Sdk\ChatService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
+    <ProjectReference Include="..\..\services\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
     <ProjectReference Include="..\..\services\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
@@ -31,6 +32,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />

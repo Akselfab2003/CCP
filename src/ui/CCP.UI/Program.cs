@@ -5,6 +5,8 @@ using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
 using ChatService.Sdk.ServiceDefaults;
+using CustomerService.Sdk.ServiceDefaults;
+using EmailService.Sdk.ServiceDefaults;
 using Gateway.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
@@ -123,24 +125,23 @@ namespace CCP.UI
                     UserRolesExtensions.ManagerRoleString,
                     UserRolesExtensions.AdminRoleString));
             });
-
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
             builder.Services.AddScoped<IUIUserContext, UIUserContext>();
             builder.Services.AddServiceDefaults("CCP.UI");
-            /*
+
             builder.Services.AddEmailServiceSdk(
-                builder.Configuration.GetValue<string>("services:EmailService:http:0")
+                builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
                 ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
-            */
+
             builder.Services.AddMessageServiceSDK(
                 builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
                 ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
-            /*
+
             builder.Services.AddCustomerviceSdk(
                 builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
                 ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
-            */
+
             builder.Services.AddIdentityServiceSdk(
                 builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                 ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
@@ -155,6 +156,7 @@ namespace CCP.UI
                 ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
                 );
 
+            builder.Services.AddScoped<ServiceAccountOverrider>();
             builder.Services.AddGatewayServiceSdk(
                 builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
                 ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")

@@ -36,6 +36,7 @@ namespace CCP.ServiceDefaults.Extensions
                    });
 
             builder.AddScoped<ICurrentUser, CurrentUser>();
+            builder.AddSingleton<ServiceAccountOverrider>();
         }
     }
 }

@@ -11,31 +11,43 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL">
+    </PackageReference>
+    <PackageReference Include="MailKit">
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi">
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore">
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
-    <PackageReference Include="NSwag.Annotations" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
-    <PackageReference Include="Aspire.RabbitMQ.Client" />
-    <PackageReference Include="WolverineFx.RabbitMQ" />
+    <PackageReference Include="NSwag.Annotations">
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger">
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI">
+    </PackageReference>
+    <PackageReference Include="Aspire.RabbitMQ.Client">
+    </PackageReference>
+    <PackageReference Include="WolverineFx.RabbitMQ">
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\CustomerService\CustomerService.Sdk\CustomerService.Sdk.csproj" />
     <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
     <ProjectReference Include="..\EmailService.Infrastructure\EmailService.Infrastructure.csproj" />
     <ProjectReference Include="..\EmailTemplates\EmailTemplates.csproj" />
+    <ProjectReference Include="..\MailCow.Sdk\MailCow.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

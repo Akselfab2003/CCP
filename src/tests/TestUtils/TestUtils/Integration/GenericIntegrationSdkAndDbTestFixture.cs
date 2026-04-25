@@ -35,6 +35,7 @@ namespace TestUtils.Integration
         {
             var ConnectionString = await App.GetConnectionStringAsync(DBResourceName);
             DB_Services.AddScoped<ICurrentUser, CurrentUser>();
+            DB_Services.AddScoped<ServiceAccountOverrider>();
             DB_Services.AddLogging();
             DB_Services.AddDbContext<DBContext>(options =>
             {

@@ -1,4 +1,4 @@
-﻿using CustomerService.Api.DB.Models;
+﻿using CustomerService.Domain.Entities;
 
 namespace CustomerService.Application.Services
 {
@@ -8,6 +8,7 @@ namespace CustomerService.Application.Services
         Task<bool> DeleteCustomer(Guid id);
         Task<List<Customer>> GetAllCustomers();
         Task<Customer?> GetCustomerById(Guid id);
+        Task<Customer?> GetCustomerByEmail(string email);
         Task<Customer?> UpdateCustomer(Customer customer);
     }
 }

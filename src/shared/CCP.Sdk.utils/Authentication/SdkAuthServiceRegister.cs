@@ -1,7 +1,8 @@
-﻿using Duende.AccessTokenManagement;
-using Microsoft.Extensions.Configuration;
+﻿using CCP.Shared.AuthContext;
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CCP.Sdk.utils.Authentication
@@ -17,7 +18,8 @@ namespace CCP.Sdk.utils.Authentication
 
             services.AddOpenIdAccessTokenManagement(IsServiceAccount, configuration);
             services.AddHttpClientConnection(clientName, ServiceUrl, IsServiceAccount);
-
+            services.AddTransient<TenantHeaderInjector>();
+            services.AddScoped<ServiceAccountOverrider>();
             return services;
         }
 
@@ -81,7 +83,7 @@ namespace CCP.Sdk.utils.Authentication
                 services.AddClientCredentialsHttpClient(ClientName, ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
                 {
                     client.BaseAddress = new Uri(ServiceUrl);
-                });
+                }).AddHttpMessageHandler<TenantHeaderInjector>();
 
                 return services;
             }

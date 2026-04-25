@@ -4,7 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
     <OpenApiDocumentsDirectory>Docs</OpenApiDocumentsDirectory>
     <UserSecretsId>c4e1df0c-085f-4cb2-b2c1-f33d1bdaaaa6</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -28,7 +27,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
     <PackageReference Include="Aspire.RabbitMQ.Client" />
     <PackageReference Include="WolverineFx.RabbitMQ" />
@@ -38,7 +36,6 @@
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\MessagingService.Application\MessagingService.Application.csproj" />
     <ProjectReference Include="..\MessagingService.Infrastructure\MessagingService.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

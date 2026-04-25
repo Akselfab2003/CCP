@@ -1,4 +1,5 @@
 using System.Reflection;
+using EmailService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Api.Endpoints;
 using TicketService.Application.ServiceDefaults;
@@ -19,8 +20,7 @@ namespace TicketService.Api
             {
                 options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
             });
-
-            builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
+            builder.Services.AddOpenApi();
 
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
@@ -30,9 +30,16 @@ namespace TicketService.Api
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
+                builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
 
                 var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddApiAuthenticationServices("TicketService.Api", "CCP", keycloakURL);
+
+
+
+                builder.Services.AddEmailServiceSdk(
+                    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
+                    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
 
                 builder.Services.AddDbContext<TicketDbContext>(options =>
                 {

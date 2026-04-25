@@ -1,4 +1,5 @@
 ﻿using ChatApp.Encryption;
+using CustomerService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerService.Api.DB
@@ -15,7 +16,7 @@ namespace CustomerService.Api.DB
         }
 
         // Customer table
-        public DbSet<Models.Customer> Customers { get; set; }
+        public DbSet<Customer> Customers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,7 +26,7 @@ namespace CustomerService.Api.DB
             var encryptedConverter = new EncryptedStringConverter(_encryptionService);
 
             // Konfigurer Customer entity
-            modelBuilder.Entity<Models.Customer>(entity =>
+            modelBuilder.Entity<Customer>(entity =>
             {
                 // Email skal encryptes i databasen
                 entity.Property(e => e.Email)

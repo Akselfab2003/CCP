@@ -10,7 +10,7 @@ namespace MessagingService.Api.IntegrationTests.Fixtures
     {
         public override string APIResourceName => "messagingservice-api";
         public override string DBResourceName => "MessagingDatabase";
-        public override List<string> RequiredResources => [APIResourceName, DBResourceName, "keycloak", "postgres", "MailHog", "RabbitMQ", "ticketservice-api", "ticketdb"];
+        public override List<string> RequiredResources => [APIResourceName, DBResourceName, "keycloak", "postgres", "MailHog", "RabbitMQ", "ticketservice-api", "ticketdb", "emailservice-api", "emaildb", "customerdb", "customerservice-api"];
 
         public async ValueTask InitializeAsync()
         {

@@ -16,7 +16,11 @@ namespace TicketService.Api.IntegrationTests.Fixtures
             DBResourceName,
             "keycloak",
             "postgres",
-            "RabbitMQ"
+            "RabbitMQ",
+            "emailservice-api",
+            "emaildb",
+            "customerdb",
+            "customerservice-api"
         ];
 
         public async ValueTask InitializeAsync()

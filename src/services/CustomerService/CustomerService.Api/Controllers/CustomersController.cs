@@ -1,5 +1,5 @@
-﻿using CustomerService.Api.DB.Models;
-using CustomerService.Application.Services;
+﻿using CustomerService.Application.Services;
+using CustomerService.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerService.Api.Controllers
@@ -17,6 +17,7 @@ namespace CustomerService.Api.Controllers
 
         //Henter alle customers fra databasen
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllCustomers()
         {
             var customers = await _customerService.GetAllCustomers();
@@ -24,7 +25,9 @@ namespace CustomerService.Api.Controllers
         }
 
         //Henter en specifik customer via ID
-        [HttpGet("{id}")]
+        [HttpGet("details/{id:guid}")]
+        [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCustomerById(Guid id)
         {
             var customer = await _customerService.GetCustomerById(id);
@@ -37,8 +40,22 @@ namespace CustomerService.Api.Controllers
             return Ok(customer); //HTTP 200
         }
 
+        [HttpGet("{email}")]
+        [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCustomerByEmail(string email)
+        {
+            var customer = await _customerService.GetCustomerByEmail(email);
+            if (customer == null)
+            {
+                return NotFound(); //HTTP 404
+            }
+            return Ok(customer); //HTTP 200
+        }
+
         //Opretter en ny customer
-        [HttpPost]
+        [HttpPost("add")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
         {
             var createdCustomer = await _customerService.CreateCustomer(customer);
@@ -51,7 +68,9 @@ namespace CustomerService.Api.Controllers
         }
 
         //Opdaterer en eksisterende customer
-        [HttpPut("{id}")]
+        [HttpPut("Update/{id:guid}")]
+        [ProducesResponseType<Customer>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] Customer customer)
         {
             //Kald servicen for at opdatere kunden
@@ -68,7 +87,9 @@ namespace CustomerService.Api.Controllers
         }
 
         //Sletter en customer permanent
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
             //Kald servicen for at slette kunden

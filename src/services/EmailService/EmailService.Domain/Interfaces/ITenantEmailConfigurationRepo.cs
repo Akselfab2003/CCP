@@ -8,6 +8,7 @@ namespace EmailService.Domain.Interfaces
         Task<Result> AddAsync(TenantEmailConfiguration tenantEmailConfiguration);
         Task<Result> DeleteAsync(int id);
         Task<Result<TenantEmailConfiguration>> GetByIdAsync(Guid id);
+        Task<Result<TenantEmailConfiguration>> GetByTenantIdAsync(Guid tenantId);
         Task<Result> UpdateAsync(TenantEmailConfiguration tenantEmailConfiguration);
     }
 }

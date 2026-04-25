@@ -19,7 +19,7 @@ namespace EmailService.Sdk.ServiceDefaults
             });
 
             // Register IEmailService using the named HttpClient created by AddSdkAuthentication so BaseAddress and auth handlers are applied
-            services.AddScoped<IEmailService, EmailService.Sdk.Services.EmailService>();
+            services.AddScoped<IEmailSdkService, EmailSdkService>();
             return services;
         }
     }

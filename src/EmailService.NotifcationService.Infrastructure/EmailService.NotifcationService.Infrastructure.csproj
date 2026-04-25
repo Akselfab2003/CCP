@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\services\EmailService\EmailService.API\EmailService.API.csproj" />
+    <ProjectReference Include="..\services\EmailService\EmailService.Domain\EmailService.Domain.csproj" />
+    <ProjectReference Include="..\services\IdentityService\IdentityService.Application\IdentityService.Application.csproj" />
+    <ProjectReference Include="..\services\TicketService\TicketService.Domain\TicketService.Domain.csproj" />
+    <ProjectReference Include="..\shared\CCP.Shared\CCP.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

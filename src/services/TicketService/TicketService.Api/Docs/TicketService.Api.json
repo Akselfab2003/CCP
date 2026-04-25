@@ -576,7 +576,17 @@
               "string"
             ]
           },
+          "origin": {
+            "$ref": "#/components/schemas/TicketOrigin"
+          },
           "customerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "organizationId": {
             "type": [
               "null",
               "string"
@@ -713,12 +723,22 @@
           "status": {
             "$ref": "#/components/schemas/TicketStatus"
           },
+          "origin": {
+            "$ref": "#/components/schemas/TicketOrigin"
+          },
           "organizationId": {
             "type": "string",
             "format": "uuid"
           },
           "assignment": {
-            "$ref": "#/components/schemas/AssignmentDto"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AssignmentDto"
+              }
+            ]
           },
           "customerId": {
             "type": [
@@ -778,6 +798,9 @@
           }
         }
       },
+      "TicketOrigin": {
+        "type": "integer"
+      },
       "TicketStatus": {
         "type": "integer"
       },
@@ -802,21 +825,8 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "Bearer": {
-        "type": "http",
-        "description": "JWT",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
     }
   },
-  "security": [
-    {
-      "Bearer": [ ]
-    }
-  ],
   "tags": [
     {
       "name": "Ticket"
