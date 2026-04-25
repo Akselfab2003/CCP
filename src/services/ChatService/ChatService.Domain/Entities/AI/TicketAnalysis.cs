@@ -23,7 +23,7 @@
         public string? RootCause { get; set; }
         public string? SolutionSummary { get; set; }
         public string[]? SolutionSteps { get; set; }
-        public string[]? PreventiveTips { get; set; }
+        public string[]? PreventionTips { get; set; }
         public DateTime? SolutionAnalysedAt { get; set; }
 
 

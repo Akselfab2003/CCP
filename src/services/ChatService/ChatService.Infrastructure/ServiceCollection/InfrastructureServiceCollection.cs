@@ -20,7 +20,9 @@ namespace ChatService.Infrastructure.ServiceCollection
 
             services.AddScoped<IEmbeddingService, EmbeddingService>()
                     .AddScoped<ITicketAnalysisService, TicketAnalysisService>()
-                    .AddScoped<IChatService, LLM.Chat.ChatService>();
+                    .AddScoped<IChatService, LLM.Chat.ChatService>()
+                    .AddScoped<ITicketEmbeddingRepository, TicketEmbeddingRepository>()
+                    .AddScoped<ITicketEmbeddingOrchestrator, TicketEmbeddingOrchestrator>();
 
             return services;
         }

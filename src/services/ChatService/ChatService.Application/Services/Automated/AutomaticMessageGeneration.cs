@@ -2,34 +2,38 @@
 using CCP.Shared.ResultAbstraction;
 using ChatService.Domain.Dtos;
 using ChatService.Infrastructure.LLM.Analysis;
+using ChatService.Infrastructure.LLM.Embedding;
 using MessagingService.Sdk.Services;
 using Microsoft.Extensions.Logging;
 using TicketService.Sdk.Services.Ticket;
 
 namespace ChatService.Application.Services.Automated
 {
-    public class AutomaticMessageGeneration
+    public class AutomaticMessageGeneration : IAutomaticMessageGeneration
     {
         private readonly ILogger<AutomaticMessageGeneration> _logger;
         private readonly IMessageSdkService _messageSdkService;
         private readonly ITicketService _ticketService;
         private readonly ITicketAnalysisService _ticketAnalysisService;
         private readonly ICurrentUser _currentUser;
+        private readonly ITicketEmbeddingOrchestrator _ticketEmbeddingOrchestrator;
 
         public AutomaticMessageGeneration(ILogger<AutomaticMessageGeneration> logger,
                                           IMessageSdkService messageSdkService,
                                           ITicketService ticketService,
                                           ITicketAnalysisService ticketAnalysisService,
-                                          ICurrentUser currentUser)
+                                          ICurrentUser currentUser,
+                                          ITicketEmbeddingOrchestrator ticketEmbeddingOrchestrator)
         {
             _logger = logger;
             _messageSdkService = messageSdkService;
             _ticketService = ticketService;
             _ticketAnalysisService = ticketAnalysisService;
             _currentUser = currentUser;
+            _ticketEmbeddingOrchestrator = ticketEmbeddingOrchestrator;
         }
 
-        public async Task<Result<string>> GenerateMessage(int ticketId)
+        private async Task<Result<SupportTicket>> GetTicket(int ticketId)
         {
             try
             {
@@ -38,7 +42,7 @@ namespace ChatService.Application.Services.Automated
 
                 var TicketDetailsResult = await _ticketService.GetTicket(ticketId);
                 if (TicketDetailsResult.IsFailure)
-                    return Result.Failure<string>(TicketDetailsResult.Error);
+                    return Result.Failure<SupportTicket>(TicketDetailsResult.Error);
 
                 NewSupportTicketRequst.TicketId = TicketDetailsResult.Value.Id;
                 NewSupportTicketRequst.Title = TicketDetailsResult.Value.Title;
@@ -48,7 +52,7 @@ namespace ChatService.Application.Services.Automated
                 var messagesResult = await _messageSdkService.GetMessagesByTicketIdAsync(ticketId);
 
                 if (messagesResult.IsFailure)
-                    return Result.Failure<string>(Error.Failure("MessageRetrievalError", "Failed to retrieve messages for the ticket."));
+                    return Result.Failure<SupportTicket>(messagesResult.Error);
 
                 var messages = messagesResult.Value;
 
@@ -80,20 +84,108 @@ namespace ChatService.Application.Services.Automated
 
                 NewSupportTicketRequst.Messages = messagesList;
 
-                Result<TicketProblemAnalysis> analysisResult = await _ticketAnalysisService.ExtractProblemAsync(ticket: NewSupportTicketRequst);
-
-                if (analysisResult.IsFailure)
-                    return Result.Failure<string>(Error.Failure("TicketAnalysisError", "Failed to analyze the ticket for problem extraction."));
-
-                var problemAnalysis = analysisResult.Value;
-
+                return Result.Success(NewSupportTicketRequst);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating automatic message");
-                return Result.Failure<string>(Error.Failure("AutomaticMessageGenerationError", "An error occurred while generating the automatic message."));
+                _logger.LogError(ex, "Error retrieving ticket details or messages for ticket ID {TicketId}", ticketId);
+                return Result.Failure<SupportTicket>(Error.Failure("TicketRetrievalError", $"An error occurred while retrieving the ticket: {ex.Message}"));
             }
         }
+
+
+        public async Task<Result> TicketCreatedAnalysis(int ticketId)
+        {
+            try
+            {
+                Result<SupportTicket> ticketResult = await GetTicket(ticketId);
+
+                if (ticketResult.IsFailure)
+                    return Result.Failure(ticketResult.Error);
+
+                var ticket = ticketResult.Value;
+
+
+                await _ticketEmbeddingOrchestrator.OnTicketCreatedAsync(ticket);
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during ticket created analysis for ticket ID {TicketId}", ticketId);
+                return Result.Failure(Error.Failure("TicketCreatedAnalysisError", $"An error occurred during ticket analysis: {ex.Message}"));
+            }
+
+        }
+        public async Task<Result> TicketClosedAnalysis(int ticketId)
+        {
+            try
+            {
+                Result<SupportTicket> ticketResult = await GetTicket(ticketId);
+
+                if (ticketResult.IsFailure)
+                    return Result.Failure(ticketResult.Error);
+
+                var ticket = ticketResult.Value;
+
+
+                await _ticketEmbeddingOrchestrator.OnTicketClosedAsync(ticket);
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during ticket closed analysis for ticket ID {TicketId}", ticketId);
+                return Result.Failure(Error.Failure("TicketClosedAnalysisError", $"An error occurred during ticket analysis: {ex.Message}"));
+            }
+
+        }
+        public async Task<Result> NewMessageAddedToTicketAnalysis(int ticketId)
+        {
+            try
+            {
+                Result<SupportTicket> ticketResult = await GetTicket(ticketId);
+
+                if (ticketResult.IsFailure)
+                    return Result.Failure(ticketResult.Error);
+
+                var ticket = ticketResult.Value;
+
+
+                await _ticketEmbeddingOrchestrator.OnNewMessageAsync(ticket);
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during new message added to ticket analysis for ticket ID {TicketId}", ticketId);
+                return Result.Failure(Error.Failure("NewMessageAddedAnalysisError", $"An error occurred during ticket analysis: {ex.Message}"));
+            }
+        }
+
+
+
+        //public async Task<Result<string>> GenerateMessage(int ticketId)
+        //{
+        //    try
+        //    {
+
+
+        //        Result<TicketProblemAnalysis> analysisResult = await _ticketAnalysisService.ExtractProblemAsync(ticket: NewSupportTicketRequst);
+
+        //        if (analysisResult.IsFailure)
+        //            return Result.Failure<string>(Error.Failure("TicketAnalysisError", "Failed to analyze the ticket for problem extraction."));
+
+        //        var problemAnalysis = analysisResult.Value;
+
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error generating automatic message");
+        //        return Result.Failure<string>(Error.Failure("AutomaticMessageGenerationError", "An error occurred while generating the automatic message."));
+        //    }
+        //}
     }
 }

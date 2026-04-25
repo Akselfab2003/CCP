@@ -6,6 +6,6 @@
         public string SolutionSummary { get; set; } = string.Empty;
         public string[] SolutionSteps { get; set; } = [];
         public string[] DiagnosticSteps { get; set; } = [];
-        public string[] PreventiveTips { get; set; } = [];
+        public string[] PreventionTips { get; set; } = [];
     }
 }
