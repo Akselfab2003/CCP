@@ -60,7 +60,7 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
     builder.Services.AddCustomerviceSdk(
         builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
-        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."),true);
+        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."), true);
     builder.Services.AddMessageServiceSDK(
         builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
         ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
@@ -96,18 +96,19 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
 builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
 builder.Services.AddScoped<ITenantEmailConfigurationService, TenantEmailConfigurationService>();
+builder.Services.AddSingleton<ServiceAccountOverrider>();
 
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseMiddleware<AuthMiddleware>();
 
 
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
-    AutomaticallyApplyDBMigration<DBcontext>.ApplyMigrationsAsync(app).Wait();
     app.AppMapSwaggerExtensions();
+    app.UseMiddleware<AuthMiddleware>();
+    AutomaticallyApplyDBMigration<DBcontext>.ApplyMigrationsAsync(app).Wait();
 }
 
 // Configure the HTTP request pipeline.

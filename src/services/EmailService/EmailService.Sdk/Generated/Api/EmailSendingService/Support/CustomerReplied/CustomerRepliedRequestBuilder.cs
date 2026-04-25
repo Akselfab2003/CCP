@@ -21,7 +21,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public CustomerRepliedRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?TicketId*,TicketStatus*,agentEmail*,agentName*,customerId*,replyContent*,ticketTitle*}", pathParameters)
+        public CustomerRepliedRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?TicketId*,TicketStatus*,agentEmail*,agentName*,customerId*,origin*,replyContent*,ticketTitle*}", pathParameters)
         {
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public CustomerRepliedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?TicketId*,TicketStatus*,agentEmail*,agentName*,customerId*,replyContent*,ticketTitle*}", rawUrl)
+        public CustomerRepliedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/support/customer-replied{?TicketId*,TicketStatus*,agentEmail*,agentName*,customerId*,origin*,replyContent*,ticketTitle*}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -96,6 +96,8 @@ namespace EmailService.Sdk.Api.EmailSendingService.Support.CustomerReplied
 #endif
             [QueryParameter("customerId")]
             public Guid? CustomerId { get; set; }
+            [QueryParameter("origin")]
+            public int? Origin { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("replyContent")]

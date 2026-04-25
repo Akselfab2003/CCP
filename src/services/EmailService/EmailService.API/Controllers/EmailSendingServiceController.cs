@@ -1,11 +1,11 @@
-﻿using CCP.Shared.ResultAbstraction;
+﻿using CCP.Shared.AuthContext;
+using CCP.Shared.ResultAbstraction;
 using CCP.Shared.ValueObjects;
-using CustomerService.Domain.Entities;
 using CustomerService.Sdk.Services;
 using EmailService.Application.Interfaces;
 using EmailService.Domain.Models;
-using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -14,28 +14,34 @@ namespace EmailService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EmailSendingServiceController : ControllerBase
     {
         private readonly ITicketEmailService _ticketEmailService;
         private readonly ICustomerSdkService _customerSdkService;
         private readonly IMessageSdkService _messageSdkService;
         private readonly IConfiguration _configuration;
-
-        public EmailSendingServiceController(ITicketEmailService ticketEmailService,IMessageSdkService messageSdkService, ICustomerSdkService customerSdkService, IConfiguration configuration)
+        private readonly ICurrentUser _currentUser;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        public EmailSendingServiceController(ITicketEmailService ticketEmailService, ICustomerSdkService customerSdkService, IMessageSdkService messageSdkService, IConfiguration configuration, ICurrentUser currentUser, ServiceAccountOverrider serviceAccountOverrider)
         {
             _ticketEmailService = ticketEmailService;
-            _messageSdkService = messageSdkService;
             _customerSdkService = customerSdkService;
+            _messageSdkService = messageSdkService;
             _configuration = configuration;
+            _currentUser = currentUser;
+            _serviceAccountOverrider = serviceAccountOverrider;
         }
 
         [HttpPost]
         public async Task<IResult> NotifyNewTicketCreation(
             [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
-            [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery]TicketOrigin origin)
+            [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] TicketOrigin origin)
         {
             try
             {
+                _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
                 if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
                 {
                     return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
@@ -70,7 +76,7 @@ namespace EmailService.Api.Controllers
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
                     portalUrl: portalUrl,
-                    origin:origin);
+                    origin: origin);
 
                 return Results.Accepted($"Email notification for ticket creation has been sent with ticket ID {TicketId} to {customer.Email}.");
             }
@@ -84,10 +90,12 @@ namespace EmailService.Api.Controllers
         public async Task<IResult> NotifyTicketStatusChange(
             [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
             [FromQuery] int TicketId, [FromQuery] string newStatus,
-            [FromQuery] string oldStatus, [FromQuery]TicketOrigin origin)
+            [FromQuery] string oldStatus, [FromQuery] TicketOrigin origin)
         {
             try
             {
+                _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
                 if (!Enum.TryParse(newStatus, out TicketStatus parsedStatus))
                 {
                     return Results.BadRequest(new { message = $"Invalid ticket status value: {newStatus}" });
@@ -141,6 +149,8 @@ namespace EmailService.Api.Controllers
         {
             try
             {
+                _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
                 if (origin == TicketOrigin.Manual)
                 {
                     if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
@@ -252,6 +262,8 @@ namespace EmailService.Api.Controllers
         {
             try
             {
+                _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
                 if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
                 {
                     return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });

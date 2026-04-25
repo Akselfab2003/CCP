@@ -1,4 +1,6 @@
 using System.Reflection;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Api.Endpoints;
@@ -34,12 +36,19 @@ namespace TicketService.Api
 
                 var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddApiAuthenticationServices("TicketService.Api", "CCP", keycloakURL);
+                builder.Services.AddClientCredentialsTokenManagement()
+                        .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                        {
+                            client.TokenEndpoint = new Uri($"{keycloakURL}/realms/CCP/protocol/openid-connect/token");
+                            client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                            client.ClientSecret = ClientSecret.Parse(
+                                builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                                ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                            );
+                            client.Scope = Scope.ParseOrDefault("openid");
+                            client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                        });
 
-
-
-                builder.Services.AddEmailServiceSdk(
-                    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
-                    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
 
                 builder.Services.AddDbContext<TicketDbContext>(options =>
                 {
@@ -56,10 +65,21 @@ namespace TicketService.Api
 
                     opts.PublishAllMessages().ToRabbitQueue("ticket.assignment.updated").UseDurableOutbox();
                 });
+
+
+
+
+                builder.Services.AddEmailServiceSdk(
+                    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
+                    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."), true);
+
+
+
             }
 
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure();
+            builder.Services.AddSingleton<ServiceAccountOverrider>();
 
             var app = builder.Build();
 

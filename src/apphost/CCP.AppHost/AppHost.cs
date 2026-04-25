@@ -176,6 +176,10 @@ TicketService
     .WithReference(RabbitMq)
     .WithReference(EmailService)
     .WaitFor(EmailService)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
