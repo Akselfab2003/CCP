@@ -31,14 +31,6 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string organizationName, string expectedResponseTime,
             string portalUrl, TicketOrigin origin)
         {
-            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
-            if (tenant.IsSuccess)
-            {
-                string fromaddress = tenant.Value.DefaultSenderEmail;
-
-                email.SenderAddress = fromaddress;
-            }
-
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketCreatedEmailAsync(
                 email, ticketId, ticketStatus,
@@ -63,7 +55,6 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         public async Task SendTicketReplyEmailAsync(
             string to, string subject,
             EmailReceived email, int ticketId, TicketStatus ticketStatus,
-
             CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
             string replyUrl, string viewHistoryUrl, TicketOrigin origin)
