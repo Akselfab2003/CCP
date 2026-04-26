@@ -56,6 +56,7 @@ namespace ChatService.Infrastructure.LLM.Embedding
                 };
 
                 _chatDbContext.TicketAnalysis.Add(entity);
+                // Fix update to seperate service
                 await _chatDbContext.SaveChangesAsync();
 
                 await EmbedProblemAsync(entity, analysisData);

@@ -54,10 +54,7 @@ public partial class Program
             });
 
 
-            builder.Services.AddTicketServiceSdk(
-                builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
-                ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
-                );
+
 
             builder.Services.AddMessageServiceSDK(
               builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
@@ -94,6 +91,14 @@ public partial class Program
             builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                                                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
+
+            builder.Services.AddTicketServiceSdk(
+       builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+       ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required.")
+       , true);
+
+
+            builder.Services.AddSingleton<ServiceAccountOverrider>();
 
             builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
                 .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })

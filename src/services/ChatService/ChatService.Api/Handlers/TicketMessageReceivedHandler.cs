@@ -9,12 +9,15 @@ namespace ChatService.Api.Handlers
         private readonly ILogger<TicketMessageReceivedHandler> _logger;
         private readonly ICurrentUser _currentUser;
         private readonly IAutomaticMessageGeneration _automaticMessageGeneration;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
 
-        public TicketMessageReceivedHandler(ILogger<TicketMessageReceivedHandler> logger, ICurrentUser currentUser, IAutomaticMessageGeneration automaticMessageGeneration)
+
+        public TicketMessageReceivedHandler(ILogger<TicketMessageReceivedHandler> logger, ICurrentUser currentUser, IAutomaticMessageGeneration automaticMessageGeneration, ServiceAccountOverrider serviceAccountOverrider)
         {
             _logger = logger;
             _currentUser = currentUser;
             _automaticMessageGeneration = automaticMessageGeneration;
+            _serviceAccountOverrider = serviceAccountOverrider;
         }
 
         public void Handle(TicketMessageReceived ticketMessageReceived)
@@ -22,6 +25,7 @@ namespace ChatService.Api.Handlers
             _logger.LogInformation("Received TicketMessageReceived event for TicketId: {TicketId}, OrgId: {OrgId}, ReceivedAt: {ReceivedAt}",
                 ticketMessageReceived.TicketId, ticketMessageReceived.OrgId, ticketMessageReceived.ReceivedAt);
             _currentUser.SetOrganizationId(ticketMessageReceived.OrgId);
+            _serviceAccountOverrider.SetOrganizationId(ticketMessageReceived.OrgId);
             _automaticMessageGeneration.NewMessageAddedToTicketAnalysis(ticketMessageReceived.TicketId);
         }
     }

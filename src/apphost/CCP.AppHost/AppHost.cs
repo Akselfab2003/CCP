@@ -225,6 +225,7 @@ ChatService
     .WaitFor(Ollama)
     .WaitFor(EmbeddingModel)
     .WaitFor(QwenModel)
+    .WaitFor(RabbitMq)
     .WithReference(IdentityService)
     .WithReference(Keycloak)
     .WithReference(TicketService)
@@ -233,6 +234,7 @@ ChatService
     .WithReference(Ollama)
     .WithReference(EmbeddingModel)
     .WithReference(QwenModel)
+    .WithReference(RabbitMq)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
