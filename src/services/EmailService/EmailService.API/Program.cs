@@ -14,6 +14,7 @@ using EmailTemplates.Renderes;
 using MailCow.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
+using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -92,6 +93,12 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
     builder.Services.AddMailCowSdk(mailCowApiUrl, mailCowApiKey);
 
     builder.Services.AddInfrastructureServices(builder.Configuration);
+
+    builder.Services.AddTicketServiceSdk(
+    builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+    ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required."), true);
+
+
 }
 
 builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();

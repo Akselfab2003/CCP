@@ -7,6 +7,7 @@ using EmailService.Domain.Models;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TicketService.Sdk.Services.Ticket;
 
 
 
@@ -18,12 +19,13 @@ namespace EmailService.Api.Controllers
     public class EmailSendingServiceController : ControllerBase
     {
         private readonly ITicketEmailService _ticketEmailService;
+        private readonly ITicketService _ticketService;
         private readonly ICustomerSdkService _customerSdkService;
         private readonly IMessageSdkService _messageSdkService;
         private readonly IConfiguration _configuration;
         private readonly ICurrentUser _currentUser;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
-        public EmailSendingServiceController(ITicketEmailService ticketEmailService, ICustomerSdkService customerSdkService, IMessageSdkService messageSdkService, IConfiguration configuration, ICurrentUser currentUser, ServiceAccountOverrider serviceAccountOverrider)
+        public EmailSendingServiceController(ITicketEmailService ticketEmailService, ICustomerSdkService customerSdkService, IMessageSdkService messageSdkService, IConfiguration configuration, ICurrentUser currentUser, ServiceAccountOverrider serviceAccountOverrider, ITicketService ticketService)
         {
             _ticketEmailService = ticketEmailService;
             _customerSdkService = customerSdkService;
@@ -31,6 +33,7 @@ namespace EmailService.Api.Controllers
             _configuration = configuration;
             _currentUser = currentUser;
             _serviceAccountOverrider = serviceAccountOverrider;
+            _ticketService = ticketService;
         }
 
         [HttpPost]
@@ -143,7 +146,6 @@ namespace EmailService.Api.Controllers
 
         [HttpPost("reply")]
         public async Task<IResult> NotifyTicketReply(
-            [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
             [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] string agentName,
             [FromQuery] string agentRole, [FromQuery] TicketOrigin origin)
         {
@@ -151,16 +153,27 @@ namespace EmailService.Api.Controllers
             {
                 _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
 
+                var ticketResult = await _ticketService.GetTicket(TicketId);
+
+                if (ticketResult == null)
+                    return Results.NotFound(new { message = $"Ticket with ID {TicketId} not found." });
+
+                var ticket = ticketResult.Value;
+
+                if (!ticket.CustomerId.HasValue)
+                    return Results.BadRequest(new { message = $"Ticket with ID {TicketId} does not have an associated customer." });
+
                 if (origin == TicketOrigin.Manual)
                 {
                     if (!Enum.TryParse(TicketStatus, out TicketStatus parsedStatus))
                     {
                         return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
                     }
-                    var customerResult = await _customerSdkService.GetCustomerById(customerId);
+
+                    var customerResult = await _customerSdkService.GetCustomerById(ticket.CustomerId.Value);
 
                     if (customerResult.IsFailure)
-                        return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
+                        return Results.NotFound(new { message = $"Customer with ID {ticket.CustomerId.Value} not found." });
 
                     var customer = customerResult.Value;
 
@@ -172,7 +185,7 @@ namespace EmailService.Api.Controllers
 
                     var emailModel = new EmailReceived
                     {
-                        Subject = $"[Reply] {ticketTitle}",
+                        Subject = $"[Reply] {ticket.Title}",
                         Body = $"A support agent has replied to your ticket (ID: {TicketId}).",
                         SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
                         RecipientAddress = customer.Email ?? "",
@@ -181,7 +194,7 @@ namespace EmailService.Api.Controllers
 
                     await _ticketEmailService.SendTicketReplyNotificationAsync(
                         recipientEmail: customer.Email ?? "",
-                        ticketTitle: ticketTitle,
+                        ticketTitle: ticket.Title,
                         emailModel: emailModel,
                         ticketId: TicketId,
                         ticketStatus: parsedStatus,
@@ -201,16 +214,13 @@ namespace EmailService.Api.Controllers
                         return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
                     }
                     // For email and chatbot origins, we can have a more generic notification without agent details
-                    var customerResult = await _customerSdkService.GetCustomerById(customerId);
+                    var customerResult = await _customerSdkService.GetCustomerById(ticket.CustomerId.Value);
                     if (customerResult.IsFailure)
-                        return Results.NotFound(new { message = $"Customer with ID {customerId} not found." });
+                        return Results.NotFound(new { message = $"Customer with ID {ticket.CustomerId.Value} not found." });
 
                     var customer = customerResult.Value;
 
-                    var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
-                    var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
-                    var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
-                    var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                    var organizationName = "Support Team";
 
                     var messagePageResult = await _messageSdkService.GetMessagesByTicketIdAsync(TicketId);
 
@@ -228,7 +238,7 @@ namespace EmailService.Api.Controllers
 
                     var emailModel = new EmailSent()
                     {
-                        Subject = $"[Reply] {ticketTitle}",
+                        Subject = $"[Reply] {ticket.Title}",
                         Body = $"There is a new reply to your ticket (ID: {TicketId}).",
                         SenderAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required."),
                         RecipientAddress = customer.Email ?? "",
