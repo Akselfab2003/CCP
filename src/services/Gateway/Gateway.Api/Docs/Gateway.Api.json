@@ -272,6 +272,9 @@
           }
         }
       },
+      "TicketOrigin": {
+        "type": "integer"
+      },
       "TicketSdkDto": {
         "type": "object",
         "properties": {
@@ -291,6 +294,9 @@
           "status": {
             "type": "integer",
             "format": "int32"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TicketOrigin"
           },
           "organizationId": {
             "type": "string",

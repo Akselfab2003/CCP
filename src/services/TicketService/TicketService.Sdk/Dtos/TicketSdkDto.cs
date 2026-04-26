@@ -16,6 +16,9 @@ namespace TicketService.Sdk.Dtos
         [JsonPropertyName("status")]
         public int Status { get; set; }
 
+        [JsonPropertyName("origin")]
+        public TicketOrigin Origin { get; set; }
+
         [JsonPropertyName("organizationId")]
         public Guid OrganizationId { get; set; }
 

@@ -1,5 +1,5 @@
-﻿using CustomerService.Api.DB.Models;
-using CustomerService.Application.Persistence;
+﻿using CustomerService.Application.Persistence;
+using CustomerService.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace CustomerService.Application.Services
@@ -26,6 +26,16 @@ namespace CustomerService.Application.Services
             if (customer == null)
             {
                 _logger.LogWarning("Customer with ID {CustomerId} not found.", id);
+            }
+            return customer;
+        }
+
+        public async Task<Customer?> GetCustomerByEmail(string email)
+        {
+            var customer = await _customerRepository.GetCustomerByEmail(email);
+            if (customer == null)
+            {
+                _logger.LogWarning("Customer with email {CustomerEmail} not found.", email);
             }
             return customer;
         }

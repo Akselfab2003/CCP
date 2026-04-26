@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Api" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />

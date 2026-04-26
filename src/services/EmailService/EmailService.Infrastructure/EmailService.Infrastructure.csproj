@@ -18,10 +18,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EmailService.Application\EmailService.Application.csproj" />
     <ProjectReference Include="..\EmailService.Domain\EmailService.Domain.csproj" />
+    <ProjectReference Include="..\EmailTemplates\EmailTemplates.csproj" />
   </ItemGroup>
 
 </Project>

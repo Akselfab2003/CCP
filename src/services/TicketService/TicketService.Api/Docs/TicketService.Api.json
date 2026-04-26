@@ -576,7 +576,17 @@
               "string"
             ]
           },
+          "origin": {
+            "$ref": "#/components/schemas/TicketOrigin"
+          },
           "customerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "organizationId": {
             "type": [
               "null",
               "string"
@@ -713,6 +723,9 @@
           "status": {
             "$ref": "#/components/schemas/TicketStatus"
           },
+          "origin": {
+            "$ref": "#/components/schemas/TicketOrigin"
+          },
           "organizationId": {
             "type": "string",
             "format": "uuid"
@@ -777,6 +790,9 @@
             "format": "date-time"
           }
         }
+      },
+      "TicketOrigin": {
+        "type": "integer"
       },
       "TicketStatus": {
         "type": "integer"

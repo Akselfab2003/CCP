@@ -1,4 +1,4 @@
-﻿namespace CustomerService.Api.DB.Models
+﻿namespace CustomerService.Domain.Entities
 {
     public class Customer
     {

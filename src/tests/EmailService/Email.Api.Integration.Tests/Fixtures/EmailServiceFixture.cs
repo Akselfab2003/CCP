@@ -1,4 +1,5 @@
 using CCP.Shared.AuthContext;
+using ChatApp.Encryption;
 using EmailService.Domain.Interfaces;
 using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.EmailInfrastructure;
@@ -21,17 +22,23 @@ namespace Email.Api.Integration.Tests.Fixtures
             DBResourceName,
             "keycloak",
             "postgres",
-            "RabbitMQ"
+            "RabbitMQ",
+            "customerservice-api",
+            "customerdb"
         ];
 
 
         public async ValueTask InitializeAsync()
         {
-            DefaultTimeout = TimeSpan.FromMinutes(1);
+            DefaultTimeout = TimeSpan.FromMinutes(2);
             await Initialize();
+            var encryptionKey = GetConfiguration()["Encryption_Key"]
+              ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
+            DB_Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey));
             DB_Services.AddScoped<ICurrentUser, CurrentUser>();
             DB_Services.AddScoped<IEmailSent, EmailSentRepo>();
             DB_Services.AddScoped<IEmailReceived, EmailReceivedRepo>();
+            SDK_Services.AddHttpContextAccessor();
             SDK_Services.AddEmailServiceSdk(GetServiceUrl(APIResourceName), true);
             await BuildProviders();
         }
