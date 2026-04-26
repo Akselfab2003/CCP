@@ -218,10 +218,23 @@ namespace CCP.UI
 
             Directory.CreateDirectory(attachmentsFullPath);
 
-            app.UseStaticFiles(new StaticFileOptions
+            app.UseWhen(ctx => ctx.Request.Path.StartsWithSegments("/attachments"), branch =>
             {
-                FileProvider = new PhysicalFileProvider(attachmentsFullPath),
-                RequestPath = "/attachments"
+                branch.Use(async (context, next) =>
+                {
+                    if (context.User.Identity is null || !context.User.Identity.IsAuthenticated)
+                    {
+                        context.Response.StatusCode = 401;
+                        return;
+                    }
+                    await next();
+                });
+
+                branch.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(attachmentsFullPath),
+                    RequestPath = "/attachments"
+                });
             });
 
             app.Run();
