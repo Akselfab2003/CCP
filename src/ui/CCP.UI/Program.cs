@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TicketService.Sdk.ServiceDefaults;
+using CustomerService.Sdk.ServiceDefaults;
 
 namespace CCP.UI
 {
@@ -103,89 +104,21 @@ namespace CCP.UI
             });
             }
 
-
-            //Authorization Policies
-            builder.Services.AddAuthorization(options =>
-            {
-                // Base role policies
-                options.AddPolicy("RequireAdmin", policy => policy.RequireRole(
-                    UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireManager", policy => policy.RequireRole(
-                    UserRolesExtensions.ManagerRoleString,
-                    UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireSupporter", policy => policy.RequireRole(
-                    UserRolesExtensions.SupporterRoleString,
-                    UserRolesExtensions.ManagerRoleString,
-                    UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireInitialUser", policy => policy.RequireRole(
-                    UserRolesExtensions.CustomerRoleString,
-                    UserRolesExtensions.SupporterRoleString,
-                    UserRolesExtensions.ManagerRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                // Granular feature-specific policies
-                options.AddPolicy("RequireInviteUsers", policy => policy.RequireRole(
-                    UserRolesExtensions.InviteUsersRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireManageUsers", policy => policy.RequireRole(
-                    UserRolesExtensions.ManageUsersRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequirePromoteUsers", policy => policy.RequireRole(
-                    UserRolesExtensions.PromoteUsersRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireAssignTickets", policy => policy.RequireRole(
-                    UserRolesExtensions.AssignTicketsRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireViewAllTickets", policy => policy.RequireRole(
-                    UserRolesExtensions.ViewAllTicketsRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireManageOrganization", policy => policy.RequireRole(
-                    UserRolesExtensions.ManageOrganizationRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireManageFaq", policy => policy.RequireRole(
-                    UserRolesExtensions.ManageFaqRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireViewCustomers", policy => policy.RequireRole(
-                    UserRolesExtensions.ViewCustomersRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireCreateCustomers", policy => policy.RequireRole(
-                    UserRolesExtensions.CreateCustomersRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireManageCustomers", policy => policy.RequireRole(
-                    UserRolesExtensions.ManageCustomersRoleString,
-                    UserRolesExtensions.AdminRoleString));
-
-                options.AddPolicy("RequireViewDashboard", policy => policy.RequireRole(
-                    UserRolesExtensions.ViewDashboardRoleString,
-                    UserRolesExtensions.AdminRoleString));
-            });
+            //Authorization using direct role-based authorization on pages
+            builder.Services.AddAuthorization();
 
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
             builder.Services.AddScoped<IUIUserContext, UIUserContext>();
             builder.Services.AddServiceDefaults("CCP.UI");
-            /*
-            builder.Services.AddEmailServiceSdk(
-                builder.Configuration.GetValue<string>("services:EmailService:http:0")
-                ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
-            */
             builder.Services.AddMessageServiceSDK(
                 builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
                 ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
-            /*
+
             builder.Services.AddCustomerviceSdk(
                 builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
                 ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."));
-            */
+
             builder.Services.AddIdentityServiceSdk(
                 builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                 ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));

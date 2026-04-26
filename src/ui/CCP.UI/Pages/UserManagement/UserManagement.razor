@@ -8,7 +8,7 @@
 @layout CCPLayout
 @inject IJSRuntime JS
 @inject IUIUserContext UserContext
-@attribute [Authorize(Policy = "RequireInviteUsers")]
+@attribute [Authorize(Roles = $"{UserRolesExtensions.CreateSupportersRoleString},{UserRolesExtensions.PromoteUsersRoleString}")]
 
 <PageTitle>User Management</PageTitle>
 

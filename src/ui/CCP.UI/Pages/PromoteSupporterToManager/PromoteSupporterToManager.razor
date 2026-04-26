@@ -1,7 +1,7 @@
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @inject IJSRuntime JS
-@attribute [Authorize(Policy = "RequirePromoteUsers")]
+@attribute [Authorize(Roles = UserRolesExtensions.PromoteUsersRoleString)]
 
 <EditForm Model="PromoteSupporterModel" OnValidSubmit="@Submit">
     <DataAnnotationsValidator />
