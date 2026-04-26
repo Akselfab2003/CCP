@@ -15,12 +15,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         private readonly ISmtpClient _smtpClient;
         private readonly IEmailTemplateRenderer _emailTemplateRenderer;
         private readonly IEmailTicketMessageRepository _emailTicketMessageRepository;
+        private readonly ITenantEmailConfigurationRepo _tenantEmailConfigurationRepo;
 
-        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer, IEmailTicketMessageRepository emailTicketMessageRepository)
+        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer,ITenantEmailConfigurationRepo tenantEmailConfigurationRepo, IEmailTicketMessageRepository emailTicketMessageRepository)
         {
             _smtpClient = smtpClient;
             _emailTemplateRenderer = emailTemplateRenderer;
             _emailTicketMessageRepository = emailTicketMessageRepository;
+            _tenantEmailConfigurationRepo = tenantEmailConfigurationRepo;
         }
 
         public async Task SendTicketCreatedEmailAsync(
@@ -29,6 +31,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string organizationName, string expectedResponseTime,
             string portalUrl, TicketOrigin origin)
         {
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
+            if (tenant.IsSuccess)
+            {
+                string fromaddress = tenant.Value.DefaultSenderEmail;
+
+                email.SenderAddress = fromaddress;
+            }
+
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketCreatedEmailAsync(
                 email, ticketId, ticketStatus,
@@ -58,6 +68,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string agentName, string agentRole,
             string replyUrl, string viewHistoryUrl, TicketOrigin origin)
         {
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
+            if (tenant.IsSuccess)
+            {
+                string fromaddress = tenant.Value.DefaultSenderEmail;
+
+                email.SenderAddress = fromaddress;
+            }
+
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketReplyEmailAsync(
                 email, ticketId, ticketStatus,
@@ -84,6 +102,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string organizationName, string oldStatusLabel,
             string portalUrl, TicketOrigin origin)
         {
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
+            if (tenant.IsSuccess)
+            {
+                string fromaddress = tenant.Value.DefaultSenderEmail;
+
+                email.SenderAddress = fromaddress;
+            }
+
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketStatusEmailAsync(
                 email, ticketId, ticketStatus,
@@ -110,6 +136,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string replyUrl, string managementUrl,
             string viewHistoryUrl, TicketOrigin origin)
         {
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
+            if (tenant.IsSuccess)
+            {
+                string fromaddress = tenant.Value.DefaultSenderEmail;
+
+                email.SenderAddress = fromaddress;
+            }
+
             var htmlContent = await _emailTemplateRenderer
                 .RenderSupportCustomerReplyNotificationAsync(
                 email, ticketId, ticketStatus,
@@ -136,6 +170,14 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             int ticketId, TicketStatus ticketStatus,
             string organizationName,TicketOrigin origin)
         {
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(emailSent.OrganizationId);
+            if (tenant.IsSuccess)
+            {
+                string fromaddress = tenant.Value.DefaultSenderEmail;
+
+                emailSent.SenderAddress = fromaddress;
+            }
+
             var htmlContent = await _emailTemplateRenderer
                 .RenderReplyToEmailAsync(
                 messages, emailSent,
