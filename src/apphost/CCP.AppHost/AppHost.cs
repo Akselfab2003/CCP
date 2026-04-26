@@ -136,16 +136,14 @@ IdentityService
     .WithOtlpExporter();
 
 EmailService
-    .WithReference(EmailDB)
     .WaitFor(EmailDB)
-    .WithReference(CustomerService)
     .WaitFor(CustomerService)
     .WaitFor(Keycloak)
+    .WithReference(EmailDB)
+    .WithReference(CustomerService)
     .WithReference(Keycloak)
-    .WaitFor(MessagingService)
     .WithReference(MessagingService)
     .WithReference(TicketService)
-    .WaitFor(TicketService)
     .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
     .WithUrlForEndpoint("https", endpoint =>
     {
