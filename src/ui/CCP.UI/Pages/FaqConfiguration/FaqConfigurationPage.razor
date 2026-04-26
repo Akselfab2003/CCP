@@ -2,7 +2,8 @@
 @layout CCPLayout
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
+@using CCP.Shared.ValueObjects
+@attribute [Authorize(Roles = UserRolesExtensions.ConfigureChatbotRoleString)]
 <div class="container-shell">
     <div class="content">
         <div class="header">

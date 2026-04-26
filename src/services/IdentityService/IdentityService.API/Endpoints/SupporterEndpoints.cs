@@ -21,12 +21,14 @@ namespace IdentityService.API.Endpoints
                                             .RequireAuthorization();
 
             supporterRoute.MapPost("/Invite", InviteSupporter)
+                        .RequireAuthorization("RequireInviteUsers")
                         .Produces(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status404NotFound)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             supporterRoute.MapGet("/GetAllSupporters", GetAllSupporters)
+                        .RequireAuthorization("RequireViewCustomers")
                         .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);

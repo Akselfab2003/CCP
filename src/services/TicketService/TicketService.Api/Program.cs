@@ -7,6 +7,7 @@ using TicketService.Infrastructure.Persistence;
 using TicketService.Infrastructure.ServiceCollection;
 using Wolverine;
 using Wolverine.RabbitMQ;
+using CCP.Shared.ValueObjects;
 
 namespace TicketService.Api
 {

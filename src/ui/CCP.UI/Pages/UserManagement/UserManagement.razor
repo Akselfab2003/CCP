@@ -1,12 +1,14 @@
 @page "/UserManagement"
 @using CCP.Shared.ValueObjects
+@using CCP.Shared.UIContext
 @using Microsoft.AspNetCore.Authorization
 @using CCP.UI.Pages.PromoteSupporterToManager
 @using CCP.UI.Pages.InviteSupporter
 @using CCP.UI.Pages.InviteCustomer
 @layout CCPLayout
 @inject IJSRuntime JS
-@attribute [Authorize(Policy = "RequireAdmin")]
+@inject IUIUserContext UserContext
+@attribute [Authorize(Roles = $"{UserRolesExtensions.CreateSupportersRoleString},{UserRolesExtensions.PromoteUsersRoleString}")]
 
 <PageTitle>User Management</PageTitle>
 
@@ -21,13 +23,17 @@
 
 <!-- Tab Navigation -->
 <div class="tab-container">
-    <button class="tab-button @(activeTab == "promote" ? "active" : "")" 
-            @onclick="@(() => SetActiveTab("promote"))">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-        Promote Supporter
-    </button>
+    @* Only show Promote tab to Admins *@
+    @if (UserContext.Role == UserRole.Admin)
+    {
+        <button class="tab-button @(activeTab == "promote" ? "active" : "")" 
+                @onclick="@(() => SetActiveTab("promote"))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Promote Supporter
+        </button>
+    }
 
     <button class="tab-button @(activeTab == "invite-supporter" ? "active" : "")" 
             @onclick="@(() => SetActiveTab("invite-supporter"))">

@@ -15,6 +15,7 @@ namespace ChatService.Api.Endpoints
                                     .RequireAuthorization();
 
             faqGroup.MapPost("/", CreateFaqEmbedding)
+                    .RequireAuthorization("RequireManageFaq")
                     .Produces(StatusCodes.Status200OK)
                     .ProducesProblem(StatusCodes.Status400BadRequest)
                     .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -24,6 +25,7 @@ namespace ChatService.Api.Endpoints
                     .WithDescription("Creates an embedding for a sample FAQ and returns it. In a real application, you would typically save the embedding to a database.");
 
             faqGroup.MapPatch("/Update", UpdateFaq)
+                    .RequireAuthorization("RequireManageFaq")
                     .Produces(StatusCodes.Status200OK)
                     .ProducesProblem(StatusCodes.Status400BadRequest)
                     .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -33,6 +35,7 @@ namespace ChatService.Api.Endpoints
                     .WithDescription("Updates an existing FAQ entry with a new embedding. This is a placeholder for demonstration purposes.");
 
             faqGroup.MapGet("/Search", SearchFaqs)
+                    .RequireAuthorization("RequireManageFaq")
                     .Produces<List<FaqEntity>>(StatusCodes.Status200OK)
                     .ProducesProblem(StatusCodes.Status400BadRequest)
                     .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -42,6 +45,7 @@ namespace ChatService.Api.Endpoints
                     .WithDescription("Searches for FAQs based on a query string. This is a placeholder for demonstration purposes.");
 
             faqGroup.MapGet("/GetAll", GetAllFaqs)
+                    .RequireAuthorization("RequireManageFaq")
                     .Produces<List<FaqEntity>>(StatusCodes.Status200OK)
                     .ProducesProblem(StatusCodes.Status400BadRequest)
                     .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -51,6 +55,7 @@ namespace ChatService.Api.Endpoints
                     .WithDescription("Retrieves all FAQ entries. This is a placeholder for demonstration purposes.");
 
             faqGroup.MapDelete("/{faqId}", DeleteFaq)
+                    .RequireAuthorization("RequireManageFaq")
                     .Produces(StatusCodes.Status200OK)
                     .ProducesProblem(StatusCodes.Status400BadRequest)
                     .ProducesProblem(StatusCodes.Status500InternalServerError)

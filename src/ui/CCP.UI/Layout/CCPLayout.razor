@@ -1,4 +1,5 @@
 ﻿@using CCP.Shared.UIContext
+@using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -106,11 +107,11 @@
                 </ul>
             </div>
 
-            <AuthorizeView Policy="RequireSupporter">
+            <AuthorizeView Roles="org.Supporter">
                 <div class="ccp-nav-section">
                     <span class="ccp-nav-label">Workspace</span>
                     <ul>
-                        <AuthorizeView Policy="RequireAdmin" Context="adminContext">
+                        <AuthorizeView Roles="org.Admin" Context="adminContext">
                             <li>
                                 <NavLink class="ccp-nav-item" href="/customers">
                                     <span class="ccp-nav-icon icon-purple">
@@ -174,7 +175,7 @@
                             <span class="ccp-nav-text">Settings</span>
                         </NavLink>
                     </li>
-                    <AuthorizeView Policy="RequireManager">
+                    <AuthorizeView Roles="org.Manager">
                         <li>
                             <NavLink class="ccp-nav-item" href="/support-users">
                                 <span class="ccp-nav-icon icon-teal">
@@ -186,7 +187,7 @@
                             </NavLink>
                         </li>
                     </AuthorizeView>
-                    <AuthorizeView Policy="RequireAdmin">
+                    <AuthorizeView Roles="org.Admin">
                         <li>
                             <NavLink class="ccp-nav-item" href="/UserManagement">
                                 <span class="ccp-nav-icon icon-teal">

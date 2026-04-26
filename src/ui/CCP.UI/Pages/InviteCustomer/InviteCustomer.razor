@@ -1,7 +1,7 @@
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @inject IJSRuntime JS
-@attribute [Authorize(Policy = "RequireManager")]
+@attribute [Authorize(Roles = UserRolesExtensions.CreateCustomersRoleString)]
 
 <EditForm Model="InviteCustomerModel" OnValidSubmit="@Submit">
     <DataAnnotationsValidator />
