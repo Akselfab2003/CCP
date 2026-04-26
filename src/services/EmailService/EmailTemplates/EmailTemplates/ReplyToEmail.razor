@@ -97,13 +97,13 @@
                                             <!-- Avatar: first char of UserId or a generic fallback -->
                                             <td width="36" valign="top" style="padding-right: 12px;">
                                                 <div style="width: 36px; height: 36px; border-radius: 50%; background-color: @(message.IsInternalNote ? "#fde68a" : "#dbeafe"); text-align: center; line-height: 36px; font-size: 14px; font-weight: bold; color: @(message.IsInternalNote ? "#92400e" : "#1d4ed8");">
-                                                    @(SentEmail.RecipientAddress.FirstOrDefault().ToString().ToUpper())
+                                                    @(SentEmail.RecipientAddress.ToString().ToUpper())
                                                 </div>
                                             </td>
                                             <!-- Meta: userId + timestamp + badges -->
                                             <td valign="top">
                                                 <p style="margin: 0; font-size: 13px; font-weight: bold; color: #111827;">
-                                                    @(SentEmail.RecipientAddress.FirstOrDefault().ToString().ToUpper() ?? "Customer")
+                                                    @(SentEmail.RecipientAddress.ToString().ToUpper() ?? "Customer")
                                                 </p>
                                                 <p style="margin: 2px 0 0; font-size: 11px; color: #9ca3af;">
                                                     @(message.CreatedAtUtc.HasValue ? message.CreatedAtUtc.Value.ToString("MMM d, HH:mm") : "–")
