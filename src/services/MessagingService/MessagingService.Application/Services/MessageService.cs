@@ -1,3 +1,6 @@
+using CCP.Shared.AuthContext;
+using CCP.Shared.ValueObjects;
+using EmailService.Sdk.Services;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
@@ -5,6 +8,7 @@ using MessagingService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pgvector;
+using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
 
 namespace MessagingService.Application.Services;
@@ -19,13 +23,17 @@ public class MessageService : IMessageService
     private readonly MessagingDbContext _dbContext;
     private readonly IMessageAccessValidator _messageAccessValidator;
     private readonly ITicketService _ticketService;
+    private readonly IEmailSdkService _emailSdkService;
+    private readonly ServiceAccountOverrider _serviceAccountOverrider;
     private readonly ILogger<MessageService> _logger;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
+        _emailSdkService = emailSdkService;
         _ticketService = ticketService;
+        _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
     }
 
@@ -33,8 +41,13 @@ public class MessageService : IMessageService
         CreateMessageRequest request,
         CancellationToken cancellationToken = default)
     {
+        _serviceAccountOverrider.SetOrganizationId(request.OrganizationId);
         if (request.TicketId <= 0)
             return MessageServiceResult.Failed("TicketId must be greater than 0.");
+
+        var ticket = await _ticketService.GetTicket(request.TicketId);
+        if (ticket is null || ticket.IsFailure)
+            return MessageServiceResult.Failed("Ticket not found.");
 
         if (request.OrganizationId == Guid.Empty)
             return MessageServiceResult.Failed("OrganizationId is required.");
@@ -81,16 +94,19 @@ public class MessageService : IMessageService
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        await ForwardMessageToServices(ticket.Value, message);
+
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
             message.UserId,
             message.Content.Length > 120 ? message.Content[..120] : message.Content
+
         ).ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-                _logger.LogWarning("Failed to record message history for ticket {TicketId}: {Error}",
+                {
+                    if (t.IsFaulted)
+                        _logger.LogWarning("Failed to record message history for ticket {TicketId}: {Error}",
                     message.TicketId, t.Exception?.Message);
-        }, TaskScheduler.Default);
+                }, TaskScheduler.Default);
 
         return MessageServiceResult.Succeeded(MapToResponse(message));
     }
@@ -253,5 +269,34 @@ public class MessageService : IMessageService
             AttachmentFileName = message.AttachmentFileName,
             AttachmentContentType = message.AttachmentContentType
         };
+    }
+
+
+    private async Task ForwardMessageToServices(TicketSdkDto ticket, Message msg)
+    {
+        try
+        {
+            _serviceAccountOverrider.SetOrganizationId(ticket.OrganizationId);
+
+            switch (ticket.Origin)
+            {
+                case TicketOrigin.Manual:
+
+                    break;
+                case TicketOrigin.Email:
+                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role");
+                    break;
+                case TicketOrigin.Chatbot:
+                    break;
+                default:
+                    break;
+
+            }
+
+        }
+        catch (Exception)
+        {
+
+        }
     }
 }

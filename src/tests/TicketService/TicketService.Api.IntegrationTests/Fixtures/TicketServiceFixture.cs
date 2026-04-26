@@ -21,7 +21,9 @@ namespace TicketService.Api.IntegrationTests.Fixtures
             "emailservice-api",
             "emaildb",
             "customerdb",
-            "customerservice-api"
+            "customerservice-api",
+            "messagingservice-api",
+            "MessagingDatabase"
         ];
 
         public async ValueTask InitializeAsync()

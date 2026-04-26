@@ -1,5 +1,6 @@
 ﻿@using CCP.Shared.ValueObjects
 @using EmailService.Domain.Models
+@using MessagingService.Sdk.Dtos
 @using TicketService.Domain.Entities
 
 <!DOCTYPE html>
@@ -75,35 +76,68 @@
                         </td>
                     </tr>
 
-                    <!-- ── CUSTOMER REPLY (EmailReceived, if present) ── -->
-                    @if (ReceivedEmail != null)
+                    <!-- ── RECEIVED MESSAGES ── -->
+                    @if (ReceivedMessages.Any())
                     {
+                        <!-- Section divider label -->
                         <tr>
-                            <td style="padding: 20px 24px;">
-                                <table width="100%" cellpadding="0" cellspacing="0">
-                                    <tr>
-                                        <!-- Avatar: initial from SenderAddress -->
-                                        <td width="36" valign="top" style="padding-right: 12px;">
-                                            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #e5e7eb; text-align: center; line-height: 36px; font-size: 14px; font-weight: bold; color: #6b7280;">
-                                                @(ReceivedEmail.SenderAddress.Substring(0, 1).ToUpper())
-                                            </div>
-                                        </td>
-                                        <!-- Sender + timestamp -->
-                                        <td valign="top">
-                                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #111827;">
-                                                @ReceivedEmail.SenderAddress
-                                            </p>
-                                            <p style="margin: 2px 0 0; font-size: 11px; color: #9ca3af;">@ReceivedEmail.ReceivedAt.ToString("MMM d, HH:mm")</p>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                                <!-- Customer reply body -->
-                                <p style="margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: #111827;">
-                                    @ReceivedEmail.Body
+                            <td style="padding: 10px 24px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    Previous messages
                                 </p>
                             </td>
                         </tr>
+
+                        @foreach (var message in ReceivedMessages.Where(m => !m.IsDeleted))
+                        {
+                            <tr>
+                                <td style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb; @(message.IsInternalNote ? "background-color: #fffbeb;" : "")">
+                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <!-- Avatar: first char of UserId or a generic fallback -->
+                                            <td width="36" valign="top" style="padding-right: 12px;">
+                                                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: @(message.IsInternalNote ? "#fde68a" : "#dbeafe"); text-align: center; line-height: 36px; font-size: 14px; font-weight: bold; color: @(message.IsInternalNote ? "#92400e" : "#1d4ed8");">
+                                                    @(SentEmail.RecipientAddress.ToString().ToUpper())
+                                                </div>
+                                            </td>
+                                            <!-- Meta: userId + timestamp + badges -->
+                                            <td valign="top">
+                                                <p style="margin: 0; font-size: 13px; font-weight: bold; color: #111827;">
+                                                    @(SentEmail.RecipientAddress.ToString().ToUpper() ?? "Customer")
+                                                </p>
+                                                <p style="margin: 2px 0 0; font-size: 11px; color: #9ca3af;">
+                                                    @(message.CreatedAtUtc.HasValue ? message.CreatedAtUtc.Value.ToString("MMM d, HH:mm") : "–")
+                                                    @if (message.IsInternalNote)
+                                                    {
+                                                        <span style="margin-left: 6px; padding: 1px 6px; background-color: #fde68a; color: #92400e; border-radius: 4px; font-size: 10px; font-weight: bold;">Internal note</span>
+                                                    }
+                                                    @if (message.IsEdited)
+                                                    {
+                                                        <span style="margin-left: 6px; font-size: 10px; color: #9ca3af;">(edited)</span>
+                                                    }
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Message body -->
+                                    <p style="margin: 12px 0 0; font-size: 14px; line-height: 1.6; color: #374151;">
+                                        @message.Content
+                                    </p>
+
+                                    <!-- Attachment (if present) -->
+                                    @if (!string.IsNullOrWhiteSpace(message.AttachmentUrl))
+                                    {
+                                        <p style="margin: 10px 0 0;">
+                                            <a href="@message.AttachmentUrl"
+                                                   style="font-size: 13px; color: #2563eb; text-decoration: underline;">
+                                                📎 @(message.AttachmentFileName ?? "Attachment")
+                                            </a>
+                                        </p>
+                                    }
+                                </td>
+                            </tr>
+                        }
                     }
 
                 </table>
@@ -119,13 +153,13 @@
     [Parameter, EditorRequired]
     public EmailSent SentEmail { get; set; } = default!;
 
-    /// <summary>The inbound email from the customer, shown below the agent reply. Null hides the section.</summary>
+    /// <summary>The inbound messages from the customer shown below the agent reply. Empty list hides the section.</summary>
     [Parameter]
-    public EmailReceived? ReceivedEmail { get; set; }
+    public List<MessageDto> ReceivedMessages { get; set; } = new();
 
     [Parameter]
     public int TicketId { get; set; } = default!;
-    
+
     [Parameter]
     public string OrganizationName { get; set; } = "Support";
 }
