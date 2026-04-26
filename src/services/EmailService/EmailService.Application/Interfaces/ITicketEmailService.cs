@@ -33,10 +33,14 @@ namespace EmailService.Application.Interfaces
             CustomerDTO customer, string organizationName,
             string replyUrl, string managementUrl,
             string viewHistoryUrl, TicketOrigin origin);
-        Task SendReplyToEmailAsync(
-            string recipientEmail, EmailSent email,
-            List<MessageDto> messages, int ticketId,
-            string organizationName, TicketOrigin origin,
-            TicketStatus ticketStatus);
+        Task SendReplyToEmailAsync(string recipientEmail,
+                                   EmailSent email,
+                                   List<MessageDto> messages,
+                                   int ticketId,
+                                   Guid customerId,
+                                   Guid OrgId,
+                                   string organizationName,
+                                   TicketOrigin origin,
+                                   TicketStatus ticketStatus);
     }
 }

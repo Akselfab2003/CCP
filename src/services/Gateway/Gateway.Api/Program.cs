@@ -46,6 +46,8 @@ builder.Services.AddIdentityServiceSdk(
     IsServiceAccount: true,
     configuration: builder.Configuration);
 
+builder.Services.AddSingleton<ServiceAccountOverrider>();
+
 var app = builder.Build();
 
 app.UseAuthentication();

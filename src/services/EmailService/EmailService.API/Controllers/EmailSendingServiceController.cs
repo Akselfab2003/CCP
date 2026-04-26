@@ -250,6 +250,8 @@ namespace EmailService.Api.Controllers
                         email: emailModel,
                         messages: messages.ToList(),
                         ticketId: TicketId,
+                        customerId: customer.Id,
+                        OrgId: ticket.OrganizationId,
                         organizationName: organizationName,
                         origin: origin,
                         ticketStatus: parsedStatus

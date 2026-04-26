@@ -36,7 +36,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
                     portalUrl: portalUrl,
-                    origin:origin);
+                    origin: origin);
 
                 _logger.LogInformation($"Ticket created email sent to {recipientEmail} for ticket: {ticketTitle}");
             }
@@ -52,7 +52,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
-            string replyUrl, string viewHistoryUrl,TicketOrigin origin)
+            string replyUrl, string viewHistoryUrl, TicketOrigin origin)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     organizationName: organizationName,
                     oldStatusLabel: oldStatusLabel,
                     portalUrl: portalUrl,
-                    origin:origin);
+                    origin: origin);
 
                 _logger.LogInformation($"Ticket status change email sent to {recipientEmail} for ticket: {ticketTitle}. Status: {ticketStatus}");
             }
@@ -126,7 +126,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     replyUrl: replyUrl,
                     managementUrl: managementUrl,
                     viewHistoryUrl: viewHistoryUrl,
-                    origin:origin);
+                    origin: origin);
 
                 _logger.LogInformation("Support customer-reply notification sent to {Recipient} for ticket #{TicketId}",
                     recipientEmail, emailModel.Id);
@@ -141,6 +141,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         public async Task SendReplyToEmailAsync(
             string recipientEmail, EmailSent email,
             List<MessageDto> messages, int ticketId,
+            Guid customerId, Guid OrgId,
             string organizationName, TicketOrigin origin,
             TicketStatus ticketStatus)
         {
@@ -152,6 +153,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     messages: messages,
                     emailSent: email,
                     ticketId: ticketId,
+                    CustomerId: customerId,
+                    OrgId: OrgId,
                     ticketStatus: ticketStatus,
                     organizationName: organizationName,
                     origin: origin);

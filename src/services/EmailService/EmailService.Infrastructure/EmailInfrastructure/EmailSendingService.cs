@@ -17,7 +17,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         private readonly IEmailTicketMessageRepository _emailTicketMessageRepository;
         private readonly ITenantEmailConfigurationRepo _tenantEmailConfigurationRepo;
 
-        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer,ITenantEmailConfigurationRepo tenantEmailConfigurationRepo, IEmailTicketMessageRepository emailTicketMessageRepository)
+        public EmailSendingService(ISmtpClient smtpClient, IEmailTemplateRenderer emailTemplateRenderer, ITenantEmailConfigurationRepo tenantEmailConfigurationRepo, IEmailTicketMessageRepository emailTicketMessageRepository)
         {
             _smtpClient = smtpClient;
             _emailTemplateRenderer = emailTemplateRenderer;
@@ -164,13 +164,40 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             await _smtpClient.SendAsync(message);
         }
 
-        public async Task SendReplyToEmailAsync(
-            string to, string subject,
-            List<MessageDto> messages, EmailSent emailSent,
-            int ticketId, TicketStatus ticketStatus,
-            string organizationName,TicketOrigin origin)
+        public async Task SendReplyToEmailAsync(string to,
+                                                string subject,
+                                                List<MessageDto> messages,
+                                                EmailSent emailSent,
+                                                Guid CustomerId,
+                                                Guid OrgId,
+                                                int ticketId,
+                                                TicketStatus ticketStatus,
+                                                string organizationName,
+                                                TicketOrigin origin)
         {
-            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(emailSent.OrganizationId);
+            string? ReplyTo = null;
+            List<string> MessagesReferences = [];
+
+
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(OrgId);
+
+            var emailTicketMessagesResult = await _emailTicketMessageRepository.GetByTicketIdAsync(ticketId);
+            if (emailTicketMessagesResult.IsFailure)
+            {
+                ReplyTo = null;
+                MessagesReferences = new List<string>();
+            }
+            else
+            {
+                var emailTicketMessages = emailTicketMessagesResult.Value.OrderByDescending(m => m.SentAt).ToList();
+                if (emailTicketMessages.Any())
+                {
+                    ReplyTo = emailTicketMessages.First().MessageId;
+                    MessagesReferences = emailTicketMessages.First().References.ToList();
+                }
+            }
+
+
             if (tenant.IsSuccess)
             {
                 string fromaddress = tenant.Value.DefaultSenderEmail;
@@ -193,6 +220,25 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                 ticketId: ticketId
             );
             message.Body = new BodyBuilder { HtmlBody = htmlContent }.ToMessageBody();
+            MessagesReferences.Add(message.MessageId!);
+
+            await _emailTicketMessageRepository.AddAsync(new EmailTicketMessage()
+            {
+                Id = Guid.NewGuid(),
+                TicketId = ticketId,
+                Body = message.Body.ToString(),
+                MessageId = message.MessageId!,
+                OrganizationId = emailSent.OrganizationId,
+                CustomerId = CustomerId,
+                Direction = EmailDirection.Outbound,
+                SentAt = DateTime.UtcNow,
+                Subject = subject,
+                SenderEmail = emailSent.SenderAddress,
+                SenderName = emailSent.SenderAddress,
+                References = MessagesReferences,
+                InReplyTo = ReplyTo ?? "",
+            });
+
             await _smtpClient.SendAsync(message);
         }
 
@@ -223,10 +269,10 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             var lastEmail = allEmailsFromTicket.Value.OrderByDescending(e => e.SentAt).FirstOrDefault();
             if (lastEmail == null) { return message; }
 
-                message.InReplyTo = lastEmail.MessageId;
-                message.MessageId = MimeUtils.GenerateMessageId();
-                message.References.AddRange(lastEmail.References);
-                message.References.Add(lastEmail.MessageId);
+            message.InReplyTo = lastEmail.MessageId;
+            message.MessageId = MimeUtils.GenerateMessageId();
+            message.References.AddRange(lastEmail.References);
+            message.References.Add(lastEmail.MessageId);
 
             return message;
         }
