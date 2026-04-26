@@ -17,6 +17,7 @@ namespace MessagingService.Api.IntegrationTests.Fixtures
             await Initialize();
             DB_Services.AddScoped<IMessageService, MessageService>();
             var serviceUrl = GetServiceUrl(APIResourceName);
+            SDK_Services.AddHttpContextAccessor();
             SDK_Services.AddMessageServiceSDK(serviceUrl, true);
             await BuildProviders();
         }
