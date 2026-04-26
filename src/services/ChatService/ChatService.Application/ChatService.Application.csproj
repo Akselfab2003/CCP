@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" />
+    <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
   
   <ItemGroup>

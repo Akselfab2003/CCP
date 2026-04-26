@@ -27,6 +27,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="WolverineFx.RabbitMQ" />
     <PackageReference Include="Aspire.RabbitMQ.Client" />
   </ItemGroup>
