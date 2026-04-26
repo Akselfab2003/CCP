@@ -26,7 +26,7 @@ public class MessageService : IMessageService
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
     private readonly ILogger<MessageService> _logger;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator,ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
@@ -42,6 +42,10 @@ public class MessageService : IMessageService
     {
         if (request.TicketId <= 0)
             return MessageServiceResult.Failed("TicketId must be greater than 0.");
+
+        var ticket = await _ticketService.GetTicket(request.TicketId);
+        if (ticket is null)
+            return MessageServiceResult.Failed("Ticket not found.");
 
         if (request.OrganizationId == Guid.Empty)
             return MessageServiceResult.Failed("OrganizationId is required.");
@@ -88,24 +92,43 @@ public class MessageService : IMessageService
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        if (request.UserId.HasValue)
+        try
         {
-            //TODO : Der skal ændres i nogle parametre;
-            _serviceAccountOverrider.SetOrganizationId(request.OrganizationId);
-            await _emailSdkService.NotifyTicketRepliedAsync(request.UserId.Value,"", request.TicketId,TicketStatus.Open,TicketOrigin.Email,"","");
+
+            switch (ticket.Value.Origin)
+            {
+                case TicketOrigin.Manual:
+                    break;
+                case TicketOrigin.Email:
+                    _serviceAccountOverrider.SetOrganizationId(request.OrganizationId);
+                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: request.TicketId, status: TicketStatus.Open, origin: TicketOrigin.Email, agentName: "Agent Name", agentRole: "Agent Role");
+                    break;
+                case TicketOrigin.Chatbot:
+                    break;
+                default:
+                    break;
+
+            }
+
         }
+        catch (Exception)
+        {
+
+        }
+
 
 
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
             message.UserId,
             message.Content.Length > 120 ? message.Content[..120] : message.Content
+
         ).ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-                _logger.LogWarning("Failed to record message history for ticket {TicketId}: {Error}",
+                {
+                    if (t.IsFaulted)
+                        _logger.LogWarning("Failed to record message history for ticket {TicketId}: {Error}",
                     message.TicketId, t.Exception?.Message);
-        }, TaskScheduler.Default);
+                }, TaskScheduler.Default);
 
         return MessageServiceResult.Succeeded(MapToResponse(message));
     }

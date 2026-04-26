@@ -144,6 +144,8 @@ EmailService
     .WithReference(Keycloak)
     .WaitFor(MessagingService)
     .WithReference(MessagingService)
+    .WithReference(TicketService)
+    .WaitFor(TicketService)
     .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
     .WithUrlForEndpoint("https", endpoint =>
     {

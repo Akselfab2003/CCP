@@ -64,6 +64,8 @@ namespace Email.Api.Integration.Tests.Tests
                 customerId,
                 "test3",
                 ticketId,
+                TicketStatus.Open,
+                TicketOrigin.Manual,
                 agentName,
                 agentRole
               );
@@ -128,6 +130,8 @@ namespace Email.Api.Integration.Tests.Tests
                 customerId,
                 "test6",
                 ticketId: ticketId,
+                TicketStatus.Open,
+                TicketOrigin.Manual,
                 agentName: "Agent with Special Chars",
                 agentRole: "Support & Service"
                );
@@ -170,6 +174,8 @@ namespace Email.Api.Integration.Tests.Tests
                 customerId,
                 "test8",
                 ticketId,
+                TicketStatus.Open,
+                TicketOrigin.Manual,
                 "Agent",
                 "Support"
                 );

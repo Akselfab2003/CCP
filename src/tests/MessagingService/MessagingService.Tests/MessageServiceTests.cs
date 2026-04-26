@@ -1,12 +1,13 @@
+using CCP.Shared.AuthContext;
+using MessagingService.Application.Services;
 using MessagingService.Domain.Contracts;
+using MessagingService.Domain.Entities;
+using MessagingService.Domain.Interfaces;
+using MessagingService.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TicketService.Sdk.Services.Ticket;
-using MessagingService.Domain.Entities;
-using MessagingService.Domain.Interfaces;
-using MessagingService.Application.Services;
-using MessagingService.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.MessagingService.Tests;
 
@@ -71,8 +72,10 @@ public class MessageServiceTests
     {
         var validator = new AllowAllTestMessageAccessValidator();
         var ticketService = Substitute.For<ITicketService>();
+        var emailService = Substitute.For<EmailService.Sdk.Services.IEmailSdkService>();
+        var serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
         var logger = Substitute.For<ILogger<MessageService>>();
-        return new MessageService(dbContext, validator, ticketService, logger);
+        return new MessageService(dbContext, validator, serviceAccountOverrider, emailService, ticketService, logger);
     }
 
     [Fact]

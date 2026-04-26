@@ -121,21 +121,6 @@
         ],
         "parameters": [
           {
-            "name": "customerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "ticketTitle",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "TicketId",
             "in": "query",
             "schema": {
