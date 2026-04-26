@@ -72,7 +72,10 @@ public class MessageService : IMessageService
             IsEdited = false,
             IsDeleted = false,
             IsInternalNote = request.IsInternalNote,
-            Embedding = request.Embedding is null ? null : new Vector(request.Embedding)
+            Embedding = request.Embedding is null ? null : new Vector(request.Embedding),
+            AttachmentUrl = request.AttachmentUrl,
+            AttachmentFileName = request.AttachmentFileName,
+            AttachmentContentType = request.AttachmentContentType
         };
 
         _dbContext.Messages.Add(message);
@@ -130,7 +133,10 @@ public class MessageService : IMessageService
                 IsDeleted = m.IsDeleted,
                 DeletedAtUtc = m.DeletedAtUtc,
                 IsInternalNote = m.IsInternalNote,
-                Embedding = m.Embedding == null ? null : m.Embedding.ToArray()
+                Embedding = m.Embedding == null ? null : m.Embedding.ToArray(),
+                AttachmentUrl = m.AttachmentUrl,
+                AttachmentFileName = m.AttachmentFileName,
+                AttachmentContentType = m.AttachmentContentType
             })
             .ToListAsync(cancellationToken);
 
@@ -242,7 +248,10 @@ public class MessageService : IMessageService
             IsDeleted = message.IsDeleted,
             DeletedAtUtc = message.DeletedAtUtc,
             IsInternalNote = message.IsInternalNote,
-            Embedding = message.Embedding?.ToArray()
+            Embedding = message.Embedding?.ToArray(),
+            AttachmentUrl = message.AttachmentUrl,
+            AttachmentFileName = message.AttachmentFileName,
+            AttachmentContentType = message.AttachmentContentType
         };
     }
 }

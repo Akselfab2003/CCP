@@ -42,6 +42,10 @@ namespace MessagingService.Infrastructure.Persistence
 
                 entity.Property(m => m.Embedding)
                     .HasColumnType("vector(1536)");
+
+                entity.Property(m => m.AttachmentUrl).IsRequired(false);
+                entity.Property(m => m.AttachmentFileName).IsRequired(false);
+                entity.Property(m => m.AttachmentContentType).IsRequired(false);
             });
         }
     }

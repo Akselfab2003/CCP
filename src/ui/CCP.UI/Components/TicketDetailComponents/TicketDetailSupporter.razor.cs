@@ -6,6 +6,8 @@ using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
 
@@ -21,6 +23,7 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     [Inject] private IGatewayService GatewayService { get; set; } = default!;
     [Inject] private ILogger<TicketDetailSupporter> Logger { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     [Parameter, EditorRequired] public TicketSdkDto Ticket { get; set; } = default!;
 
@@ -32,6 +35,40 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     private bool _sidebarOpen = true;
     private string? _customerName;
     private readonly Dictionary<Guid, string> _userNameCache = new();
+
+    // Pending attachment state
+    private AttachmentDto? _pendingAttachment;
+    private string? _pendingAttachmentPreviewUrl;
+    private bool _isUploadingAttachment;
+
+    // Lightbox state
+    private string? _lightboxUrl;
+    private string? _lightboxFileName;
+    private string? _lightboxContentType;
+
+    // Pagination state
+    private bool _hasMoreMessages;
+    private bool _isLoadingMoreMessages;
+    private bool _shouldScrollToBottom;
+    private ElementReference _messagesContainer;
+
+    private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
+
+    private void OpenLightbox(string url, string? fileName, string? contentType = null)
+    {
+        _lightboxUrl = url;
+        _lightboxFileName = fileName;
+        _lightboxContentType = contentType;
+        StateHasChanged();
+    }
+
+    private void CloseLightbox()
+    {
+        _lightboxUrl = null;
+        _lightboxFileName = null;
+        _lightboxContentType = null;
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,7 +104,65 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         }
 
         _isLoadingMessages = false;
+        _hasMoreMessages = _messages.Count >= 50;
+        _shouldScrollToBottom = true;
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_shouldScrollToBottom)
+        {
+            _shouldScrollToBottom = false;
+            await ScrollToBottomAsync();
+        }
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.scrollToBottom", _messagesContainer); }
+        catch { /* ignore if JS not ready */ }
+    }
+
+    private async Task LoadMoreMessagesAsync()
+    {
+        if (_isLoadingMoreMessages || !_hasMoreMessages || !_messages.Any()) return;
+        _isLoadingMoreMessages = true;
+        await InvokeAsync(StateHasChanged);
+
+        var beforeId = _messages.Min(m => m.Id);
+        double previousScrollHeight = 0;
+        try { previousScrollHeight = await JSRuntime.InvokeAsync<double>("scrollHelpers.getScrollHeight", _messagesContainer); }
+        catch { }
+
+        var result = await MessageSdkService.GetMessagesByTicketIdAsync(Ticket.Id, 50, beforeId);
+        if (result.IsSuccess && result.Value.Items.Any())
+        {
+            var olderMessages = result.Value.Items.ToList();
+            await ResolveUserNamesAsync(olderMessages);
+            _messages.InsertRange(0, olderMessages);
+            _hasMoreMessages = result.Value.HasMore;
+            await InvokeAsync(StateHasChanged);
+            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.preserveScrollPosition", _messagesContainer, previousScrollHeight); }
+            catch { }
+        }
+        else
+        {
+            _hasMoreMessages = false;
+        }
+
+        _isLoadingMoreMessages = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnScrollAsync()
+    {
+        if (_isLoadingMoreMessages || !_hasMoreMessages) return;
+        double scrollTop = 0;
+        try { scrollTop = await JSRuntime.InvokeAsync<double>("scrollHelpers.getScrollTop", _messagesContainer); }
+        catch { return; }
+        if (scrollTop <= 50)
+            await LoadMoreMessagesAsync();
     }
 
     private async Task ConnectHubAsync()
@@ -82,10 +177,64 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
             _ = HubService.JoinTicketGroupAsync(Ticket.Id);
     }
 
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        Logger.LogInformation("HandleFileSelected triggered, file: {FileName}", e.File?.Name ?? "null");
+
+        if (_isUploadingAttachment || _pendingAttachment is not null) return;
+
+        var file = e.File;
+        if (file is null) return;
+
+        if (file.Size > MaxFileSizeBytes)
+        {
+            Logger.LogWarning("File {FileName} exceeds 50MB limit", file.Name);
+            _isUploadingAttachment = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _isUploadingAttachment = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await using var stream = file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024);
+            var result = await MessageSdkService.UploadAttachmentAsync(stream, file.Name, file.ContentType);
+
+            if (result.IsSuccess)
+            {
+                _pendingAttachment = result.Value;
+                if (file.ContentType.StartsWith("image/"))
+                    _pendingAttachmentPreviewUrl = _pendingAttachment.Url;
+                else
+                    _pendingAttachmentPreviewUrl = null;
+            }
+            else
+            {
+                Logger.LogError("Attachment upload failed: {Code} - {Description}", result.Error.Code, result.Error.Description);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Exception while uploading attachment");
+        }
+
+        _isUploadingAttachment = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RemovePendingAttachment()
+    {
+        _pendingAttachment = null;
+        _pendingAttachmentPreviewUrl = null;
+    }
+
     private async Task SendMessageAsync()
     {
-        if (string.IsNullOrWhiteSpace(_newMessageContent) || _isSending)
+        if (string.IsNullOrWhiteSpace(_newMessageContent) && _pendingAttachment is null)
             return;
+        if (_isSending) return;
 
         _isSending = true;
 
@@ -94,13 +243,23 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
             organizationId: Ticket.OrganizationId,
             userId: UserContext.UserId,
             content: _newMessageContent,
-            isInternalNote: _isInternalNoteMode);
+            isInternalNote: _isInternalNoteMode,
+            attachmentUrl: _pendingAttachment?.Url,
+            attachmentFileName: _pendingAttachment?.FileName,
+            attachmentContentType: _pendingAttachment?.ContentType);
 
         if (result.IsSuccess)
+        {
             _newMessageContent = string.Empty;
+            _pendingAttachment = null;
+            _pendingAttachmentPreviewUrl = null;
+            _shouldScrollToBottom = true;
+        }
         else
+        {
             Logger.LogError("TicketDetailSupporter failed to send message: {Code} - {Description}",
                 result.Error.Code, result.Error.Description);
+        }
 
         _isSending = false;
         await InvokeAsync(StateHasChanged);
@@ -117,7 +276,12 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     {
         if (message.TicketId != Ticket.Id || _messages.Any(m => m.Id == message.Id)) return;
         _messages.Add(message);
-        _ = ResolveUserNamesAsync(new[] { message }).ContinueWith(_ => InvokeAsync(StateHasChanged));
+        _ = ResolveUserNamesAsync(new[] { message })
+            .ContinueWith(_ => InvokeAsync(async () =>
+            {
+                _shouldScrollToBottom = true;
+                StateHasChanged();
+            }));
     }
 
     private void HandleMessageUpdated(MessageDto message)

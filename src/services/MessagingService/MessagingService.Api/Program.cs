@@ -4,6 +4,7 @@ using MessagingService.Application.ServiceCollection;
 using MessagingService.Infrastructure.Persistence;
 using MessagingService.Infrastructure.ServiceCollection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
