@@ -20,22 +20,19 @@ namespace TicketService.Api
             {
                 options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
             });
-            builder.Services.AddOpenApi();
+
+            builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
 
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
             builder.Services.AddHttpContextAccessor();
             builder.Services.ConfigureDefaultOpenTelemetry("TicketService.Api");
-            builder.Services.AddHttpContextAccessor();
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
-                builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
-
-                var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+                var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0")
+                    ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddApiAuthenticationServices("TicketService.Api", "CCP", keycloakURL);
-
-
 
                 builder.Services.AddEmailServiceSdk(
                     builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
@@ -46,7 +43,6 @@ namespace TicketService.Api
                     options.UseNpgsql(builder.Configuration.GetConnectionString("TicketDb"));
                 });
 
-                // Keep this inside the guard — Swagger UI only needed at runtime
                 builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
 
                 builder.UseWolverine(opts =>
@@ -73,7 +69,6 @@ namespace TicketService.Api
                 AutomaticallyApplyDBMigration<TicketDbContext>.ApplyMigrationsAsync(app).Wait();
             }
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();

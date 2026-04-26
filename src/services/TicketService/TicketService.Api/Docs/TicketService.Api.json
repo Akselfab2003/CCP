@@ -731,14 +731,7 @@
             "format": "uuid"
           },
           "assignment": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/AssignmentDto"
-              }
-            ]
+            "$ref": "#/components/schemas/AssignmentDto"
           },
           "customerId": {
             "type": [
@@ -825,8 +818,21 @@
           }
         }
       }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "JWT",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     }
   },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
   "tags": [
     {
       "name": "Ticket"
