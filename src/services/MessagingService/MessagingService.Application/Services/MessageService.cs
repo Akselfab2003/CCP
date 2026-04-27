@@ -1,12 +1,15 @@
+using System.Runtime.CompilerServices;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using EmailService.Sdk.Services;
 using IdentityService.Sdk.Services.Tenant;
+using IdentityService.Sdk.Services.User;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
 using MessagingService.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pgvector;
@@ -27,11 +30,11 @@ public class MessageService : IMessageService
     private readonly ITicketService _ticketService;
     private readonly IEmailSdkService _emailSdkService;
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
-    private readonly IUIUserContext _userContext;
     private readonly ILogger<MessageService> _logger;
     private readonly ITenantService _tenantService;
+    private readonly IUserService _userService;
 
-    public MessageService(MessagingDbContext dbContext,ITenantService tenantService, IUIUserContext userContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext,ITenantService tenantService,IUserService userService, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
@@ -40,7 +43,7 @@ public class MessageService : IMessageService
         _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
         _tenantService = tenantService;
-        _userContext = userContext;
+        _userService = userService;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -285,20 +288,37 @@ public class MessageService : IMessageService
             _serviceAccountOverrider.SetOrganizationId(ticket.OrganizationId);
 
             var tenantResult = await _tenantService.GetTenantDetailsAsync(ticket.OrganizationId);
-            var userRole = _userContext.Role;
-            var isSupporter = userRole is UserRole.Supporter or UserRole.Manager or UserRole.Admin;
-            var agentEmail = _userContext.Email;
+            var userId = msg.UserId;
+            UserRole userRole = UserRole.Customer;
+            string agentName = "";
+            string agentEmail = "";
+            if (userId.HasValue)
+            {
+                var userRoleResult = await _userService.GetUserDetailsAsync(userId.Value);
+                userRole = userRoleResult.Value.groups
+                    .Select(s => s switch
+                    {
+                        "Admin" => UserRole.Admin,
+                        "Manager" => UserRole.Manager,
+                        "Supporter" => UserRole.Supporter,
+                        "Customer" => UserRole.Customer,
+                        _ => UserRole.Customer
+                    })
+                    .FirstOrDefault();
+                agentName = userRoleResult.Value.name;
+                agentEmail = userRoleResult.Value.email;
+            }
 
             switch (ticket.Origin)
             {
                 case TicketOrigin.Manual:
-                    if (isSupporter)
+                    if (userRole == UserRole.Supporter || userRole == UserRole.Admin || userRole == UserRole.Manager)
                     {
                         await _emailSdkService.NotifyTicketRepliedAsync(
                             ticketId: ticket.Id,
                             status: (TicketStatus)ticket.Status,
                             origin: ticket.Origin,
-                            agentName: _userContext.FullName,
+                            agentName: agentName,
                             agentRole: userRole.ToString(),
                             orgName: tenantResult.Value.Name);
                     }
@@ -309,14 +329,14 @@ public class MessageService : IMessageService
                             await _emailSdkService.NotifySupportCustomerReplyAsync(
                                 customerId: ticket.CustomerId.Value,
                                 agentEmail: agentEmail,
-                                agentName: _userContext.FullName,
+                                agentName: agentName,
                                 ticketId: ticket.Id,
                                 ticketTitle: ticket.Title,
                                 ticketStatus: (TicketStatus)ticket.Status,
                                 replyContent: msg.Content,
                                 orgName: tenantResult.Value.Name);
 
-                            _logger.LogInformation("Customer {UserId} sent a message on ticket {TicketId}. Support team notified.", _userContext.UserId, ticket.Id);
+                            _logger.LogInformation("Customer {UserId} sent a message on ticket {TicketId}. Support team notified.", agentName, ticket.Id);
                         }
                         else
                         {
@@ -326,13 +346,13 @@ public class MessageService : IMessageService
                     break;
 
                 case TicketOrigin.Email:
-                    if (isSupporter)
+                    if (!msg.UserId.HasValue)
                     {
                         await _emailSdkService.NotifyTicketRepliedAsync(
                             ticketId: ticket.Id,
                             status: (TicketStatus)ticket.Status,
                             origin: ticket.Origin,
-                            agentName: _userContext.FullName,
+                            agentName: agentName,
                             agentRole: userRole.ToString(),
                             orgName: tenantResult.Value.Name);
                     }
@@ -343,14 +363,14 @@ public class MessageService : IMessageService
                             await _emailSdkService.NotifySupportCustomerReplyAsync(
                                 customerId: ticket.CustomerId.Value,
                                 agentEmail: agentEmail,
-                                agentName: _userContext.FullName,
+                                agentName: agentName,
                                 ticketId: ticket.Id,
                                 ticketTitle: ticket.Title,
                                 ticketStatus: (TicketStatus)ticket.Status,
                                 replyContent: msg.Content,
                                 orgName: tenantResult.Value.Name);
 
-                            _logger.LogInformation("Customer {UserId} replied to ticket {TicketId} from email. Support team notified.", _userContext.UserId, ticket.Id);
+                            _logger.LogInformation("Customer {UserId} replied to ticket {TicketId} from email. Support team notified.", agentName, ticket.Id);
                         }
                         else
                         {

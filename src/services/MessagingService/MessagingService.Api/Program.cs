@@ -1,4 +1,5 @@
 using System.Reflection;
+using CCP.Shared.UIContext;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
@@ -76,7 +77,7 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
     ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."),true);
     builder.Services.AddIdentityServiceSdk(
     builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
-    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
+    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."),true);
 
     builder.Services.AddSingleton<ServiceAccountOverrider>();
 }

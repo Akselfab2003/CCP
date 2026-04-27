@@ -195,11 +195,13 @@ MessagingService
     .WaitFor(MessagingDB)
     .WaitFor(TicketService)
     .WaitFor(EmailService)
+    .WaitFor(IdentityService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(RabbitMq)
     .WithReference(TicketService)
     .WithReference(EmailService)
+    .WithReference(IdentityService)
     .WaitFor(RabbitMq)
     .WithEnvironment(env =>
     {
