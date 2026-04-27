@@ -77,7 +77,7 @@ namespace ChatService.Application.Services.Chat
                             await _messageSdkService.CreateMessageAsync((int)Conversation.EscalatedTicketId, Conversation.OrgId, null, message, false);
                         }
 
-                        return "Message Received Supporter will respond as soon as possible";
+                        return "";
                     }
 
 

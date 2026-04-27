@@ -23,12 +23,15 @@ namespace ChatService.Infrastructure.LLM.Chat
         private readonly ITicketService _ticketService;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
         private readonly IMessageSdkService _messageSdkService;
+        private readonly IMessageRepository _messageRepository;
+
         public ChatService([FromKeyedServices("qwen")] IChatClient chatClient,
                            ILogger<ChatService> logger,
                            IConversationRepository conversationRepository,
                            ITicketService ticketService,
                            ServiceAccountOverrider serviceAccountOverrider,
-                           IMessageSdkService messageSdkService)
+                           IMessageSdkService messageSdkService,
+                           IMessageRepository messageRepository)
         {
             _chatClient = chatClient;
             _logger = logger;
@@ -36,6 +39,7 @@ namespace ChatService.Infrastructure.LLM.Chat
             _ticketService = ticketService;
             _serviceAccountOverrider = serviceAccountOverrider;
             _messageSdkService = messageSdkService;
+            _messageRepository = messageRepository;
         }
 
         public async Task<Result<MessageEntity>> GetChatBotResponseAsync(string userMessage, List<FaqEntity> mostRelevantFaqs, List<MessageEntity> History, Guid ConversationId, Guid OrgId, string OrgName)
@@ -59,8 +63,7 @@ namespace ChatService.Infrastructure.LLM.Chat
                             IsFromUser = false,
                             CreatedAt = DateTime.UtcNow
                         };
-                        History.Add(messageEntity);
-                        await EscalateToHumanAgent(routingResult.Value, History, OrgId);
+                        await EscalateToHumanAgent(routingResult.Value, ConversationId, OrgId, userMessage);
                         return Result.Success(messageEntity);
                     }
                     else
@@ -194,27 +197,22 @@ namespace ChatService.Infrastructure.LLM.Chat
                 $"{(m.IsFromUser ? "USER" : "Aria")}: {m.Message}"));
         }
 
-        private async Task<Result> EscalateToHumanAgent(RouterDecision decision, List<MessageEntity> messages, Guid TenantId)
+        private async Task<Result> EscalateToHumanAgent(RouterDecision decision, Guid ConversationId, Guid TenantId, string usermessage)
         {
             try
             {
-
-                var newestMessage = messages.OrderBy(m => m.CreatedAt).First();
-
-
-
                 _serviceAccountOverrider.SetOrganizationId(TenantId);
 
                 var createTicketResult = await _ticketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
                 {
                     Title = $"Support request from customer: {decision.Summary}",
                     OrganizationId = TenantId,
-                    Description = $"The following message was escalated to a human agent:\n\n{newestMessage.Message}\n\nReason for escalation: {decision.Reason}",
+                    Description = $"The following message was escalated to a human agent:\n\n{usermessage}\n\nReason for escalation: {decision.Reason}",
                 }, CCP.Shared.ValueObjects.TicketOrigin.Chatbot);
 
                 if (createTicketResult.IsSuccess)
                 {
-                    var conversation = await _conversationRepository.GetConversationById(newestMessage.ConversationId);
+                    var conversation = await _conversationRepository.GetConversationById(ConversationId);
                     if (conversation == null || conversation.IsFailure) return Result.Failure(Error.NotFound("ConversationNotFound", "Conversation not found for escalation."));
 
                     ConversationEntity conversationEntity = conversation.Value;
@@ -222,9 +220,9 @@ namespace ChatService.Infrastructure.LLM.Chat
                     conversationEntity.IsEscalated = true;
                     conversationEntity.EscalatedTicketId = ticketId;
                     await _conversationRepository.UpdateConversation(conversationEntity);
-
-
-                    foreach (var msg in messages)
+                    var messages = await _messageRepository.GetMessagesByConversationId(conversationEntity.Id);
+                    if (messages.IsFailure) return Result.Failure(Error.Failure("MessageRetrievalError", "Failed to retrieve messages for escalation."));
+                    foreach (var msg in messages.Value.OrderBy(m => m.CreatedAt))
                     {
                         await _messageSdkService.CreateMessageAsync(ticketId, TenantId, null, msg.Message, false);
                     }

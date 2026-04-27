@@ -1,4 +1,4 @@
-﻿import * as signalR from "@microsoft/signalr";
+﻿//import * as signalR from "@microsoft/signalr";
 
 class ChatBot {
     constructor() {
@@ -15,7 +15,7 @@ class ChatBot {
     }
 
     getSession() {
-        const sessionUrl = "https://api.northflow.dev/session";
+        const sessionUrl = "https://localhost:7127/session";
         fetch(sessionUrl, {
             method: "POST",
             credentials: "include",
@@ -247,7 +247,7 @@ class ChatBot {
 
     connectToChatHub() {
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://api.northflow.dev/chatHub", {
+            .withUrl("https://localhost:7127/chatHub", {
                 accessTokenFactory: () => {
                     const sessionId = this.getSessionIdFromCookie();
                     console.log("Retrieved session ID from cookie:", sessionId);
@@ -289,7 +289,7 @@ class ChatBot {
 
     // Creates a new conversation and sets the activeConversationID
     async createChatConversation() {
-        const conversationUrl = "https://api.northflow.dev/chat/createConversation";
+        const conversationUrl = "https://localhost:7127/chat/createConversation";
         var conversationID = await fetch(conversationUrl, {
             method: "POST",
             credentials: "include",

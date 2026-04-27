@@ -290,7 +290,8 @@ public class MessageService : IMessageService
                     await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role");
                     break;
                 case TicketOrigin.Chatbot:
-                    await _chatService.SendMessageToChatbotTicket(ticket.Id, msg.Content);
+                    if (msg.UserId.HasValue)
+                        await _chatService.SendMessageToChatbotTicket(ticket.Id, msg.Content);
                     break;
                 default:
                     break;
