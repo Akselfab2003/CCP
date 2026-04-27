@@ -1,4 +1,3 @@
-
 using CCP.Shared.ValueObjects;
 using Gateway.Sdk.Dtos;
 using Gateway.Sdk.Mappers;
@@ -54,18 +53,22 @@ namespace Gateway.Sdk.Services
                     messages = dto.Messages.Select(m => m.ToMessagingServiceDto()).Where(m => m != null).ToList()!;
                 }
 
-
-
-                //var sdkDto = new Dtos.TicketDetailAggregateSdkDto
-                //{
-                //    Ticket = Ticket,
-                //    Messages = messages,
-                //    UserNames = dto.UserNames
-                //};
+                var sdkDto = new Dtos.TicketDetailAggregateSdkDto
+                {
+                    Ticket = Ticket,
+                    Messages = messages,
+                    UserNames = dto.UserNames switch
+                    {
+                        IDictionary<string, string> sdict => new Dictionary<string, string>(sdict),
+                        IDictionary<string, object> odict => odict.Where(kv => kv.Value is string)
+                                                                  .ToDictionary(kv => kv.Key, kv => (string)kv.Value),
+                        _ => new Dictionary<string, string>()
+                    }
+                };
 
 
                 return dto is not null
-                    ? Result.Success(new TicketDetailAggregateSdkDto())
+                    ? Result.Success(sdkDto)
                     : Result.Failure<Dtos.TicketDetailAggregateSdkDto>(Error.Failure("GatewayError", "Gateway returned an empty response."));
             }
             catch (ApiException ex)
@@ -93,30 +96,39 @@ namespace Gateway.Sdk.Services
 
                 if (response is null)
                 {
-                    return Result.Failure<Dtos.ManagerDashboardAggregateSdkDto>(Error.Failure("GatewayError", "Gateway returned an empty response."));
+                    return Result.Failure<ManagerDashboardAggregateSdkDto>(Error.Failure("GatewayError", "Gateway returned an empty response."));
                 }
-                managerStats = response.Stats != null
-                                    ? new ManagerDashboardAggregateSdkDto
-                                    {
 
-                                        Stats = new TicketService.Sdk.Dtos.ManagerStatsSdkDto()
-                                        {
-                                            AvgResponseTime = response.Stats.AvgResponseTime ?? string.Empty,
-                                            AwaitingUser = response.Stats.AwaitingUser ?? 0,
-                                            ClosedToday = response.Stats.ClosedToday ?? 0,
-                                            OpenTickets = response.Stats.OpenTickets ?? 0,
-                                            TeamPerformance = new List<TicketService.Sdk.Dtos.SupporterPerformanceSdkDto>()
-                                            {
-                                            }
-                                        }
-                                    }
-                                    : null;
+                var stats = response.Stats;
+                var managerStats = stats != null
+                    ? new TicketService.Sdk.Dtos.ManagerStatsSdkDto
+                    {
+                        AvgResponseTime = stats.AvgResponseTime ?? string.Empty,
+                        AwaitingUser = stats.AwaitingUser ?? 0,
+                        ClosedToday = stats.ClosedToday ?? 0,
+                        OpenTickets = stats.OpenTickets ?? 0,
+                        TeamPerformance = stats.TeamPerformance?
+                            .Select(tp => new TicketService.Sdk.Dtos.SupporterPerformanceSdkDto
+                            {
+                                UserId = tp.UserId.HasValue ? tp.UserId.Value : Guid.Empty,
+                                ResolvedCount = tp.ResolvedCount.HasValue ? tp.ResolvedCount.Value : 0,
+                            }).ToList() ?? new List<TicketService.Sdk.Dtos.SupporterPerformanceSdkDto>()
+                    }
+                    : null;
 
+                var sdkDto = new ManagerDashboardAggregateSdkDto
+                {
+                    Stats = managerStats ?? new TicketService.Sdk.Dtos.ManagerStatsSdkDto(),
+                    UserNames = response.UserNames switch
+                    {
+                        IDictionary<string, string> sdict => new Dictionary<string, string>(sdict),
+                        IDictionary<string, object> odict => odict.Where(kv => kv.Value is string)
+                                                                  .ToDictionary(kv => kv.Key, kv => (string)kv.Value),
+                        _ => new Dictionary<string, string>()
+                    }
+                };
 
-
-                return managerStats is not null
-                    ? Result.Success(new ManagerDashboardAggregateSdkDto { })
-                    : Result.Failure<ManagerDashboardAggregateSdkDto>(Error.Failure("GatewayError", "Gateway returned an empty response."));
+                return Result.Success(sdkDto);
             }
             catch (Exception ex)
             {

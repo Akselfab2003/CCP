@@ -122,6 +122,7 @@ namespace Gateway.Api.Endpoints
                     .Where(r => r.name is not null)
                     .ToDictionary(r => r.id.ToString(), r => r.name!);
 
+
                 return Results.Ok(new ManagerDashboardAggregateDto
                 {
                     Stats = stats,
