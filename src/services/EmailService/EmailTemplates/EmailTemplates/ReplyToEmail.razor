@@ -88,7 +88,7 @@
                             </td>
                         </tr>
 
-                        @foreach (var message in ReceivedMessages.Where(m => !m.IsDeleted))
+                        @foreach (var message in ReceivedMessages.Where(m => !m.IsDeleted).OrderByDescending(m => m.CreatedAtUtc))
                         {
                             <tr>
                                 <td style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb; @(message.IsInternalNote ? "background-color: #fffbeb;" : "")">

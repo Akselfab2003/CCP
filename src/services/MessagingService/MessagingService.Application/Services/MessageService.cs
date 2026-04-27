@@ -1,6 +1,7 @@
 using CCP.Shared.AuthContext;
 using CCP.Shared.ValueObjects;
 using EmailService.Sdk.Services;
+using IdentityService.Sdk.Services.Tenant;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
@@ -26,8 +27,9 @@ public class MessageService : IMessageService
     private readonly IEmailSdkService _emailSdkService;
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
     private readonly ILogger<MessageService> _logger;
+    private readonly ITenantService _tenantService;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext,ITenantService tenantService, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
@@ -35,6 +37,7 @@ public class MessageService : IMessageService
         _ticketService = ticketService;
         _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
+        _tenantService = tenantService;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -278,13 +281,15 @@ public class MessageService : IMessageService
         {
             _serviceAccountOverrider.SetOrganizationId(ticket.OrganizationId);
 
+            var tenantResult = await _tenantService.GetTenantDetailsAsync(ticket.OrganizationId);
+
             switch (ticket.Origin)
             {
                 case TicketOrigin.Manual:
-
+                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role", orgName: tenantResult.Value.Name);
                     break;
                 case TicketOrigin.Email:
-                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role");
+                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role", orgName:tenantResult.Value.Name);
                     break;
                 case TicketOrigin.Chatbot:
                     break;

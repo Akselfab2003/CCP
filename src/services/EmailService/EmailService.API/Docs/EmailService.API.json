@@ -47,6 +47,21 @@
             "schema": {
               "$ref": "#/components/schemas/TicketOrigin"
             }
+          },
+          {
+            "name": "OrgId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orgName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -105,6 +120,13 @@
             "schema": {
               "$ref": "#/components/schemas/TicketOrigin"
             }
+          },
+          {
+            "name": "orgName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -154,6 +176,13 @@
             "in": "query",
             "schema": {
               "$ref": "#/components/schemas/TicketOrigin"
+            }
+          },
+          {
+            "name": "orgName",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -226,6 +255,13 @@
             "in": "query",
             "schema": {
               "$ref": "#/components/schemas/TicketOrigin"
+            }
+          },
+          {
+            "name": "orgName",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],

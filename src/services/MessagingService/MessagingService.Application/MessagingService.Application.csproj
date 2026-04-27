@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
+    <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\MessagingService.Infrastructure\MessagingService.Infrastructure.csproj" />
     <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
   </ItemGroup>

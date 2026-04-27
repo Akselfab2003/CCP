@@ -29,8 +29,16 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string to, string subject,
             EmailSent email, int ticketId, TicketStatus ticketStatus,
             string organizationName, string expectedResponseTime,
-            string portalUrl, TicketOrigin origin)
+            string portalUrl, TicketOrigin origin, Guid OrgId)
         {
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(OrgId);
+            if (tenant.IsSuccess)
+            {
+                string fromaddress = tenant.Value.DefaultSenderEmail;
+
+                email.SenderAddress = fromaddress;
+            }
+
             var htmlContent = await _emailTemplateRenderer
                 .RenderTicketCreatedEmailAsync(
                 email, ticketId, ticketStatus,
@@ -57,9 +65,9 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             EmailReceived email, int ticketId, TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
-            string replyUrl, string viewHistoryUrl, TicketOrigin origin)
+            string replyUrl, string viewHistoryUrl, TicketOrigin origin, Guid OrgId)
         {
-            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(OrgId);
             if (tenant.IsSuccess)
             {
                 string fromaddress = tenant.Value.DefaultSenderEmail;
@@ -91,9 +99,9 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             string to, string subject,
             EmailSent email, int ticketId, TicketStatus ticketStatus,
             string organizationName, string oldStatusLabel,
-            string portalUrl, TicketOrigin origin)
+            string portalUrl, TicketOrigin origin, Guid OrgId)
         {
-            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
+            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(OrgId);
             if (tenant.IsSuccess)
             {
                 string fromaddress = tenant.Value.DefaultSenderEmail;
@@ -125,12 +133,12 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             EmailReceived email, int ticketId, TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string replyUrl, string managementUrl,
-            string viewHistoryUrl, TicketOrigin origin)
+            string viewHistoryUrl, TicketOrigin origin,Guid OrgId)
         {
-            var tenant = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(email.OrganizationId);
-            if (tenant.IsSuccess)
+            var result = await _tenantEmailConfigurationRepo.GetByTenantIdAsync(customer.OrganizationId);
+            if (result.IsSuccess)
             {
-                string fromaddress = tenant.Value.DefaultSenderEmail;
+                string fromaddress = result.Value.DefaultSenderEmail;
 
                 email.SenderAddress = fromaddress;
             }
