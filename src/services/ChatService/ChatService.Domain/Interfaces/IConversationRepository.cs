@@ -8,5 +8,7 @@ namespace ChatService.Domain.Interfaces
         Task<Result> AddConversation(ConversationEntity conversation);
         Task<Result<ConversationEntity>> GetConversationById(Guid conversationId);
         Task<Result<List<ConversationEntity>>> GetConversationsBySessionId(Guid SessionId);
+        Task<Result<ConversationEntity>> GetConversationsByTicketId(int ticketId);
+        Task<Result> UpdateConversation(ConversationEntity conversation);
     }
 }

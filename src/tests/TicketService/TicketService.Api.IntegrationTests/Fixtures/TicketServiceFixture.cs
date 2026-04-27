@@ -23,7 +23,7 @@ namespace TicketService.Api.IntegrationTests.Fixtures
             "customerdb",
             "customerservice-api",
             "messagingservice-api",
-            "MessagingDatabase"
+            "MessagingDatabase","identityservice-api", "chatDB", "ollama", "chatservice-api"
         ];
 
         public async ValueTask InitializeAsync()

@@ -13,15 +13,15 @@ using Pgvector;
 namespace ChatService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20260420082706_Updated messages to only contain one message")]
-    partial class Updatedmessagestoonlycontainonemessage
+    [Migration("20260427090103_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
@@ -35,6 +35,12 @@ namespace ChatService.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("EscalatedTicketId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsEscalated")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("OrgId")
                         .HasColumnType("uuid");

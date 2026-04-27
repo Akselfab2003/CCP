@@ -1,9 +1,12 @@
 ﻿using CCP.Shared.ResultAbstraction;
 using ChatService.Application.AuthContext;
 using ChatService.Application.Interfaces;
+using ChatService.Application.Services.Domain;
 using ChatService.Application.Services.Faq;
 using ChatService.Domain.Entities;
 using ChatService.Domain.Interfaces;
+using MessagingService.Sdk.Services;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace ChatService.Application.Services.Chat
@@ -16,13 +19,18 @@ namespace ChatService.Application.Services.Chat
         private readonly IFaqManagementService _faqManagementService;
         private readonly IChatService _chatService;
         private readonly IActiveSession _activeSession;
-
+        private readonly IHubContext<ChatHub.ChatHub> _chatHub;
+        private readonly IDomainServices _domainServices;
+        private readonly IMessageSdkService _messageSdkService;
         public ChatManagementService(ILogger<ChatManagementService> logger,
                                      IConversationRepository conversationRepository,
                                      IMessageRepository messageRepository,
                                      IFaqManagementService faqManagementService,
                                      IChatService chatService,
-                                     IActiveSession activeSession)
+                                     IActiveSession activeSession,
+                                     IHubContext<ChatHub.ChatHub> chatHub,
+                                     IDomainServices domainServices,
+                                     IMessageSdkService messageSdkService)
         {
             _logger = logger;
             _conversationRepository = conversationRepository;
@@ -30,6 +38,9 @@ namespace ChatService.Application.Services.Chat
             _faqManagementService = faqManagementService;
             _chatService = chatService;
             _activeSession = activeSession;
+            _chatHub = chatHub;
+            _domainServices = domainServices;
+            _messageSdkService = messageSdkService;
         }
 
         public async Task<Result<string>> GetChatResponseToMessage(string message, Guid? ConversationId)
@@ -48,6 +59,29 @@ namespace ChatService.Application.Services.Chat
                         return Result.Failure<string>(Error.Failure(code: "FailedToFindConversation", description: "Failed to find conversation with the provided ID."));
                     }
                     var Conversation = conversationResult.Value;
+
+                    if (Conversation.IsEscalated)
+                    {
+                        await _messageRepository.AddMessage(new MessageEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            ConversationId = Conversation.Id,
+                            IsFromUser = true,
+                            OrgId = _activeSession.OrgId,
+                            Message = message,
+                            CreatedAt = DateTime.UtcNow,
+                        });
+
+                        if (Conversation.EscalatedTicketId != null)
+                        {
+                            await _messageSdkService.CreateMessageAsync((int)Conversation.EscalatedTicketId, Conversation.OrgId, null, message, false);
+                        }
+
+                        return "";
+                    }
+
+
+
                     var messagesResult = await _messageRepository.GetMessagesByConversationId(Conversation.Id);
                     if (messagesResult.IsFailure)
                     {
@@ -105,6 +139,8 @@ namespace ChatService.Application.Services.Chat
                     Id = Guid.NewGuid(),
                     OrgId = _activeSession.OrgId,
                     SessionId = SessionId,
+                    EscalatedTicketId = null,
+                    IsEscalated = false,
                     CreatedAt = DateTime.UtcNow,
                 };
                 var addConversationResult = await _conversationRepository.AddConversation(newConversation);
@@ -175,6 +211,50 @@ namespace ChatService.Application.Services.Chat
             {
                 _logger.LogError(ex, "Error while creating a new conversation.");
                 return Result.Failure<string>(Error.Failure(code: "CreateConversationError", description: "An error occurred while creating the conversation."));
+            }
+        }
+        public async Task<Result> SendMessageFromSupportToConversation(int ticketId, string message)
+        {
+            try
+            {
+                var conversationResult = await _conversationRepository.GetConversationsByTicketId(ticketId);
+
+                if (conversationResult.IsFailure)
+                {
+                    return Result.Failure(Error.Failure(code: "FailedToFindConversation", description: "Failed to find conversation for the provided ticket ID."));
+                }
+
+                var conversation = conversationResult.Value;
+
+                var addMessageResult = await _messageRepository.AddMessage(new MessageEntity
+                {
+                    Id = Guid.NewGuid(),
+                    ConversationId = conversation.Id,
+                    IsFromUser = false,
+                    OrgId = conversation.OrgId,
+                    Message = message,
+                    CreatedAt = DateTime.UtcNow,
+                });
+
+                if (addMessageResult.IsFailure)
+                {
+                    return Result.Failure(Error.Failure(code: "FailedToAddMessage", description: "Failed to add message to the database."));
+                }
+                var domainResult = await _domainServices.GetDomainDetailsByOrgId();
+                if (domainResult.IsFailure)
+                    return domainResult;
+
+
+                await _chatHub.Clients.Group($"{domainResult.Value.Domain}:{conversation.SessionId}")
+                            .SendAsync("ReceiveMessage", conversation.Id.ToString(), message);
+
+                return Result.Success();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while sending message from support to conversation.");
+                return Result.Failure(Error.Failure(code: "SendMessageError", description: "An error occurred while sending the message to the conversation."));
             }
         }
     }

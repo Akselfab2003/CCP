@@ -1,4 +1,5 @@
 using System.Reflection;
+using ChatService.Sdk.ServiceDefaults;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
@@ -7,7 +8,6 @@ using MessagingService.Application.ServiceCollection;
 using MessagingService.Infrastructure.Persistence;
 using MessagingService.Infrastructure.ServiceCollection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -72,7 +72,13 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         configuration: builder.Configuration);
     builder.Services.AddEmailServiceSdk(
     builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
-    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."),true);
+    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."), true);
+
+
+    builder.Services.AddChatServiceSdk(
+        builder.Configuration.GetValue<string>("services:chatservice-api:http:0")
+        ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
+        , true);
 
     builder.Services.AddSingleton<ServiceAccountOverrider>();
 }

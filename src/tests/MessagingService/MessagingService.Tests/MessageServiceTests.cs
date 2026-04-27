@@ -1,4 +1,5 @@
 using CCP.Shared.AuthContext;
+using ChatService.Sdk.Services;
 using MessagingService.Application.Services;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
@@ -83,7 +84,8 @@ public class MessageServiceTests
         var emailService = Substitute.For<EmailService.Sdk.Services.IEmailSdkService>();
         var serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
         var logger = Substitute.For<ILogger<MessageService>>();
-        return new MessageService(dbContext, validator, serviceAccountOverrider, emailService, ticketService, logger);
+        var chatService = Substitute.For<IChatService>();
+        return new MessageService(dbContext, validator, serviceAccountOverrider, emailService, ticketService, logger, chatService);
     }
 
     [Fact]
