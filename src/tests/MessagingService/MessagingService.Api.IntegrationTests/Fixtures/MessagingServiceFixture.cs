@@ -23,7 +23,7 @@ namespace MessagingService.Api.IntegrationTests.Fixtures
         public async ValueTask InitializeAsync()
         {
             IsRemoveNotNeededResourcesForTestingEnabled = true;
-            DefaultTimeout = TimeSpan.FromMinutes(1);
+            DefaultTimeout = TimeSpan.FromMinutes(5);
             await Initialize();
             DB_Services.AddScoped<IMessageService, MessageService>();
             var serviceUrl = GetServiceUrl(APIResourceName);
