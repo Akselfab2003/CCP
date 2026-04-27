@@ -86,7 +86,8 @@ public class MessageServiceTests
         var logger = Substitute.For<ILogger<MessageService>>();
         var userService = Substitute.For<IdentityService.Sdk.Services.User.IUserService>();
         var tenantService = Substitute.For<IdentityService.Sdk.Services.Tenant.ITenantService>();
-        return new MessageService(dbContext,tenantService,userService, validator, serviceAccountOverrider, emailService, ticketService, logger);
+        var chatservice = Substitute.For<IChatService>();
+        return new MessageService(dbContext, tenantService, userService, validator, serviceAccountOverrider, emailService, ticketService, logger, chatservice);
     }
 
     [Fact]
