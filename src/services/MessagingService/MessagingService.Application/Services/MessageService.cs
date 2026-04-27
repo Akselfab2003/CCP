@@ -1,4 +1,5 @@
 using CCP.Shared.AuthContext;
+using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using EmailService.Sdk.Services;
 using IdentityService.Sdk.Services.Tenant;
@@ -26,10 +27,11 @@ public class MessageService : IMessageService
     private readonly ITicketService _ticketService;
     private readonly IEmailSdkService _emailSdkService;
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
+    private readonly IUIUserContext _userContext;
     private readonly ILogger<MessageService> _logger;
     private readonly ITenantService _tenantService;
 
-    public MessageService(MessagingDbContext dbContext,ITenantService tenantService, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext,ITenantService tenantService, IUIUserContext userContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
@@ -38,6 +40,7 @@ public class MessageService : IMessageService
         _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
         _tenantService = tenantService;
+        _userContext = userContext;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -282,22 +285,86 @@ public class MessageService : IMessageService
             _serviceAccountOverrider.SetOrganizationId(ticket.OrganizationId);
 
             var tenantResult = await _tenantService.GetTenantDetailsAsync(ticket.OrganizationId);
+            var userRole = _userContext.Role;
+            var isSupporter = userRole is UserRole.Supporter or UserRole.Manager or UserRole.Admin;
+            var agentEmail = _userContext.Email;
 
             switch (ticket.Origin)
             {
                 case TicketOrigin.Manual:
-                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role", orgName: tenantResult.Value.Name);
+                    if (isSupporter)
+                    {
+                        await _emailSdkService.NotifyTicketRepliedAsync(
+                            ticketId: ticket.Id,
+                            status: (TicketStatus)ticket.Status,
+                            origin: ticket.Origin,
+                            agentName: _userContext.FullName,
+                            agentRole: userRole.ToString(),
+                            orgName: tenantResult.Value.Name);
+                    }
+                    else
+                    {
+                        if (ticket.CustomerId.HasValue && ticket.CustomerId.Value != Guid.Empty)
+                        {
+                            await _emailSdkService.NotifySupportCustomerReplyAsync(
+                                customerId: ticket.CustomerId.Value,
+                                agentEmail: agentEmail,
+                                agentName: _userContext.FullName,
+                                ticketId: ticket.Id,
+                                ticketTitle: ticket.Title,
+                                ticketStatus: (TicketStatus)ticket.Status,
+                                replyContent: msg.Content,
+                                orgName: tenantResult.Value.Name);
+
+                            _logger.LogInformation("Customer {UserId} sent a message on ticket {TicketId}. Support team notified.", _userContext.UserId, ticket.Id);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Cannot notify support team: CustomerId is null or empty for ticket {TicketId}", ticket.Id);
+                        }
+                    }
                     break;
+
                 case TicketOrigin.Email:
-                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role", orgName:tenantResult.Value.Name);
+                    if (isSupporter)
+                    {
+                        await _emailSdkService.NotifyTicketRepliedAsync(
+                            ticketId: ticket.Id,
+                            status: (TicketStatus)ticket.Status,
+                            origin: ticket.Origin,
+                            agentName: _userContext.FullName,
+                            agentRole: userRole.ToString(),
+                            orgName: tenantResult.Value.Name);
+                    }
+                    else
+                    {
+                        if (ticket.CustomerId.HasValue && ticket.CustomerId.Value != Guid.Empty)
+                        {
+                            await _emailSdkService.NotifySupportCustomerReplyAsync(
+                                customerId: ticket.CustomerId.Value,
+                                agentEmail: agentEmail,
+                                agentName: _userContext.FullName,
+                                ticketId: ticket.Id,
+                                ticketTitle: ticket.Title,
+                                ticketStatus: (TicketStatus)ticket.Status,
+                                replyContent: msg.Content,
+                                orgName: tenantResult.Value.Name);
+
+                            _logger.LogInformation("Customer {UserId} replied to ticket {TicketId} from email. Support team notified.", _userContext.UserId, ticket.Id);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Cannot notify support team: CustomerId is null or empty for ticket {TicketId}", ticket.Id);
+                        }
+                    }
                     break;
+
                 case TicketOrigin.Chatbot:
                     break;
+
                 default:
                     break;
-
             }
-
         }
         catch (Exception)
         {
