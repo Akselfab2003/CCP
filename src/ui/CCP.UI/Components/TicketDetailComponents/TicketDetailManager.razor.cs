@@ -406,7 +406,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         if (userId is null) return "Unknown";
         if (userId == UserContext.UserId) return "You";
         if (_userNameCache.TryGetValue(userId.Value, out var name)) return name;
-        return "Loading...";
+        return _customerName ?? "Unknown";
     }
 
     private string GetAssigneeName(Guid? userId)
