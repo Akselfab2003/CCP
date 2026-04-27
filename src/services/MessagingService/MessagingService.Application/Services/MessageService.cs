@@ -285,7 +285,6 @@ public class MessageService : IMessageService
             switch (ticket.Origin)
             {
                 case TicketOrigin.Manual:
-
                     break;
                 case TicketOrigin.Email:
                     await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role");
