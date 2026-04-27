@@ -1,4 +1,5 @@
 using CCP.Shared.AuthContext;
+using ChatService.Sdk.Services;
 using MessagingService.Application.Services;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;

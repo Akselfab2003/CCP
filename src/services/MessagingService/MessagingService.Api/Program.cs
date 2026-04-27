@@ -1,5 +1,6 @@
 using System.Reflection;
 using CCP.Shared.UIContext;
+using ChatService.Sdk.ServiceDefaults;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
@@ -9,7 +10,6 @@ using MessagingService.Application.ServiceCollection;
 using MessagingService.Infrastructure.Persistence;
 using MessagingService.Infrastructure.ServiceCollection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
@@ -72,12 +72,14 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         builder.Configuration.GetConnectionString("ticketservice-api") ?? builder.Configuration["services:ticketservice-api:https:0"] ?? string.Empty,
         IsServiceAccount: true,
         configuration: builder.Configuration);
-    builder.Services.AddEmailServiceSdk(
-    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
-    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."),true);
-    builder.Services.AddIdentityServiceSdk(
-    builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
-    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."),true);
+    builder.Services.AddEmailServiceSdk(    builder.Configuration.GetValue<string>("services:emailservice-api:http:0") ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."),true);
+    builder.Services.AddIdentityServiceSdk(  builder.Configuration.GetValue<string>("services:identityservice-api:http:0") ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."),true);
+
+
+    builder.Services.AddChatServiceSdk(
+        builder.Configuration.GetValue<string>("services:chatservice-api:http:0")
+        ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
+        , true);
 
     builder.Services.AddSingleton<ServiceAccountOverrider>();
 }

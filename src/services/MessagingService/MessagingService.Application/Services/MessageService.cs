@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
+using ChatService.Sdk.Services;
 using EmailService.Sdk.Services;
 using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.User;
@@ -30,20 +31,31 @@ public class MessageService : IMessageService
     private readonly ITicketService _ticketService;
     private readonly IEmailSdkService _emailSdkService;
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
+    private readonly IChatService _chatService;
     private readonly ILogger<MessageService> _logger;
     private readonly ITenantService _tenantService;
     private readonly IUserService _userService;
 
-    public MessageService(MessagingDbContext dbContext,ITenantService tenantService,IUserService userService, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(
+        MessagingDbContext dbContext,
+        ITenantService tenantService,
+        IUserService userService,
+        IMessageAccessValidator messageAccessValidator,
+        ServiceAccountOverrider serviceAccountOverrider,
+        IEmailSdkService emailSdkService,
+        ITicketService ticketService,
+        ILogger<MessageService> logger,
+        IChatService chatService)
     {
         _dbContext = dbContext;
-        _messageAccessValidator = messageAccessValidator;
-        _emailSdkService = emailSdkService;
-        _ticketService = ticketService;
-        _serviceAccountOverrider = serviceAccountOverrider;
-        _logger = logger;
         _tenantService = tenantService;
         _userService = userService;
+        _messageAccessValidator = messageAccessValidator;
+        _serviceAccountOverrider = serviceAccountOverrider;
+        _emailSdkService = emailSdkService;
+        _ticketService = ticketService;
+        _logger = logger;
+        _chatService = chatService;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -103,7 +115,8 @@ public class MessageService : IMessageService
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        await ForwardMessageToServices(ticket.Value, message);
+        if (!request.IsInternalNote)
+            await ForwardMessageToServices(ticket.Value, message);
 
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
@@ -369,6 +382,8 @@ public class MessageService : IMessageService
                     break;
 
                 case TicketOrigin.Chatbot:
+                    if (msg.UserId.HasValue)
+                        await _chatService.SendMessageToChatbotTicket(ticket.Id, msg.Content);
                     break;
 
                 default:

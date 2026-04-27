@@ -1,5 +1,4 @@
 ﻿using CCP.Shared.UIContext;
-using CCP.Shared.ValueObjects;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
@@ -18,6 +17,7 @@ public partial class TicketDetail : ComponentBase
     private TicketSdkDto? _ticket;
     private bool _isLoading = true;
     private string? _errorMessage;
+
 
     protected override async Task OnInitializedAsync()
     {

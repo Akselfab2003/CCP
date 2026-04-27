@@ -66,5 +66,37 @@ namespace ChatService.Infrastructure.Persistence.Repositories
             }
 
         }
+
+        public async Task<Result<ConversationEntity>> GetConversationsByTicketId(int ticketId)
+        {
+            try
+            {
+                var conversations = await _context.Conversations.Where(c => c.EscalatedTicketId == ticketId).FirstOrDefaultAsync();
+                if (conversations == null)
+                    return Result.Failure<ConversationEntity>(Error.Failure(code: "ConversationNotFound", description: $"No conversation found with Ticket ID {ticketId}"));
+                return Result.Success(conversations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving conversation with Ticket ID {TicketId}", ticketId);
+                return Result.Failure<ConversationEntity>(Error.Failure(code: "GetConversationsByTicketIdError", description: $"An error occurred while retrieving the conversation: {ex.Message}"));
+            }
+
+        }
+
+        public async Task<Result> UpdateConversation(ConversationEntity conversation)
+        {
+            try
+            {
+                _context.Conversations.Update(conversation);
+                await _context.SaveChangesAsync();
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating conversation with ID {ConversationId}", conversation.Id);
+                return Result.Failure(Error.Failure(code: "UpdateConversationError", description: $"An error occurred while updating the conversation: {ex.Message}"));
+            }
+        }
     }
 }

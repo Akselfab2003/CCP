@@ -202,6 +202,7 @@ MessagingService
     .WithReference(TicketService)
     .WithReference(EmailService)
     .WithReference(IdentityService)
+    .WithReference(ChatService)
     .WaitFor(RabbitMq)
     .WithEnvironment(env =>
     {
@@ -241,6 +242,7 @@ ChatService
     .WaitFor(QwenModel)
     .WithReference(IdentityService)
     .WithReference(Keycloak)
+    .WithReference(MessagingService)
     .WithReference(TicketService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
