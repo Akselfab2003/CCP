@@ -34,7 +34,10 @@ namespace ChatService.Application.ChatHub
                 await Clients.Group(key).SendAsync("ReceiveMessage", conversationId, "Sorry, something went wrong while processing your message.");
                 return;
             }
-            await Clients.Group(key).SendAsync("ReceiveMessage", conversationId, response.Value);
+            else if (!string.IsNullOrEmpty(response.Value))
+            {
+                await Clients.Group(key).SendAsync("ReceiveMessage", conversationId, response.Value);
+            }
         }
 
         public async Task SendMessageToCustomer(string sessionId, string conversationId, string message)
