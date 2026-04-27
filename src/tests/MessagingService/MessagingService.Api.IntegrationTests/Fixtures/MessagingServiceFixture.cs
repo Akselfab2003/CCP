@@ -15,7 +15,7 @@ namespace MessagingService.Api.IntegrationTests.Fixtures
     {
         public override string APIResourceName => "messagingservice-api";
         public override string DBResourceName => "MessagingDatabase";
-        public override List<string> RequiredResources => [APIResourceName, DBResourceName, "keycloak", "postgres", "MailHog", "RabbitMQ", "ticketservice-api", "ticketdb", "emailservice-api", "emaildb", "customerdb", "customerservice-api", "identityservice-api", "chatDB", "ollama", "embedding", "qwen", "chatservice-api"];
+        public override List<string> RequiredResources => [APIResourceName, DBResourceName, "keycloak", "postgres", "MailHog", "RabbitMQ", "ticketservice-api", "ticketdb", "emailservice-api", "emaildb", "customerdb", "customerservice-api", "identityservice-api", "chatDB", "ollama", "chatservice-api"];
 
         private IServiceCollection TicketSdk = null!;
         public IServiceProvider TicketSDK = null!;
