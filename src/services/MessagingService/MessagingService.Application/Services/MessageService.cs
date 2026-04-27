@@ -290,8 +290,8 @@ public class MessageService : IMessageService
             var tenantResult = await _tenantService.GetTenantDetailsAsync(ticket.OrganizationId);
             var userId = msg.UserId;
             UserRole userRole = UserRole.Customer;
-            string agentName = "";
-            string agentEmail = "";
+            string customerName = "";
+
             if (userId.HasValue)
             {
                 var userRoleResult = await _userService.GetUserDetailsAsync(userId.Value);
@@ -305,8 +305,17 @@ public class MessageService : IMessageService
                         _ => UserRole.Customer
                     })
                     .FirstOrDefault();
-                agentName = userRoleResult.Value.name;
-                agentEmail = userRoleResult.Value.email;
+                customerName = userRoleResult.Value.name;
+            }
+            string agentName = "";
+            string agentEmail = "";
+
+            var agentInfo = ticket.AssignedUserId;
+            if (agentInfo.HasValue)
+            {
+                var agentResult = await _userService.GetUserDetailsAsync(agentInfo.Value);
+                agentName = agentResult.Value.name;
+                agentEmail = agentResult.Value.email;
             }
 
             switch (ticket.Origin)
@@ -318,7 +327,7 @@ public class MessageService : IMessageService
                             ticketId: ticket.Id,
                             status: (TicketStatus)ticket.Status,
                             origin: ticket.Origin,
-                            agentName: agentName,
+                            agentName: customerName,
                             agentRole: userRole.ToString(),
                             orgName: tenantResult.Value.Name);
                     }
@@ -346,7 +355,7 @@ public class MessageService : IMessageService
                     break;
 
                 case TicketOrigin.Email:
-                    if (!msg.UserId.HasValue)
+                    if (msg.UserId.HasValue)
                     {
                         await _emailSdkService.NotifyTicketRepliedAsync(
                             ticketId: ticket.Id,
@@ -356,27 +365,7 @@ public class MessageService : IMessageService
                             agentRole: userRole.ToString(),
                             orgName: tenantResult.Value.Name);
                     }
-                    else
-                    {
-                        if (ticket.CustomerId.HasValue && ticket.CustomerId.Value != Guid.Empty)
-                        {
-                            await _emailSdkService.NotifySupportCustomerReplyAsync(
-                                customerId: ticket.CustomerId.Value,
-                                agentEmail: agentEmail,
-                                agentName: agentName,
-                                ticketId: ticket.Id,
-                                ticketTitle: ticket.Title,
-                                ticketStatus: (TicketStatus)ticket.Status,
-                                replyContent: msg.Content,
-                                orgName: tenantResult.Value.Name);
 
-                            _logger.LogInformation("Customer {UserId} replied to ticket {TicketId} from email. Support team notified.", agentName, ticket.Id);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Cannot notify support team: CustomerId is null or empty for ticket {TicketId}", ticket.Id);
-                        }
-                    }
                     break;
 
                 case TicketOrigin.Chatbot:

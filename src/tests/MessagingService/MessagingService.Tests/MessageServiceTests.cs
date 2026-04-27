@@ -83,7 +83,9 @@ public class MessageServiceTests
         var emailService = Substitute.For<EmailService.Sdk.Services.IEmailSdkService>();
         var serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
         var logger = Substitute.For<ILogger<MessageService>>();
-        return new MessageService(dbContext, validator, serviceAccountOverrider, emailService, ticketService, logger);
+        var userService = Substitute.For<IdentityService.Sdk.Services.User.IUserService>();
+        var tenantService = Substitute.For<IdentityService.Sdk.Services.Tenant.ITenantService>();
+        return new MessageService(dbContext,tenantService,userService, validator, serviceAccountOverrider, emailService, ticketService, logger);
     }
 
     [Fact]
