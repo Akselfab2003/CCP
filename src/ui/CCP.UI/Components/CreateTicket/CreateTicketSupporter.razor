@@ -74,10 +74,10 @@
                 @if (_selectedCustomer is not null)
                 {
                     <div class="ct-selected-user">
-                        <div class="ct-selected-avatar">@GetInitials(_selectedCustomer.name)</div>
+                        <div class="ct-selected-avatar">@GetInitials(_selectedCustomer)</div>
                         <div class="ct-selected-info">
-                            <span class="ct-selected-name">@_selectedCustomer.name</span>
-                            <span class="ct-selected-email">@_selectedCustomer.email</span>
+                            <span class="ct-selected-name">@_selectedCustomer.Name</span>
+                            <span class="ct-selected-email">@_selectedCustomer.Email</span>
                         </div>
                         <button class="ct-selected-clear" @onclick="ClearCustomer" title="Remove">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
@@ -98,36 +98,25 @@
                                @oninput="OnCustomerSearchInput"
                                @onblur="() => _customerTouched = true"
                                disabled="@_isSubmitting" />
-                        @if (_isSearching)
-                        {
-                            <div class="ct-search-results">
-                                <div class="ct-search-loading">
-                                    <svg class="ct-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-                                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                                    </svg>
-                                    Searching...
-                                </div>
-                            </div>
-                        }
-                        else if (_searchResults.Any())
+                        @if (_searchResults.Any())
                         {
                             <div class="ct-search-results">
                                 @foreach (var user in _searchResults)
                                 {
                                     <button class="ct-search-result" @onclick="() => SelectCustomer(user)">
-                                        <div class="ct-result-avatar">@GetInitials(user.name)</div>
+                                        <div class="ct-result-avatar">@GetInitials(user)</div>
                                         <div class="ct-result-info">
-                                            <span class="ct-result-name">@user.name</span>
-                                            <span class="ct-result-email">@user.email</span>
+                                            <span class="ct-result-name">@user.Name</span>
+                                            <span class="ct-result-email">@user.Email</span>
                                         </div>
                                     </button>
                                 }
                             </div>
                         }
-                        else if (_customerSearch.Length > 1 && !_isSearching)
+                        else if (_customerSearch.Length > 1)
                         {
                             <div class="ct-search-results">
-                                <div class="ct-search-empty">No users found</div>
+                                <div class="ct-search-empty">No customers found</div>
                             </div>
                         }
                     </div>

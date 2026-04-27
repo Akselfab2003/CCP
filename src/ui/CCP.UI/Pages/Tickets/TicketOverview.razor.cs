@@ -1,6 +1,7 @@
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using IdentityService.Sdk.Models;
+using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Dtos;
@@ -14,6 +15,7 @@ public partial class TicketOverview : ComponentBase
     [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private IAssignmentService AssignmentService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
+    [Inject] private ISupporterService SupporterService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private ILogger<TicketOverview> Logger { get; set; } = default!;
@@ -44,8 +46,8 @@ public partial class TicketOverview : ComponentBase
 
     // Supporter search state (manager-only feature)
     private string _supporterSearchTerm = string.Empty;
-    private List<UserAccount> _supporterSearchResults = new();
-    private bool _isSearching;
+    private List<TenantMember> _allSupporters = new();
+    private List<TenantMember> _supporterSearchResults = new();
     private string? _searchError;
 
     private bool IsManager => UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin;
@@ -63,6 +65,10 @@ public partial class TicketOverview : ComponentBase
             NavigationManager.NavigateTo("/");
             return;
         }
+
+        var supportersResult = await SupporterService.GetAllSupporters();
+        if (supportersResult.IsSuccess && supportersResult.Value is not null)
+            _allSupporters = supportersResult.Value;
 
         await LoadTicketsAsync();
     }
@@ -212,28 +218,15 @@ public partial class TicketOverview : ComponentBase
 
     private void ClosePanel() => _isPanelOpen = false;
 
-    private async Task HandleSupporterSearchInput(ChangeEventArgs e)
+    private void HandleSupporterSearchInput(ChangeEventArgs e)
     {
         _supporterSearchTerm = e.Value?.ToString() ?? string.Empty;
-        await SearchSupportersAsync();
-    }
-
-    private async Task SearchSupportersAsync()
-    {
-        if (string.IsNullOrWhiteSpace(_supporterSearchTerm))
-        {
-            _supporterSearchResults = new();
-            return;
-        }
-
-        _isSearching = true;
-        StateHasChanged();
-
-        var result = await UserService.SearchUsers(_supporterSearchTerm);
-        _supporterSearchResults = result.IsSuccess ? result.Value : new();
-        _searchError = result.IsSuccess ? null : "Search failed. Please try again.";
-
-        _isSearching = false;
+        _supporterSearchResults = string.IsNullOrWhiteSpace(_supporterSearchTerm) || _supporterSearchTerm.Length < 2
+            ? new()
+            : _allSupporters
+                .Where(u => $"{u.FirstName} {u.LastName}".Contains(_supporterSearchTerm, StringComparison.OrdinalIgnoreCase)
+                         || u.Email.Contains(_supporterSearchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         StateHasChanged();
     }
 
@@ -253,9 +246,9 @@ public partial class TicketOverview : ComponentBase
             // Resolve name if not yet cached
             if (!_userNames.ContainsKey(supporterUserId))
             {
-                var found = _supporterSearchResults.FirstOrDefault(u => u.userId == supporterUserId);
+                var found = _supporterSearchResults.FirstOrDefault(u => u.Id == supporterUserId);
                 if (found is not null)
-                    _userNames[supporterUserId] = found.name;
+                    _userNames[supporterUserId] = $"{found.FirstName} {found.LastName}".Trim();
             }
 
             _supporterSearchTerm = string.Empty;
