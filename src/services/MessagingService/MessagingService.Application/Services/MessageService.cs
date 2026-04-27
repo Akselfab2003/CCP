@@ -1,5 +1,6 @@
 using CCP.Shared.AuthContext;
 using CCP.Shared.ValueObjects;
+using ChatService.Sdk.Services;
 using EmailService.Sdk.Services;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
@@ -25,9 +26,10 @@ public class MessageService : IMessageService
     private readonly ITicketService _ticketService;
     private readonly IEmailSdkService _emailSdkService;
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
+    private readonly IChatService _chatService;
     private readonly ILogger<MessageService> _logger;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger, IChatService chatService)
     {
         _dbContext = dbContext;
         _messageAccessValidator = messageAccessValidator;
@@ -35,6 +37,7 @@ public class MessageService : IMessageService
         _ticketService = ticketService;
         _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
+        _chatService = chatService;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -94,7 +97,8 @@ public class MessageService : IMessageService
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        await ForwardMessageToServices(ticket.Value, message);
+        if (!request.IsInternalNote)
+            await ForwardMessageToServices(ticket.Value, message);
 
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
@@ -287,6 +291,7 @@ public class MessageService : IMessageService
                     await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role");
                     break;
                 case TicketOrigin.Chatbot:
+                    await _chatService.SendMessageToChatbotTicket(ticket.Id, msg.Content);
                     break;
                 default:
                     break;

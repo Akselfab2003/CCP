@@ -2,8 +2,9 @@
 using ChatService.Application.Services.Chat;
 using ChatService.Application.Services.Domain;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
-namespace ChatService.Api.ChatHub
+namespace ChatService.Application.ChatHub
 {
     public class ChatHub : Hub
     {
@@ -34,6 +35,12 @@ namespace ChatService.Api.ChatHub
                 return;
             }
             await Clients.Group(key).SendAsync("ReceiveMessage", conversationId, response.Value);
+        }
+
+        public async Task SendMessageToCustomer(string sessionId, string conversationId, string message)
+        {
+            var key = $"{_activeSession.Host}:{sessionId}";
+            await Clients.Group(key).SendAsync("ReceiveMessage", conversationId, message);
         }
 
 
