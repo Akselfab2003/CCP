@@ -4,6 +4,7 @@ using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using IdentityService.Sdk.Services.Tenant;
 
 namespace TicketService.Application.Services.Ticket
 {
@@ -16,9 +17,10 @@ namespace TicketService.Application.Services.Ticket
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        private readonly ITenantService _tenantService;
 
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, ServiceAccountOverrider serviceAccountOverrider)
+        public TicketCommands(ILogger<TicketCommands> logger,ITenantService tenantService, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, ServiceAccountOverrider serviceAccountOverrider)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
@@ -27,6 +29,7 @@ namespace TicketService.Application.Services.Ticket
             _emailSdkService = emailSdkService;
             _historyRepository = historyRepository;
             _serviceAccountOverrider = serviceAccountOverrider;
+            _tenantService = tenantService;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -81,8 +84,11 @@ namespace TicketService.Application.Services.Ticket
                 try
                 {
                     _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
+                    var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
+
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status);
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status, tenantResult.Value.Name);
                 }
                 catch (Exception ex)
                 {
@@ -129,13 +135,16 @@ namespace TicketService.Application.Services.Ticket
                 try
                 {
                     _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+                    var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
 
                     if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
                         await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
                                                                               ticketTitle: ticketEntity.Title,
                                                                               ticketId: ticketId,
                                                                               newStatus: newStatus,
-                                                                              oldStatus: oldStatus);
+                                                                              oldStatus: oldStatus,
+                                                                              orgName: tenantResult.Value.Name
+                                                                              );
                 }
                 catch (Exception ex)
                 {

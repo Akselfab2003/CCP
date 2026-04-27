@@ -171,10 +171,12 @@ TicketService
     .WaitFor(Keycloak)
     .WaitFor(TicketDB)
     .WaitFor(RabbitMq)
+    .WaitFor(IdentityService)
     .WithReference(Keycloak)
     .WithReference(TicketDB)
     .WithReference(RabbitMq)
     .WithReference(EmailService)
+    .WithReference(IdentityService)
     .WaitFor(EmailService)
     .WithEnvironment(env =>
     {
@@ -193,11 +195,13 @@ MessagingService
     .WaitFor(MessagingDB)
     .WaitFor(TicketService)
     .WaitFor(EmailService)
+    .WaitFor(IdentityService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(RabbitMq)
     .WithReference(TicketService)
     .WithReference(EmailService)
+    .WithReference(IdentityService)
     .WithReference(ChatService)
     .WaitFor(RabbitMq)
     .WithEnvironment(env =>

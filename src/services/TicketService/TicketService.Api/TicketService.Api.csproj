@@ -36,6 +36,7 @@
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
     <ProjectReference Include="..\..\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
+    <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\TicketService.Application\TicketService.Application.csproj" />
     <ProjectReference Include="..\TicketService.Infrastructure\TicketService.Infrastructure.csproj" />
   </ItemGroup>

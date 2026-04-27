@@ -1,8 +1,10 @@
 using System.Reflection;
+using CCP.Shared.UIContext;
 using ChatService.Sdk.ServiceDefaults;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
+using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Api.Hubs;
 using MessagingService.Application.ServiceCollection;
 using MessagingService.Infrastructure.Persistence;
@@ -70,9 +72,8 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
         builder.Configuration.GetConnectionString("ticketservice-api") ?? builder.Configuration["services:ticketservice-api:https:0"] ?? string.Empty,
         IsServiceAccount: true,
         configuration: builder.Configuration);
-    builder.Services.AddEmailServiceSdk(
-    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
-    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."), true);
+    builder.Services.AddEmailServiceSdk(    builder.Configuration.GetValue<string>("services:emailservice-api:http:0") ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."),true);
+    builder.Services.AddIdentityServiceSdk(  builder.Configuration.GetValue<string>("services:identityservice-api:http:0") ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."),true);
 
 
     builder.Services.AddChatServiceSdk(

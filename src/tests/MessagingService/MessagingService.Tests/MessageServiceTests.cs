@@ -84,8 +84,10 @@ public class MessageServiceTests
         var emailService = Substitute.For<EmailService.Sdk.Services.IEmailSdkService>();
         var serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
         var logger = Substitute.For<ILogger<MessageService>>();
-        var chatService = Substitute.For<IChatService>();
-        return new MessageService(dbContext, validator, serviceAccountOverrider, emailService, ticketService, logger, chatService);
+        var userService = Substitute.For<IdentityService.Sdk.Services.User.IUserService>();
+        var tenantService = Substitute.For<IdentityService.Sdk.Services.Tenant.ITenantService>();
+        var chatservice = Substitute.For<IChatService>();
+        return new MessageService(dbContext, tenantService, userService, validator, serviceAccountOverrider, emailService, ticketService, logger, chatservice);
     }
 
     [Fact]
