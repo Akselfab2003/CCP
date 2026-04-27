@@ -23,6 +23,7 @@ namespace Customer.Api.Integration.Tests.Fixtures
             var encryptionKey = GetConfiguration()["Encryption_Key"]
                 ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
             DB_Services.AddSingleton<IEncryptionService>(new AesEncryptionService(encryptionKey));
+            SDK_Services.AddHttpContextAccessor();
             SDK_Services.AddCustomerviceSdk(GetServiceUrl(APIResourceName), true);
             await BuildProviders();
         }

@@ -1,3 +1,4 @@
+using EmailService.Sdk.Services;
 using MessagingService.Api.Hubs;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Interfaces;
@@ -34,6 +35,7 @@ public class MessagesController : ControllerBase
         await _hubContext.Clients
             .Group($"ticket-{result.Message.TicketId}")
             .SendAsync("ReceiveMessage", result.Message, cancellationToken);
+
 
         return CreatedAtAction(nameof(GetMessageById),
             new { messageId = result.Message.Id }, result.Message);

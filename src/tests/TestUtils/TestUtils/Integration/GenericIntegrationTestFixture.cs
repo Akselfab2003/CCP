@@ -21,7 +21,7 @@ namespace TestUtils.Integration
 
         internal DistributedApplication App = null!;
         private IDistributedApplicationTestingBuilder AppHost = null!;
-        public TimeSpan DefaultTimeout = TimeSpan.FromMinutes(1);
+        public TimeSpan DefaultTimeout = TimeSpan.FromMinutes(2);
         public bool IsRemoveNotNeededResourcesForTestingEnabled = true;
         public IConfiguration GetConfiguration() => App.Services.GetRequiredService<IConfiguration>();
 

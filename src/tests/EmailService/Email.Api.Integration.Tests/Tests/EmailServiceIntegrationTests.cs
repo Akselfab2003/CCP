@@ -61,9 +61,9 @@ namespace Email.Api.Integration.Tests.Tests
             var agentRole = "Support Specialist";
 
             await emailService.NotifyTicketRepliedAsync(
-                customerId,
-                "test3",
                 ticketId,
+                TicketStatus.Open,
+                TicketOrigin.Manual,
                 agentName,
                 agentRole
               );
@@ -125,9 +125,9 @@ namespace Email.Api.Integration.Tests.Tests
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
             await emailService.NotifyTicketRepliedAsync(
-                customerId,
-                "test6",
                 ticketId: ticketId,
+                TicketStatus.Open,
+                TicketOrigin.Manual,
                 agentName: "Agent with Special Chars",
                 agentRole: "Support & Service"
                );
@@ -167,9 +167,9 @@ namespace Email.Api.Integration.Tests.Tests
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
             await emailService.NotifyTicketRepliedAsync(
-                customerId,
-                "test8",
                 ticketId,
+                TicketStatus.Open,
+                TicketOrigin.Manual,
                 "Agent",
                 "Support"
                 );

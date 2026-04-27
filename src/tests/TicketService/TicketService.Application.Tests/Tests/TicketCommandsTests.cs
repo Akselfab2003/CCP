@@ -21,6 +21,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
         private readonly TicketCommands _sut; // System Under Test
 
         public TicketCommandsTests()
@@ -32,6 +33,7 @@ namespace TicketService.Application.Tests.Tests
             _assignmentCommands = Substitute.For<IAssignmentCommands>();
             _emailSdkService = Substitute.For<IEmailSdkService>();
             _historyRepository = Substitute.For<ITicketHistoryRepository>();
+            _serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
 
             // Setup standard værdier
             _currentUser.OrganizationId.Returns(Guid.NewGuid());
@@ -43,8 +45,8 @@ namespace TicketService.Application.Tests.Tests
                 _currentUser,
                 _assignmentCommands,
                 _emailSdkService,
-                _historyRepository
-
+                _historyRepository,
+                _serviceAccountOverrider
             );
         }
 

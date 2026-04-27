@@ -1,6 +1,7 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Sdk.utils.Authentication;
 using EmailService.Sdk.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EmailService.Sdk.ServiceDefaults
@@ -9,9 +10,9 @@ namespace EmailService.Sdk.ServiceDefaults
     {
         private const string ServiceName = "EmailService";
 
-        public static IServiceCollection AddEmailServiceSdk(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false)
+        public static IServiceCollection AddEmailServiceSdk(this IServiceCollection services, string serviceUrl, bool IsServiceAccount = false, IConfiguration? configuration = null)
         {
-            services.AddSdkAuthentication(ServiceName, serviceUrl, IsServiceAccount);
+            services.AddSdkAuthentication(ServiceName, serviceUrl, IsServiceAccount, configuration);
             services.AddScoped<IKiotaApiClient<EmailServiceClient>>(sp =>
             {
                 var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();

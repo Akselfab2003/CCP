@@ -1,4 +1,6 @@
 using System.Reflection;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using TicketService.Api.Endpoints;
@@ -20,33 +22,38 @@ namespace TicketService.Api
             {
                 options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
             });
-            builder.Services.AddOpenApi();
+
+            builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
 
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
             builder.Services.AddHttpContextAccessor();
             builder.Services.ConfigureDefaultOpenTelemetry("TicketService.Api");
-            builder.Services.AddHttpContextAccessor();
 
             if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
             {
-                builder.Services.AddOpenApi(op => OpenApiConfiguration.SetupOpenApiForSwagger(op));
-
-                var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
+                var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0")
+                    ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
                 builder.Services.AddApiAuthenticationServices("TicketService.Api", "CCP", keycloakURL);
+                builder.Services.AddClientCredentialsTokenManagement()
+                        .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                        {
+                            client.TokenEndpoint = new Uri($"{keycloakURL}/realms/CCP/protocol/openid-connect/token");
+                            client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                            client.ClientSecret = ClientSecret.Parse(
+                                builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                                ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                            );
+                            client.Scope = Scope.ParseOrDefault("openid");
+                            client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                        });
 
-
-
-                builder.Services.AddEmailServiceSdk(
-                    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
-                    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
 
                 builder.Services.AddDbContext<TicketDbContext>(options =>
                 {
                     options.UseNpgsql(builder.Configuration.GetConnectionString("TicketDb"));
                 });
 
-                // Keep this inside the guard — Swagger UI only needed at runtime
                 builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
 
                 builder.UseWolverine(opts =>
@@ -56,10 +63,21 @@ namespace TicketService.Api
 
                     opts.PublishAllMessages().ToRabbitQueue("ticket.assignment.updated").UseDurableOutbox();
                 });
+
+
+
+
+                builder.Services.AddEmailServiceSdk(
+                    builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
+                    ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."), true);
+
+
+
             }
 
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure();
+            builder.Services.AddSingleton<ServiceAccountOverrider>();
 
             var app = builder.Build();
 
@@ -73,7 +91,6 @@ namespace TicketService.Api
                 AutomaticallyApplyDBMigration<TicketDbContext>.ApplyMigrationsAsync(app).Wait();
             }
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();

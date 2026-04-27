@@ -25,6 +25,7 @@ namespace Identity.Api.IntegrationTests.Fixtures
         public async ValueTask InitializeAsync()
         {
             await Initialize();
+            SDK_Services.AddHttpContextAccessor();
             SDK_Services.AddIdentityServiceSdk(GetServiceUrl(APIResourceName), true);
             await InitializeKeyCloakSDK();
             await BuildProviders();

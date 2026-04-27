@@ -30,7 +30,7 @@ namespace Email.Api.Integration.Tests.Fixtures
 
         public async ValueTask InitializeAsync()
         {
-            DefaultTimeout = TimeSpan.FromMinutes(1);
+            DefaultTimeout = TimeSpan.FromMinutes(2);
             await Initialize();
             var encryptionKey = GetConfiguration()["Encryption_Key"]
               ?? throw new InvalidOperationException("Encryption_Key configuration value is required.");
@@ -38,6 +38,7 @@ namespace Email.Api.Integration.Tests.Fixtures
             DB_Services.AddScoped<ICurrentUser, CurrentUser>();
             DB_Services.AddScoped<IEmailSent, EmailSentRepo>();
             DB_Services.AddScoped<IEmailReceived, EmailReceivedRepo>();
+            SDK_Services.AddHttpContextAccessor();
             SDK_Services.AddEmailServiceSdk(GetServiceUrl(APIResourceName), true);
             await BuildProviders();
         }

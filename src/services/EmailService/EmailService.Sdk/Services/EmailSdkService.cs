@@ -1,6 +1,5 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ValueObjects;
-using EmailService.Sdk.Models;
 
 namespace EmailService.Sdk.Services
 {
@@ -50,9 +49,9 @@ namespace EmailService.Sdk.Services
         }
 
         public async Task NotifyTicketRepliedAsync(
-            Guid customerId,
-            string ticketTitle,
             int ticketId,
+            TicketStatus status,
+            TicketOrigin origin,
             string agentName,
             string agentRole)
         {
@@ -63,11 +62,11 @@ namespace EmailService.Sdk.Services
                 .Reply
                 .PostAsync(request =>
                 {
-                    request.QueryParameters.CustomerId = customerId;
-                    request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.AgentRole = agentRole;
+                    request.QueryParameters.Origin = (int?)origin;
+                    request.QueryParameters.TicketStatus = status.ToString();
                 });
         }
 
@@ -104,7 +103,7 @@ namespace EmailService.Sdk.Services
             await api.Api
                 .TenantEmailConfiguration
                 .Create
-                .PostAsync(request=>
+                .PostAsync(request =>
                 {
                     request.QueryParameters.DefaultSenderEmail = DefaultSenderEmail;
                 });

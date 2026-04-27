@@ -15,9 +15,10 @@ namespace TicketService.Application.Services.Ticket
         private readonly ICurrentUser _currentUser;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
 
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository)
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, ServiceAccountOverrider serviceAccountOverrider)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
@@ -25,6 +26,7 @@ namespace TicketService.Application.Services.Ticket
             _assignmentCommands = assignmentCommands;
             _emailSdkService = emailSdkService;
             _historyRepository = historyRepository;
+            _serviceAccountOverrider = serviceAccountOverrider;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -78,6 +80,7 @@ namespace TicketService.Application.Services.Ticket
 
                 try
                 {
+                    _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
                         await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status);
                 }
@@ -125,6 +128,8 @@ namespace TicketService.Application.Services.Ticket
 
                 try
                 {
+                    _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
                     if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
                         await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
                                                                               ticketTitle: ticketEntity.Title,

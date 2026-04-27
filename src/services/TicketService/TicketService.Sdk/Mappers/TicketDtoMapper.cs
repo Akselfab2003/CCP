@@ -11,8 +11,8 @@ namespace TicketService.Sdk.Mappers
         {
             Id = t.Id ?? 0,
             Title = t.Title ?? string.Empty,
-            AssignedUserId = t.Assignment == null ? null : t.Assignment.AssignmentDto == null ? null : t.Assignment.AssignmentDto.UserId,
-            AssignedByUserId = t.Assignment == null ? null : t.Assignment.AssignmentDto == null ? null : t.Assignment.AssignmentDto.AssignedByUserId,
+            AssignedUserId = t.Assignment == null ? null : t.Assignment.UserId,
+            AssignedByUserId = t.Assignment == null ? null : t.Assignment.AssignedByUserId,
             Status = t.Status ?? 0,
             OrganizationId = t.OrganizationId ?? Guid.Empty,
             CreatedAt = t.CreatedAt,

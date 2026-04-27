@@ -136,12 +136,14 @@ IdentityService
     .WithOtlpExporter();
 
 EmailService
-    .WithReference(EmailDB)
     .WaitFor(EmailDB)
-    .WithReference(CustomerService)
     .WaitFor(CustomerService)
     .WaitFor(Keycloak)
+    .WithReference(EmailDB)
+    .WithReference(CustomerService)
     .WithReference(Keycloak)
+    .WithReference(MessagingService)
+    .WithReference(TicketService)
     .WithEndpoint("https", endpoint => endpoint.IsProxied = false)
     .WithUrlForEndpoint("https", endpoint =>
     {
@@ -174,6 +176,10 @@ TicketService
     .WithReference(RabbitMq)
     .WithReference(EmailService)
     .WaitFor(EmailService)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
@@ -186,12 +192,17 @@ MessagingService
     .WaitFor(Keycloak)
     .WaitFor(MessagingDB)
     .WaitFor(TicketService)
+    .WaitFor(EmailService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(RabbitMq)
     .WithReference(TicketService)
+    .WithReference(EmailService)
     .WaitFor(RabbitMq)
-    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";
