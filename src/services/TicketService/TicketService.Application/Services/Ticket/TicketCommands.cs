@@ -64,7 +64,7 @@ namespace TicketService.Application.Services.Ticket
 
                 await _historyRepository.AddAsync(TicketHistoryEntry.Create(
                     result.Value.Id,
-                    actorUserId: request.CustomerId,
+                    actorUserId: _currentUser.UserId,
                     eventType: "TicketCreated",
                     oldValue: null,
                     newValue: result.Value.Title

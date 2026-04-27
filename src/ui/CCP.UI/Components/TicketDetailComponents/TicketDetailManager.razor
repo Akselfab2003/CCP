@@ -319,26 +319,26 @@
                                placeholder="Search supporters…"
                                value="@_supporterSearch"
                                @oninput="HandleSupporterSearchInput" />
-                        @if (_isSearching)
-                        {
-                            <div class="tds-search-hint">Searching…</div>
-                        }
-                        @if (_searchError is not null)
-                        {
-                            <div class="tds-search-error">@_searchError</div>
-                        }
                         @if (_supporterResults.Any())
                         {
                             <ul class="tds-search-results">
                                 @foreach (var s in _supporterResults)
                                 {
                                     var supporter = s;
-                                    <li class="tds-search-result" @onclick="() => AssignToSupporterAsync(supporter.userId)">
-                                        <span class="tds-search-result-name">@supporter.name</span>
-                                        <span class="tds-search-result-email">@supporter.email</span>
+                                    <li class="tds-search-result" @onclick="() => AssignToSupporterAsync(supporter.Id)">
+                                        <span class="tds-search-result-name">@supporter.Name</span>
+                                        <span class="tds-search-result-email">@supporter.Email</span>
                                     </li>
                                 }
                             </ul>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_supporterSearch))
+                        {
+                            <div class="tds-search-hint">No supporters found</div>
+                        }
+                        @if (_searchError is not null)
+                        {
+                            <div class="tds-search-error">@_searchError</div>
                         }
                     </div>
                 }

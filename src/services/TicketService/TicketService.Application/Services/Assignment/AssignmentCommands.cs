@@ -61,15 +61,16 @@ namespace TicketService.Application.Services.Assignment
                 Result<Domain.Entities.Assignment> assignment = await _assignmentRepository.GetAssignmentByTicketIdAsync(ticketId);
 
                 Result<Guid> result;
+                Guid? previousUserId = null;
+
                 if (assignment.IsFailure)
                 {
-                    _logger.LogInformation("No existing assignment found for ticket {TicketId}. Creating a new assignment.", ticketId);
                     result = await CreateAssignmentAsync(ticketId, assignUserId);
                 }
                 else
                 {
                     Domain.Entities.Assignment existingAssignment = assignment.Value;
-                    var previousUserId = existingAssignment.UserId;
+                    previousUserId = existingAssignment.UserId;
                     existingAssignment.UpdateAssignment(assignUserId, _currentUser.UserId);
 
                     Result<Domain.Entities.Assignment> updateResult = await _assignmentRepository.UpdateAsync(existingAssignment);
@@ -106,12 +107,12 @@ namespace TicketService.Application.Services.Assignment
                     }
 
                     await _historyRepository.AddAsync(TicketHistoryEntry.Create(
-                        ticketId,
-                        actorUserId: assignUserId,
-                        eventType: "AssignedToSupporter",
-                        oldValue: null,
-                        newValue: null
-                    ));
+                            ticketId,
+                            actorUserId: _currentUser.UserId,
+                            eventType: "AssignedToSupporter",
+                            oldValue: previousUserId?.ToString(),
+                            newValue: assignUserId.ToString()
+                        ));
 
                     await NotifyAssignmentAsync(ticketId, assignUserId);
                 }

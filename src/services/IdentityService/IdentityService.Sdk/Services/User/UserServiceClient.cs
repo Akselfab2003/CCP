@@ -95,6 +95,15 @@ namespace IdentityService.Sdk.Services.User
                     req.QueryParameters.SearchTerm = SearchTerm;
                 }, cancellationToken: ct);
 
+                if (userSearchResults?.Count > 0)
+                {
+                    var first = userSearchResults[0];
+                    _logger.LogWarning("FIRST USER: {Name} Groups={Groups} RealmRoles={Roles}",
+                        first.Name,
+                        first.Groups == null ? "NULL" : string.Join("|", first.Groups),
+                        first.RealmRoles == null ? "NULL" : string.Join("|", first.RealmRoles));
+                }
+
                 if (userSearchResults == null || userSearchResults.Count == 0)
                 {
                     return Result.Failure<List<UserAccount>>(Error.NotFound("NoUsersFound", $"No users found matching search term '{SearchTerm}'."));
@@ -112,6 +121,7 @@ namespace IdentityService.Sdk.Services.User
                         u.Groups
                     ))
                     .ToList();
+
                 return Result.Success(userAccounts);
             }
             catch (ApiException ex)
