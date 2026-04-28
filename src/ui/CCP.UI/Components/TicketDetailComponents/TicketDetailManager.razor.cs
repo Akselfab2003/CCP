@@ -2,6 +2,8 @@ using Gateway.Sdk.Services;
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
+using ChatService.Sdk.Services;
+using ChatService.Sdk.Models;
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.User;
@@ -26,6 +28,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private ISupporterService SupporterService { get; set; } = default!;
     [Inject] private IGatewayService GatewayService { get; set; } = default!;
+    [Inject] private IAIReplyClient AIReplyClient { get; set; } = default!;
     [Inject] private ILogger<TicketDetailManager> Logger { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
@@ -56,6 +59,12 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     private bool _isLoadingMoreMessages;
     private bool _shouldScrollToBottom;
     private ElementReference _messagesContainer;
+
+    // AI reply state
+    private AiReply? _aiSuggestion;
+    private bool _isLoadingAiSuggestion;
+    private bool _showAiSuggestion;
+    private string? _aiSuggestionError;
 
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
 
@@ -248,8 +257,58 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
             _ = HubService.JoinTicketGroupAsync(Ticket.Id);
     }
 
+    // ── AI reply ────────────────────────────────────────────────────────────
+
+    private async Task GenerateAiReplyAsync()
+    {
+        if (_isLoadingAiSuggestion) return;
+
+        _isLoadingAiSuggestion = true;
+        _aiSuggestionError = null;
+        _aiSuggestion = null;
+        _showAiSuggestion = false;
+        await InvokeAsync(StateHasChanged);
+
+        var result = await AIReplyClient.GetReply(Ticket.Id);
+
+        if (result.IsSuccess)
+        {
+            _aiSuggestion = result.Value;
+            _showAiSuggestion = true;
+        }
+        else
+        {
+            _aiSuggestionError = result.Error.Description;
+            Logger.LogError("AI reply failed for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+        }
+
+        _isLoadingAiSuggestion = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void UseAiSuggestion(string text)
+    {
+        _newMessageContent = text;
+        _showAiSuggestion = false;
+        StateHasChanged();
+    }
+
+    private void DismissAiSuggestion()
+    {
+        _showAiSuggestion = false;
+        _aiSuggestion = null;
+        _aiSuggestionError = null;
+        StateHasChanged();
+    }
+
+    // ── Attachments ─────────────────────────────────────────────────────────
+
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
+        Logger.LogInformation("HandleFileSelected triggered, file: {FileName}", e.File?.Name ?? "null");
+
+        if (_isUploadingAttachment || _pendingAttachment is not null) return;
+
         var file = e.File;
         if (file is null) return;
 
@@ -272,7 +331,10 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
             if (result.IsSuccess)
             {
                 _pendingAttachment = result.Value;
-                _pendingAttachmentPreviewUrl = file.ContentType.StartsWith("image/") ? _pendingAttachment.Url : null;
+                if (file.ContentType.StartsWith("image/"))
+                    _pendingAttachmentPreviewUrl = _pendingAttachment.Url;
+                else
+                    _pendingAttachmentPreviewUrl = null;
             }
             else
             {

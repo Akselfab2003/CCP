@@ -734,10 +734,10 @@
         border-color: var(--ccp-accent);
     }
 
-    .tds-attach-btn--loading {
-        opacity: 0.6;
-        cursor: default;
-    }
+.tds-attach-btn--loading {
+    opacity: 0.6;
+    cursor: default;
+}
 
 .tds-attachment-preview {
     position: relative;
@@ -924,9 +924,9 @@
     transition: background 0.13s;
 }
 
-.tds-msg-video-expand:hover {
-    background: rgba(0,0,0,0.8);
-}
+    .tds-msg-video-expand:hover {
+        background: rgba(0,0,0,0.8);
+    }
 
 .tds-lightbox-video {
     max-width: 90vw;
@@ -934,3 +934,262 @@
     border-radius: 8px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.6);
 }
+
+/* ========================================================== AI Suggest */
+.tds-ai-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid rgba(99,102,241,0.35);
+    background: rgba(99,102,241,0.08);
+    color: #818cf8;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+    .tds-ai-trigger-btn:hover:not(:disabled) {
+        background: rgba(99,102,241,0.16);
+        border-color: rgba(99,102,241,0.55);
+        color: #a5b4fc;
+    }
+
+    .tds-ai-trigger-btn:disabled,
+    .tds-ai-trigger-btn--loading {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+.tds-ai-panel {
+    margin: 0 0 10px 0;
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 8px;
+    background: rgba(99,102,241,0.05);
+    overflow: hidden;
+    font-size: 12.5px;
+}
+
+.tds-ai-panel--loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    color: var(--ccp-text-lo);
+    font-size: 12px;
+}
+
+.tds-ai-panel--error {
+    border-color: rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.05);
+}
+
+.tds-ai-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(99,102,241,0.15);
+    gap: 8px;
+}
+
+.tds-ai-panel--error .tds-ai-panel-header {
+    border-bottom-color: rgba(239,68,68,0.2);
+}
+
+.tds-ai-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #818cf8;
+    letter-spacing: 0.01em;
+}
+
+.tds-ai-panel--error .tds-ai-panel-title {
+    color: #f87171;
+}
+
+.tds-ai-panel-dismiss {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--ccp-text-lo);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.12s, color 0.12s;
+}
+
+    .tds-ai-panel-dismiss:hover {
+        background: rgba(255,255,255,0.08);
+        color: var(--ccp-text-hi);
+    }
+
+.tds-ai-confidence {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+.tds-ai-confidence--high {
+    background: rgba(34,197,94,0.15);
+    color: #4ade80;
+}
+
+.tds-ai-confidence--mid {
+    background: rgba(245,158,11,0.15);
+    color: #fbbf24;
+}
+
+.tds-ai-confidence--low {
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+}
+
+.tds-ai-headsup {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 8px 12px 0;
+    padding: 6px 9px;
+    border-radius: 5px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.2);
+    color: #fbbf24;
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+    .tds-ai-headsup svg {
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+.tds-ai-moreinfo {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 6px 12px 0;
+    padding: 6px 9px;
+    border-radius: 5px;
+    background: rgba(99,102,241,0.08);
+    border: 1px solid rgba(99,102,241,0.2);
+    color: #818cf8;
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+    .tds-ai-moreinfo svg {
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+.tds-ai-reply-block {
+    padding: 10px 12px 8px;
+}
+
+.tds-ai-alt-block {
+    padding: 8px 12px;
+    border-top: 1px dashed rgba(99,102,241,0.15);
+}
+
+.tds-ai-alt-label {
+    display: inline-block;
+    margin-bottom: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ccp-text-lo);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tds-ai-reply-text {
+    margin: 0 0 8px 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ccp-text-hi);
+    white-space: pre-wrap;
+}
+
+.tds-ai-use-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid rgba(99,102,241,0.4);
+    background: rgba(99,102,241,0.12);
+    color: #a5b4fc;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+    .tds-ai-use-btn:hover {
+        background: rgba(99,102,241,0.22);
+        border-color: rgba(99,102,241,0.6);
+    }
+
+.tds-ai-use-btn--alt {
+    border-color: rgba(148,163,184,0.3);
+    background: rgba(148,163,184,0.07);
+    color: #94a3b8;
+}
+
+    .tds-ai-use-btn--alt:hover {
+        background: rgba(148,163,184,0.14);
+        border-color: rgba(148,163,184,0.5);
+        color: #cbd5e1;
+    }
+
+.tds-ai-panel-error-msg {
+    margin: 0;
+    padding: 8px 12px 10px;
+    font-size: 12px;
+    color: #f87171;
+    line-height: 1.4;
+}
+
+.tds-ai-reasoning {
+    margin: 0;
+    border-top: 1px dashed rgba(99,102,241,0.15);
+}
+
+    .tds-ai-reasoning summary {
+        padding: 6px 12px;
+        font-size: 11.5px;
+        font-weight: 500;
+        color: var(--ccp-text-lo);
+        cursor: pointer;
+        user-select: none;
+        list-style: none;
+        outline: none;
+    }
+
+        .tds-ai-reasoning summary:hover {
+            color: var(--ccp-text-hi);
+        }
+
+    .tds-ai-reasoning p {
+        margin: 0;
+        padding: 0 12px 10px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ccp-text-lo);
+    }
