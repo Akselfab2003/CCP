@@ -28,11 +28,11 @@ else if (_errorMessage is not null)
 }
 else if (_ticket is not null)
 {
-    @if (UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin)
+    @if (_ticketView == TicketView.Manager)
     {
         <TicketDetailManager Ticket="_ticket" />
     }
-    else if (UserContext.IsInternalUser)
+    else if (_ticketView == TicketView.Supporter)
     {
         <TicketDetailSupporter Ticket="_ticket" />
     }

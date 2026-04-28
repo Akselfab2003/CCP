@@ -70,10 +70,14 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         StateHasChanged();
     }
 
+    private bool _initialized;
+
     protected override async Task OnInitializedAsync()
     {
-        if (!RendererInfo.IsInteractive)
+        if (!RendererInfo.IsInteractive || _initialized)
             return;
+
+        _initialized = true;
 
         HubService.OnMessageReceived += HandleMessageReceived;
         HubService.OnMessageUpdated += HandleMessageUpdated;
@@ -87,7 +91,17 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     {
         _isLoadingMessages = true;
 
-        var result = await GatewayService.GetTicketDetailAsync(Ticket.Id);
+        var detailTask = GatewayService.GetTicketDetailAsync(Ticket.Id);
+        var customerTask = Ticket.CustomerId.HasValue
+            ? UserService.GetUserDetailsAsync(Ticket.CustomerId.Value)
+            : null;
+
+        if (customerTask is not null)
+            await Task.WhenAll(detailTask, customerTask);
+        else
+            await detailTask;
+
+        var result = detailTask.Result;
         if (result.IsSuccess)
         {
             _messages = result.Value.Messages;
@@ -100,7 +114,17 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         }
         else
         {
-            Logger.LogError("TicketDetailSupporter failed to load detail for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+            Logger.LogError("LoadDetailAsync failed for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+        }
+
+        if (_customerName is null && customerTask is not null)
+        {
+            var nameResult = customerTask.Result;
+            if (nameResult.IsSuccess)
+            {
+                _customerName = nameResult.Value.name;
+                _userNameCache[Ticket.CustomerId!.Value] = _customerName;
+            }
         }
 
         _isLoadingMessages = false;
