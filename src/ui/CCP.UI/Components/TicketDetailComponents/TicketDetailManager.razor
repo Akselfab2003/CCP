@@ -7,7 +7,7 @@
 
 <div class="tds-wrap">
 
-    <!-- Header (identical to supporter) -->
+    <!-- Header -->
     <div class="tds-header">
         <div class="tds-header-left">
             <button class="tds-back-btn" @onclick="NavigateBack" title="Back to tickets">
@@ -190,7 +190,6 @@
                 </div>
                 <div class="tds-composer-body">
 
-                    <!-- ── AI Suggestion Panel ── -->
                     @if (_isLoadingAiSuggestion)
                     {
                         <div class="tds-ai-panel tds-ai-panel--loading">
@@ -296,14 +295,14 @@
                             }
                         </div>
                     }
-                    <!-- ── End AI Suggestion Panel ── -->
 
                     <textarea class="tds-composer-input"
                               placeholder="@(_isInternalNoteMode ? "Write an internal note..." : "Write a reply...")"
-                              rows="3"
                               style="@(_isInternalNoteMode ? "border-color:#f59e0b;background:rgba(245,158,11,0.04);" : "")"
-                              @bind="_newMessageContent"
-                              @onkeydown="HandleKeyDown" />
+                              value="@_newMessageContent"
+                              @oninput="HandleComposerInput"
+                              @onkeydown="HandleKeyDown"
+                              @ref="_composerTextarea" />
 
                     @if (_pendingAttachment is not null)
                     {
@@ -428,7 +427,7 @@
                     </button>
                 </div>
 
-                <!-- Assign to me shortcut — only shown when not already assigned to current user -->
+                <!-- Assign to me shortcut only shown when not already assigned to current user -->
                 @if (Ticket.AssignedUserId != UserContext.UserId)
                 {
                     <button class="tds-assign-btn" @onclick="SelfAssignAsync" disabled="@_isAssigning"

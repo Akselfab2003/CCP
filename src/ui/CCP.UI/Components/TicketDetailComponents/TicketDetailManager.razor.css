@@ -286,6 +286,7 @@
 }
 
 .tds-msg-bubble {
+    white-space: pre-wrap;
     padding: 10px 14px;
     border-radius: 10px;
     font-size: 13px;
@@ -1193,3 +1194,27 @@
         line-height: 1.5;
         color: var(--ccp-text-lo);
     }
+
+/* ── Composer input: auto-grow + styled scrollbar ─────────────────────────── */
+.tds-composer-input {
+    min-height: 44px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+    .tds-composer-input::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .tds-composer-input::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .tds-composer-input::-webkit-scrollbar-thumb {
+        background: var(--ccp-border);
+        border-radius: 3px;
+    }
+
+        .tds-composer-input::-webkit-scrollbar-thumb:hover {
+            background: var(--ccp-border-mid);
+        }

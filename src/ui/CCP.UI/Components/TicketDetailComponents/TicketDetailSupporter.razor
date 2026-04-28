@@ -300,10 +300,11 @@
 
                     <textarea class="tds-composer-input"
                               placeholder="@(_isInternalNoteMode ? "Write an internal note..." : "Write a reply...")"
-                              rows="3"
                               style="@(_isInternalNoteMode ? "border-color:#f59e0b;background:rgba(245,158,11,0.04);" : "")"
-                              @bind="_newMessageContent"
-                              @onkeydown="HandleKeyDown" />
+                              value="@_newMessageContent"
+                              @oninput="HandleComposerInput"
+                              @onkeydown="HandleKeyDown"
+                              @ref="_composerTextarea" />
 
                     @if (_pendingAttachment is not null)
                     {

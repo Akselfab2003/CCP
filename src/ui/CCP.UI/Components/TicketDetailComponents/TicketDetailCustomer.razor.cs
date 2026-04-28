@@ -44,6 +44,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
     private bool _isLoadingMoreMessages;
     private bool _shouldScrollToBottom;
     private ElementReference _messagesContainer;
+    private ElementReference _composerTextarea;
 
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
 
@@ -243,6 +244,8 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
             _pendingAttachment = null;
             _pendingAttachmentPreviewUrl = null;
             _shouldScrollToBottom = true;
+            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
+            catch { /* ignore */ }
         }
         else
         {
@@ -332,6 +335,13 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
     private async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !e.ShiftKey) await SendMessageAsync();
+    }
+
+    private async Task HandleComposerInput(ChangeEventArgs e)
+    {
+        _newMessageContent = e.Value?.ToString() ?? string.Empty;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.autoResizeComposer", _composerTextarea); }
+        catch { /* ignore if JS not ready */ }
     }
 
     private string GetStatusLabel(int status) => status switch

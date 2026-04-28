@@ -12,5 +12,17 @@ window.scrollHelpers = {
         if (element) {
             element.scrollTop += element.scrollHeight - previousScrollHeight;
         }
-    }
+    },
+
+    autoResizeComposer: function (el) {
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 220) + 'px';
+    },
+
+    resetComposerHeight: function (el) {
+        if (!el) return;
+        el.style.height = 'auto';
+    },
+
 };
