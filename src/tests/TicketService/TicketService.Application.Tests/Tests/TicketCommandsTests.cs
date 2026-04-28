@@ -10,6 +10,7 @@ using TicketService.Application.Services.Ticket;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using Wolverine;
 
 namespace TicketService.Application.Tests.Tests
 {
@@ -22,6 +23,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly IMessageBus _messageBus;
         private readonly ITenantService _tenantService;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
         private readonly TicketCommands _sut; // System Under Test
@@ -35,6 +37,7 @@ namespace TicketService.Application.Tests.Tests
             _assignmentCommands = Substitute.For<IAssignmentCommands>();
             _emailSdkService = Substitute.For<IEmailSdkService>();
             _historyRepository = Substitute.For<ITicketHistoryRepository>();
+            _messageBus = Substitute.For<IMessageBus>();
             _serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
             _tenantService = Substitute.For<ITenantService>();
 
@@ -51,7 +54,8 @@ namespace TicketService.Application.Tests.Tests
                 _assignmentCommands,
                 _emailSdkService,
                 _historyRepository,
-                _serviceAccountOverrider
+                _serviceAccountOverrider,
+                _messageBus
             );
         }
 

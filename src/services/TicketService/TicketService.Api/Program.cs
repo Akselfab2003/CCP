@@ -1,4 +1,5 @@
 using System.Reflection;
+using CCP.Shared.Events;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
@@ -62,7 +63,18 @@ namespace TicketService.Api
                     opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
                         .AutoProvision();
 
-                    opts.PublishAllMessages().ToRabbitQueue("ticket.assignment.updated").UseDurableOutbox();
+                    opts.PublishMessage<TicketAssignmentUpdated>()
+                        .ToRabbitQueue("ticket.assignment.updated")
+                        .UseDurableOutbox();
+
+                    opts.PublishMessage<TicketCreated>()
+                        .ToRabbitQueue("ticket.created")
+                        .UseDurableOutbox();
+
+                    opts.PublishMessage<TicketClosed>()
+                        .ToRabbitQueue("ticket.closed")
+                        .UseDurableOutbox();
+
                 });
 
 

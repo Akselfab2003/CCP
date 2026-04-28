@@ -1,5 +1,7 @@
 ﻿using ChatService.Application.Interfaces;
 using ChatService.Domain.Interfaces;
+using ChatService.Infrastructure.LLM.Analysis;
+using ChatService.Infrastructure.LLM.Chat;
 using ChatService.Infrastructure.LLM.Embedding;
 using ChatService.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +20,13 @@ namespace ChatService.Infrastructure.ServiceCollection
                     .AddScoped<IDomainDetailsRepository, DomainDetailsRepository>();
 
             services.AddScoped<IEmbeddingService, EmbeddingService>()
-                .AddScoped<IChatService, LLM.Chat.ChatService>();
-
+                    .AddScoped<ITicketAnalysisService, TicketAnalysisService>()
+                    .AddScoped<IChatService, LLM.Chat.ChatService>()
+                    .AddScoped<ITicketEmbeddingRepository, TicketEmbeddingRepository>()
+                    .AddScoped<ITicketEmbeddingOrchestrator, TicketEmbeddingOrchestrator>()
+                    .AddScoped<ITicketAnalysisRepository, TicketAnalysisRepository>()
+                    .AddScoped<IGeneratedReplyRepository, GeneratedReplyRepository>()
+                    .AddScoped<IGenerateReplyService, GenerateReplyService>();
 
             return services;
         }

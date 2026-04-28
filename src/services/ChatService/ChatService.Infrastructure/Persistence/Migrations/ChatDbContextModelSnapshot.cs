@@ -24,6 +24,154 @@ namespace ChatService.Infrastructure.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ChatService.Domain.Entities.AI.GeneratedReply", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AgentHeadsUp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AlternativeReply")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Confidence")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("InfoNeeded")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("NeedsMoreInfo")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("OrgId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reasoning")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reply")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GeneratedReplies");
+                });
+
+            modelBuilder.Entity("ChatService.Domain.Entities.AI.TicketAnalysis", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Component")
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<string[]>("ErrorCodes")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<DateTime?>("LastReanalysedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OrgId")
+                        .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<string[]>("PreventionTips")
+                        .HasColumnType("text[]");
+
+                    b.Property<DateTime?>("ProblemAnalysedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProblemSummary")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ReanalysisCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RootCause")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("SolutionAnalysedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<string[]>("SolutionSteps")
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("SolutionSummary")
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<string[]>("Symptoms")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.PrimitiveCollection<string[]>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketAnalysis");
+                });
+
+            modelBuilder.Entity("ChatService.Domain.Entities.AI.TicketEmbedding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnalysisId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsSemanticSearchable")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("OrgId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ProblemEmbeddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProblemEmbeddingSource")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Vector>("ProblemVector")
+                        .IsRequired()
+                        .HasColumnType("vector");
+
+                    b.Property<DateTime?>("SolutionEmbeddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SolutionEmbeddingSource")
+                        .HasColumnType("text");
+
+                    b.Property<Vector>("SolutionVector")
+                        .HasColumnType("vector");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalysisId")
+                        .IsUnique();
+
+                    b.ToTable("TicketEmbedding");
+                });
+
             modelBuilder.Entity("ChatService.Domain.Entities.ConversationEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -160,6 +308,17 @@ namespace ChatService.Infrastructure.Persistence.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("ChatService.Domain.Entities.AI.TicketEmbedding", b =>
+                {
+                    b.HasOne("ChatService.Domain.Entities.AI.TicketAnalysis", "Analysis")
+                        .WithOne("Embedding")
+                        .HasForeignKey("ChatService.Domain.Entities.AI.TicketEmbedding", "AnalysisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Analysis");
+                });
+
             modelBuilder.Entity("ChatService.Domain.Entities.MessageEntity", b =>
                 {
                     b.HasOne("ChatService.Domain.Entities.ConversationEntity", null)
@@ -167,6 +326,11 @@ namespace ChatService.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ChatService.Domain.Entities.AI.TicketAnalysis", b =>
+                {
+                    b.Navigation("Embedding");
                 });
 
             modelBuilder.Entity("ChatService.Domain.Entities.ConversationEntity", b =>

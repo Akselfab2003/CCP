@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using TicketService.Sdk.ServiceDefaults;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 public partial class Program
 {
@@ -51,6 +53,14 @@ public partial class Program
             {
                 opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); });
             });
+
+
+
+
+            builder.Services.AddMessageServiceSDK(
+              builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+              ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
+
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
             builder.AddKeyedOllamaApiClient("qwen")
@@ -87,6 +97,22 @@ public partial class Program
             builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
                 .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
                 .AddEndpointsApiExplorer();
+
+
+            builder.UseWolverine(opts =>
+            {
+                opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
+                    .AutoProvision();
+
+                opts.ListenToRabbitQueue("ticket.created")
+                    .UseDurableInbox();
+
+                opts.ListenToRabbitQueue("MessageCreated")
+                    .UseDurableInbox();
+
+                opts.ListenToRabbitQueue("ticket.closed")
+                    .UseDurableInbox();
+            });
 
 
 
@@ -152,6 +178,9 @@ public partial class Program
            .MapFaqManagementEndpoints()
            .MapChatEndpoints()
            .MapConfigurationEndpoints();
+
+        app.MapAutomaticMessageGenerationEndpoints();
+
 
 
 

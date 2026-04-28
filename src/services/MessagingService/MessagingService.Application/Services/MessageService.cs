@@ -1,6 +1,5 @@
-using System.Runtime.CompilerServices;
 using CCP.Shared.AuthContext;
-using CCP.Shared.UIContext;
+using CCP.Shared.Events;
 using CCP.Shared.ValueObjects;
 using ChatService.Sdk.Services;
 using EmailService.Sdk.Services;
@@ -10,12 +9,12 @@ using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
 using MessagingService.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pgvector;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
+using Wolverine;
 
 namespace MessagingService.Application.Services;
 
@@ -35,6 +34,7 @@ public class MessageService : IMessageService
     private readonly ILogger<MessageService> _logger;
     private readonly ITenantService _tenantService;
     private readonly IUserService _userService;
+    private readonly IMessageBus _messageBus;
 
     public MessageService(
         MessagingDbContext dbContext,
@@ -45,7 +45,8 @@ public class MessageService : IMessageService
         IEmailSdkService emailSdkService,
         ITicketService ticketService,
         ILogger<MessageService> logger,
-        IChatService chatService)
+        IChatService chatService,
+        IMessageBus messageBus)
     {
         _dbContext = dbContext;
         _tenantService = tenantService;
@@ -56,6 +57,7 @@ public class MessageService : IMessageService
         _ticketService = ticketService;
         _logger = logger;
         _chatService = chatService;
+        _messageBus = messageBus;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -117,6 +119,8 @@ public class MessageService : IMessageService
 
         if (!request.IsInternalNote)
             await ForwardMessageToServices(ticket.Value, message);
+
+        await PublishNewMsgEventToForAIAnalysis(ticket.Value.Id, ticket.Value.OrganizationId);
 
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
@@ -393,6 +397,24 @@ public class MessageService : IMessageService
         catch (Exception)
         {
 
+        }
+    }
+
+
+    private async Task PublishNewMsgEventToForAIAnalysis(int ticketId, Guid OrgId)
+    {
+        try
+        {
+            await _messageBus.PublishAsync<TicketMessageReceived>(new TicketMessageReceived
+            {
+                TicketId = ticketId,
+                OrgId = OrgId,
+                ReceivedAt = DateTime.UtcNow,
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish TicketMessageReceived event for ticket {TicketId}", ticketId);
         }
     }
 }

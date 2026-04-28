@@ -67,8 +67,6 @@ namespace ChatService.Api.Endpoints
                 return Results.Problem("An error occurred while creating the conversation.", statusCode: 500);
             }
         }
-
-
         private static async Task<IResult> SendMessage([FromServices] IChatManagementService chatManagement, [FromBody] ChatMessageRequest request)
         {
             try

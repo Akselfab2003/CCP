@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
+using Wolverine;
 
 namespace ChatApp.MessagingService.Tests;
 
@@ -87,7 +88,8 @@ public class MessageServiceTests
         var userService = Substitute.For<IdentityService.Sdk.Services.User.IUserService>();
         var tenantService = Substitute.For<IdentityService.Sdk.Services.Tenant.ITenantService>();
         var chatservice = Substitute.For<IChatService>();
-        return new MessageService(dbContext, tenantService, userService, validator, serviceAccountOverrider, emailService, ticketService, logger, chatservice);
+        var messageBus = Substitute.For<IMessageBus>();
+        return new MessageService(dbContext, tenantService, userService, validator, serviceAccountOverrider, emailService, ticketService, logger, chatservice, messageBus);
     }
 
     [Fact]

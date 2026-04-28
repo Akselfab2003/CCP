@@ -39,7 +39,29 @@ namespace IdentityService.API.Endpoints
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
+            tenantRoute.MapGet("/GetAllTenantManagers", GetAllTenantManagers)
+                       .RequireAuthorization()
+                       .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
+                       .ProducesProblem(StatusCodes.Status400BadRequest)
+                       .ProducesProblem(StatusCodes.Status404NotFound)
+                       .ProducesProblem(StatusCodes.Status500InternalServerError);
+
             return routeBuilder;
+        }
+
+        private static async Task<IResult> GetAllTenantManagers([FromServices] IMemberService memberService)
+        {
+            try
+            {
+                Result<List<TenantMemberDto>> result = await memberService.GetAllManagerUsersOfTenant();
+                return result.IsSuccess
+                            ? Results.Ok(result.Value)
+                            : result.ToProblemDetails();
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem("An error occurred while retrieving tenant managers: " + ex.Message);
+            }
         }
 
         private static async Task<IResult> GetTenantInfo([FromServices] ITenantService tenantService, [FromQuery] Guid? tenantId, [FromQuery] string? Domain)

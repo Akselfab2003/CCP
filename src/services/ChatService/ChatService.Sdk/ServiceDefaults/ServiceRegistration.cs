@@ -19,7 +19,8 @@ namespace ChatService.Sdk.ServiceDefaults
 
             services.AddScoped<IFaqService, FaqServiceClient>()
                     .AddScoped<IChatService, ChatClient>()
-                    .AddScoped<IDomainService, DomainServiceClient>();
+                    .AddScoped<IDomainService, DomainServiceClient>()
+                    .AddScoped<IAIReplyClient, AIReplyClient>();
 
             return services;
         }
