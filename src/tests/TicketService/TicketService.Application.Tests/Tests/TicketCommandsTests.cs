@@ -9,6 +9,7 @@ using TicketService.Application.Services.Ticket;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using Wolverine;
 
 namespace TicketService.Application.Tests.Tests
 {
@@ -21,6 +22,7 @@ namespace TicketService.Application.Tests.Tests
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly IMessageBus _messageBus;
         private readonly TicketCommands _sut; // System Under Test
 
         public TicketCommandsTests()
@@ -32,7 +34,7 @@ namespace TicketService.Application.Tests.Tests
             _assignmentCommands = Substitute.For<IAssignmentCommands>();
             _emailSdkService = Substitute.For<IEmailSdkService>();
             _historyRepository = Substitute.For<ITicketHistoryRepository>();
-
+            _messageBus = Substitute.For<IMessageBus>();
             // Setup standard værdier
             _currentUser.OrganizationId.Returns(Guid.NewGuid());
 
@@ -43,8 +45,8 @@ namespace TicketService.Application.Tests.Tests
                 _currentUser,
                 _assignmentCommands,
                 _emailSdkService,
-                _historyRepository
-
+                _historyRepository,
+                _messageBus
             );
         }
 
