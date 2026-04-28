@@ -152,6 +152,7 @@ public partial class Program
                     using var scope = app.Services.CreateScope();
                     var domainservices = scope.ServiceProvider.GetRequiredService<IDomainServices>();
                     var host = new Uri(origin).Host;
+                    Console.WriteLine(host);
                     return domainservices.IsDomainAllowed(host);
                 })
                  .AllowAnyHeader()
