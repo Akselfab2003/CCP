@@ -9,12 +9,14 @@
   <ItemGroup>
     <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="WolverineFx.RabbitMQ" />
     <PackageReference Include="Aspire.RabbitMQ.Client" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
+    <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\TicketService.Domain\TicketService.Domain.csproj" />
   </ItemGroup>
 

@@ -5,31 +5,31 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System;
-namespace TicketService.Sdk.Models
+namespace Gateway.Sdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    internal partial class TicketDto_assignmentMember1 : IAdditionalDataHolder, IParsable
+    internal partial class TicketDetailAggregateDto_userNames : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::TicketService.Sdk.Models.TicketDto_assignmentMember1"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Gateway.Sdk.Models.TicketDetailAggregateDto_userNames"/> and sets the default values.
         /// </summary>
-        public TicketDto_assignmentMember1()
+        public TicketDetailAggregateDto_userNames()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::TicketService.Sdk.Models.TicketDto_assignmentMember1"/></returns>
+        /// <returns>A <see cref="global::Gateway.Sdk.Models.TicketDetailAggregateDto_userNames"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::TicketService.Sdk.Models.TicketDto_assignmentMember1 CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::Gateway.Sdk.Models.TicketDetailAggregateDto_userNames CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::TicketService.Sdk.Models.TicketDto_assignmentMember1();
+            return new global::Gateway.Sdk.Models.TicketDetailAggregateDto_userNames();
         }
         /// <summary>
         /// The deserialization information for the current model

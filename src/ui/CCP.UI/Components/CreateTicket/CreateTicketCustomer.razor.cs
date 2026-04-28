@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using Microsoft.AspNetCore.Components;
 
 namespace CCP.UI.Components.CreateTicket;
@@ -33,14 +34,14 @@ public partial class CreateTicketCustomer : ComponentBase
             CustomerId = UserContext.UserId,
             AssignedUserId = null,
             Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
-        });
+        }, origin: TicketOrigin.Manual);
 
         if (result.IsSuccess)
         {
-            _successMessage = "Ticket submitted! Redirecting to your inbox...";
+            _successMessage = "Ticket submitted! Redirecting to your tickets...";
             StateHasChanged();
             await Task.Delay(1200);
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/my-tickets");
         }
         else
         {

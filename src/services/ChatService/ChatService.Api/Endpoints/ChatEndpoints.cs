@@ -71,8 +71,10 @@ namespace ChatService.Api.Endpoints
         {
             try
             {
-                var response = await chatManagement.GetChatResponseToMessage(request.Message, request.ConversationId);
-                return response.IsSuccess ? Results.Ok(response.Value) : response.ToProblemDetails();
+                var response = await chatManagement.SendMessageFromSupportToConversation(request.TicketId, request.Message);
+                return response.IsSuccess
+                               ? Results.Ok()
+                               : response.ToProblemDetails();
             }
             catch (Exception)
             {

@@ -257,14 +257,6 @@
                                placeholder="Search supporters by name…"
                                value="@_supporterSearchTerm"
                                @oninput="HandleSupporterSearchInput" />
-                        @if (_isSearching)
-                        {
-                            <p class="to-panel-search-hint">Searching…</p>
-                        }
-                        @if (_searchError is not null)
-                        {
-                            <p class="to-modal-error">@_searchError</p>
-                        }
                         @if (_supporterSearchResults.Any())
                         {
                             <ul class="to-panel-search-results">
@@ -272,12 +264,20 @@
                                 {
                                     var s = supporter;
                                     <li class="to-panel-search-result"
-                                        @onclick="() => AssignToSupporterAsync(s.userId)">
-                                        <span class="to-panel-result-name">@s.name</span>
-                                        <span class="to-panel-result-email">@s.email</span>
+                                        @onclick="() => AssignToSupporterAsync(s.Id)">
+                                        <span class="to-panel-result-name">@s.Name</span>
+                                        <span class="to-panel-result-email">@s.Email</span>
                                     </li>
                                 }
                             </ul>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_supporterSearchTerm))
+                        {
+                            <p class="to-panel-search-hint">No supporters found</p>
+                        }
+                        @if (_searchError is not null)
+                        {
+                            <p class="to-modal-error">@_searchError</p>
                         }
                     </div>
                 }

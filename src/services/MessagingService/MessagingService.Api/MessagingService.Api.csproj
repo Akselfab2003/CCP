@@ -26,6 +26,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
     <PackageReference Include="Aspire.RabbitMQ.Client" />
@@ -34,6 +35,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\apphost\CCP.ServiceDefaults\CCP.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\ChatService\ChatService.Sdk\ChatService.Sdk.csproj" />
+    <ProjectReference Include="..\..\EmailService\EmailService.Sdk\EmailService.Sdk.csproj" />
+    <ProjectReference Include="..\..\IdentityService\IdentityService.Sdk\IdentityService.Sdk.csproj" />
     <ProjectReference Include="..\MessagingService.Application\MessagingService.Application.csproj" />
     <ProjectReference Include="..\MessagingService.Infrastructure\MessagingService.Infrastructure.csproj" />
   </ItemGroup>

@@ -17,10 +17,10 @@ namespace TicketService.Sdk.Models
         /// <summary>The assignment property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment? Assignment { get; set; }
+        public global::TicketService.Sdk.Models.AssignmentDto? Assignment { get; set; }
 #nullable restore
 #else
-        public global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment Assignment { get; set; }
+        public global::TicketService.Sdk.Models.AssignmentDto Assignment { get; set; }
 #endif
         /// <summary>The createdAt property</summary>
         public DateTimeOffset? CreatedAt { get; set; }
@@ -46,6 +46,8 @@ namespace TicketService.Sdk.Models
 #endif
         /// <summary>The organizationId property</summary>
         public Guid? OrganizationId { get; set; }
+        /// <summary>The origin property</summary>
+        public int? Origin { get; set; }
         /// <summary>The status property</summary>
         public int? Status { get; set; }
         /// <summary>The title property</summary>
@@ -81,13 +83,14 @@ namespace TicketService.Sdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "assignment", n => { Assignment = n.GetObjectValue<global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment>(global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment.CreateFromDiscriminatorValue); } },
+                { "assignment", n => { Assignment = n.GetObjectValue<global::TicketService.Sdk.Models.AssignmentDto>(global::TicketService.Sdk.Models.AssignmentDto.CreateFromDiscriminatorValue); } },
                 { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
                 { "customerId", n => { CustomerId = n.GetGuidValue(); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetIntValue(); } },
                 { "internalNotes", n => { InternalNotes = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "organizationId", n => { OrganizationId = n.GetGuidValue(); } },
+                { "origin", n => { Origin = n.GetIntValue(); } },
                 { "status", n => { Status = n.GetIntValue(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
             };
@@ -99,91 +102,17 @@ namespace TicketService.Sdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment>("assignment", Assignment);
+            writer.WriteObjectValue<global::TicketService.Sdk.Models.AssignmentDto>("assignment", Assignment);
             writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
             writer.WriteGuidValue("customerId", CustomerId);
             writer.WriteStringValue("description", Description);
             writer.WriteIntValue("id", Id);
             writer.WriteCollectionOfPrimitiveValues<string>("internalNotes", InternalNotes);
             writer.WriteGuidValue("organizationId", OrganizationId);
+            writer.WriteIntValue("origin", Origin);
             writer.WriteIntValue("status", Status);
             writer.WriteStringValue("title", Title);
             writer.WriteAdditionalData(AdditionalData);
-        }
-        /// <summary>
-        /// Composed type wrapper for classes <see cref="global::TicketService.Sdk.Models.AssignmentDto"/>, <see cref="global::TicketService.Sdk.Models.TicketDto_assignmentMember1"/>
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        internal partial class TicketDto_assignment : IComposedTypeWrapper, IParsable
-        {
-            /// <summary>Composed type representation for type <see cref="global::TicketService.Sdk.Models.AssignmentDto"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::TicketService.Sdk.Models.AssignmentDto? AssignmentDto { get; set; }
-#nullable restore
-#else
-            public global::TicketService.Sdk.Models.AssignmentDto AssignmentDto { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::TicketService.Sdk.Models.TicketDto_assignmentMember1"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::TicketService.Sdk.Models.TicketDto_assignmentMember1? TicketDtoAssignmentMember1 { get; set; }
-#nullable restore
-#else
-            public global::TicketService.Sdk.Models.TicketDto_assignmentMember1 TicketDtoAssignmentMember1 { get; set; }
-#endif
-            /// <summary>
-            /// Creates a new instance of the appropriate class based on discriminator value
-            /// </summary>
-            /// <returns>A <see cref="global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment"/></returns>
-            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-            public static global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment CreateFromDiscriminatorValue(IParseNode parseNode)
-            {
-                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-                var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
-                var result = new global::TicketService.Sdk.Models.TicketDto.TicketDto_assignment();
-                if("AssignmentDto".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.AssignmentDto = new global::TicketService.Sdk.Models.AssignmentDto();
-                }
-                else if("".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.TicketDtoAssignmentMember1 = new global::TicketService.Sdk.Models.TicketDto_assignmentMember1();
-                }
-                return result;
-            }
-            /// <summary>
-            /// The deserialization information for the current model
-            /// </summary>
-            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
-            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
-            {
-                if(AssignmentDto != null)
-                {
-                    return AssignmentDto.GetFieldDeserializers();
-                }
-                else if(TicketDtoAssignmentMember1 != null)
-                {
-                    return TicketDtoAssignmentMember1.GetFieldDeserializers();
-                }
-                return new Dictionary<string, Action<IParseNode>>();
-            }
-            /// <summary>
-            /// Serializes information the current object
-            /// </summary>
-            /// <param name="writer">Serialization writer to use to serialize this model</param>
-            public virtual void Serialize(ISerializationWriter writer)
-            {
-                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                if(AssignmentDto != null)
-                {
-                    writer.WriteObjectValue<global::TicketService.Sdk.Models.AssignmentDto>(null, AssignmentDto);
-                }
-                else if(TicketDtoAssignmentMember1 != null)
-                {
-                    writer.WriteObjectValue<global::TicketService.Sdk.Models.TicketDto_assignmentMember1>(null, TicketDtoAssignmentMember1);
-                }
-            }
         }
     }
 }

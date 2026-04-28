@@ -14,8 +14,6 @@ namespace ChatService.Sdk.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The conversationId property</summary>
-        public Guid? ConversationId { get; set; }
         /// <summary>The message property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -24,6 +22,8 @@ namespace ChatService.Sdk.Models
 #else
         public string Message { get; set; }
 #endif
+        /// <summary>The ticketId property</summary>
+        public int? TicketId { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::ChatService.Sdk.Models.ChatMessageRequest"/> and sets the default values.
         /// </summary>
@@ -49,8 +49,8 @@ namespace ChatService.Sdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "conversationId", n => { ConversationId = n.GetGuidValue(); } },
                 { "message", n => { Message = n.GetStringValue(); } },
+                { "ticketId", n => { TicketId = n.GetIntValue(); } },
             };
         }
         /// <summary>
@@ -60,8 +60,8 @@ namespace ChatService.Sdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteGuidValue("conversationId", ConversationId);
             writer.WriteStringValue("message", Message);
+            writer.WriteIntValue("ticketId", TicketId);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -16,7 +16,6 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
               "type": "integer",
               "format": "int32"
             }
@@ -272,6 +271,9 @@
           }
         }
       },
+      "TicketOrigin": {
+        "type": "integer"
+      },
       "TicketSdkDto": {
         "type": "object",
         "properties": {
@@ -291,6 +293,9 @@
           "status": {
             "type": "integer",
             "format": "int32"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TicketOrigin"
           },
           "organizationId": {
             "type": "string",

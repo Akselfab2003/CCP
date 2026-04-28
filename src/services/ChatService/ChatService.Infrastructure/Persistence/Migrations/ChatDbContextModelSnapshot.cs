@@ -141,6 +141,12 @@ namespace ChatService.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("EscalatedTicketId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsEscalated")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("OrgId")
                         .HasColumnType("uuid");
 

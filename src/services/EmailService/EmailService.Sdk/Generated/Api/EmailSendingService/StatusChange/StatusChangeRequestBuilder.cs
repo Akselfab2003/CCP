@@ -21,7 +21,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public StatusChangeRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?TicketId*,customerId*,newStatus*,oldStatus*,ticketTitle*}", pathParameters)
+        public StatusChangeRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?TicketId*,customerId*,newStatus*,oldStatus*,orgName*,origin*,ticketTitle*}", pathParameters)
         {
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public StatusChangeRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?TicketId*,customerId*,newStatus*,oldStatus*,ticketTitle*}", rawUrl)
+        public StatusChangeRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/EmailSendingService/status-change{?TicketId*,customerId*,newStatus*,oldStatus*,orgName*,origin*,ticketTitle*}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -96,6 +96,17 @@ namespace EmailService.Sdk.Api.EmailSendingService.StatusChange
             [QueryParameter("oldStatus")]
             public string OldStatus { get; set; }
 #endif
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            [QueryParameter("orgName")]
+            public string? OrgName { get; set; }
+#nullable restore
+#else
+            [QueryParameter("orgName")]
+            public string OrgName { get; set; }
+#endif
+            [QueryParameter("origin")]
+            public int? Origin { get; set; }
             public int? TicketId { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable

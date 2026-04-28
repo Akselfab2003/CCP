@@ -1,5 +1,6 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ValueObjects;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace EmailService.Sdk.Services
 {
@@ -10,7 +11,7 @@ namespace EmailService.Sdk.Services
         {
             _client = client;
         }
-        public async Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus status)
+        public async Task NotifyTicketCreatedAsync(Guid customerId, string ticketTitle, int ticketId, TicketStatus status, string orgName)
         {
             var api = _client.Client;
 
@@ -22,6 +23,7 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.TicketStatus = status.ToString();
+                    request.QueryParameters.OrgName = orgName;
                 });
         }
 
@@ -30,7 +32,8 @@ namespace EmailService.Sdk.Services
             string ticketTitle,
             int ticketId,
             TicketStatus oldStatus,
-            TicketStatus newStatus)
+            TicketStatus newStatus,
+            string orgName)
 
         {
             var api = _client.Client;
@@ -45,15 +48,17 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.OldStatus = oldStatus.ToString();
                     request.QueryParameters.NewStatus = newStatus.ToString();
+                    request.QueryParameters.OrgName = orgName;
                 });
         }
 
         public async Task NotifyTicketRepliedAsync(
-            Guid customerId,
-            string ticketTitle,
             int ticketId,
+            TicketStatus status,
+            TicketOrigin origin,
             string agentName,
-            string agentRole)
+            string agentRole,
+            string orgName)
         {
             var api = _client.Client;
 
@@ -62,11 +67,12 @@ namespace EmailService.Sdk.Services
                 .Reply
                 .PostAsync(request =>
                 {
-                    request.QueryParameters.CustomerId = customerId;
-                    request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketId = ticketId;
                     request.QueryParameters.AgentName = agentName;
                     request.QueryParameters.AgentRole = agentRole;
+                    request.QueryParameters.Origin = (int?)origin;
+                    request.QueryParameters.TicketStatus = status.ToString();
+                    request.QueryParameters.OrgName = orgName;
                 });
         }
 
@@ -77,7 +83,8 @@ namespace EmailService.Sdk.Services
             int ticketId,
             string ticketTitle,
             TicketStatus ticketStatus,
-            string replyContent)
+            string replyContent,
+            string orgName)
         {
             var api = _client.Client;
 
@@ -94,6 +101,19 @@ namespace EmailService.Sdk.Services
                     request.QueryParameters.TicketTitle = ticketTitle;
                     request.QueryParameters.TicketStatus = ticketStatus.ToString();
                     request.QueryParameters.ReplyContent = replyContent;
+                    request.QueryParameters.OrgName = orgName;
+                });
+        }
+        public async Task CreateTenantEmailAsync(string DefaultSenderEmail)
+        {
+            var api = _client.Client;
+
+            await api.Api
+                .TenantEmailConfiguration
+                .Create
+                .PostAsync(request =>
+                {
+                    request.QueryParameters.DefaultSenderEmail = DefaultSenderEmail;
                 });
         }
     }

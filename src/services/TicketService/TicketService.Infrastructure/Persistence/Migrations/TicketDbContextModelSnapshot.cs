@@ -77,6 +77,11 @@ namespace TicketService.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Origin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 

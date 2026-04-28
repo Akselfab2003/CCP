@@ -5,6 +5,7 @@ using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using IdentityService.Sdk.Services.Tenant;
 using Wolverine;
 
 namespace TicketService.Application.Services.Ticket
@@ -18,8 +19,11 @@ namespace TicketService.Application.Services.Ticket
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
         private readonly IMessageBus _messageBus;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        private readonly ITenantService _tenantService;
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, IMessageBus messageBus)
+
+        public TicketCommands(ILogger<TicketCommands> logger,ITenantService tenantService, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, ServiceAccountOverrider serviceAccountOverrider, IMessageBus messageBus)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
@@ -27,6 +31,8 @@ namespace TicketService.Application.Services.Ticket
             _assignmentCommands = assignmentCommands;
             _emailSdkService = emailSdkService;
             _historyRepository = historyRepository;
+            _serviceAccountOverrider = serviceAccountOverrider;
+            _tenantService = tenantService;
             _messageBus = messageBus;
         }
 
@@ -35,7 +41,7 @@ namespace TicketService.Application.Services.Ticket
             try
             {
                 var ticket = new Domain.Entities.Ticket();
-                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Description);
+                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Origin, request.Description);
                 Result<Domain.Entities.Ticket> result = await _ticketRepository.AddAsync(ticket);
 
                 await _ticketRepository.SaveChangesAsync();
@@ -62,7 +68,7 @@ namespace TicketService.Application.Services.Ticket
 
                 await _historyRepository.AddAsync(TicketHistoryEntry.Create(
                     result.Value.Id,
-                    actorUserId: request.CustomerId,
+                    actorUserId: _currentUser.UserId,
                     eventType: "TicketCreated",
                     oldValue: null,
                     newValue: result.Value.Title
@@ -81,8 +87,12 @@ namespace TicketService.Application.Services.Ticket
 
                 try
                 {
+                    _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
+                    var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
+
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status);
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status, tenantResult.Value.Name);
                 }
                 catch (Exception ex)
                 {
@@ -143,12 +153,17 @@ namespace TicketService.Application.Services.Ticket
 
                 try
                 {
+                    _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+                    var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
+
                     if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
                         await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
                                                                               ticketTitle: ticketEntity.Title,
                                                                               ticketId: ticketId,
                                                                               newStatus: newStatus,
-                                                                              oldStatus: oldStatus);
+                                                                              oldStatus: oldStatus,
+                                                                              orgName: tenantResult.Value.Name
+                                                                              );
                 }
                 catch (Exception ex)
                 {

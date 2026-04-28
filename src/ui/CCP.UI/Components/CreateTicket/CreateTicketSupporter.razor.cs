@@ -1,6 +1,7 @@
-﻿using CCP.Shared.UIContext;
+using CCP.Shared.UIContext;
+using CCP.Shared.ValueObjects;
 using IdentityService.Sdk.Models;
-using IdentityService.Sdk.Services.User;
+using IdentityService.Sdk.Services.Customer;
 using Microsoft.AspNetCore.Components;
 using TicketService.Sdk.Services.Ticket;
 
@@ -9,7 +10,7 @@ namespace CCP.UI.Components.CreateTicket;
 public partial class CreateTicketSupporter : ComponentBase
 {
     [Inject] private ITicketService TicketService { get; set; } = default!;
-    [Inject] private IUserService UserService { get; set; } = default!;
+    [Inject] private ICustomerService CustomerService { get; set; } = default!;
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ILogger<CreateTicketSupporter> Logger { get; set; } = default!;
@@ -21,50 +22,35 @@ public partial class CreateTicketSupporter : ComponentBase
     private bool _assignToSelf;
     private bool _isSubmitting;
     private string _customerSearch = string.Empty;
-    private bool _isSearching;
-    private List<UserAccount> _searchResults = new();
-    private UserAccount? _selectedCustomer;
+    private List<TenantMember> _allCustomers = new();
+    private List<TenantMember> _searchResults = new();
+    private TenantMember? _selectedCustomer;
     private string? _successMessage;
     private string? _errorMessage;
-    private CancellationTokenSource? _searchCts;
 
-    private async Task OnCustomerSearchInput(ChangeEventArgs e)
+    protected override async Task OnInitializedAsync()
     {
-        _customerSearch = e.Value?.ToString() ?? string.Empty;
-        _searchResults.Clear();
-
-        if (_customerSearch.Length < 2)
+        if (!RendererInfo.IsInteractive)
             return;
 
-        _searchCts?.Cancel();
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
-
-        _isSearching = true;
-        StateHasChanged();
-
-        try
-        {
-            await Task.Delay(300, token);
-            if (token.IsCancellationRequested) return;
-
-            var result = await UserService.SearchUsers(_customerSearch, token);
-            if (result.IsSuccess && result.Value is not null)
-                _searchResults = result.Value;
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Customer search failed for term {Term}", _customerSearch);
-        }
-        finally
-        {
-            _isSearching = false;
-            StateHasChanged();
-        }
+        var customersResult = await CustomerService.GetAllCustomers();
+        if (customersResult.IsSuccess && customersResult.Value is not null)
+            _allCustomers = customersResult.Value;
     }
 
-    private void SelectCustomer(UserAccount user)
+    private void OnCustomerSearchInput(ChangeEventArgs e)
+    {
+        _customerSearch = e.Value?.ToString() ?? string.Empty;
+        _searchResults = string.IsNullOrWhiteSpace(_customerSearch) || _customerSearch.Length < 2
+            ? new()
+            : _allCustomers
+                .Where(u => $"{u.FirstName} {u.LastName}".Contains(_customerSearch, StringComparison.OrdinalIgnoreCase)
+                         || u.Email.Contains(_customerSearch, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        StateHasChanged();
+    }
+
+    private void SelectCustomer(TenantMember user)
     {
         _selectedCustomer = user;
         _customerSearch = string.Empty;
@@ -93,17 +79,17 @@ public partial class CreateTicketSupporter : ComponentBase
         var result = await TicketService.CreateTicket(new TicketService.Sdk.Dtos.CreateTicketRequestDto()
         {
             Title = _title.Trim(),
-            CustomerId = _selectedCustomer.userId,
+            CustomerId = _selectedCustomer.Id,
             AssignedUserId = _assignToSelf ? UserContext.UserId : null,
             Description = string.IsNullOrWhiteSpace(_description) ? null : _description.Trim()
-        });
+        }, origin: TicketOrigin.Manual);
 
         if (result.IsSuccess)
         {
-            _successMessage = "Ticket created! Redirecting to your inbox...";
+            _successMessage = "Ticket created! Redirecting to the ticket overview...";
             StateHasChanged();
             await Task.Delay(1200);
-            Navigation.NavigateTo("/inbox");
+            Navigation.NavigateTo("/tickets");
         }
         else
         {
@@ -114,12 +100,11 @@ public partial class CreateTicketSupporter : ComponentBase
         }
     }
 
-    private static string GetInitials(string? name)
+    private static string GetInitials(TenantMember? user)
     {
-        if (string.IsNullOrWhiteSpace(name)) return "?";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length >= 2
-            ? $"{parts[0][0]}{parts[1][0]}".ToUpper()
-            : name[0].ToString().ToUpper();
+        if (user is null) return "?";
+        var f = user.FirstName.Length > 0 ? user.FirstName[0].ToString().ToUpper() : "";
+        var l = user.LastName.Length > 0 ? user.LastName[0].ToString().ToUpper() : "";
+        return string.IsNullOrEmpty(f + l) ? "?" : f + l;
     }
 }

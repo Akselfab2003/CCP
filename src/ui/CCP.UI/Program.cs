@@ -6,6 +6,7 @@ using CCP.UI.Components;
 using CCP.UI.Services;
 using ChatService.Sdk.ServiceDefaults;
 using CustomerService.Sdk.ServiceDefaults;
+using EmailService.Sdk.ServiceDefaults;
 using Gateway.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
@@ -128,11 +129,11 @@ namespace CCP.UI
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
             builder.Services.AddScoped<IUIUserContext, UIUserContext>();
             builder.Services.AddServiceDefaults("CCP.UI");
-            /*
+
             builder.Services.AddEmailServiceSdk(
-                builder.Configuration.GetValue<string>("services:EmailService:http:0")
+                builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
                 ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
-            */
+
             builder.Services.AddMessageServiceSDK(
                 builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
                 ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
@@ -155,7 +156,6 @@ namespace CCP.UI
                 ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
                 );
 
-            builder.Services.AddScoped<ServiceAccountOverrider>();
             builder.Services.AddGatewayServiceSdk(
                 builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
                 ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")
@@ -217,10 +217,23 @@ namespace CCP.UI
 
             Directory.CreateDirectory(attachmentsFullPath);
 
-            app.UseStaticFiles(new StaticFileOptions
+            app.UseWhen(ctx => ctx.Request.Path.StartsWithSegments("/attachments"), branch =>
             {
-                FileProvider = new PhysicalFileProvider(attachmentsFullPath),
-                RequestPath = "/attachments"
+                branch.Use(async (context, next) =>
+                {
+                    if (context.User.Identity is null || !context.User.Identity.IsAuthenticated)
+                    {
+                        context.Response.StatusCode = 401;
+                        return;
+                    }
+                    await next();
+                });
+
+                branch.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(attachmentsFullPath),
+                    RequestPath = "/attachments"
+                });
             });
 
             app.Run();

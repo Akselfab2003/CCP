@@ -24,6 +24,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />

@@ -3,6 +3,7 @@ using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
 using IdentityService.Sdk.Models;
+using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
@@ -23,6 +24,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private IAssignmentService AssignmentService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
+    [Inject] private ISupporterService SupporterService { get; set; } = default!;
     [Inject] private IGatewayService GatewayService { get; set; } = default!;
     [Inject] private ILogger<TicketDetailManager> Logger { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
@@ -75,8 +77,8 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
 
     // Assignment (manager-only)
     private string _supporterSearch = string.Empty;
-    private List<UserAccount> _supporterResults = new();
-    private bool _isSearching;
+    private List<TenantMember> _allSupporters = new();
+    private List<TenantMember> _supporterResults = new();
     private bool _isAssigning;
     private bool _reassignOpen;
     private string? _searchError;
@@ -89,6 +91,10 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         HubService.OnMessageReceived += HandleMessageReceived;
         HubService.OnMessageUpdated += HandleMessageUpdated;
         HubService.OnMessageDeleted += HandleMessageDeleted;
+
+        var supportersResult = await SupporterService.GetAllSupporters();
+        if (supportersResult.IsSuccess && supportersResult.Value is not null)
+            _allSupporters = supportersResult.Value;
 
         await LoadDetailAsync();
         _ = ConnectHubAsync();
@@ -305,25 +311,15 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         StateHasChanged();
     }
 
-    private async Task HandleSupporterSearchInput(ChangeEventArgs e)
+    private void HandleSupporterSearchInput(ChangeEventArgs e)
     {
         _supporterSearch = e.Value?.ToString() ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(_supporterSearch))
-        {
-            _supporterResults = new();
-            StateHasChanged();
-            return;
-        }
-
-        _isSearching = true;
-        StateHasChanged();
-
-        var result = await UserService.SearchUsers(_supporterSearch);
-        _supporterResults = result.IsSuccess ? result.Value : new();
-        _searchError = result.IsSuccess ? null : "Search failed. Please try again.";
-
-        _isSearching = false;
+        _supporterResults = string.IsNullOrWhiteSpace(_supporterSearch) || _supporterSearch.Length < 2
+            ? new()
+            : _allSupporters
+                .Where(u => $"{u.FirstName} {u.LastName}".Contains(_supporterSearch, StringComparison.OrdinalIgnoreCase)
+                         || u.Email.Contains(_supporterSearch, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         StateHasChanged();
     }
 
@@ -336,8 +332,8 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         if (result.IsSuccess)
         {
             Ticket.AssignedUserId = supporterUserId;
-            var found = _supporterResults.FirstOrDefault(u => u.userId == supporterUserId);
-            if (found is not null) _userNameCache[supporterUserId] = found.name;
+            var found = _supporterResults.FirstOrDefault(u => u.Id == supporterUserId);
+            if (found is not null) _userNameCache[supporterUserId] = $"{found.FirstName} {found.LastName}".Trim();
             _supporterSearch = string.Empty;
             _supporterResults = new();
             _reassignOpen = false;
@@ -406,7 +402,7 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         if (userId is null) return "Unknown";
         if (userId == UserContext.UserId) return "You";
         if (_userNameCache.TryGetValue(userId.Value, out var name)) return name;
-        return "Loading...";
+        return _customerName ?? "Unknown";
     }
 
     private string GetAssigneeName(Guid? userId)

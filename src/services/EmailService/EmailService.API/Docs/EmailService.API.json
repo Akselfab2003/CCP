@@ -40,6 +40,28 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TicketOrigin"
+            }
+          },
+          {
+            "name": "OrgId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orgName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -91,6 +113,20 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TicketOrigin"
+            }
+          },
+          {
+            "name": "orgName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -106,21 +142,6 @@
           "EmailSendingService"
         ],
         "parameters": [
-          {
-            "name": "customerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "ticketTitle",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "TicketId",
             "in": "query",
@@ -145,6 +166,20 @@
           },
           {
             "name": "agentRole",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TicketOrigin"
+            }
+          },
+          {
+            "name": "orgName",
             "in": "query",
             "schema": {
               "type": "string"
@@ -214,157 +249,16 @@
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/EmailSendingService/reply-to-email": {
-      "post": {
-        "tags": [
-          "EmailSendingService"
-        ],
-        "parameters": [
+          },
           {
-            "name": "Id",
+            "name": "origin",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/TicketOrigin"
             }
           },
           {
-            "name": "MailId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "Subject",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Body",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "SenderAddress",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "RecipientAddress",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ReceivedAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "Id",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrganizationId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "Subject",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Body",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "SenderAddress",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "RecipientAddress",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "SentAt",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "TicketId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "TicketId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "TicketStatus",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organizationName",
+            "name": "orgName",
             "in": "query",
             "schema": {
               "type": "string"
@@ -415,26 +309,15 @@
         "tags": [
           "TenantEmailConfiguration"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddTenantEmailConfigurationRequest"
-              }
+        "parameters": [
+          {
+            "name": "DefaultSenderEmail",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -445,21 +328,6 @@
   },
   "components": {
     "schemas": {
-      "AddTenantEmailConfigurationRequest": {
-        "required": [
-          "domain",
-          "defaultSenderEmail"
-        ],
-        "type": "object",
-        "properties": {
-          "domain": {
-            "type": "string"
-          },
-          "defaultSenderEmail": {
-            "type": "string"
-          }
-        }
-      },
       "DovecotEvent": {
         "type": "object",
         "properties": {
@@ -582,6 +450,9 @@
             ]
           }
         }
+      },
+      "TicketOrigin": {
+        "type": "integer"
       }
     }
   },

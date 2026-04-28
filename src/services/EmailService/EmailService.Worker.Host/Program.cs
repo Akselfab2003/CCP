@@ -63,6 +63,8 @@ builder.Services.AddMessageServiceSDK(
     builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
     ?? throw new InvalidOperationException("MessageServiceUrl configuration value is required."), true);
 
+
+
 builder.Services.AddSingleton<ServiceAccountOverrider>();
 
 builder.Services.AddDbContext<DBcontext>(option =>

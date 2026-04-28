@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Aspire.OllamaSharp" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
@@ -21,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
     <ProjectReference Include="..\..\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
     <ProjectReference Include="..\ChatService.Application\ChatService.Application.csproj" />
     <ProjectReference Include="..\ChatService.Domain\ChatService.Domain.csproj" />
   </ItemGroup>

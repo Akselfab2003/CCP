@@ -707,12 +707,9 @@
           "message": {
             "type": "string"
           },
-          "conversationId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
+          "ticketId": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

@@ -15,13 +15,10 @@ namespace TicketService.Sdk.Mappers
             if (ticketDto.Assignment == null)
                 return null;
 
-            if (ticketDto.Assignment.AssignmentDto == null)
+            if (ticketDto.Assignment.UserId == null)
                 return null;
 
-            if (ticketDto.Assignment.AssignmentDto.UserId == null)
-                return null;
-
-            return ticketDto.Assignment.AssignmentDto.UserId;
+            return ticketDto.Assignment.UserId;
         }
 
         private static Guid? AssignedByUserId(TicketDto ticketDto)
@@ -32,13 +29,13 @@ namespace TicketService.Sdk.Mappers
             if (ticketDto.Assignment == null)
                 return null;
 
-            if (ticketDto.Assignment.AssignmentDto == null)
+            if (ticketDto.Assignment == null)
                 return null;
 
-            if (ticketDto.Assignment.AssignmentDto.AssignedByUserId == null)
+            if (ticketDto.Assignment.AssignedByUserId == null)
                 return null;
 
-            return ticketDto.Assignment.AssignmentDto.AssignedByUserId;
+            return ticketDto.Assignment.AssignedByUserId;
         }
 
 
@@ -53,14 +50,13 @@ namespace TicketService.Sdk.Mappers
             AssignedByUserId = AssignedByUserId(t),
             CreatedAt = t.CreatedAt,
             CustomerId = t.CustomerId,
+            Origin = (TicketOrigin)(t.Origin ?? 0),
         };
-
 
         public static TicketSdkDto ToDto(this TicketDto ticket)
                => TicketProjection.Compile().Invoke(ticket);
 
         public static List<TicketSdkDto> ToDto(this IEnumerable<TicketDto> tickets)
             => tickets.Select(t => t.ToDto()).ToList();
-
     }
 }
