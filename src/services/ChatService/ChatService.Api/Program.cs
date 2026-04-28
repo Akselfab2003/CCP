@@ -177,8 +177,10 @@ public partial class Program
         app.MapSessionEndpoints()
            .MapFaqManagementEndpoints()
            .MapChatEndpoints()
-           .MapConfigurationEndpoints()
-           .MapAutomaticMessageGenerationEndpoints();
+           .MapConfigurationEndpoints();
+
+        app.MapAutomaticMessageGenerationEndpoints();
+
 
 
 

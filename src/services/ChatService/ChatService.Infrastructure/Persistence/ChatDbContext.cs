@@ -30,6 +30,7 @@ public class ChatDbContext : DbContext
     public DbSet<DomainDetails> DomainDetails => Set<DomainDetails>();
     public DbSet<TicketAnalysis> TicketAnalysis => Set<TicketAnalysis>();
     public DbSet<TicketEmbedding> TicketEmbedding => Set<TicketEmbedding>();
+    public DbSet<GeneratedReply> GeneratedReplies => Set<GeneratedReply>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,6 +42,8 @@ public class ChatDbContext : DbContext
             modelBuilder.ApplyConfiguration(new Configurations.ConversationEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.DomainDetailsConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.GeneratedReplyConfiguration());
+
             return;
         }
         else
@@ -50,6 +53,7 @@ public class ChatDbContext : DbContext
             modelBuilder.ApplyConfiguration(new Configurations.ConversationEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.DomainDetailsConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.GeneratedReplyConfiguration());
 
             modelBuilder.Entity<SessionEntity>()
                 .HasQueryFilter(s => s.OrganizationId == _currentUser.OrganizationId);
@@ -59,6 +63,9 @@ public class ChatDbContext : DbContext
 
             modelBuilder.Entity<MessageEntity>()
                .HasQueryFilter(m => m.OrgId == _currentUser.OrganizationId || m.OrgId == _activeSession.OrgId);
+
+            modelBuilder.Entity<GeneratedReply>()
+                .HasQueryFilter(gr => gr.OrgId == _currentUser.OrganizationId || gr.OrgId == _activeSession.OrgId);
         }
     }
 }

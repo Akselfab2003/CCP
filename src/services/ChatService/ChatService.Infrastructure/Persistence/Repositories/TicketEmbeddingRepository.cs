@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.ResultAbstraction;
+using ChatService.Domain.Dtos;
 using ChatService.Domain.Entities.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -49,20 +50,33 @@ namespace ChatService.Infrastructure.Persistence.Repositories
             }
         }
 
-        public async Task<Result<List<TicketEmbedding>>> SemanticSearch(Vector searchVector, int topK = 5, CancellationToken ct = default)
+        public async Task<Result<List<SimilarTicket>>> SemanticSearch(Vector searchVector, int topK = 5, CancellationToken ct = default)
         {
             try
             {
-                var faqs = await _dbContext.TicketEmbedding.Where(f => f.ProblemVector != null)
-                                                    .OrderBy(f => f.ProblemVector!.L2Distance(searchVector))
-                                                    .Take(topK)
-                                                    .ToListAsync(cancellationToken: ct);
-                return Result.Success(faqs);
+
+                var query = _dbContext.TicketEmbedding.Where(e => e.IsSemanticSearchable)
+                                                      .Join(_dbContext.TicketAnalysis,
+                                                            embedding => embedding.TicketId,
+                                                            analysis => analysis.TicketId,
+                                                            (embedding, analysis) => new { embedding, analysis });
+
+
+                return await query.Where(f => f.embedding.ProblemVector != null)
+                                  .OrderBy(f => f.embedding.ProblemVector!.L2Distance(searchVector))
+                                  .Take(topK)
+                                  .Select(f => new SimilarTicket
+                                  {
+                                      TicketAnalysis = f.analysis,
+                                      SimilarityScore = (float)(1 - f.embedding.ProblemVector!.CosineDistance(searchVector))
+                                  })
+                                  .OrderByDescending(t => t.SimilarityScore)
+                                  .ToListAsync(cancellationToken: ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Could not perform semantic search with vector");
-                return Result.Failure<List<TicketEmbedding>>(Error.Failure("TicketEmbeddingSearchFailed", "An error occurred while performing semantic search for ticket embeddings."));
+                _logger.LogError(ex, "Error performing semantic search for vector {SearchVector}", searchVector);
+                return Result.Failure<List<SimilarTicket>>(Error.Failure("DatabaseError", "Failed to perform semantic search."));
             }
         }
 

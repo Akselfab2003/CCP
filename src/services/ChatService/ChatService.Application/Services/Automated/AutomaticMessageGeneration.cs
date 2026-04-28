@@ -1,8 +1,12 @@
 ﻿using CCP.Shared.AuthContext;
 using CCP.Shared.ResultAbstraction;
 using ChatService.Domain.Dtos;
+using ChatService.Domain.Entities.AI;
+using ChatService.Domain.Interfaces;
 using ChatService.Infrastructure.LLM.Analysis;
+using ChatService.Infrastructure.LLM.Chat;
 using ChatService.Infrastructure.LLM.Embedding;
+using ChatService.Infrastructure.Persistence.Repositories;
 using MessagingService.Sdk.Services;
 using Microsoft.Extensions.Logging;
 using TicketService.Sdk.Services.Ticket;
@@ -17,13 +21,20 @@ namespace ChatService.Application.Services.Automated
         private readonly ITicketAnalysisService _ticketAnalysisService;
         private readonly ICurrentUser _currentUser;
         private readonly ITicketEmbeddingOrchestrator _ticketEmbeddingOrchestrator;
-
+        private readonly IGenerateReplyService _generateReplyService;
+        private readonly ITicketEmbeddingRepository _ticketEmbeddingRepository;
+        private readonly ITicketAnalysisRepository _ticketAnalysisRepository;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
         public AutomaticMessageGeneration(ILogger<AutomaticMessageGeneration> logger,
                                           IMessageSdkService messageSdkService,
                                           ITicketService ticketService,
                                           ITicketAnalysisService ticketAnalysisService,
                                           ICurrentUser currentUser,
-                                          ITicketEmbeddingOrchestrator ticketEmbeddingOrchestrator)
+                                          ITicketEmbeddingOrchestrator ticketEmbeddingOrchestrator,
+                                          IGenerateReplyService generateReplyService,
+                                          ITicketEmbeddingRepository ticketEmbeddingRepository,
+                                          ServiceAccountOverrider serviceAccountOverrider,
+                                          ITicketAnalysisRepository ticketAnalysisRepository)
         {
             _logger = logger;
             _messageSdkService = messageSdkService;
@@ -31,14 +42,16 @@ namespace ChatService.Application.Services.Automated
             _ticketAnalysisService = ticketAnalysisService;
             _currentUser = currentUser;
             _ticketEmbeddingOrchestrator = ticketEmbeddingOrchestrator;
+            _generateReplyService = generateReplyService;
+            _ticketEmbeddingRepository = ticketEmbeddingRepository;
+            _serviceAccountOverrider = serviceAccountOverrider;
+            _ticketAnalysisRepository = ticketAnalysisRepository;
         }
 
         private async Task<Result<SupportTicket>> GetTicket(int ticketId)
         {
             try
             {
-
-
                 var TicketDetailsResult = await _ticketService.GetTicket(ticketId);
                 if (TicketDetailsResult.IsFailure)
                     return Result.Failure<SupportTicket>(TicketDetailsResult.Error);
@@ -166,6 +179,50 @@ namespace ChatService.Application.Services.Automated
             }
         }
 
+
+        public async Task<Result<GeneratedReply>> GenerateReplyUsingAI(int ticketId)
+        {
+            try
+            {
+                _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+                Result<SupportTicket> ticketResult = await GetTicket(ticketId);
+
+                if (ticketResult.IsFailure)
+                    return Result.Failure<GeneratedReply>(ticketResult.Error);
+
+                var ticket = ticketResult.Value;
+
+                var analysisResult = await _ticketAnalysisRepository.GetByTicketIdAsync(ticketId);
+
+                if (analysisResult.IsFailure)
+                    return Result.Failure<GeneratedReply>(analysisResult.Error);
+
+                var analysis = analysisResult.Value;
+
+                if (analysis.Embedding == null)
+                    return Result.Failure<GeneratedReply>(Error.Failure("EmbeddingNotFound", "No embedding found for the ticket analysis."));
+
+                var SimilaritySearchResult = await _ticketEmbeddingRepository.SemanticSearch(analysis.Embedding.ProblemVector, topK: 5);
+
+                if (SimilaritySearchResult.IsFailure)
+                    return Result.Failure<GeneratedReply>(Error.Failure("SemanticSearchError", "Failed to perform semantic search for relevant ticket information."));
+
+                var aiReplyResult = await _generateReplyService.GenerateReply(ticket, analysis, SimilaritySearchResult.Value);
+
+                if (aiReplyResult.IsFailure)
+                    return Result.Failure<GeneratedReply>(aiReplyResult.Error);
+
+                var aiReply = aiReplyResult.Value;
+
+                return Result.Success(aiReply);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating AI reply for ticket ID {TicketId}", ticketId);
+                return Result.Failure<GeneratedReply>(Error.Failure("AIReplyGenerationError", $"An error occurred while generating AI reply: {ex.Message}"));
+            }
+        }
 
 
         //public async Task<Result<string>> GenerateMessage(int ticketId)

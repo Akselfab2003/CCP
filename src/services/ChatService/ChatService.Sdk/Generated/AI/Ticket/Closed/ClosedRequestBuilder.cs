@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ChatService.Sdk.Configuration.AI.Ticket.Closed
+namespace ChatService.Sdk.AI.Ticket.Closed
 {
     /// <summary>
-    /// Builds and executes requests for operations under \configuration\AI\ticket\closed
+    /// Builds and executes requests for operations under \AI\ticket\closed
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     internal partial class ClosedRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ClosedRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/configuration/AI/ticket/closed?ticketId={ticketId}", pathParameters)
+        public ClosedRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/AI/ticket/closed?ticketId={ticketId}", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ClosedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/configuration/AI/ticket/closed?ticketId={ticketId}", rawUrl)
+        public ClosedRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/AI/ticket/closed?ticketId={ticketId}", rawUrl)
         {
         }
         /// <returns>A <see cref="Stream"/></returns>
@@ -40,11 +40,11 @@ namespace ChatService.Sdk.Configuration.AI.Ticket.Closed
         /// <exception cref="global::ChatService.Sdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<Stream?> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream?> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<Stream> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Stream> PostAsync(Action<RequestConfiguration<global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToPostRequestInformation(requestConfiguration);
@@ -59,11 +59,11 @@ namespace ChatService.Sdk.Configuration.AI.Ticket.Closed
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
@@ -74,11 +74,11 @@ namespace ChatService.Sdk.Configuration.AI.Ticket.Closed
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder WithUrl(string rawUrl)
+        public global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder(rawUrl, RequestAdapter);
         }
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         #pragma warning disable CS1591
@@ -93,7 +93,7 @@ namespace ChatService.Sdk.Configuration.AI.Ticket.Closed
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        internal partial class ClosedRequestBuilderPostRequestConfiguration : RequestConfiguration<global::ChatService.Sdk.Configuration.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>
+        internal partial class ClosedRequestBuilderPostRequestConfiguration : RequestConfiguration<global::ChatService.Sdk.AI.Ticket.Closed.ClosedRequestBuilder.ClosedRequestBuilderPostQueryParameters>
         {
         }
     }
