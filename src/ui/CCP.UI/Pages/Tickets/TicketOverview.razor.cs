@@ -109,8 +109,9 @@ public partial class TicketOverview : ComponentBase
     private async Task ResolveUserNamesAsync()
     {
         var unknownIds = _tickets
-            .Where(t => t.AssignedUserId.HasValue && !_userNames.ContainsKey(t.AssignedUserId.Value))
-            .Select(t => t.AssignedUserId!.Value)
+            .SelectMany(t => new[] { t.AssignedUserId, t.CustomerId })
+            .Where(id => id.HasValue && !_userNames.ContainsKey(id!.Value))
+            .Select(id => id!.Value)
             .Distinct()
             .ToList();
 
@@ -119,7 +120,6 @@ public partial class TicketOverview : ComponentBase
         _isLoadingNames = true;
         StateHasChanged();
 
-        // Fire all lookups in parallel — total wait = slowest single request
         var tasks = unknownIds.Select(async userId =>
         {
             var nameResult = await UserService.GetUserDetailsAsync(userId);

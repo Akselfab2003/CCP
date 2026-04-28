@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Net.Sockets;
 using CCP.Shared.ValueObjects;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Models;
@@ -11,6 +12,7 @@ namespace TicketService.Sdk.Mappers
         {
             Id = t.Id ?? 0,
             Title = t.Title ?? string.Empty,
+            Description = t.Description,
             AssignedUserId = t.Assignment == null ? null : t.Assignment.UserId,
             AssignedByUserId = t.Assignment == null ? null : t.Assignment.AssignedByUserId,
             Status = t.Status ?? 0,

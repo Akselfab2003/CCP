@@ -653,6 +653,23 @@
     color: var(--ccp-text-lo);
 }
 
+.to-panel-meta-row--description {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+    .to-panel-meta-row--description .to-panel-meta-value {
+        font-size: 12.5px;
+        color: var(--ccp-text-mid);
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-word;
+        text-align: left;
+        width: 100%;
+    }
+
+
 /* =============================================
    PAGINATION
    ============================================= */
