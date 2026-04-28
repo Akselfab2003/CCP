@@ -1,5 +1,6 @@
 ﻿using CCP.Sdk.utils.Abstractions;
 using CCP.Shared.ValueObjects;
+using EmailService.Domain.Models;
 
 namespace EmailService.Sdk.Services
 {
@@ -107,6 +108,50 @@ namespace EmailService.Sdk.Services
                 {
                     request.QueryParameters.DefaultSenderEmail = DefaultSenderEmail;
                 });
+        }
+        public async Task UpdateTenantEmailAsync(string DefaultSenderEmail)
+        {
+            var api = _client.Client;
+            await api.Api
+                .TenantEmailConfiguration
+                .Update
+                .PutAsync(request =>
+                {
+                    request.QueryParameters.DefaultSenderEmail = DefaultSenderEmail;
+                });
+        }
+        public async Task<TenantEmailConfiguration?> GetTenantEmailAsync()
+        {
+            var api = _client.Client;
+            var stream = await api.Api
+                .TenantEmailConfiguration
+                .GetPath
+                .GetAsync(request =>
+                {
+                    request.Headers.Add("Accept", "application/json");
+                });
+
+            if (stream == null)
+                return null;
+
+            try
+            {
+                using var reader = new StreamReader(stream);
+                var json = await reader.ReadToEndAsync();
+
+                if (string.IsNullOrWhiteSpace(json) || json == "null")
+                    return null;
+
+                return System.Text.Json.JsonSerializer.Deserialize<TenantEmailConfiguration>(json, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deserializing tenant email config: {ex.Message}");
+                return null;
+            }
         }
     }
 }
