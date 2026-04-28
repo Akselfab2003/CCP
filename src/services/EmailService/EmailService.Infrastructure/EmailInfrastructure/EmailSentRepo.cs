@@ -28,6 +28,11 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             return await _dbContext.EmailSent.FirstOrDefaultAsync(e => e.OrganizationId == organizationId);
         }
 
+        public async Task<EmailSent?> GetByTicketIdAsync(int ticketId)
+        {
+            return await _dbContext.EmailSent.FirstOrDefaultAsync(e => e.TicketId == ticketId);
+        }
+
         public async Task<Result> CreateAsync(EmailSent email)
         {
             if (email == null)

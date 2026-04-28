@@ -6,6 +6,7 @@
         public string Title { get; set; } = string.Empty;
         public string? Description { get; private set; }
         public TicketStatus Status { get; set; }
+        public TicketOrigin Origin { get; private set; }
         public Guid OrganizationId { get; set; }
         public Guid? CustomerId { get; set; }
         public Guid? AssignmentId { get; set; }
@@ -14,11 +15,12 @@
         public List<string> InternalNotes { get; set; } = [];
 
 
-        public void AddRequiredInfo(string title, Guid? customerId, Guid organizationId, string? description = null)
+        public void AddRequiredInfo(string title, Guid? customerId, Guid organizationId, TicketOrigin origin = TicketOrigin.Manual, string? description = null)
         {
             Title = title;
             OrganizationId = organizationId;
             CustomerId = customerId;
+            Origin = origin;
             CreatedAt = DateTime.UtcNow;
             InternalNotes = [];
             Status = TicketStatus.Open;

@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.Kiota.Bundle" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CCP.Shared\CCP.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

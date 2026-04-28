@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EmailService.Domain.Models
+﻿namespace EmailService.Domain.Models
 {
     public class EmailReceived
     {
         public int Id { get; set; }
+        public string MailId { get; set; } = string.Empty;
         public Guid OrganizationId { get; set; }
         public required string Subject { get; set; }
         public required string Body { get; set; }

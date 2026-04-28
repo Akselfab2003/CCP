@@ -12,10 +12,6 @@
     <None Remove="Models\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="AuthContext\" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />

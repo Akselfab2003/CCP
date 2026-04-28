@@ -46,6 +46,8 @@ namespace TicketService.Sdk.Models
 #endif
         /// <summary>The organizationId property</summary>
         public Guid? OrganizationId { get; set; }
+        /// <summary>The origin property</summary>
+        public int? Origin { get; set; }
         /// <summary>The status property</summary>
         public int? Status { get; set; }
         /// <summary>The title property</summary>
@@ -88,6 +90,7 @@ namespace TicketService.Sdk.Models
                 { "id", n => { Id = n.GetIntValue(); } },
                 { "internalNotes", n => { InternalNotes = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "organizationId", n => { OrganizationId = n.GetGuidValue(); } },
+                { "origin", n => { Origin = n.GetIntValue(); } },
                 { "status", n => { Status = n.GetIntValue(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
             };
@@ -106,6 +109,7 @@ namespace TicketService.Sdk.Models
             writer.WriteIntValue("id", Id);
             writer.WriteCollectionOfPrimitiveValues<string>("internalNotes", InternalNotes);
             writer.WriteGuidValue("organizationId", OrganizationId);
+            writer.WriteIntValue("origin", Origin);
             writer.WriteIntValue("status", Status);
             writer.WriteStringValue("title", Title);
             writer.WriteAdditionalData(AdditionalData);

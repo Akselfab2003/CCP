@@ -51,6 +51,29 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        foreach (var claim in context.User.Claims)
+            logger.LogInformation("Gateway claim: {Type} = {Value}", claim.Type, claim.Value);
+
+        var overrider = context.RequestServices.GetRequiredService<ServiceAccountOverrider>();
+        var orgClaim = context.User.Claims.FirstOrDefault(c => c.Type == "org")
+                    ?? context.User.Claims.FirstOrDefault(c => c.Type == "organization");
+
+        if (orgClaim != null)
+        {
+            var orgData = System.Text.Json.JsonSerializer
+                .Deserialize<Dictionary<string, Dictionary<string, string>>>(orgClaim.Value);
+            if (orgData?.First().Value.TryGetValue("id", out var orgId) == true)
+                overrider.SetOrganizationId(Guid.Parse(orgId));
+        }
+    }
+    await next();
+});
+
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
     app.AppMapSwaggerExtensions();

@@ -1,6 +1,6 @@
 ﻿using ChatApp.Encryption;
 using CustomerService.Api.DB;
-using CustomerService.Api.DB.Models;
+using CustomerService.Domain.Entities;
 using CustomerService.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;

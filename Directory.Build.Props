@@ -11,7 +11,7 @@
 		<!-- Test performance -->
 		<DisableAppDomain>true</DisableAppDomain>
 		<CollectCoverage>false</CollectCoverage>
-
+		<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
 		<!-- Package lock file -->
 		<RestoreWithLockFile>false</RestoreWithLockFile>
 

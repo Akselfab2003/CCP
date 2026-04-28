@@ -21,6 +21,10 @@ namespace TicketService.Infrastructure.Persistence.Configurations
             builder.Property(t => t.Status)
                    .IsRequired();
 
+            builder.Property(t => t.Origin)
+                   .IsRequired()
+                   .HasDefaultValue(TicketOrigin.Manual);
+
             builder.Property(t => t.OrganizationId).IsRequired();
 
             builder.Property(t => t.CustomerId)

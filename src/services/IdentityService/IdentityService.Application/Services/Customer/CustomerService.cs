@@ -36,7 +36,7 @@ namespace IdentityService.Application.Services.Customer
             _memberService = memberService;
         }
 
-        public async Task<Result> InviteCustomer(string Email, CancellationToken ct = default)
+        public async Task<Result<Guid>> InviteCustomer(string Email, CancellationToken ct = default)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace IdentityService.Application.Services.Customer
                 if (CreateUserResult.IsFailure)
                 {
                     _logger.LogWarning("Failed to create customer with email {Email}: {Error}", Email, CreateUserResult.Error.Description);
-                    return Result.Failure(CreateUserResult.Error);
+                    return Result.Failure<Guid>(CreateUserResult.Error);
                 }
 
                 var userId = CreateUserResult.Value;
@@ -53,14 +53,14 @@ namespace IdentityService.Application.Services.Customer
                 if (JoinOrgResult.IsFailure)
                 {
                     _logger.LogWarning("Failed to invite customer with email {Email} to organization: {Error}", Email, JoinOrgResult.Error.Description);
-                    return Result.Failure(JoinOrgResult.Error);
+                    return Result.Failure<Guid>(JoinOrgResult.Error);
                 }
 
                 var AddUserToGroupResult = await _groupService.AddUserToGroup("Customers", _currentUser.OrganizationId, userId, ct);
                 if (AddUserToGroupResult.IsFailure)
                 {
                     _logger.LogWarning("Failed to add customer with email {Email} to Customers group: {Error}", Email, AddUserToGroupResult.Error.Description);
-                    return Result.Failure(AddUserToGroupResult.Error);
+                    return Result.Failure<Guid>(AddUserToGroupResult.Error);
                 }
 
                 int lifespan = 24 * 60 * 60; // 24 hours in seconds
@@ -72,15 +72,15 @@ namespace IdentityService.Application.Services.Customer
                 if (SendRequiredActionsEmailResult.IsFailure)
                 {
                     _logger.LogWarning("Failed to send required actions email to customer with email {Email}: {Error}", Email, SendRequiredActionsEmailResult.Error.Description);
-                    return Result.Failure(SendRequiredActionsEmailResult.Error);
+                    return Result.Failure<Guid>(SendRequiredActionsEmailResult.Error);
                 }
 
-                return Result.Success();
+                return Result.Success(userId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error inviting customer with email {Email}", Email);
-                return Result.Failure(Error.Failure(code: "InviteCustomerFailed", description: $"An error occurred while inviting the customer with email {Email}."));
+                return Result.Failure<Guid>(Error.Failure(code: "InviteCustomerFailed", description: $"An error occurred while inviting the customer with email {Email}."));
             }
         }
 

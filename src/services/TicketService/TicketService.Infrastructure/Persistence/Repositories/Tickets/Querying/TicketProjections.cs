@@ -12,6 +12,7 @@ namespace TicketService.Infrastructure.Persistence.Repositories.Tickets.Querying
             Title = t.Title,
             Description = t.Description,
             Status = t.Status,
+            Origin = t.Origin,
             OrganizationId = t.OrganizationId,
             CreatedAt = t.CreatedAt,
             CustomerId = t.CustomerId,

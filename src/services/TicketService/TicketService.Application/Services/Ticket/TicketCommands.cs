@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using EmailService.Sdk.Services;
+using Microsoft.Extensions.Logging;
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
@@ -12,14 +13,17 @@ namespace TicketService.Application.Services.Ticket
         private readonly ITicketRepositoryCommands _ticketRepository;
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly ICurrentUser _currentUser;
+        private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, ITicketHistoryRepository historyRepository)
+
+        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
             _currentUser = currentUser;
             _assignmentCommands = assignmentCommands;
+            _emailSdkService = emailSdkService;
             _historyRepository = historyRepository;
         }
 
@@ -28,7 +32,7 @@ namespace TicketService.Application.Services.Ticket
             try
             {
                 var ticket = new Domain.Entities.Ticket();
-                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Description);
+                ticket.AddRequiredInfo(request.Title, request.CustomerId, _currentUser.OrganizationId, request.Origin, request.Description);
                 Result<Domain.Entities.Ticket> result = await _ticketRepository.AddAsync(ticket);
 
                 await _ticketRepository.SaveChangesAsync();
@@ -72,7 +76,17 @@ namespace TicketService.Application.Services.Ticket
                     ));
                 }
 
-                return Result.Success(result.Value.Id);
+                try
+                {
+                    if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
+                }
+
+                return Result.Success(result.Value.Id); // ← return the ticket ID
             }
             catch (Exception ex)
             {
@@ -85,6 +99,14 @@ namespace TicketService.Application.Services.Ticket
         {
             try
             {
+                var CurrentTicketEntityResult = await _ticketRepository.GetTicket(id: ticketId);
+
+                if (CurrentTicketEntityResult.IsFailure)
+                    return Result.Failure(Error.Failure("TicketNotFound", $"Ticket with ID {ticketId} was not found."));
+
+                Domain.Entities.Ticket ticketEntity = CurrentTicketEntityResult.Value;
+                TicketStatus oldStatus = ticketEntity.Status;
+
                 var result = await _ticketRepository.UpdateStatusAsync(ticketId, newStatus);
                 if (result.IsFailure)
                 {
@@ -93,12 +115,28 @@ namespace TicketService.Application.Services.Ticket
                 }
 
                 await _historyRepository.AddAsync(TicketHistoryEntry.Create(
-                    ticketId,
-                    actorUserId: null,
+                    ticketId: ticketId,
+                    actorUserId: _currentUser.UserId,
                     eventType: "StatusChanged",
-                    oldValue: null,
+                    oldValue: ticketEntity.Status.ToString(),
                     newValue: newStatus.ToString()
                 ));
+
+
+                try
+                {
+                    if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
+                        await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
+                                                                              ticketTitle: ticketEntity.Title,
+                                                                              ticketId: ticketId,
+                                                                              newStatus: newStatus,
+                                                                              oldStatus: oldStatus);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send ticket status update email for ticket {TicketId}, but status was updated successfully", ticketId);
+                }
+
 
                 return Result.Success();
             }

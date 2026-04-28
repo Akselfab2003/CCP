@@ -1,0 +1,10 @@
+﻿namespace CustomerService.Sdk.Models
+{
+    public class CustomerDTO
+    {
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+        public required string Email { get; set; }
+        public Guid OrganizationId { get; set; }
+    }
+}

@@ -24,6 +24,10 @@ public partial class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
+        });
 
         builder.Services.AddOpenApi()
                         .AddAuthentication();
@@ -81,6 +85,11 @@ public partial class Program
             builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                                                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
+
+            builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
+                .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
+                .AddEndpointsApiExplorer();
+
         }
         builder.Services.AddSignalR(options =>
         {
@@ -93,9 +102,7 @@ public partial class Program
 
         builder.Services.AddInfrastructureServices(builder.Configuration);
 
-        builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
-                        .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
-                        .AddEndpointsApiExplorer();
+
 
         var app = builder.Build();
 
