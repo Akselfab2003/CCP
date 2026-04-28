@@ -1,8 +1,9 @@
-﻿using ChatService.Domain.Dtos;
+﻿using CCP.Shared.ResultAbstraction;
+using ChatService.Domain.Dtos;
 using ChatService.Domain.Entities.AI;
+using ChatService.Domain.Interfaces;
 using ChatService.Infrastructure.LLM.Analysis;
-using ChatService.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using ChatService.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,20 +14,23 @@ namespace ChatService.Infrastructure.LLM.Embedding
     {
         private readonly ILogger<TicketEmbeddingOrchestrator> _logger;
         private readonly ITicketAnalysisService _ticketAnalysisService;
-        private readonly ChatDbContext _chatDbContext;
+        private readonly ITicketAnalysisRepository _ticketAnalysisRepository;
+        private readonly ITicketEmbeddingRepository _ticketEmbeddingRepository;
         private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
 
         private readonly EmbeddingTextBuilder _embeddingTextBuilder;
         public TicketEmbeddingOrchestrator(ILogger<TicketEmbeddingOrchestrator> logger,
                                            ITicketAnalysisService ticketAnalysisService,
                                            [FromKeyedServices("embedding")] IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-                                           ChatDbContext chatDbContext)
+                                           ITicketAnalysisRepository ticketAnalysisRepository,
+                                           ITicketEmbeddingRepository ticketEmbeddingRepository)
         {
             _logger = logger;
             _ticketAnalysisService = ticketAnalysisService;
             _embeddingGenerator = embeddingGenerator;
-            _chatDbContext = chatDbContext;
             _embeddingTextBuilder = new EmbeddingTextBuilder();
+            _ticketAnalysisRepository = ticketAnalysisRepository;
+            _ticketEmbeddingRepository = ticketEmbeddingRepository;
         }
 
         public async Task OnTicketCreatedAsync(SupportTicket ticket)
@@ -55,9 +59,7 @@ namespace ChatService.Infrastructure.LLM.Embedding
                     ProblemAnalysedAt = DateTime.UtcNow,
                 };
 
-                _chatDbContext.TicketAnalysis.Add(entity);
-                // Fix update to seperate service
-                await _chatDbContext.SaveChangesAsync();
+                await _ticketAnalysisRepository.AddAsync(entity);
 
                 await EmbedProblemAsync(entity, analysisData);
             }
@@ -71,13 +73,14 @@ namespace ChatService.Infrastructure.LLM.Embedding
         {
             try
             {
-                var existing = await _chatDbContext.TicketAnalysis.Include(a => a.Embedding).FirstOrDefaultAsync(a => a.TicketId == ticket.TicketId);
+                var existing = await _ticketAnalysisRepository.GetByTicketIdAsync(ticket.TicketId);
 
                 if (existing is null)
                 {
                     await OnTicketCreatedAsync(ticket);
                     return;
                 }
+                var ticketAnalysis = existing.Value;
 
                 var analysisResult = await _ticketAnalysisService.ExtractProblemAsync(ticket);
 
@@ -87,19 +90,19 @@ namespace ChatService.Infrastructure.LLM.Embedding
                     return;
                 }
 
-                if (analysisResult.Value.Summary == existing.ProblemSummary)
+                if (analysisResult.Value.Summary == ticketAnalysis.ProblemSummary)
                     return;
 
-                existing.ProblemSummary = analysisResult.Value.Summary;
-                existing.Category = analysisResult.Value.Category;
-                existing.Component = analysisResult.Value.Component;
-                existing.Symptoms = analysisResult.Value.Symptoms;
-                existing.ErrorCodes = analysisResult.Value.ErrorCodes;
-                existing.Tags = analysisResult.Value.Tags;
-                existing.ProblemAnalysedAt = DateTime.UtcNow;
-                existing.ReanalysisCount += 1;
-                await _chatDbContext.SaveChangesAsync();
-                await EmbedProblemAsync(existing, analysisResult.Value);
+                ticketAnalysis.ProblemSummary = analysisResult.Value.Summary;
+                ticketAnalysis.Category = analysisResult.Value.Category;
+                ticketAnalysis.Component = analysisResult.Value.Component;
+                ticketAnalysis.Symptoms = analysisResult.Value.Symptoms;
+                ticketAnalysis.ErrorCodes = analysisResult.Value.ErrorCodes;
+                ticketAnalysis.Tags = analysisResult.Value.Tags;
+                ticketAnalysis.ProblemAnalysedAt = DateTime.UtcNow;
+                ticketAnalysis.ReanalysisCount += 1;
+                Result result = await _ticketAnalysisRepository.UpdateAsync(ticketAnalysis);
+                await EmbedProblemAsync(ticketAnalysis, analysisResult.Value);
 
             }
             catch (Exception ex)
@@ -112,18 +115,17 @@ namespace ChatService.Infrastructure.LLM.Embedding
         {
             try
             {
-                var existing = await _chatDbContext.TicketAnalysis
-                                                   .Include(a => a.Embedding)
-                                                   .FirstOrDefaultAsync(a => a.TicketId == ticket.TicketId);
+                var existing = await _ticketAnalysisRepository.GetByTicketIdAsync(ticket.TicketId);
+
+
 
                 if (existing is null)
                 {
                     // This covers the edge case where a ticket is created and closed before the OnTicketCreatedAsync is processed. In such cases, we can directly create the analysis and embedding for the closed ticket before generating the solution embedding.
                     await OnTicketCreatedAsync(ticket);
-                    existing = await _chatDbContext.TicketAnalysis
-                                                   .Include(a => a.Embedding)
-                                                   .FirstAsync(a => a.TicketId == ticket.TicketId);
+                    existing = await _ticketAnalysisRepository.GetByTicketIdAsync(ticket.TicketId);
                 }
+                var ticketAnalysis = existing.Value;
 
                 var solutionAnalysisResult = await _ticketAnalysisService.ExtractSolutionAsync(ticket);
                 if (solutionAnalysisResult.IsFailure)
@@ -132,15 +134,15 @@ namespace ChatService.Infrastructure.LLM.Embedding
                     return;
                 }
 
-                existing.RootCause = solutionAnalysisResult.Value.RootCause;
-                existing.SolutionSummary = solutionAnalysisResult.Value.SolutionSummary;
-                existing.SolutionSteps = solutionAnalysisResult.Value.SolutionSteps;
-                existing.PreventionTips = solutionAnalysisResult.Value.PreventionTips;
-                existing.SolutionAnalysedAt = DateTime.UtcNow;
+                ticketAnalysis.RootCause = solutionAnalysisResult.Value.RootCause;
+                ticketAnalysis.SolutionSummary = solutionAnalysisResult.Value.SolutionSummary;
+                ticketAnalysis.SolutionSteps = solutionAnalysisResult.Value.SolutionSteps;
+                ticketAnalysis.PreventionTips = solutionAnalysisResult.Value.PreventionTips;
+                ticketAnalysis.SolutionAnalysedAt = DateTime.UtcNow;
 
-                await _chatDbContext.SaveChangesAsync();
+                await _ticketAnalysisRepository.UpdateAsync(ticketAnalysis);
 
-                await EmbedSolutionAsync(existing, solutionAnalysisResult.Value);
+                await EmbedSolutionAsync(ticketAnalysis, solutionAnalysisResult.Value);
             }
             catch (Exception ex)
             {
@@ -169,10 +171,9 @@ namespace ChatService.Infrastructure.LLM.Embedding
             embedding.IsSemanticSearchable = false;
 
             if (analysis.Embedding is null)
-                await _chatDbContext.TicketEmbedding.AddAsync(embedding);
-
-            await _chatDbContext.SaveChangesAsync();
-
+                await _ticketEmbeddingRepository.AddAsync(embedding);
+            else
+                await _ticketEmbeddingRepository.UpdateAsync(embedding);
         }
 
 
@@ -189,7 +190,7 @@ namespace ChatService.Infrastructure.LLM.Embedding
             embedding.SolutionEmbeddedAt = DateTime.UtcNow;
             embedding.IsSemanticSearchable = true;
 
-            await _chatDbContext.SaveChangesAsync();
+            await _ticketEmbeddingRepository.UpdateAsync(embedding);
         }
     }
 }

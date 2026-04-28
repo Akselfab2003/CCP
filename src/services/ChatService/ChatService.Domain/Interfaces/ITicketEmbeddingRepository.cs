@@ -9,5 +9,6 @@ namespace ChatService.Infrastructure.Persistence.Repositories
         Task<Result> AddAsync(TicketEmbedding embedding);
         Task<Result<TicketEmbedding>> GetByTicketIdAsync(int ticketId);
         Task<Result<List<TicketEmbedding>>> SemanticSearch(Vector searchVector, int topK = 5, CancellationToken ct = default);
+        Task<Result> UpdateAsync(TicketEmbedding embedding);
     }
 }

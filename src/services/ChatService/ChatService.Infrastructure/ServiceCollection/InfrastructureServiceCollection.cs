@@ -22,7 +22,8 @@ namespace ChatService.Infrastructure.ServiceCollection
                     .AddScoped<ITicketAnalysisService, TicketAnalysisService>()
                     .AddScoped<IChatService, LLM.Chat.ChatService>()
                     .AddScoped<ITicketEmbeddingRepository, TicketEmbeddingRepository>()
-                    .AddScoped<ITicketEmbeddingOrchestrator, TicketEmbeddingOrchestrator>();
+                    .AddScoped<ITicketEmbeddingOrchestrator, TicketEmbeddingOrchestrator>()
+                    .AddScoped<ITicketAnalysisRepository, TicketAnalysisRepository>();
 
             return services;
         }

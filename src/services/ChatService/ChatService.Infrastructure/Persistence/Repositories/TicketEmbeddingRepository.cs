@@ -65,5 +65,20 @@ namespace ChatService.Infrastructure.Persistence.Repositories
                 return Result.Failure<List<TicketEmbedding>>(Error.Failure("TicketEmbeddingSearchFailed", "An error occurred while performing semantic search for ticket embeddings."));
             }
         }
+
+        public async Task<Result> UpdateAsync(TicketEmbedding embedding)
+        {
+            try
+            {
+                _dbContext.TicketEmbedding.Update(embedding);
+                await _dbContext.SaveChangesAsync();
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating ticket embedding for ticket {TicketId}", embedding.TicketId);
+                return Result.Failure(Error.Failure("DatabaseError", "Failed to update ticket embedding."));
+            }
+        }
     }
 }
