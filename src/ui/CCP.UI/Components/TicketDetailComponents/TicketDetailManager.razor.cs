@@ -119,11 +119,27 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
         var customerTask = Ticket.CustomerId.HasValue
             ? UserService.GetUserDetailsAsync(Ticket.CustomerId.Value)
             : null;
+        var assigneeTask = Ticket.AssignedUserId.HasValue
+            ? UserService.GetUserDetailsAsync(Ticket.AssignedUserId.Value)
+            : null;
+
+        var tasksToAwait = new List<Task> { detailTask };
+        if (customerTask is not null) tasksToAwait.Add(customerTask);
+        if (assigneeTask is not null) tasksToAwait.Add(assigneeTask);
+        await Task.WhenAll(tasksToAwait);
 
         if (customerTask is not null)
             await Task.WhenAll(detailTask, customerTask);
         else
             await detailTask;
+
+        if (assigneeTask is not null && Ticket.AssignedUserId.HasValue
+            && !_userNameCache.ContainsKey(Ticket.AssignedUserId.Value))
+        {
+            var assigneeResult = assigneeTask.Result;
+            if (assigneeResult.IsSuccess)
+                _userNameCache[Ticket.AssignedUserId.Value] = assigneeResult.Value.name;
+        }
 
         var result = detailTask.Result;
         if (result.IsSuccess)
@@ -149,6 +165,13 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
                 _customerName = nameResult.Value.name;
                 _userNameCache[Ticket.CustomerId!.Value] = _customerName;
             }
+        }
+
+        if (Ticket.AssignedUserId.HasValue && !_userNameCache.ContainsKey(Ticket.AssignedUserId.Value))
+        {
+            var assigneeResult = await UserService.GetUserDetailsAsync(Ticket.AssignedUserId.Value);
+            if (assigneeResult.IsSuccess)
+                _userNameCache[Ticket.AssignedUserId.Value] = assigneeResult.Value.name;
         }
 
         _isLoadingMessages = false;
