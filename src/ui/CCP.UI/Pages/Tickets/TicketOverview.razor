@@ -201,12 +201,28 @@
                 </div>
                 <div class="to-panel-meta-row">
                     <span class="to-panel-meta-label">Customer</span>
-                    <span class="to-panel-meta-value to-panel-mono">
-                        @(_selectedTicket.CustomerId.HasValue
-                            ? _selectedTicket.CustomerId.Value.ToString()[..8] + "…"
-                            : "—")
+                    <span class="to-panel-meta-value">
+                        @if (_selectedTicket.CustomerId is null)
+                        {
+                            <span>—</span>
+                        }
+                        else if (_userNames.TryGetValue(_selectedTicket.CustomerId.Value, out var customerName))
+                        {
+                            @customerName
+                        }
+                        else
+                        {
+                            <span class="to-panel-mono">@(_isLoadingNames ? "Loading..." : _selectedTicket.CustomerId.Value.ToString()[..8] + "…")</span>
+                        }
                     </span>
                 </div>
+                @if (!string.IsNullOrWhiteSpace(_selectedTicket.Description))
+                {
+                    <div class="to-panel-meta-row to-panel-meta-row--description">
+                        <span class="to-panel-meta-label">Description</span>
+                        <span class="to-panel-meta-value">@_selectedTicket.Description</span>
+                    </div>
+                }
                 <div class="to-panel-meta-row">
                     <span class="to-panel-meta-label">Assigned to</span>
                     <span class="to-panel-meta-value">
