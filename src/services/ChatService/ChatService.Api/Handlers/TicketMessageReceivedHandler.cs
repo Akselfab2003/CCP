@@ -7,26 +7,34 @@ namespace ChatService.Api.Handlers
     public class TicketMessageReceivedHandler
     {
         private readonly ILogger<TicketMessageReceivedHandler> _logger;
-        private readonly ICurrentUser _currentUser;
-        private readonly IAutomaticMessageGeneration _automaticMessageGeneration;
-        private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-
-        public TicketMessageReceivedHandler(ILogger<TicketMessageReceivedHandler> logger, ICurrentUser currentUser, IAutomaticMessageGeneration automaticMessageGeneration, ServiceAccountOverrider serviceAccountOverrider)
+        public TicketMessageReceivedHandler(ILogger<TicketMessageReceivedHandler> logger, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
-            _currentUser = currentUser;
-            _automaticMessageGeneration = automaticMessageGeneration;
-            _serviceAccountOverrider = serviceAccountOverrider;
+            _scopeFactory = scopeFactory;
         }
 
-        public void Handle(TicketMessageReceived ticketMessageReceived)
+        public async Task Handle(TicketMessageReceived ticketMessageReceived)
         {
-            _logger.LogInformation("Received TicketMessageReceived event for TicketId: {TicketId}, OrgId: {OrgId}, ReceivedAt: {ReceivedAt}",
-                ticketMessageReceived.TicketId, ticketMessageReceived.OrgId, ticketMessageReceived.ReceivedAt);
-            _currentUser.SetOrganizationId(ticketMessageReceived.OrgId);
-            _serviceAccountOverrider.SetOrganizationId(ticketMessageReceived.OrgId);
-            _automaticMessageGeneration.NewMessageAddedToTicketAnalysis(ticketMessageReceived.TicketId);
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                ICurrentUser currentUser = scope.ServiceProvider.GetRequiredService<ICurrentUser>();
+                ServiceAccountOverrider serviceAccountOverrider = scope.ServiceProvider.GetRequiredService<ServiceAccountOverrider>();
+                IAutomaticMessageGeneration automaticMessageGeneration = scope.ServiceProvider.GetRequiredService<IAutomaticMessageGeneration>();
+
+                _logger.LogInformation("Received TicketMessageReceived event for TicketId: {TicketId}, OrgId: {OrgId}, ReceivedAt: {ReceivedAt}",
+                    ticketMessageReceived.TicketId, ticketMessageReceived.OrgId, ticketMessageReceived.ReceivedAt);
+                currentUser.SetOrganizationId(ticketMessageReceived.OrgId);
+                serviceAccountOverrider.SetOrganizationId(ticketMessageReceived.OrgId);
+                await automaticMessageGeneration.NewMessageAddedToTicketAnalysis(ticketMessageReceived.TicketId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling TicketMessageReceived event for TicketId: {TicketId}, OrgId: {OrgId}",
+                    ticketMessageReceived.TicketId, ticketMessageReceived.OrgId);
+            }
         }
     }
 }

@@ -37,17 +37,19 @@ namespace ChatService.Application.Services.Automated
         {
             try
             {
-                var NewSupportTicketRequst = new SupportTicket();
 
 
                 var TicketDetailsResult = await _ticketService.GetTicket(ticketId);
                 if (TicketDetailsResult.IsFailure)
                     return Result.Failure<SupportTicket>(TicketDetailsResult.Error);
 
-                NewSupportTicketRequst.TicketId = TicketDetailsResult.Value.Id;
-                NewSupportTicketRequst.Title = TicketDetailsResult.Value.Title;
-                NewSupportTicketRequst.Description = TicketDetailsResult.Value.Description ?? string.Empty;
-
+                var NewSupportTicketRequest = new SupportTicket()
+                {
+                    TicketId = TicketDetailsResult.Value.Id,
+                    Title = TicketDetailsResult.Value.Title,
+                    Description = TicketDetailsResult.Value.Description ?? string.Empty,
+                    OrgId = TicketDetailsResult.Value.OrganizationId,
+                };
 
                 var messagesResult = await _messageSdkService.GetMessagesByTicketIdAsync(ticketId);
 
@@ -82,9 +84,9 @@ namespace ChatService.Application.Services.Automated
                     messagesList.Add(ticketMessage);
                 }
 
-                NewSupportTicketRequst.Messages = messagesList;
+                NewSupportTicketRequest.Messages = messagesList;
 
-                return Result.Success(NewSupportTicketRequst);
+                return Result.Success(NewSupportTicketRequest);
 
             }
             catch (Exception ex)

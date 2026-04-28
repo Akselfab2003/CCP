@@ -117,8 +117,6 @@ namespace ChatService.Infrastructure.LLM.Embedding
             {
                 var existing = await _ticketAnalysisRepository.GetByTicketIdAsync(ticket.TicketId);
 
-
-
                 if (existing is null)
                 {
                     // This covers the edge case where a ticket is created and closed before the OnTicketCreatedAsync is processed. In such cases, we can directly create the analysis and embedding for the closed ticket before generating the solution embedding.
@@ -161,8 +159,10 @@ namespace ChatService.Infrastructure.LLM.Embedding
 
             var embedding = analysis.Embedding ?? new TicketEmbedding()
             {
+                Id = Guid.NewGuid(),
                 TicketId = analysis.TicketId,
-                OrgId = analysis.OrgId,
+                AnalysisId = analysis.Id,
+                OrgId = analysis.OrgId
             };
 
             embedding.ProblemEmbeddingSource = text;

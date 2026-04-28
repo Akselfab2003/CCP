@@ -7,27 +7,34 @@ namespace ChatService.Api.Handlers
     public class TicketCreatedHandler
     {
         private readonly ILogger<TicketCreatedHandler> _logger;
-        private readonly IAutomaticMessageGeneration _automaticMessageGeneration;
-        private readonly ICurrentUser _currentUser;
-        private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TicketCreatedHandler(ILogger<TicketCreatedHandler> logger, IAutomaticMessageGeneration automaticMessageGeneration, ICurrentUser currentUser, ServiceAccountOverrider serviceAccountOverrider)
+
+        public TicketCreatedHandler(ILogger<TicketCreatedHandler> logger, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
-            _automaticMessageGeneration = automaticMessageGeneration;
-            _currentUser = currentUser;
-            _serviceAccountOverrider = serviceAccountOverrider;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
-        public void Handle(TicketCreated ticketCreated)
+        public async Task HandleAsync(TicketCreated ticketCreated)
         {
-            _logger.LogInformation("Received TicketCreated event for TicketId: {TicketId}, OrgId: {OrgId}, CreatedAt: {CreatedAt}",
-                ticketCreated.TicketId, ticketCreated.OrgId, ticketCreated.CreatedAt);
+            try
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var _currentUser = scope.ServiceProvider.GetRequiredService<ICurrentUser>();
+                var _serviceAccountOverrider = scope.ServiceProvider.GetRequiredService<ServiceAccountOverrider>();
+                var _automaticMessageGeneration = scope.ServiceProvider.GetRequiredService<IAutomaticMessageGeneration>();
+                _logger.LogInformation("Received TicketCreated event for TicketId: {TicketId}, OrgId: {OrgId}, CreatedAt: {CreatedAt}",
+                    ticketCreated.TicketId, ticketCreated.OrgId, ticketCreated.CreatedAt);
+                _currentUser.SetOrganizationId(ticketCreated.OrgId);
+                _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+                await _automaticMessageGeneration.TicketCreatedAnalysis(ticketCreated.TicketId);
 
-            _currentUser.SetOrganizationId(ticketCreated.OrgId);
-            _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
-
-            _automaticMessageGeneration.TicketCreatedAnalysis(ticketCreated.TicketId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing TicketCreated event for TicketId: {TicketId}, OrgId: {OrgId}", ticketCreated.TicketId, ticketCreated.OrgId);
+            }
         }
     }
 }
