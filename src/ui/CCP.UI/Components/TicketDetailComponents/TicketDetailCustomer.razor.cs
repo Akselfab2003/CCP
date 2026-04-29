@@ -292,19 +292,33 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
 
         var unknownIds = messages
             .Where(m => m.UserId.HasValue && m.UserId.Value != Guid.Empty)
-            .Select(m => m.UserId!.Value)
-            .Distinct()
-            .Where(id => !_userNameCache.ContainsKey(id))
-            .ToList();
+            .Select(m => m.UserId!.Value).Distinct()
+            .Where(id => !_userNameCache.ContainsKey(id)).ToList();
+
+        Logger.LogInformation("ResolveUserNamesAsync: resolving {Count} unknown user IDs: {Ids}",
+            unknownIds.Count, string.Join(", ", unknownIds));
 
         var tasks = unknownIds.Select(async userId =>
         {
             try
             {
                 var r = await UserService.GetUserDetailsAsync(userId);
+                if (r.IsSuccess)
+                {
+                    Logger.LogInformation("Resolved user {UserId} -> {Name}", userId, r.Value.name);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to resolve user {UserId}: {Code} - {Description}",
+                        userId, r.Error.Code, r.Error.Description);
+                }
                 return (userId, name: r.IsSuccess ? r.Value.name : (string?)null);
             }
-            catch { return (userId, name: (string?)null); }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Exception resolving user {UserId}", userId);
+                return (userId, name: (string?)null);
+            }
         });
 
         foreach (var (userId, name) in await Task.WhenAll(tasks))
@@ -373,6 +387,6 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
         HubService.OnMessageReceived -= HandleMessageReceived;
         HubService.OnMessageUpdated -= HandleMessageUpdated;
         HubService.OnMessageDeleted -= HandleMessageDeleted;
-        await HubService.DisposeAsync();
+        await HubService.LeaveTicketAsync(Ticket.Id);
     }
 }
