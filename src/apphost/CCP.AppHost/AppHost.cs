@@ -171,11 +171,13 @@ TicketService
     .WaitFor(Keycloak)
     .WaitFor(TicketDB)
     .WaitFor(RabbitMq)
+    .WaitFor(EmailService)
+    .WaitFor(IdentityService)
     .WithReference(Keycloak)
     .WithReference(TicketDB)
     .WithReference(RabbitMq)
     .WithReference(EmailService)
-    .WaitFor(EmailService)
+    .WithReference(IdentityService)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
@@ -193,11 +195,14 @@ MessagingService
     .WaitFor(MessagingDB)
     .WaitFor(TicketService)
     .WaitFor(EmailService)
+    .WaitFor(IdentityService)
     .WithReference(Keycloak)
     .WithReference(MessagingDB)
     .WithReference(RabbitMq)
     .WithReference(TicketService)
     .WithReference(EmailService)
+    .WithReference(IdentityService)
+    .WithReference(ChatService)
     .WaitFor(RabbitMq)
     .WithEnvironment(env =>
     {
@@ -230,18 +235,23 @@ CustomerService.WaitFor(Keycloak)
 ChatService
     .WaitFor(IdentityService)
     .WaitFor(Keycloak)
+    .WaitFor(TicketService)
+    .WaitFor(MessagingService)
     .WaitFor(ChatDB)
     .WaitFor(Ollama)
-    .WaitFor(TicketService)
     .WaitFor(EmbeddingModel)
     .WaitFor(QwenModel)
+    .WaitFor(RabbitMq)
     .WithReference(IdentityService)
     .WithReference(Keycloak)
+    .WithReference(MessagingService)
     .WithReference(TicketService)
+    .WithReference(MessagingService)
     .WithReference(ChatDB)
     .WithReference(Ollama)
     .WithReference(EmbeddingModel)
     .WithReference(QwenModel)
+    .WithReference(RabbitMq)
     .WithEnvironment(env =>
     {
         env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);

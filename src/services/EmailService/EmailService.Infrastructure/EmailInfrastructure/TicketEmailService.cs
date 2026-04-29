@@ -23,7 +23,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             EmailSent emailModel, int ticketId,
             TicketStatus ticketStatus,
             string organizationName, string expectedResponseTime,
-            string portalUrl, TicketOrigin origin)
+            string portalUrl, TicketOrigin origin,Guid OrgId)
         {
             try
             {
@@ -36,7 +36,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
                     portalUrl: portalUrl,
-                    origin: origin);
+                    origin: origin,
+                    OrgId: OrgId);
 
                 _logger.LogInformation($"Ticket created email sent to {recipientEmail} for ticket: {ticketTitle}");
             }
@@ -52,7 +53,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string agentName, string agentRole,
-            string replyUrl, string viewHistoryUrl, TicketOrigin origin)
+            string replyUrl, string viewHistoryUrl, TicketOrigin origin, Guid OrgId)
         {
             try
             {
@@ -68,7 +69,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     agentRole: agentRole,
                     replyUrl: replyUrl,
                     viewHistoryUrl: viewHistoryUrl,
-                    origin: origin
+                    origin: origin,
+                    OrgId: OrgId
 );
 
                 _logger.LogInformation($"Ticket reply email sent to {recipientEmail} for ticket: {ticketTitle}");
@@ -84,7 +86,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             EmailSent emailModel, int ticketId,
             TicketStatus ticketStatus,
             string organizationName, string oldStatusLabel,
-            string portalUrl, TicketOrigin origin)
+            string portalUrl, TicketOrigin origin, Guid OrgId)
         {
             try
             {
@@ -97,7 +99,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     organizationName: organizationName,
                     oldStatusLabel: oldStatusLabel,
                     portalUrl: portalUrl,
-                    origin: origin);
+                    origin: origin,
+                    OrgId: OrgId);
 
                 _logger.LogInformation($"Ticket status change email sent to {recipientEmail} for ticket: {ticketTitle}. Status: {ticketStatus}");
             }
@@ -111,7 +114,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             int ticketId, TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string replyUrl, string managementUrl,
-            string viewHistoryUrl, TicketOrigin origin)
+            string viewHistoryUrl, TicketOrigin origin,Guid OrgId)
         {
             try
             {
@@ -126,7 +129,8 @@ namespace EmailService.Infrastructure.EmailInfrastructure
                     replyUrl: replyUrl,
                     managementUrl: managementUrl,
                     viewHistoryUrl: viewHistoryUrl,
-                    origin: origin);
+                    origin: origin,
+                    OrgId: OrgId);
 
                 _logger.LogInformation("Support customer-reply notification sent to {Recipient} for ticket #{TicketId}",
                     recipientEmail, emailModel.Id);

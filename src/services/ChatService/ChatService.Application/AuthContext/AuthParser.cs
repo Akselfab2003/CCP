@@ -19,6 +19,7 @@ namespace ChatService.Application.AuthContext
             try
             {
                 var origin = context.Request.Headers.Origin.First();
+                Console.WriteLine($"[AuthParser] Origin: {origin}");
 
                 var cookie = context.Request.Cookies["SessionId"];
 
@@ -26,6 +27,7 @@ namespace ChatService.Application.AuthContext
                 if (origin == null) return Result.Failure(Error.Failure("AuthContextParseError", "Origin header not found."));
 
                 var host = new Uri(origin!).Host;
+
                 var domainDetails = await _domainServices.GetDomainDetails(host);
 
                 if (domainDetails != null && domainDetails.IsSuccess)
@@ -37,8 +39,9 @@ namespace ChatService.Application.AuthContext
 
                 return Result.Success();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[AuthParser] Error: {ex.Message}"); Console.WriteLine(ex);
                 return Result.Failure(Error.Failure("AuthContextParseError", "An error occurred while parsing the authentication context."));
             }
         }

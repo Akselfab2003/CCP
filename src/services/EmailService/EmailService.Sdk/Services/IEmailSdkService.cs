@@ -1,6 +1,7 @@
 ﻿
 using CCP.Shared.ValueObjects;
 using EmailService.Domain.Models;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace EmailService.Sdk.Services
 {

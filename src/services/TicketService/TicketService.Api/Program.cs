@@ -1,4 +1,5 @@
 using System.Reflection;
+using CCP.Shared.Events;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using EmailService.Sdk.ServiceDefaults;
@@ -9,6 +10,7 @@ using TicketService.Infrastructure.Persistence;
 using TicketService.Infrastructure.ServiceCollection;
 using Wolverine;
 using Wolverine.RabbitMQ;
+using IdentityService.Sdk.ServiceDefaults;
 
 namespace TicketService.Api
 {
@@ -61,7 +63,18 @@ namespace TicketService.Api
                     opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
                         .AutoProvision();
 
-                    opts.PublishAllMessages().ToRabbitQueue("ticket.assignment.updated").UseDurableOutbox();
+                    opts.PublishMessage<TicketAssignmentUpdated>()
+                        .ToRabbitQueue("ticket.assignment.updated")
+                        .UseDurableOutbox();
+
+                    opts.PublishMessage<TicketCreated>()
+                        .ToRabbitQueue("ticket.created")
+                        .UseDurableOutbox();
+
+                    opts.PublishMessage<TicketClosed>()
+                        .ToRabbitQueue("ticket.closed")
+                        .UseDurableOutbox();
+
                 });
 
 
@@ -71,7 +84,9 @@ namespace TicketService.Api
                     builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
                     ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."), true);
 
-
+                builder.Services.AddIdentityServiceSdk(
+                    builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
+                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."));
 
             }
 

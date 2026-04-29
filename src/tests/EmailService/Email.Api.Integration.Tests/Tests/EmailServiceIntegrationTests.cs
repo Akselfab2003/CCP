@@ -25,7 +25,7 @@ namespace Email.Api.Integration.Tests.Tests
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.NotifyTicketCreatedAsync(customerId, "test1", ticketId, TicketStatus.Open);
+            await emailService.NotifyTicketCreatedAsync(customerId, "test1", ticketId, TicketStatus.Open,"support");
 
             _output.WriteLine($"Notification sent for ticket creation: TicketId={ticketId}, CustomerId={customerId}");
         }
@@ -44,7 +44,8 @@ namespace Email.Api.Integration.Tests.Tests
                 "test2",
                 ticketId,
                 oldStatus,
-                newStatus);
+                newStatus,
+                "support");
 
 
 
@@ -65,7 +66,8 @@ namespace Email.Api.Integration.Tests.Tests
                 TicketStatus.Open,
                 TicketOrigin.Manual,
                 agentName,
-                agentRole
+                agentRole,
+                "support"
               );
 
             _output.WriteLine($"Notification sent for reply: TicketId={ticketId}, Agent={agentName}");
@@ -84,7 +86,7 @@ namespace Email.Api.Integration.Tests.Tests
                 var ticketId = Random.Shared.Next(1000, int.MaxValue);
                 ticketIds.Add(ticketId);
 
-                await emailService.NotifyTicketCreatedAsync(customerId, "test4", ticketId, TicketStatus.Open);
+                await emailService.NotifyTicketCreatedAsync(customerId, "test4", ticketId, TicketStatus.Open,"support");
             }
 
             _output.WriteLine($"Successfully sent {notificationCount} ticket creation notifications");
@@ -111,7 +113,8 @@ namespace Email.Api.Integration.Tests.Tests
                     "test5",
                     ticketId,
                     oldStatus,
-                    newStatus);
+                    newStatus,
+                    "support");
             }
 
             _output.WriteLine($"Successfully sent {statusTransitions.Length} status change notifications");
@@ -129,7 +132,8 @@ namespace Email.Api.Integration.Tests.Tests
                 TicketStatus.Open,
                 TicketOrigin.Manual,
                 agentName: "Agent with Special Chars",
-                agentRole: "Support & Service"
+                agentRole: "Support & Service",
+                "support"
                );
 
             _output.WriteLine($"Notification sent with special characters");
@@ -154,7 +158,8 @@ namespace Email.Api.Integration.Tests.Tests
                 "test7",
                 ticketId,
                 TicketStatus.Open,
-                TicketStatus.Closed);
+                TicketStatus.Closed,
+                "support");
 
             _output.WriteLine($"Notification sent with long agent note ({longNote.Length} chars)");
         }
@@ -171,7 +176,8 @@ namespace Email.Api.Integration.Tests.Tests
                 TicketStatus.Open,
                 TicketOrigin.Manual,
                 "Agent",
-                "Support"
+                "Support",
+                "support"
                 );
 
             _output.WriteLine($"Notification sent with empty reply content");
@@ -184,7 +190,7 @@ namespace Email.Api.Integration.Tests.Tests
             var customerId = Guid.NewGuid();
             var ticketId = Random.Shared.Next(1000, int.MaxValue);
 
-            await emailService.NotifyTicketCreatedAsync(customerId, "test9", ticketId, TicketStatus.Open);
+            await emailService.NotifyTicketCreatedAsync(customerId, "test9", ticketId, TicketStatus.Open,"support");
 
             Assert.True(customerId != Guid.Empty);
             Assert.True(ticketId > 0);
@@ -205,7 +211,8 @@ namespace Email.Api.Integration.Tests.Tests
                 "test10",
                 ticketId,
                 oldStatus,
-                newStatus);
+                newStatus,
+                "test");
 
 
             _output.WriteLine($"All parameters verified for status change notification");

@@ -13,26 +13,28 @@ namespace EmailService.Application.Interfaces
             EmailSent emailModel, int ticketId,
             TicketStatus ticketStatus, string organizationName,
             string expectedResponseTime, string portalUrl,
-            TicketOrigin origin);
+            TicketOrigin origin, Guid OrgId);
         Task SendTicketReplyNotificationAsync(
             string recipientEmail, string ticketTitle,
             EmailReceived emailModel, int ticketId,
             TicketStatus ticketStatus, CustomerDTO customer,
             string organizationName, string agentName,
             string agentRole, string replyUrl,
-            string viewHistoryUrl, TicketOrigin origin);
+            string viewHistoryUrl, TicketOrigin origin,
+            Guid OrgId);
         Task SendTicketStatusChangeNotificationAsync(
             string recipientEmail, string ticketTitle,
             EmailSent emailModel, int ticketId,
             TicketStatus ticketStatus, string organizationName,
             string oldStatusLabel, string portalUrl,
-            TicketOrigin origin);
+            TicketOrigin origin, Guid OrgId);
         Task SendSupportCustomerReplyNotificationAsync(
             string recipientEmail, EmailReceived emailModel,
             int ticketId, TicketStatus ticketStatus,
             CustomerDTO customer, string organizationName,
             string replyUrl, string managementUrl,
-            string viewHistoryUrl, TicketOrigin origin);
+            string viewHistoryUrl, TicketOrigin origin,
+            Guid OrgId);
         Task SendReplyToEmailAsync(string recipientEmail,
                                    EmailSent email,
                                    List<MessageDto> messages,

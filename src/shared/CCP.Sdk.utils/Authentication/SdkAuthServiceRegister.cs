@@ -85,6 +85,8 @@ namespace CCP.Sdk.utils.Authentication
                     client.BaseAddress = new Uri(ServiceUrl);
                 }).AddHttpMessageHandler<TenantHeaderInjector>();
 
+                Console.WriteLine($"[SdkAuthServiceRegister] ServiceUrl for {ClientName}: {ServiceUrl}");
+
                 return services;
             }
 

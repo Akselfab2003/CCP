@@ -2,6 +2,8 @@ using Gateway.Sdk.Services;
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
+using ChatService.Sdk.Services;
+using ChatService.Sdk.Models;
 using IdentityService.Sdk.Services.User;
 using MessagingService.Sdk.Dtos;
 using MessagingService.Sdk.Services;
@@ -21,6 +23,7 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     [Inject] private ITicketService TicketService { get; set; } = default!;
     [Inject] private IUserService UserService { get; set; } = default!;
     [Inject] private IGatewayService GatewayService { get; set; } = default!;
+    [Inject] private IAIReplyClient AIReplyClient { get; set; } = default!;
     [Inject] private ILogger<TicketDetailSupporter> Logger { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
@@ -51,6 +54,13 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     private bool _isLoadingMoreMessages;
     private bool _shouldScrollToBottom;
     private ElementReference _messagesContainer;
+    private ElementReference _composerTextarea;
+
+    // AI reply state
+    private AiReply? _aiSuggestion;
+    private bool _isLoadingAiSuggestion;
+    private bool _showAiSuggestion;
+    private string? _aiSuggestionError;
 
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
 
@@ -70,10 +80,14 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         StateHasChanged();
     }
 
+    private bool _initialized;
+
     protected override async Task OnInitializedAsync()
     {
-        if (!RendererInfo.IsInteractive)
+        if (!RendererInfo.IsInteractive || _initialized)
             return;
+
+        _initialized = true;
 
         HubService.OnMessageReceived += HandleMessageReceived;
         HubService.OnMessageUpdated += HandleMessageUpdated;
@@ -87,7 +101,33 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     {
         _isLoadingMessages = true;
 
-        var result = await GatewayService.GetTicketDetailAsync(Ticket.Id);
+        var detailTask = GatewayService.GetTicketDetailAsync(Ticket.Id);
+        var customerTask = Ticket.CustomerId.HasValue
+            ? UserService.GetUserDetailsAsync(Ticket.CustomerId.Value)
+            : null;
+        var assigneeTask = Ticket.AssignedUserId.HasValue
+            ? UserService.GetUserDetailsAsync(Ticket.AssignedUserId.Value)
+            : null;
+
+        var tasksToAwait = new List<Task> { detailTask };
+        if (customerTask is not null) tasksToAwait.Add(customerTask);
+        if (assigneeTask is not null) tasksToAwait.Add(assigneeTask);
+        await Task.WhenAll(tasksToAwait);
+
+        if (customerTask is not null)
+            await Task.WhenAll(detailTask, customerTask);
+        else
+            await detailTask;
+
+        if (assigneeTask is not null && Ticket.AssignedUserId.HasValue
+            && !_userNameCache.ContainsKey(Ticket.AssignedUserId.Value))
+        {
+            var assigneeResult = assigneeTask.Result;
+            if (assigneeResult.IsSuccess)
+                _userNameCache[Ticket.AssignedUserId.Value] = assigneeResult.Value.name;
+        }
+
+        var result = detailTask.Result;
         if (result.IsSuccess)
         {
             _messages = result.Value.Messages;
@@ -100,7 +140,24 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         }
         else
         {
-            Logger.LogError("TicketDetailSupporter failed to load detail for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+            Logger.LogError("LoadDetailAsync failed for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+        }
+
+        if (_customerName is null && customerTask is not null)
+        {
+            var nameResult = customerTask.Result;
+            if (nameResult.IsSuccess)
+            {
+                _customerName = nameResult.Value.name;
+                _userNameCache[Ticket.CustomerId!.Value] = _customerName;
+            }
+        }
+
+        if (Ticket.AssignedUserId.HasValue && !_userNameCache.ContainsKey(Ticket.AssignedUserId.Value))
+        {
+            var assigneeResult = await UserService.GetUserDetailsAsync(Ticket.AssignedUserId.Value);
+            if (assigneeResult.IsSuccess)
+                _userNameCache[Ticket.AssignedUserId.Value] = assigneeResult.Value.name;
         }
 
         _isLoadingMessages = false;
@@ -176,6 +233,52 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         if (HubService.IsConnected)
             _ = HubService.JoinTicketGroupAsync(Ticket.Id);
     }
+
+    // ── AI reply ────────────────────────────────────────────────────────────
+
+    private async Task GenerateAiReplyAsync()
+    {
+        if (_isLoadingAiSuggestion) return;
+
+        _isLoadingAiSuggestion = true;
+        _aiSuggestionError = null;
+        _aiSuggestion = null;
+        _showAiSuggestion = false;
+        await InvokeAsync(StateHasChanged);
+
+        var result = await AIReplyClient.GetReply(Ticket.Id);
+
+        if (result.IsSuccess)
+        {
+            _aiSuggestion = result.Value;
+            _showAiSuggestion = true;
+        }
+        else
+        {
+            _aiSuggestionError = result.Error.Description;
+            Logger.LogError("AI reply failed for ticket {TicketId}: {Error}", Ticket.Id, result.Error);
+        }
+
+        _isLoadingAiSuggestion = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void UseAiSuggestion(string text)
+    {
+        _newMessageContent = text;
+        _showAiSuggestion = false;
+        StateHasChanged();
+    }
+
+    private void DismissAiSuggestion()
+    {
+        _showAiSuggestion = false;
+        _aiSuggestion = null;
+        _aiSuggestionError = null;
+        StateHasChanged();
+    }
+
+    // ── Attachments ─────────────────────────────────────────────────────────
 
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
@@ -254,6 +357,8 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
             _pendingAttachment = null;
             _pendingAttachmentPreviewUrl = null;
             _shouldScrollToBottom = true;
+            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
+            catch { /* ignore */ }
         }
         else
         {
@@ -325,7 +430,7 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         if (userId is null) return "Unknown";
         if (userId == UserContext.UserId) return "You";
         if (_userNameCache.TryGetValue(userId.Value, out var name)) return name;
-        return "Loading...";
+        return _customerName ?? "Unknown";
     }
 
     private string GetAssigneeName(Guid? userId)
@@ -352,6 +457,13 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
     private async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !e.ShiftKey) await SendMessageAsync();
+    }
+
+    private async Task HandleComposerInput(ChangeEventArgs e)
+    {
+        _newMessageContent = e.Value?.ToString() ?? string.Empty;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.autoResizeComposer", _composerTextarea); }
+        catch { /* ignore if JS not ready */ }
     }
 
     private string GetStatusLabel(int status) => status switch

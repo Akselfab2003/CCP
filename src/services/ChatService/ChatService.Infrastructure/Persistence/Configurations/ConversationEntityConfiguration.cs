@@ -19,6 +19,12 @@ namespace ChatService.Infrastructure.Persistence.Configurations
             builder.Property(p => p.CreatedAt)
                    .IsRequired();
 
+            builder.Property(p => p.IsEscalated)
+                   .IsRequired();
+
+            builder.Property(p => p.EscalatedTicketId)
+                   .IsRequired(false);
+
             builder.HasMany(p => p.Messages)
                    .WithOne()
                    .HasForeignKey(m => m.ConversationId);

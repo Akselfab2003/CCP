@@ -156,7 +156,6 @@ namespace CCP.UI
                 ?? throw new InvalidOperationException("ChatServiceUrl configuration value is required.")
                 );
 
-            builder.Services.AddScoped<ServiceAccountOverrider>();
             builder.Services.AddGatewayServiceSdk(
                 builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
                 ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")

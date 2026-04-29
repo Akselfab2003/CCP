@@ -2,7 +2,6 @@
 #pragma warning disable CS0618
 using ChatService.Sdk.Chat.CreateConversation;
 using ChatService.Sdk.Chat.Message;
-using ChatService.Sdk.Chat.Test;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -26,11 +25,6 @@ namespace ChatService.Sdk.Chat
         public global::ChatService.Sdk.Chat.Message.MessageRequestBuilder Message
         {
             get => new global::ChatService.Sdk.Chat.Message.MessageRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The test property</summary>
-        public global::ChatService.Sdk.Chat.Test.TestRequestBuilder Test
-        {
-            get => new global::ChatService.Sdk.Chat.Test.TestRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ChatService.Sdk.Chat.ChatRequestBuilder"/> and sets the default values.

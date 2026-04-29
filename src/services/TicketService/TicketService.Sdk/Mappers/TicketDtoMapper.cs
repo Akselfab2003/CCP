@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Net.Sockets;
 using CCP.Shared.ValueObjects;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Models;
@@ -7,14 +8,48 @@ namespace TicketService.Sdk.Mappers
 {
     internal static class TicketDtoMapper
     {
+
+        private static Guid? AssignmentUserId(TicketDto ticketDto)
+        {
+            if (ticketDto == null)
+                return null;
+
+            if (ticketDto.Assignment == null)
+                return null;
+
+            if (ticketDto.Assignment.UserId == null)
+                return null;
+
+            return ticketDto.Assignment.UserId;
+        }
+
+        private static Guid? AssignedByUserId(TicketDto ticketDto)
+        {
+            if (ticketDto == null)
+                return null;
+
+            if (ticketDto.Assignment == null)
+                return null;
+
+            if (ticketDto.Assignment == null)
+                return null;
+
+            if (ticketDto.Assignment.AssignedByUserId == null)
+                return null;
+
+            return ticketDto.Assignment.AssignedByUserId;
+        }
+
+
         public static readonly Expression<Func<TicketDto, TicketSdkDto>> TicketProjection = t => new TicketSdkDto()
         {
             Id = t.Id ?? 0,
             Title = t.Title ?? string.Empty,
-            AssignedUserId = t.Assignment == null ? null : t.Assignment.UserId,
-            AssignedByUserId = t.Assignment == null ? null : t.Assignment.AssignedByUserId,
+            AssignedUserId = AssignmentUserId(t),
             Status = t.Status ?? 0,
+            Description = t.Description ?? string.Empty,
             OrganizationId = t.OrganizationId ?? Guid.Empty,
+            AssignedByUserId = AssignedByUserId(t),
             CreatedAt = t.CreatedAt,
             CustomerId = t.CustomerId,
             Origin = (TicketOrigin)(t.Origin ?? 0),

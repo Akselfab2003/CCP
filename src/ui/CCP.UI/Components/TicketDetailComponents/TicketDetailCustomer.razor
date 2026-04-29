@@ -114,9 +114,10 @@
         <div class="tdc-composer-body">
             <textarea class="tdc-composer-input"
                       placeholder="Write a reply..."
-                      rows="3"
-                      @bind="_newMessageContent"
-                      @onkeydown="HandleKeyDown" />
+                      value="@_newMessageContent"
+                      @oninput="HandleComposerInput"
+                      @onkeydown="HandleKeyDown"
+                      @ref="_composerTextarea" />
 
             @if (_pendingAttachment is not null)
             {

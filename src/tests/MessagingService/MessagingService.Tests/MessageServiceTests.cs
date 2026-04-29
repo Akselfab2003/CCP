@@ -1,4 +1,5 @@
 using CCP.Shared.AuthContext;
+using ChatService.Sdk.Services;
 using MessagingService.Application.Services;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
+using Wolverine;
 
 namespace ChatApp.MessagingService.Tests;
 
@@ -83,7 +85,11 @@ public class MessageServiceTests
         var emailService = Substitute.For<EmailService.Sdk.Services.IEmailSdkService>();
         var serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
         var logger = Substitute.For<ILogger<MessageService>>();
-        return new MessageService(dbContext, validator, serviceAccountOverrider, emailService, ticketService, logger);
+        var userService = Substitute.For<IdentityService.Sdk.Services.User.IUserService>();
+        var tenantService = Substitute.For<IdentityService.Sdk.Services.Tenant.ITenantService>();
+        var chatservice = Substitute.For<IChatService>();
+        var messageBus = Substitute.For<IMessageBus>();
+        return new MessageService(dbContext, tenantService, userService, validator, serviceAccountOverrider, emailService, ticketService, logger, chatservice, messageBus);
     }
 
     [Fact]

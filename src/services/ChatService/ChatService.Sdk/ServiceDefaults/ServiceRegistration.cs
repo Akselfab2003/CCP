@@ -18,7 +18,9 @@ namespace ChatService.Sdk.ServiceDefaults
                                                                                                              requestAdapter => new ChatServiceClient(requestAdapter)));
 
             services.AddScoped<IFaqService, FaqServiceClient>()
-                    .AddScoped<IDomainService, DomainServiceClient>();
+                    .AddScoped<IChatService, ChatClient>()
+                    .AddScoped<IDomainService, DomainServiceClient>()
+                    .AddScoped<IAIReplyClient, AIReplyClient>();
 
             return services;
         }

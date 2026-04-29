@@ -39,7 +39,7 @@ namespace EmailService.Api.Controllers
         [HttpPost]
         public async Task<IResult> NotifyNewTicketCreation(
             [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
-            [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] TicketOrigin origin)
+            [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] TicketOrigin origin, [FromQuery] Guid OrgId, [FromQuery] string orgName)
         {
             try
             {
@@ -56,10 +56,9 @@ namespace EmailService.Api.Controllers
 
                 var customer = customerResult.Value;
 
-                // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
-                var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
-                var expectedResponseTime = _configuration.GetValue<string>("EmailSettings:ExpectedResponseTime") ?? "24 hours";
-                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                var portalUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                var expectedResponseTime = "24 Hours";
+                var organizationName = orgName;
 
                 var emailModel = new EmailSent
                 {
@@ -79,7 +78,8 @@ namespace EmailService.Api.Controllers
                     organizationName: organizationName,
                     expectedResponseTime: expectedResponseTime,
                     portalUrl: portalUrl,
-                    origin: origin);
+                    origin: origin,
+                    OrgId: customer.OrganizationId);
 
                 return Results.Accepted($"Email notification for ticket creation has been sent with ticket ID {TicketId} to {customer.Email}.");
             }
@@ -93,7 +93,7 @@ namespace EmailService.Api.Controllers
         public async Task<IResult> NotifyTicketStatusChange(
             [FromQuery] Guid customerId, [FromQuery] string ticketTitle,
             [FromQuery] int TicketId, [FromQuery] string newStatus,
-            [FromQuery] string oldStatus, [FromQuery] TicketOrigin origin)
+            [FromQuery] string oldStatus, [FromQuery] TicketOrigin origin, [FromQuery] string orgName)
         {
             try
             {
@@ -109,10 +109,8 @@ namespace EmailService.Api.Controllers
 
                 var customer = customerResult.Value;
 
-                // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
-                // These URLs can be used in the email template to direct customers to the appropriate pages in the customer portal
-                var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
-                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                var portalUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                var organizationName = orgName;
 
                 var emailModel = new EmailSent
                 {
@@ -132,7 +130,8 @@ namespace EmailService.Api.Controllers
                     organizationName: organizationName,
                     oldStatusLabel: oldStatus,
                     portalUrl: portalUrl,
-                    origin: origin
+                    origin: origin,
+                    OrgId: customer.OrganizationId
                     );
 
                 return Results.Accepted($"Email notification for status change has been sent for ticket ID {TicketId} to {customer.Email}.");
@@ -147,7 +146,7 @@ namespace EmailService.Api.Controllers
         [HttpPost("reply")]
         public async Task<IResult> NotifyTicketReply(
             [FromQuery] int TicketId, [FromQuery] string TicketStatus, [FromQuery] string agentName,
-            [FromQuery] string agentRole, [FromQuery] TicketOrigin origin)
+            [FromQuery] string agentRole, [FromQuery] TicketOrigin origin, [FromQuery] string orgName)
         {
             try
             {
@@ -177,11 +176,9 @@ namespace EmailService.Api.Controllers
 
                     var customer = customerResult.Value;
 
-                    // Needs to be updated to have different URLs for different actions (view ticket, view ticket history, reopen ticket) instead of just the portal URL
-                    var portalUrl = _configuration.GetValue<string>("ApplicationUrls:CustomerPortal") ?? "#";
-                    var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
-                    var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
-                    var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                    var replyUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                    var viewHistoryUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                    var organizationName = orgName;
 
                     var emailModel = new EmailReceived
                     {
@@ -204,7 +201,8 @@ namespace EmailService.Api.Controllers
                         agentRole: agentRole,
                         replyUrl: replyUrl,
                         viewHistoryUrl: viewHistoryUrl,
-                        origin: origin
+                        origin: origin,
+                        OrgId: ticket.OrganizationId
                         );
                 }
                 else if (origin == TicketOrigin.Email)
@@ -213,14 +211,13 @@ namespace EmailService.Api.Controllers
                     {
                         return Results.BadRequest(new { message = $"Invalid ticket status value: {TicketStatus}" });
                     }
-                    // For email and chatbot origins, we can have a more generic notification without agent details
                     var customerResult = await _customerSdkService.GetCustomerById(ticket.CustomerId.Value);
                     if (customerResult.IsFailure)
                         return Results.NotFound(new { message = $"Customer with ID {ticket.CustomerId.Value} not found." });
 
                     var customer = customerResult.Value;
 
-                    var organizationName = "Support Team";
+                    var organizationName = orgName;
 
                     var messagePageResult = await _messageSdkService.GetMessagesByTicketIdAsync(TicketId);
 
@@ -270,7 +267,7 @@ namespace EmailService.Api.Controllers
         public async Task<IResult> NotifySupportCustomerReply(
             [FromQuery] Guid customerId, [FromQuery] string agentEmail,
             [FromQuery] string agentName, [FromQuery] int TicketId, [FromQuery] string TicketStatus,
-            [FromQuery] string ticketTitle, [FromQuery] string replyContent, [FromQuery] TicketOrigin origin)
+            [FromQuery] string ticketTitle, [FromQuery] string replyContent, [FromQuery] TicketOrigin origin, [FromQuery] string orgName)
         {
             try
             {
@@ -287,10 +284,10 @@ namespace EmailService.Api.Controllers
 
                 var customer = customerResult.Value;
 
-                var replyUrl = _configuration.GetValue<string>("ApplicationUrls:ReplyToTicket") ?? "#";
-                var managementUrl = _configuration.GetValue<string>("ApplicationUrls:ManageTicket") ?? "#";
-                var viewHistoryUrl = _configuration.GetValue<string>("ApplicationUrls:ViewTicketHistory") ?? "#";
-                var organizationName = _configuration.GetValue<string>("EmailSettings:OrganizationName") ?? "Support Team";
+                var managementUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                var replyUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                var viewHistoryUrl = $"{_configuration.GetValue<string>("emailPortalUrl")}/tickets/{TicketId}";
+                var organizationName = orgName;
 
                 var emailModel = new EmailReceived
                 {
@@ -312,7 +309,8 @@ namespace EmailService.Api.Controllers
                     replyUrl: replyUrl,
                     managementUrl: managementUrl,
                     viewHistoryUrl: viewHistoryUrl,
-                    origin: origin
+                    origin: origin,
+                    OrgId: customer.OrganizationId
                     );
 
                 return Results.Accepted($"Support reply notification sent to {agentEmail} for ticket #{TicketId}.");

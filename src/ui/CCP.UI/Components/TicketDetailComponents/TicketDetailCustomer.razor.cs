@@ -27,6 +27,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
     private bool _isSending;
     private bool _isLoadingMessages = true;
     private readonly Dictionary<Guid, string> _userNameCache = new();
+    private string? _customerName;
 
     // Pending attachment state
     private AttachmentDto? _pendingAttachment;
@@ -43,6 +44,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
     private bool _isLoadingMoreMessages;
     private bool _shouldScrollToBottom;
     private ElementReference _messagesContainer;
+    private ElementReference _composerTextarea;
 
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
 
@@ -86,6 +88,8 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
             // Customers never see internal notes
             _messages = result.Value.Items.Where(m => !m.IsInternalNote).ToList();
             await ResolveUserNamesAsync(_messages);
+            if (Ticket.CustomerId.HasValue && _userNameCache.TryGetValue(Ticket.CustomerId.Value, out var customerName))
+                _customerName = customerName;
             _hasMoreMessages = result.Value.HasMore;
         }
         else
@@ -240,6 +244,8 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
             _pendingAttachment = null;
             _pendingAttachmentPreviewUrl = null;
             _shouldScrollToBottom = true;
+            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
+            catch { /* ignore */ }
         }
         else
         {
@@ -310,7 +316,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
         if (userId is null) return "Unknown";
         if (userId == UserContext.UserId) return "You";
         if (_userNameCache.TryGetValue(userId.Value, out var name)) return name;
-        return "Support";
+        return _customerName ?? "Unknown";
     }
 
     private string GetInitials(Guid? userId)
@@ -323,12 +329,19 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
             if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpper();
             return name.Length > 0 ? name[0].ToString().ToUpper() : "?";
         }
-        return "S";
+        return "?";
     }
 
     private async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !e.ShiftKey) await SendMessageAsync();
+    }
+
+    private async Task HandleComposerInput(ChangeEventArgs e)
+    {
+        _newMessageContent = e.Value?.ToString() ?? string.Empty;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.autoResizeComposer", _composerTextarea); }
+        catch { /* ignore if JS not ready */ }
     }
 
     private string GetStatusLabel(int status) => status switch

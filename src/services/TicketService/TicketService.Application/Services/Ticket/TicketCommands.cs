@@ -1,9 +1,12 @@
-﻿using EmailService.Sdk.Services;
+﻿using CCP.Shared.Events;
+using EmailService.Sdk.Services;
 using Microsoft.Extensions.Logging;
 using TicketService.Application.Services.Assignment;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using IdentityService.Sdk.Services.Tenant;
+using Wolverine;
 
 namespace TicketService.Application.Services.Ticket
 {
@@ -15,10 +18,12 @@ namespace TicketService.Application.Services.Ticket
         private readonly ICurrentUser _currentUser;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly IMessageBus _messageBus;
         private readonly ServiceAccountOverrider _serviceAccountOverrider;
+        private readonly ITenantService _tenantService;
 
 
-        public TicketCommands(ILogger<TicketCommands> logger, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, ServiceAccountOverrider serviceAccountOverrider)
+        public TicketCommands(ILogger<TicketCommands> logger,ITenantService tenantService, ITicketRepositoryCommands ticketRepository, ICurrentUser currentUser, IAssignmentCommands assignmentCommands, IEmailSdkService emailSdkService, ITicketHistoryRepository historyRepository, ServiceAccountOverrider serviceAccountOverrider, IMessageBus messageBus)
         {
             _logger = logger;
             _ticketRepository = ticketRepository;
@@ -27,6 +32,8 @@ namespace TicketService.Application.Services.Ticket
             _emailSdkService = emailSdkService;
             _historyRepository = historyRepository;
             _serviceAccountOverrider = serviceAccountOverrider;
+            _tenantService = tenantService;
+            _messageBus = messageBus;
         }
 
         public async Task<Result<int>> CreateTicketAsync(CreateTicketRequest request)
@@ -61,7 +68,7 @@ namespace TicketService.Application.Services.Ticket
 
                 await _historyRepository.AddAsync(TicketHistoryEntry.Create(
                     result.Value.Id,
-                    actorUserId: request.CustomerId,
+                    actorUserId: _currentUser.UserId,
                     eventType: "TicketCreated",
                     oldValue: null,
                     newValue: result.Value.Title
@@ -81,13 +88,31 @@ namespace TicketService.Application.Services.Ticket
                 try
                 {
                     _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+
+                    var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
+
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status);
+                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status, tenantResult.Value.Name);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to send ticket creation email for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
                 }
+
+                try
+                {
+                    await _messageBus.PublishAsync<TicketCreated>(new TicketCreated
+                    {
+                        TicketId = result.Value.Id,
+                        OrgId = _currentUser.OrganizationId,
+                        CreatedAt = DateTime.UtcNow,
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish ticket created event for ticket {TicketId}, but ticket was created successfully", result.Value.Id);
+                }
+
 
                 return Result.Success(result.Value.Id); // ← return the ticket ID
             }
@@ -129,13 +154,16 @@ namespace TicketService.Application.Services.Ticket
                 try
                 {
                     _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
+                    var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
 
                     if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
                         await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
                                                                               ticketTitle: ticketEntity.Title,
                                                                               ticketId: ticketId,
                                                                               newStatus: newStatus,
-                                                                              oldStatus: oldStatus);
+                                                                              oldStatus: oldStatus,
+                                                                              orgName: tenantResult.Value.Name
+                                                                              );
                 }
                 catch (Exception ex)
                 {
@@ -143,12 +171,34 @@ namespace TicketService.Application.Services.Ticket
                 }
 
 
+                if (newStatus == TicketStatus.Closed)
+                {
+                    await SendTicketClosedEvent(ticketId);
+                }
+
                 return Result.Success();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating status for ticket {TicketId}.", ticketId);
                 return Result.Failure(Error.Failure("StatusUpdateFailed", "An error occurred while updating the ticket status."));
+            }
+        }
+
+        private async Task SendTicketClosedEvent(int ticketId)
+        {
+            try
+            {
+                await _messageBus.PublishAsync<TicketClosed>(new TicketClosed
+                {
+                    TicketId = ticketId,
+                    OrgId = _currentUser.OrganizationId,
+                    ClosedAt = DateTime.UtcNow,
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to publish ticket closed event for ticket {TicketId}, but ticket was closed successfully", ticketId);
             }
         }
 

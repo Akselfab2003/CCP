@@ -16,6 +16,12 @@ builder.Services.AddOpenApi(options =>
     OpenApiConfiguration.SetupOpenApiForSwagger(options);
 });
 
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict;
+});
+
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
     var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0")

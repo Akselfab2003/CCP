@@ -1,6 +1,10 @@
 using CCP.Shared.AuthContext;
+using CCP.Shared.Events;
 using CCP.Shared.ValueObjects;
+using ChatService.Sdk.Services;
 using EmailService.Sdk.Services;
+using IdentityService.Sdk.Services.Tenant;
+using IdentityService.Sdk.Services.User;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Entities;
 using MessagingService.Domain.Interfaces;
@@ -10,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Pgvector;
 using TicketService.Sdk.Dtos;
 using TicketService.Sdk.Services.Ticket;
+using Wolverine;
 
 namespace MessagingService.Application.Services;
 
@@ -25,16 +30,34 @@ public class MessageService : IMessageService
     private readonly ITicketService _ticketService;
     private readonly IEmailSdkService _emailSdkService;
     private readonly ServiceAccountOverrider _serviceAccountOverrider;
+    private readonly IChatService _chatService;
     private readonly ILogger<MessageService> _logger;
+    private readonly ITenantService _tenantService;
+    private readonly IUserService _userService;
+    private readonly IMessageBus _messageBus;
 
-    public MessageService(MessagingDbContext dbContext, IMessageAccessValidator messageAccessValidator, ServiceAccountOverrider serviceAccountOverrider, IEmailSdkService emailSdkService, ITicketService ticketService, ILogger<MessageService> logger)
+    public MessageService(
+        MessagingDbContext dbContext,
+        ITenantService tenantService,
+        IUserService userService,
+        IMessageAccessValidator messageAccessValidator,
+        ServiceAccountOverrider serviceAccountOverrider,
+        IEmailSdkService emailSdkService,
+        ITicketService ticketService,
+        ILogger<MessageService> logger,
+        IChatService chatService,
+        IMessageBus messageBus)
     {
         _dbContext = dbContext;
+        _tenantService = tenantService;
+        _userService = userService;
         _messageAccessValidator = messageAccessValidator;
+        _serviceAccountOverrider = serviceAccountOverrider;
         _emailSdkService = emailSdkService;
         _ticketService = ticketService;
-        _serviceAccountOverrider = serviceAccountOverrider;
         _logger = logger;
+        _chatService = chatService;
+        _messageBus = messageBus;
     }
 
     public async Task<MessageServiceResult> CreateMessageAsync(
@@ -94,7 +117,10 @@ public class MessageService : IMessageService
         _dbContext.Messages.Add(message);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        await ForwardMessageToServices(ticket.Value, message);
+        if (!request.IsInternalNote)
+            await ForwardMessageToServices(ticket.Value, message);
+
+        await PublishNewMsgEventToForAIAnalysis(ticket.Value.Id, ticket.Value.OrganizationId);
 
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
@@ -278,25 +304,117 @@ public class MessageService : IMessageService
         {
             _serviceAccountOverrider.SetOrganizationId(ticket.OrganizationId);
 
+            var tenantResult = await _tenantService.GetTenantDetailsAsync(ticket.OrganizationId);
+            var userId = msg.UserId;
+            UserRole userRole = UserRole.Customer;
+            string customerName = "";
+
+            if (userId.HasValue)
+            {
+                var userRoleResult = await _userService.GetUserDetailsAsync(userId.Value);
+                userRole = userRoleResult.Value.groups
+                    .Select(s => s switch
+                    {
+                        "Admin" => UserRole.Admin,
+                        "Manager" => UserRole.Manager,
+                        "Supporter" => UserRole.Supporter,
+                        "Customer" => UserRole.Customer,
+                        _ => UserRole.Customer
+                    })
+                    .FirstOrDefault();
+                customerName = userRoleResult.Value.name;
+            }
+            string agentName = "";
+            string agentEmail = "";
+
+            var agentInfo = ticket.AssignedUserId;
+            if (agentInfo.HasValue)
+            {
+                var agentResult = await _userService.GetUserDetailsAsync(agentInfo.Value);
+                agentName = agentResult.Value.name;
+                agentEmail = agentResult.Value.email;
+            }
+
             switch (ticket.Origin)
             {
                 case TicketOrigin.Manual:
+                    if (userRole == UserRole.Supporter || userRole == UserRole.Admin || userRole == UserRole.Manager)
+                    {
+                        await _emailSdkService.NotifyTicketRepliedAsync(
+                            ticketId: ticket.Id,
+                            status: (TicketStatus)ticket.Status,
+                            origin: ticket.Origin,
+                            agentName: customerName,
+                            agentRole: userRole.ToString(),
+                            orgName: tenantResult.Value.Name);
+                    }
+                    else
+                    {
+                        if (ticket.CustomerId.HasValue && ticket.CustomerId.Value != Guid.Empty)
+                        {
+                            await _emailSdkService.NotifySupportCustomerReplyAsync(
+                                customerId: ticket.CustomerId.Value,
+                                agentEmail: agentEmail,
+                                agentName: agentName,
+                                ticketId: ticket.Id,
+                                ticketTitle: ticket.Title,
+                                ticketStatus: (TicketStatus)ticket.Status,
+                                replyContent: msg.Content,
+                                orgName: tenantResult.Value.Name);
+
+                            _logger.LogInformation("Customer {UserId} sent a message on ticket {TicketId}. Support team notified.", agentName, ticket.Id);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Cannot notify support team: CustomerId is null or empty for ticket {TicketId}", ticket.Id);
+                        }
+                    }
+                    break;
+
+                case TicketOrigin.Email:
+                    if (msg.UserId.HasValue)
+                    {
+                        await _emailSdkService.NotifyTicketRepliedAsync(
+                            ticketId: ticket.Id,
+                            status: (TicketStatus)ticket.Status,
+                            origin: ticket.Origin,
+                            agentName: agentName,
+                            agentRole: userRole.ToString(),
+                            orgName: tenantResult.Value.Name);
+                    }
 
                     break;
-                case TicketOrigin.Email:
-                    await _emailSdkService.NotifyTicketRepliedAsync(ticketId: ticket.Id, status: (TicketStatus)ticket.Status, origin: ticket.Origin, agentName: "Agent Name", agentRole: "Agent Role");
-                    break;
+
                 case TicketOrigin.Chatbot:
+                    if (msg.UserId.HasValue)
+                        await _chatService.SendMessageToChatbotTicket(ticket.Id, msg.Content);
                     break;
+
                 default:
                     break;
-
             }
-
         }
         catch (Exception)
         {
 
+        }
+    }
+
+
+    private async Task PublishNewMsgEventToForAIAnalysis(int ticketId, Guid OrgId)
+    {
+        try
+        {
+            await _messageBus.PublishAsync<TicketMessageReceived>(new TicketMessageReceived
+            {
+                TicketId = ticketId,
+                OrgId = OrgId,
+                ReceivedAt = DateTime.UtcNow,
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish TicketMessageReceived event for ticket {TicketId}", ticketId);
         }
     }
 }

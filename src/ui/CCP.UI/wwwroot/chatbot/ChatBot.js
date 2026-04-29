@@ -314,4 +314,3 @@ class ChatBot {
 window.addEventListener('DOMContentLoaded', () => {
     new ChatBot();
 });
-
