@@ -5,6 +5,7 @@ using CCP.UI.Components;
 using CCP.UI.Services;
 using ChatService.Sdk.ServiceDefaults;
 using CustomerService.Sdk.ServiceDefaults;
+using EmailService.Sdk.ServiceDefaults;
 using Gateway.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
@@ -136,6 +137,11 @@ namespace CCP.UI
             builder.Services.AddGatewayServiceSdk(
                 builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
                 ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddEmailServiceSdk(
+                builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
+                ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required.")
                 );
 
             var app = builder.Build();
