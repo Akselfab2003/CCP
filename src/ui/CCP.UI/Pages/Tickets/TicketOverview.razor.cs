@@ -22,6 +22,7 @@ public partial class TicketOverview : ComponentBase
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private ILogger<TicketOverview> Logger { get; set; } = default!;
     [Inject] private IEmailSdkService EmailService { get; set; } = default!;
+    [Inject] private ITenantService TenantService { get; set; } = default!;
 
     // Tickets
     private List<TicketSdkDto> _tickets = new();
@@ -240,6 +241,12 @@ public partial class TicketOverview : ComponentBase
 
         var result = await AssignmentService.AssignTicketToUserAsync(_selectedTicket.Id, supporterUserId);
 
+        var orgName = TenantService.GetTenantDetailsAsync(UserContext.OrganizationId).Result.Value.Name;
+        if (orgName == null)
+        {
+            orgName = "Support";
+        }
+
         var title = "Ticket has been assigned to you";
         var replyContent = $"You have been assigned ticket #{_selectedTicket.Id}";
 
@@ -250,7 +257,9 @@ public partial class TicketOverview : ComponentBase
             _selectedTicket.Id,
             title,
             TicketStatus.WaitingForSupport,
-            replyContent);
+            replyContent,
+            orgName
+            );
 
         if (result.IsSuccess)
         {
