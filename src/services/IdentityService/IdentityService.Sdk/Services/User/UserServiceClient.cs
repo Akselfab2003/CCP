@@ -36,6 +36,8 @@ namespace IdentityService.Sdk.Services.User
 
                 if (string.IsNullOrEmpty(userDetails.Name) || string.IsNullOrEmpty(userDetails.Email))
                 {
+                    _logger.LogWarning("GetUserDetailsAsync: incomplete data for {UserId} - Name='{Name}' Email='{Email}'",
+                        userId, userDetails.Name, userDetails.Email);
                     return Result.Failure<UserAccount>(Error.Validation("InvalidUserData", $"User data for ID {userId} is incomplete."));
                 }
 
