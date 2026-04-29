@@ -1,6 +1,6 @@
 ﻿@* SupportCustomerReplyNotification.razor - Sent to support team when customer replies *@
 @using CCP.Shared.ValueObjects
-@using CustomerService.Domain.Entities
+@using CustomerService.Sdk.Models
 @using EmailService.Domain.Models
 @using TicketService.Domain.Entities
 
@@ -129,7 +129,7 @@
     [Parameter, EditorRequired]
     public EmailReceived Email { get; set; } = default!;
     [Parameter, EditorRequired]
-    public Customer Customer { get; set; } = default!;
+    public CustomerDTO Customer { get; set; } = default!;
     [Parameter]
     public int TicketId { get; set; } = default!;
     [Parameter]

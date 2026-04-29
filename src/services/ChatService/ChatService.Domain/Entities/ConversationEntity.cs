@@ -7,5 +7,7 @@
         public Guid OrgId { get; set; }
         public List<MessageEntity> Messages { get; set; } = [];
         public DateTime CreatedAt { get; set; }
+        public bool IsEscalated { get; set; } = false;
+        public int? EscalatedTicketId { get; set; }
     }
 }

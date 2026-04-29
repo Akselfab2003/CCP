@@ -27,6 +27,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
 
         public async Task SendAsync(MimeMessage message)
         {
+            string fromAddress;
             string username;
             string password;
             var emailHostUrl = _configuration.GetValue<string>("emailHostUrl") ?? throw new InvalidOperationException("emailHostUrl configuration value is required.");
@@ -35,16 +36,19 @@ namespace EmailService.Infrastructure.EmailInfrastructure
             if (tenantEmailConfig.IsFailure)
             {
                 _logger.LogWarning("Failed to retrieve tenant email configuration for tenant with id {TenantId}. Error: {Error}. Falling back to default SMTP credentials.", _currentUser.OrganizationId, tenantEmailConfig.Error);
+                fromAddress = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
                 username = _configuration.GetValue<string>("emailWorkerServiceUsername") ?? throw new InvalidOperationException("emailWorkerServiceUsername configuration value is required.");
                 password = _configuration.GetValue<string>("emailWorkerServicePassword") ?? throw new InvalidOperationException("emailWorkerServicePassword configuration value is required.");
             }
             else
             {
+                fromAddress = tenantEmailConfig.Value.DefaultSenderEmail;
                 username = tenantEmailConfig.Value.InternalEmail;
                 password = tenantEmailConfig.Value.InternalEmailPassword;
             }
 
-
+            message.From.Clear();
+            message.From.Add(new MailboxAddress("Support", fromAddress));
             using var client = new MailKit.Net.Smtp.SmtpClient();
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
             await client.ConnectAsync(emailHostUrl, 465, true);

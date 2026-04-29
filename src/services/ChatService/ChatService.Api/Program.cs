@@ -8,6 +8,7 @@ using CCP.Shared.ValueObjects;
 using ChatService.Api.ChatHub;
 using ChatService.Api.Endpoints;
 using ChatService.Api.Middleware;
+using ChatService.Application.ChatHub;
 using ChatService.Application.ServiceCollection;
 using ChatService.Application.Services.Domain;
 using ChatService.Infrastructure.Persistence;
@@ -15,9 +16,13 @@ using ChatService.Infrastructure.ServiceCollection;
 using Duende.AccessTokenManagement;
 using Duende.IdentityModel.Client;
 using IdentityService.Sdk.ServiceDefaults;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
+using TicketService.Sdk.ServiceDefaults;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 public partial class Program
 {
@@ -31,6 +36,7 @@ public partial class Program
 
         builder.Services.AddOpenApi()
                         .AddAuthentication();
+                        .AddHttpContextAccessor();
 
         builder.Services.AddAuthorization(options =>
         {
@@ -38,7 +44,6 @@ public partial class Program
                 UserRolesExtensions.ManageFaqRoleString,
                 UserRolesExtensions.AdminRoleString));
         })
-                        .AddHttpContextAccessor();
 
 
 
@@ -50,10 +55,19 @@ public partial class Program
             var keycloakURL = builder.Configuration.GetValue<string>("services:Keycloak:http:0") ?? throw new InvalidOperationException("KeycloakServiceUrl configuration value is required.");
             builder.Services.AddApiAuthenticationServices("ChatService.Api", "CCP", keycloak: keycloakURL);
 
+
             builder.Services.AddDbContext<ChatDbContext>(opts =>
             {
                 opts.UseNpgsql(builder.Configuration.GetConnectionString("chatDB"), o => { o.UseVector(); });
             });
+
+
+
+
+            builder.Services.AddMessageServiceSDK(
+              builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+              ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
+
 
             builder.AddOllamaApiClient("embedding").AddKeyedEmbeddingGenerator("embedding");
             builder.AddKeyedOllamaApiClient("qwen")
@@ -85,10 +99,37 @@ public partial class Program
             builder.Services.AddIdentityServiceSdk(builder.Configuration.GetValue<string>("services:identityservice-api:http:0")
                                                    ?? throw new InvalidOperationException("IdentityServiceUrl configuration value is required."), true);
 
+            builder.Services.AddTicketServiceSdk(ticketUrl, true);
 
             builder.Services.AddOpenApi(op => op.SetupOpenApiForSwagger())
                 .AddSwaggerGen(c => { c.SetupSwaggerForChatApp(); })
                 .AddEndpointsApiExplorer();
+
+
+            builder.UseWolverine(opts =>
+            {
+                opts.UseRabbitMq(builder.Configuration.GetConnectionString("RabbitMQ")!)
+                    .AutoProvision();
+
+                opts.ListenToRabbitQueue("ticket.created")
+                    .UseDurableInbox();
+
+                opts.ListenToRabbitQueue("MessageCreated")
+                    .UseDurableInbox();
+
+                opts.ListenToRabbitQueue("ticket.closed")
+                    .UseDurableInbox();
+            });
+
+
+
+            builder.Services.AddMessageServiceSDK(
+                builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+                ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."), true);
+
+
+
+            builder.Services.AddSingleton<ServiceAccountOverrider>();
 
         }
         builder.Services.AddSignalR(options =>
@@ -118,6 +159,7 @@ public partial class Program
                     using var scope = app.Services.CreateScope();
                     var domainservices = scope.ServiceProvider.GetRequiredService<IDomainServices>();
                     var host = new Uri(origin).Host;
+                    Console.WriteLine(host);
                     return domainservices.IsDomainAllowed(host);
                 })
                  .AllowAnyHeader()
@@ -144,6 +186,9 @@ public partial class Program
            .MapFaqManagementEndpoints()
            .MapChatEndpoints()
            .MapConfigurationEndpoints();
+
+        app.MapAutomaticMessageGenerationEndpoints();
+
 
 
 

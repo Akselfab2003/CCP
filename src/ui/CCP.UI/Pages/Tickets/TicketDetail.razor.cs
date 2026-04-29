@@ -19,6 +19,9 @@ public partial class TicketDetail : ComponentBase
     private bool _isLoading = true;
     private string? _errorMessage;
 
+    private enum TicketView { Manager, Supporter, Customer }
+    private TicketView? _ticketView;
+
     protected override async Task OnInitializedAsync()
     {
         if (!RendererInfo.IsInteractive)
@@ -29,6 +32,9 @@ public partial class TicketDetail : ComponentBase
         if (result.IsSuccess)
         {
             _ticket = result.Value;
+            _ticketView = (UserContext.Role == UserRole.Manager || UserContext.Role == UserRole.Admin)
+                ? TicketView.Manager
+                : UserContext.IsInternalUser ? TicketView.Supporter : TicketView.Customer;
         }
         else
         {
@@ -37,6 +43,5 @@ public partial class TicketDetail : ComponentBase
         }
 
         _isLoading = false;
-        StateHasChanged();
     }
 }

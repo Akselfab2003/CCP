@@ -9,8 +9,15 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\CCP.Sdk.utils\CCP.Sdk.utils.csproj" />
     <ProjectReference Include="..\..\..\shared\CCP.Shared\CCP.Shared.csproj" />
-    <ProjectReference Include="..\..\..\services\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
-    <ProjectReference Include="..\..\..\services\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
+    <ProjectReference Include="..\..\MessagingService\MessagingService.Sdk\MessagingService.Sdk.csproj" />
+    <ProjectReference Include="..\..\TicketService\TicketService.Sdk\TicketService.Sdk.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <KiotaInputDoc>..\Gateway.Api\Docs\Gateway.Api.json</KiotaInputDoc>
+    <KiotaOutputDir>.\Generated</KiotaOutputDir>
+    <KiotaSdkName>Gateway.Sdk</KiotaSdkName>
+    <KiotaClientClass>GatewayClient</KiotaClientClass>
+  </PropertyGroup>
 
 </Project>

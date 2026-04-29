@@ -189,6 +189,11 @@ namespace Keycloak.Sdk.services.users
                                              .Users[UserID.ToString()]
                                              .GetAsync(cancellationToken: ct);
 
+                var userGroups = await Client.Admin.Realms[Constants.REALM]
+                                                  .Users[UserID.ToString()]
+                                                  .Groups
+                                                  .GetAsync(cancellationToken: ct);
+
                 if (user is null)
                     return Result.Failure<UserKeycloakAccount>(Error.Failure("GetUserDetailsByID.failed", "User not found"));
 
@@ -198,6 +203,21 @@ namespace Keycloak.Sdk.services.users
                 if (string.IsNullOrEmpty(user.Email))
                     return Result.Failure<UserKeycloakAccount>(Error.Failure("GetUserDetailsByID.failed", "User email is missing"));
 
+
+                if (user.RealmRoles == null)
+                    user.RealmRoles = [];
+
+                var groups = new List<string>();
+
+                if (userGroups != null)
+                {
+                    foreach (var group in userGroups)
+                    {
+                        if (!string.IsNullOrEmpty(group.Name))
+                            groups.Add(group.Name);
+                    }
+                }
+
                 return Result.Success(new UserKeycloakAccount()
                 {
                     Id = Guid.Parse(user.Id),
@@ -206,7 +226,7 @@ namespace Keycloak.Sdk.services.users
                     Enabled = user.Enabled,
                     CreatedTimestamp = user.CreatedTimestamp,
                     RealmRoles = user.RealmRoles,
-                    Groups = user.Groups
+                    Groups = groups
                 });
             }
             catch (ApiException ex)

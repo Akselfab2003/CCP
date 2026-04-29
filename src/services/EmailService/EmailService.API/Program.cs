@@ -12,7 +12,9 @@ using EmailService.Infrastructure.Data;
 using EmailService.Infrastructure.ServiceDefaults;
 using EmailTemplates.Renderes;
 using MailCow.Sdk.ServiceDefaults;
+using MessagingService.Sdk.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
+using TicketService.Sdk.ServiceDefaults;
 using Wolverine;
 using Wolverine.RabbitMQ;
 
@@ -59,8 +61,10 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 
     builder.Services.AddCustomerviceSdk(
         builder.Configuration.GetValue<string>("services:customerservice-api:http:0")
-        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."),true);
-
+        ?? throw new InvalidOperationException("CustomerServiceUrl configuration value is required."), true);
+    builder.Services.AddMessageServiceSDK(
+        builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
+        ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
     builder.Services.AddDbContext<DBcontext>(options =>
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString("EmailDB"));
@@ -89,22 +93,29 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
     builder.Services.AddMailCowSdk(mailCowApiUrl, mailCowApiKey);
 
     builder.Services.AddInfrastructureServices(builder.Configuration);
+
+    builder.Services.AddTicketServiceSdk(
+    builder.Configuration.GetValue<string>("services:ticketservice-api:http:0")
+    ?? throw new InvalidOperationException("TicketServiceUrl configuration value is required."), true);
+
+
 }
 
 builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
 builder.Services.AddScoped<ITenantEmailConfigurationService, TenantEmailConfigurationService>();
+builder.Services.AddSingleton<ServiceAccountOverrider>();
 
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseMiddleware<AuthMiddleware>();
 
 
 if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
 {
-    AutomaticallyApplyDBMigration<DBcontext>.ApplyMigrationsAsync(app).Wait();
     app.AppMapSwaggerExtensions();
+    app.UseMiddleware<AuthMiddleware>();
+    AutomaticallyApplyDBMigration<DBcontext>.ApplyMigrationsAsync(app).Wait();
 }
 
 // Configure the HTTP request pipeline.

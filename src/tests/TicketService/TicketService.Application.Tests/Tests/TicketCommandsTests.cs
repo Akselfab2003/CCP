@@ -1,6 +1,7 @@
 ﻿using CCP.Shared.AuthContext;
 using CCP.Shared.ResultAbstraction;
 using EmailService.Sdk.Services;
+using IdentityService.Sdk.Services.Tenant;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -9,6 +10,7 @@ using TicketService.Application.Services.Ticket;
 using TicketService.Domain.Entities;
 using TicketService.Domain.Interfaces;
 using TicketService.Domain.RequestObjects;
+using Wolverine;
 
 namespace TicketService.Application.Tests.Tests
 {
@@ -21,6 +23,9 @@ namespace TicketService.Application.Tests.Tests
         private readonly IAssignmentCommands _assignmentCommands;
         private readonly IEmailSdkService _emailSdkService;
         private readonly ITicketHistoryRepository _historyRepository;
+        private readonly IMessageBus _messageBus;
+        private readonly ITenantService _tenantService;
+        private readonly ServiceAccountOverrider _serviceAccountOverrider;
         private readonly TicketCommands _sut; // System Under Test
 
         public TicketCommandsTests()
@@ -32,6 +37,10 @@ namespace TicketService.Application.Tests.Tests
             _assignmentCommands = Substitute.For<IAssignmentCommands>();
             _emailSdkService = Substitute.For<IEmailSdkService>();
             _historyRepository = Substitute.For<ITicketHistoryRepository>();
+            _messageBus = Substitute.For<IMessageBus>();
+            _serviceAccountOverrider = Substitute.For<ServiceAccountOverrider>();
+            _tenantService = Substitute.For<ITenantService>();
+
 
             // Setup standard værdier
             _currentUser.OrganizationId.Returns(Guid.NewGuid());
@@ -39,12 +48,14 @@ namespace TicketService.Application.Tests.Tests
             // Lav System Under Test med mocked dependencies
             _sut = new TicketCommands(
                 _logger,
+                _tenantService,
                 _ticketRepository,
                 _currentUser,
                 _assignmentCommands,
                 _emailSdkService,
-                _historyRepository
-
+                _historyRepository,
+                _serviceAccountOverrider,
+                _messageBus
             );
         }
 

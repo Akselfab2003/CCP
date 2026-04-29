@@ -98,7 +98,7 @@ namespace IdentityService.Application.Services.Customer
                 }
 
                 var tenantMembers = membersResult.Value
-                                                 .Where(m => m.Groups.Contains("Customer"))
+                                                 .Where(m => m.Groups.Contains("Customers"))
                                                  .Select(member => new TenantMemberDto
                                                  {
                                                      Id = member.Id,

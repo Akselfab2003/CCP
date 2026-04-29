@@ -14,10 +14,6 @@ namespace ChatService.Infrastructure.LLM.Prompts
 
                    {PromptSections.Personality}
 
-                   {PromptSections.WhatYouCanDo}
-
-                   {PromptSections.EscalationRules}
-
                    {PromptSections.ConfidenceRule}
 
                    -- FAQ CONTEXT --

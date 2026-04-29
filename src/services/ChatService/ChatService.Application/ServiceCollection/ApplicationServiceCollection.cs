@@ -1,4 +1,5 @@
 ﻿using ChatService.Application.AuthContext;
+using ChatService.Application.Services.Automated;
 using ChatService.Application.Services.Chat;
 using ChatService.Application.Services.Domain;
 using ChatService.Application.Services.Faq;
@@ -17,7 +18,8 @@ namespace ChatService.Application.ServiceCollection
             services.AddScoped<IActiveSession, ActiveSession>()
                     .AddScoped<IChatManagementService, ChatManagementService>()
                     .AddScoped<IDomainServices, DomainServices>()
-                    .AddScoped<IAuthParser, AuthParser>();
+                    .AddScoped<IAuthParser, AuthParser>()
+                    .AddScoped<IAutomaticMessageGeneration, AutomaticMessageGeneration>();
 
             return services;
         }

@@ -77,6 +77,5 @@ namespace IdentityService.API.Endpoints
                 return Results.Problem(ex.Message);
             }
         }
-
     }
 }

@@ -273,6 +273,13 @@
                     <span class="tds-sidebar-label">Time</span>
                     <span class="tds-sidebar-value">@(Ticket.CreatedAt?.ToLocalTime().ToString("HH:mm") ?? "—")</span>
                 </div>
+                @if (!string.IsNullOrWhiteSpace(Ticket.Description))
+                {
+                    <div class="tds-sidebar-row tds-sidebar-row--description">
+                        <span class="tds-sidebar-label">Description</span>
+                        <span class="tds-sidebar-value">@Ticket.Description</span>
+                    </div>
+                }
             </div>
             <div class="tds-sidebar-divider"></div>
             <div class="tds-sidebar-section">

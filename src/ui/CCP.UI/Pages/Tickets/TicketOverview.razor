@@ -201,12 +201,28 @@
                 </div>
                 <div class="to-panel-meta-row">
                     <span class="to-panel-meta-label">Customer</span>
-                    <span class="to-panel-meta-value to-panel-mono">
-                        @(_selectedTicket.CustomerId.HasValue
-                            ? _selectedTicket.CustomerId.Value.ToString()[..8] + "…"
-                            : "—")
+                    <span class="to-panel-meta-value">
+                        @if (_selectedTicket.CustomerId is null)
+                        {
+                            <span>—</span>
+                        }
+                        else if (_userNames.TryGetValue(_selectedTicket.CustomerId.Value, out var customerName))
+                        {
+                            @customerName
+                        }
+                        else
+                        {
+                            <span class="to-panel-mono">@(_isLoadingNames ? "Loading..." : _selectedTicket.CustomerId.Value.ToString()[..8] + "…")</span>
+                        }
                     </span>
                 </div>
+                @if (!string.IsNullOrWhiteSpace(_selectedTicket.Description))
+                {
+                    <div class="to-panel-meta-row to-panel-meta-row--description">
+                        <span class="to-panel-meta-label">Description</span>
+                        <span class="to-panel-meta-value">@_selectedTicket.Description</span>
+                    </div>
+                }
                 <div class="to-panel-meta-row">
                     <span class="to-panel-meta-label">Assigned to</span>
                     <span class="to-panel-meta-value">
@@ -257,14 +273,6 @@
                                placeholder="Search supporters by name…"
                                value="@_supporterSearchTerm"
                                @oninput="HandleSupporterSearchInput" />
-                        @if (_isSearching)
-                        {
-                            <p class="to-panel-search-hint">Searching…</p>
-                        }
-                        @if (_searchError is not null)
-                        {
-                            <p class="to-modal-error">@_searchError</p>
-                        }
                         @if (_supporterSearchResults.Any())
                         {
                             <ul class="to-panel-search-results">
@@ -272,12 +280,20 @@
                                 {
                                     var s = supporter;
                                     <li class="to-panel-search-result"
-                                        @onclick="() => AssignToSupporterAsync(s.userId)">
-                                        <span class="to-panel-result-name">@s.name</span>
-                                        <span class="to-panel-result-email">@s.email</span>
+                                        @onclick="() => AssignToSupporterAsync(s.Id)">
+                                        <span class="to-panel-result-name">@s.Name</span>
+                                        <span class="to-panel-result-email">@s.Email</span>
                                     </li>
                                 }
                             </ul>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_supporterSearchTerm))
+                        {
+                            <p class="to-panel-search-hint">No supporters found</p>
+                        }
+                        @if (_searchError is not null)
+                        {
+                            <p class="to-modal-error">@_searchError</p>
                         }
                     </div>
                 }
