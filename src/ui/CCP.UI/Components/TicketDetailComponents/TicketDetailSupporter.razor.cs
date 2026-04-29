@@ -137,6 +137,8 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
 
             if (Ticket.CustomerId.HasValue && _userNameCache.TryGetValue(Ticket.CustomerId.Value, out var customerName))
                 _customerName = customerName;
+
+            await ResolveUserNamesAsync(_messages);
         }
         else
         {
@@ -383,6 +385,9 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
 
     private void HandleMessageReceived(MessageDto message)
     {
+        Logger.LogInformation("HandleMessageReceived: ticketId={TicketId}, messageUserId={UserId}, cacheHas={Has}",
+        message.TicketId, message.UserId, message.UserId.HasValue && _userNameCache.ContainsKey(message.UserId.Value));
+
         if (message.TicketId != Ticket.Id || _messages.Any(m => m.Id == message.Id)) return;
         _messages.Add(message);
         _ = ResolveUserNamesAsync(new[] { message })
@@ -415,10 +420,30 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
             .Select(m => m.UserId!.Value).Distinct()
             .Where(id => !_userNameCache.ContainsKey(id)).ToList();
 
+        Logger.LogInformation("ResolveUserNamesAsync: resolving {Count} unknown user IDs: {Ids}",
+            unknownIds.Count, string.Join(", ", unknownIds));
+
         var tasks = unknownIds.Select(async userId =>
         {
-            try { var r = await UserService.GetUserDetailsAsync(userId); return (userId, name: r.IsSuccess ? r.Value.name : (string?)null); }
-            catch { return (userId, name: (string?)null); }
+            try
+            {
+                var r = await UserService.GetUserDetailsAsync(userId);
+                if (r.IsSuccess)
+                {
+                    Logger.LogInformation("Resolved user {UserId} -> {Name}", userId, r.Value.name);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to resolve user {UserId}: {Code} - {Description}",
+                        userId, r.Error.Code, r.Error.Description);
+                }
+                return (userId, name: r.IsSuccess ? r.Value.name : (string?)null);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Exception resolving user {UserId}", userId);
+                return (userId, name: (string?)null);
+            }
         });
 
         foreach (var (userId, name) in await Task.WhenAll(tasks))
@@ -495,6 +520,6 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
         HubService.OnMessageReceived -= HandleMessageReceived;
         HubService.OnMessageUpdated -= HandleMessageUpdated;
         HubService.OnMessageDeleted -= HandleMessageDeleted;
-        await HubService.DisposeAsync();
+        await HubService.LeaveTicketAsync(Ticket.Id);
     }
 }
