@@ -330,7 +330,7 @@ public class MessageService : IMessageService
                     .FirstOrDefault();
                 customerName = userRoleResult.Value.name;
             }
-            string agentName = "";
+            string agentName = customerName;
             string agentEmail = "";
 
             var agentInfo = ticket.AssignedUserId;

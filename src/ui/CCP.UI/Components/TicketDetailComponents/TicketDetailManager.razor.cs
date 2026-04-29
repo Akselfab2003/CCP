@@ -1,9 +1,9 @@
-using Gateway.Sdk.Services;
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
 using CCP.UI.Services;
-using ChatService.Sdk.Services;
 using ChatService.Sdk.Models;
+using ChatService.Sdk.Services;
+using Gateway.Sdk.Services;
 using IdentityService.Sdk.Models;
 using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.User;
@@ -478,6 +478,9 @@ public partial class TicketDetailManager : ComponentBase, IAsyncDisposable
     private void HandleMessageReceived(MessageDto message)
     {
         if (message.TicketId != Ticket.Id || _messages.Any(m => m.Id == message.Id)) return;
+
+        if (message.IsInternalNote && UserContext.Role == UserRole.Customer) return;
+
         _messages.Add(message);
         _ = ResolveUserNamesAsync(new[] { message })
             .ContinueWith(_ => InvokeAsync(async () =>
