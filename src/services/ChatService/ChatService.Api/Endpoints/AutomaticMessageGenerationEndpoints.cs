@@ -21,69 +21,7 @@ namespace ChatService.Api.Endpoints
                 .ProducesProblem(StatusCodes.Status503ServiceUnavailable)
                 .ProducesProblem(StatusCodes.Status401Unauthorized);
 
-            autoMessageGroup.MapPost("/ticket/created", TicketCreated)
-                .Produces(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status500InternalServerError)
-                .ProducesProblem(StatusCodes.Status400BadRequest);
-
-            autoMessageGroup.MapPost("/ticket/message/created", MessageAddedToTicket)
-                .Produces(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status500InternalServerError)
-                .ProducesProblem(StatusCodes.Status400BadRequest);
-
-            autoMessageGroup.MapPost("/ticket/closed", TicketClosed)
-                .Produces(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status500InternalServerError)
-                .ProducesProblem(StatusCodes.Status400BadRequest);
-
-
             return endpoints;
-        }
-
-        private static async Task<IResult> TicketClosed([FromServices] IAutomaticMessageGeneration automaticMessageGeneration, [FromQuery] int ticketId)
-        {
-            try
-            {
-                var result = await automaticMessageGeneration.TicketClosedAnalysis(ticketId);
-                return result.IsSuccess
-                    ? Results.Ok()
-                    : result.ToProblemDetails();
-
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        private static async Task<IResult> MessageAddedToTicket([FromServices] IAutomaticMessageGeneration automaticMessageGeneration, [FromQuery] int ticketId)
-        {
-            try
-            {
-                var result = await automaticMessageGeneration.NewMessageAddedToTicketAnalysis(ticketId);
-                return result.IsSuccess
-                    ? Results.Ok()
-                    : result.ToProblemDetails();
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        private static async Task<IResult> TicketCreated([FromServices] IAutomaticMessageGeneration automaticMessageGeneration, [FromQuery] int ticketId)
-        {
-            try
-            {
-                var result = await automaticMessageGeneration.TicketCreatedAnalysis(ticketId);
-                return result.IsSuccess
-                    ? Results.Ok()
-                    : result.ToProblemDetails();
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-            }
         }
 
         private static async Task<IResult> GenerateAutomatedMessage([FromServices] IAutomaticMessageGeneration automaticMessageGeneration, [FromQuery] int TicketId)

@@ -1,7 +1,7 @@
-using EmailService.Sdk.Services;
 using MessagingService.Api.Hubs;
 using MessagingService.Domain.Contracts;
 using MessagingService.Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -9,6 +9,7 @@ namespace MessagingService.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MessagesController : ControllerBase
 {
     private readonly IMessageService _messageService;

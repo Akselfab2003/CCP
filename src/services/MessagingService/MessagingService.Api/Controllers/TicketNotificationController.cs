@@ -1,4 +1,5 @@
 using MessagingService.Api.Hubs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -8,6 +9,7 @@ public record TicketAssignmentNotificationRequest(int TicketId, Guid AssignedUse
 
 [ApiController]
 [Route("api/ticket-notifications")]
+[Authorize]
 public class TicketNotificationController : ControllerBase
 {
     private readonly IHubContext<ChatHub> _hubContext;

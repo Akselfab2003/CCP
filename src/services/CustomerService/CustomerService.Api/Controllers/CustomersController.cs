@@ -1,11 +1,14 @@
-﻿using CustomerService.Application.Services;
+﻿using CCP.Shared.ValueObjects;
+using CustomerService.Application.Services;
 using CustomerService.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -55,6 +58,7 @@ namespace CustomerService.Api.Controllers
 
         //Opretter en ny customer
         [HttpPost("add")]
+        [Authorize(Roles = UserRolesExtensions.CreateCustomersRoleString)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
         {
