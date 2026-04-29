@@ -39,7 +39,7 @@
         public const string CreateSupportersRoleString = "org.CreateSupporters";
         public const string ManageUsersRoleString = "org.ManageUsers";
         public const string DeactivateUsersRoleString = "org.DeactivateUsers";
-        public const string AssignRolesRoleString = "org.AssignRoles";
+        public const string AssignRolesRoleString = "org.PromoteUsers";
         public const string ViewUsersRoleString = "org.ViewUsers";
 
         // System Administration Roles
@@ -55,7 +55,7 @@
 
         // Legacy/Alias roles (bagudkompatibilitet)
         public const string InviteUsersRoleString = "org.CreateSupporters"; // Alias til CreateSupporters
-        public const string PromoteUsersRoleString = "org.AssignRoles"; // Alias til AssignRoles
+        public const string PromoteUsersRoleString = "org.PromoteUsers"; // Alias til AssignRoles
         public const string ViewCustomersRoleString = "org.ViewUsers"; // Alias til ViewUsers
         public const string ManageFaqRoleString = "org.ConfigureChatbot"; // FAQ er del af chatbot config
         public const string ManageOrganizationRoleString = "org.ManageTenant"; // Alias til ManageTenant
