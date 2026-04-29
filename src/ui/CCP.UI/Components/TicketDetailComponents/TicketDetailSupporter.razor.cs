@@ -341,29 +341,33 @@ public partial class TicketDetailSupporter : ComponentBase, IAsyncDisposable
 
         _isSending = true;
 
+        var optimisticContent = _newMessageContent;
+        var optimisticAttachment = _pendingAttachment;
+
+        _newMessageContent = string.Empty;
+        _pendingAttachment = null;
+        _pendingAttachmentPreviewUrl = null;
+        _shouldScrollToBottom = true;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
+        catch { /* ignore */ }
+        await InvokeAsync(StateHasChanged);
+
         var result = await MessageSdkService.CreateMessageAsync(
             ticketId: Ticket.Id,
             organizationId: Ticket.OrganizationId,
             userId: UserContext.UserId,
-            content: _newMessageContent,
+            content: optimisticContent,
             isInternalNote: _isInternalNoteMode,
-            attachmentUrl: _pendingAttachment?.Url,
-            attachmentFileName: _pendingAttachment?.FileName,
-            attachmentContentType: _pendingAttachment?.ContentType);
+            attachmentUrl: optimisticAttachment?.Url,
+            attachmentFileName: optimisticAttachment?.FileName,
+            attachmentContentType: optimisticAttachment?.ContentType);
 
-        if (result.IsSuccess)
+        if (!result.IsSuccess)
         {
-            _newMessageContent = string.Empty;
-            _pendingAttachment = null;
-            _pendingAttachmentPreviewUrl = null;
-            _shouldScrollToBottom = true;
-            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
-            catch { /* ignore */ }
-        }
-        else
-        {
-            Logger.LogError("TicketDetailSupporter failed to send message: {Code} - {Description}",
+            Logger.LogError("TicketDetailManager failed to send message: {Code} - {Description}",
                 result.Error.Code, result.Error.Description);
+            _newMessageContent = optimisticContent;
+            _pendingAttachment = optimisticAttachment;
         }
 
         _isSending = false;
