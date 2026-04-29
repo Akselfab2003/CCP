@@ -1,6 +1,8 @@
 using CCP.Shared.UIContext;
 using CCP.Shared.ValueObjects;
+using EmailService.Sdk.Services;
 using IdentityService.Sdk.Models;
+using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.Supporter;
 using IdentityService.Sdk.Services.User;
 using Microsoft.AspNetCore.Components;
@@ -19,6 +21,8 @@ public partial class TicketOverview : ComponentBase
     [Inject] private IUIUserContext UserContext { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private ILogger<TicketOverview> Logger { get; set; } = default!;
+    [Inject] private IEmailSdkService EmailService { get; set; } = default!;
+    [Inject] private ITenantService TenantService { get; set; } = default!;
 
     // Tickets
     private List<TicketSdkDto> _tickets = new();
@@ -236,6 +240,27 @@ public partial class TicketOverview : ComponentBase
         _isUpdatingAssignment = true;
 
         var result = await AssignmentService.AssignTicketToUserAsync(_selectedTicket.Id, supporterUserId);
+
+        var orgName = TenantService.GetTenantDetailsAsync(UserContext.OrganizationId).Result.Value.Name;
+        if (orgName == null)
+        {
+            orgName = "Support";
+        }
+
+        var title = "Ticket has been assigned to you";
+        var replyContent = $"You have been assigned ticket #{_selectedTicket.Id}";
+
+        await EmailService.NotifySupportCustomerReplyAsync(
+            UserContext.UserId,
+            UserContext.Email,
+            UserContext.FirstName,
+            _selectedTicket.Id,
+            title,
+            TicketStatus.WaitingForSupport,
+            replyContent,
+            orgName
+            );
+
         if (result.IsSuccess)
         {
             // Update both _selectedTicket and the matching entry in _tickets
