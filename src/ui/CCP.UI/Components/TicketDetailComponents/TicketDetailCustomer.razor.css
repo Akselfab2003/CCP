@@ -201,6 +201,7 @@
 }
 
 .tdc-msg-bubble {
+    white-space: pre-wrap;
     padding: 10px 14px;
     border-radius: 10px;
     font-size: 13px;
@@ -285,7 +286,9 @@
 
 /* ==========================================================  Attachments  */
 @keyframes tdc-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .tdc-spinner {
@@ -310,10 +313,10 @@
         border-color: var(--ccp-accent);
     }
 
-    .tdc-attach-btn--loading {
-        opacity: 0.6;
-        cursor: default;
-    }
+.tdc-attach-btn--loading {
+    opacity: 0.6;
+    cursor: default;
+}
 
 .tdc-attachment-preview {
     position: relative;
@@ -500,9 +503,9 @@
     transition: background 0.13s;
 }
 
-.tdc-msg-video-expand:hover {
-    background: rgba(0,0,0,0.8);
-}
+    .tdc-msg-video-expand:hover {
+        background: rgba(0,0,0,0.8);
+    }
 
 .tdc-lightbox-video {
     max-width: 90vw;
@@ -510,3 +513,27 @@
     border-radius: 8px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.6);
 }
+
+/* ── Composer input: auto-grow + styled scrollbar ─────────────────────────── */
+.tdc-composer-input {
+    min-height: 44px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+    .tdc-composer-input::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .tdc-composer-input::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .tdc-composer-input::-webkit-scrollbar-thumb {
+        background: var(--ccp-border);
+        border-radius: 3px;
+    }
+
+        .tdc-composer-input::-webkit-scrollbar-thumb:hover {
+            background: var(--ccp-border-mid);
+        }
