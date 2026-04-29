@@ -1,12 +1,10 @@
 using CCP.ServiceDefaults;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
-using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
 using ChatService.Sdk.ServiceDefaults;
 using CustomerService.Sdk.ServiceDefaults;
-using EmailService.Sdk.ServiceDefaults;
 using Gateway.Sdk.ServiceDefaults;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
@@ -18,7 +16,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using TicketService.Sdk.ServiceDefaults;
-using CustomerService.Sdk.ServiceDefaults;
 
 namespace CCP.UI
 {

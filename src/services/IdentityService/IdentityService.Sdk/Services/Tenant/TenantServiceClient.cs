@@ -144,5 +144,49 @@ namespace IdentityService.Sdk.Services.Tenant
                 return Result.Failure<TenantDetails>(Error.Failure(code: "GetTenantDetailsFailed", description: $"An error occurred while retrieving tenant details for TenantId: '{tenantId}' or Domain: '{domain}'"));
             }
         }
+
+        public async Task<Result<List<TenantMember>>> GetAllManagers()
+        {
+            try
+            {
+                var managersResult = await _apiClient.Client.Tenant.GetAllTenantManagers.GetAsync();
+
+                if (managersResult == null)
+                {
+                    _logger.LogWarning("No tenant managers found.");
+                    return Result.Failure<List<TenantMember>>(Error.Failure(code: "NoTenantManagers", description: "No tenant managers found."));
+                }
+
+                var tenantManagers = managersResult.Select(m => new TenantMember
+                {
+                    Id = m.Id.HasValue ? m.Id.Value : Guid.Empty,
+                    Email = m.Email ?? string.Empty,
+                    FirstName = m.FirstName ?? string.Empty,
+                    Groups = m.Groups ?? [],
+                    LastName = m.LastName ?? string.Empty,
+                    Roles = m.Roles ?? [],
+                }).ToList();
+
+
+                return tenantManagers;
+
+            }
+            catch (ApiException ex)
+            {
+                return ex.ResponseStatusCode switch
+                {
+                    400 => Result.Failure<List<TenantMember>>(Error.Failure(code: "GetTenantManagersBadRequest", description: $"Bad request error occurred while retrieving tenant managers: {ex.Message}")),
+                    401 => Result.Failure<List<TenantMember>>(Error.Failure(code: "GetTenantManagersUnauthorized", description: $"Unauthorized error occurred while retrieving tenant managers: {ex.Message}")),
+                    403 => Result.Failure<List<TenantMember>>(Error.Failure(code: "GetTenantManagersForbidden", description: $"Forbidden error occurred while retrieving tenant managers: {ex.Message}")),
+                    500 => Result.Failure<List<TenantMember>>(Error.Failure(code: "GetTenantManagersServerError", description: $"Server error occurred while retrieving tenant managers: {ex.Message}")),
+                    _ => Result.Failure<List<TenantMember>>(Error.Failure(code: "GetTenantManagersApiError", description: $"API error occurred while retrieving tenant managers: {ex.Message}")),
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving tenant managers");
+                return Result.Failure<List<TenantMember>>(Error.Failure(code: "GetTenantManagersFailed", description: "An error occurred while retrieving tenant managers."));
+            }
+        }
     }
 }

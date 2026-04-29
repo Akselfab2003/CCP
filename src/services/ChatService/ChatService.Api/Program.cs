@@ -5,7 +5,6 @@ using CCP.ServiceDefaults.Startup;
 using CCP.ServiceDefaults.swagger;
 using CCP.Shared.AuthContext;
 using CCP.Shared.ValueObjects;
-using ChatService.Api.ChatHub;
 using ChatService.Api.Endpoints;
 using ChatService.Api.Middleware;
 using ChatService.Application.ChatHub;
@@ -36,15 +35,15 @@ public partial class Program
 
         builder.Services.AddOpenApi()
                         .AddAuthentication();
-                        .AddHttpContextAccessor();
 
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("RequireManageFaq", policy => policy.RequireRole(
                 UserRolesExtensions.ManageFaqRoleString,
                 UserRolesExtensions.AdminRoleString));
-        })
+        });
 
+        builder.Services.AddHttpContextAccessor();
 
 
         builder.Services.AddServiceDefaults("ChatService.Api");

@@ -37,7 +37,7 @@ namespace IdentityService.Application.Services.UserRights
 
                 UserKeycloakAccount userDetails = userDetailsResult.Value;
 
-                if (userDetails.Groups != null && userDetails.Groups.Contains(GroupName))
+                if (userDetails.Groups == null || userDetails.Groups.Contains(GroupName))
                 {
                     _logger.LogInformation("User {UserId} is already a member of group {GroupName}", userId, GroupName);
                     return Result.Failure(Error.Failure("UserAlreadyInGroup", $"User {userId} is already a member of group {GroupName}"));
@@ -49,6 +49,18 @@ namespace IdentityService.Application.Services.UserRights
                     _logger.LogWarning("Failed to add user {UserId} to group {GroupName}: {ErrorDescription}", userId, GroupName, AddUserToGroupResult.Error.Description);
                     return Result.Failure(Error.Failure("AddUserToGroupFailed", $"Failed to add user {userId} to group {GroupName}: {AddUserToGroupResult.Error.Description}"));
                 }
+
+                foreach (var oldgroups in userDetails.Groups)
+                {
+                    var removeUserFromGroupResult = await _groupService.RemoveUserFromGroup(oldgroups, _currentUser.OrganizationId, userId, ct);
+
+                    if (removeUserFromGroupResult.IsFailure)
+                    {
+                        _logger.LogWarning("Failed to remove user {UserId} from old group {OldGroupName}: {ErrorDescription}", userId, oldgroups, removeUserFromGroupResult.Error.Description);
+                        return Result.Failure(Error.Failure("RemoveUserFromOldGroupFailed", $"Failed to remove user {userId} from old group {oldgroups}: {removeUserFromGroupResult.Error.Description}"));
+                    }
+                }
+
                 return Result.Success();
             }
             catch (Exception ex)
