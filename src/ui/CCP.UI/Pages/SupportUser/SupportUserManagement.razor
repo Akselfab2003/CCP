@@ -1,11 +1,15 @@
-﻿@using IdentityService.Sdk.Services.User
+﻿@using IdentityService.Sdk.Services.Supporter
+@using IdentityService.Sdk.Services.User
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
+@using TicketService.Sdk.Services.Ticket
 @page "/support-users"
 @layout CCPLayout
 @inject IJSRuntime JS
 @inject IUserService UserService
-@attribute [Authorize(Policy = "RequireManager")]
+@inject ISupporterService SupporterService
+@inject ITicketService TicketService
+@attribute [Authorize(Roles = UserRolesExtensions.ManageUsersRoleString)]
 
 <PageTitle>Support User Management</PageTitle>
 
@@ -136,7 +140,7 @@
                         </div>
                         <div class="user-info-item">
                             <span class="user-info-label">Member since</span>
-                            <span class="user-info-value">@selectedUser.CreatedAt.ToString("MMMM d, yyyy")</span>
+                            <span class="user-info-value">@(selectedUser.CreatedAt.HasValue ? selectedUser.CreatedAt?.ToString("MMMM d, yyyy") : "N/A")</span>
                         </div>
                         <div class="user-info-item">
                             <span class="user-info-label">Status</span>
@@ -202,7 +206,7 @@
         public required string PhoneNumber { get; set; }
         public required string Role { get; set; } // "Support" eller "Admin"
         public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         // Statistik om brugerens performance
         public int TotalTickets { get; set; }
@@ -233,22 +237,39 @@
 
         try
         {
-            var result = await UserService.SearchUsers("", CancellationToken.None);
+            var SupportTaskResult = SupporterService.GetAllSupporters();
+            var ticketsTaskResult = TicketService.GetTickets();
+
+            await Task.WhenAll(SupportTaskResult,ticketsTaskResult);
+
+            var result = SupportTaskResult.Result;
+            var ticketsResult = ticketsTaskResult.Result;
+
+            var CountOfTicketsAssignedToSupporter = ticketsResult.Value.Join(result.Value, ticket => ticket.AssignedUserId, supporter => supporter.Id, (ticket, supporter) => new { ticket, supporter })
+                .GroupBy(ts => ts.supporter.Id)
+                .Select(g => new
+                {
+                    SupporterId = g.Key,
+                    TotalTickets = g.Count(ts => ts.ticket.Status != (int)TicketStatus.Closed),
+                    SolvedLastWeek = g.Count(ts => ts.ticket.Status == (int)TicketStatus.Closed && ts.ticket.CreatedAt >= DateTime.UtcNow.AddDays(-7)),
+                })
+                .ToDictionary(x => x.SupporterId, x => x);
+
 
             if (result.IsSuccess)
             {
                 supportUsers = result.Value.Select(user => new SupportUser
                 {
-                    Id = user.userId,
-                    Name = user.name,
-                    Email = user.email,
+                    Id = user.Id,
+                    Name = $"{user.FirstName} {user.LastName}",
+                    Email = user.Email,
                     PhoneNumber = "N/A", // Keycloak har ikke phone number by default
-                    Role = user.realmRoles.FirstOrDefault() ?? "Support",
-                    IsActive = user.enabled,
-                    CreatedAt = user.CreatedAt,
-                    TotalTickets = 0,        // TODO: Hent fra TicketService
-                    SolvedLastWeek = 0,      // TODO: Hent fra TicketService
-                    AvgResponseTime = "N/A"  // TODO: Hent fra TicketService
+                    Role =  "Support",
+                    IsActive = true,
+                    CreatedAt = null,
+                    TotalTickets = CountOfTicketsAssignedToSupporter.ContainsKey(user.Id) ? CountOfTicketsAssignedToSupporter[user.Id].TotalTickets : 0,
+                    SolvedLastWeek = CountOfTicketsAssignedToSupporter.ContainsKey(user.Id) ? CountOfTicketsAssignedToSupporter[user.Id].SolvedLastWeek : 0,
+                    AvgResponseTime = "N/A"  
                 }).ToList();
             }
             else

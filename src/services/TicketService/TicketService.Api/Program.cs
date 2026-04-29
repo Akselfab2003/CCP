@@ -11,6 +11,7 @@ using TicketService.Infrastructure.ServiceCollection;
 using Wolverine;
 using Wolverine.RabbitMQ;
 using IdentityService.Sdk.ServiceDefaults;
+using CCP.Shared.ValueObjects;
 
 namespace TicketService.Api
 {

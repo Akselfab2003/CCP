@@ -1,4 +1,5 @@
 using CCP.Shared.ResultAbstraction;
+using CCP.Shared.ValueObjects;
 using IdentityService.Application.Models;
 using IdentityService.Application.Services.Member;
 using IdentityService.Application.Services.Supporter;
@@ -21,12 +22,14 @@ namespace IdentityService.API.Endpoints
                                             .RequireAuthorization();
 
             supporterRoute.MapPost("/Invite", InviteSupporter)
+                        .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.InviteUsersRoleString))
                         .Produces(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status404NotFound)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             supporterRoute.MapGet("/GetAllSupporters", GetAllSupporters)
+                        .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.ManageUsersRoleString))
                         .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);

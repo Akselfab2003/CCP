@@ -176,18 +176,6 @@
         }
       }
     },
-    "/user/test": {
-      "get": {
-        "tags": [
-          "User"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/tenant/create": {
       "post": {
         "tags": [

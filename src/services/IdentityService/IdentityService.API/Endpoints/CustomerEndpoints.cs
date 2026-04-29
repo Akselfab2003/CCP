@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.ResultAbstraction;
+using CCP.Shared.ValueObjects;
 using IdentityService.Application.Models;
 using IdentityService.Application.Services.Customer;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,13 @@ namespace IdentityService.API.Endpoints
                                             .RequireAuthorization();
 
             customerRoute.MapPost("/Invite", InviteCustomer)
+                        .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.CreateCustomersRoleString))
                         .Produces<Guid>(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             customerRoute.MapGet("/GetAllCustomers", GetAllCustomers)
+            .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.ViewCustomersRoleString))
                         .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
                         .ProducesProblem(StatusCodes.Status400BadRequest)
                         .ProducesProblem(StatusCodes.Status500InternalServerError);

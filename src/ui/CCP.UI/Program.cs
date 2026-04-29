@@ -1,7 +1,6 @@
 using CCP.ServiceDefaults;
 using CCP.Shared.AuthContext;
 using CCP.Shared.UIContext;
-using CCP.Shared.ValueObjects;
 using CCP.UI.Components;
 using CCP.UI.Services;
 using ChatService.Sdk.ServiceDefaults;
@@ -106,34 +105,13 @@ namespace CCP.UI
             });
             }
 
+            //Authorization using direct role-based authorization on pages
+            builder.Services.AddAuthorization();
 
-            //Authorization Policies
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("RequireAdmin", policy => policy.RequireRole(
-                    UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireManager", policy => policy.RequireRole(
-                    UserRolesExtensions.ManagerRoleString,
-                    UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireSupporter", policy => policy.RequireRole(
-                    UserRolesExtensions.SupporterRoleString,
-                    UserRolesExtensions.ManagerRoleString,
-                    UserRolesExtensions.AdminRoleString));
-                options.AddPolicy("RequireInitialUser", policy => policy.RequireRole(
-                    UserRolesExtensions.CustomerRoleString,
-                    UserRolesExtensions.SupporterRoleString,
-                    UserRolesExtensions.ManagerRoleString,
-                    UserRolesExtensions.AdminRoleString));
-            });
             builder.Services.AddScoped<ChatHubService>();
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
             builder.Services.AddScoped<IUIUserContext, UIUserContext>();
             builder.Services.AddServiceDefaults("CCP.UI");
-
-            builder.Services.AddEmailServiceSdk(
-                builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
-                ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required."));
-
             builder.Services.AddMessageServiceSDK(
                 builder.Configuration.GetValue<string>("services:messagingservice-api:http:0")
                 ?? throw new InvalidOperationException("MessagingServiceUrl configuration value is required."));
@@ -159,6 +137,11 @@ namespace CCP.UI
             builder.Services.AddGatewayServiceSdk(
                 builder.Configuration.GetValue<string>("services:ccp-gateway:http:0")
                 ?? throw new InvalidOperationException("GatewayServiceUrl configuration value is required.")
+                );
+
+            builder.Services.AddEmailServiceSdk(
+                builder.Configuration.GetValue<string>("services:emailservice-api:http:0")
+                ?? throw new InvalidOperationException("EmailServiceUrl configuration value is required.")
                 );
 
             var app = builder.Build();

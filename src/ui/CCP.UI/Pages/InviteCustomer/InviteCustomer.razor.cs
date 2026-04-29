@@ -13,8 +13,8 @@ namespace CCP.UI.Pages.InviteCustomer
         private readonly ICustomerSdkService _customerSdkService;
         private readonly IUIUserContext _uIUserContext;
         [Inject] private ILogger<InviteCustomer> Logger { get; set; } = default!;
-        [Inject] private ICustomerService CustomerService { get; set; } = default!;
 
+        private List<CustomerService.Sdk.Models.CustomerDTO> customers = new List<CustomerService.Sdk.Models.CustomerDTO>();
         private InviteCustomerModel InviteCustomerModel { get; set; } = new InviteCustomerModel();
         private bool isSubmitting = false;
         private string? successMessage = null;
@@ -26,6 +26,20 @@ namespace CCP.UI.Pages.InviteCustomer
             _customerService = customerService;
             _customerSdkService = customerSdkService;
             _uIUserContext = uIUserContext;
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            try
+            {
+                customers = await _customerSdkService.GetAllCustomers();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing InviteCustomer component");
+
+            }
+
         }
 
         private async Task Submit()
@@ -67,6 +81,18 @@ namespace CCP.UI.Pages.InviteCustomer
                 isSubmitting = false;
                 StateHasChanged();
             }
+        }
+        private string GetInitials(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "?";
+
+            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 1)
+                return parts[0][0].ToString().ToUpper();
+
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
         }
     }
 

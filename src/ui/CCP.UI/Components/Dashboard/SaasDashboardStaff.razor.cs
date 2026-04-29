@@ -32,15 +32,16 @@ public partial class SaasDashboardStaff : ComponentBase
         // Fetch all tickets (for global open count) and assigned tickets in parallel
         var allTicketsTask = TicketService.GetTickets();
         var assignedTicketsTask = TicketService.GetTickets(assignedUserId: UserContext.UserId);
-        await Task.WhenAll(allTicketsTask, assignedTicketsTask);
+        var historyTask = TicketService.GetMyHistoryAsync(limit: 10);
+        await Task.WhenAll(allTicketsTask, assignedTicketsTask, historyTask);
 
-        var allTicketsResult = await allTicketsTask;
+        var allTicketsResult = allTicketsTask.Result;
         if (allTicketsResult.IsSuccess && allTicketsResult.Value is not null)
             _allOpenCount = allTicketsResult.Value.Count(t => t.Status != (int)TicketStatus.Closed);
         else
             _allOpenCount = 0;
 
-        var ticketsResult = await assignedTicketsTask;
+        var ticketsResult = assignedTicketsTask.Result;
 
         if (ticketsResult.IsFailure || ticketsResult.Value is null)
         {
@@ -63,7 +64,7 @@ public partial class SaasDashboardStaff : ComponentBase
         StateHasChanged();
 
         // Load activity feed from history API
-        var historyResult = await TicketService.GetMyHistoryAsync(limit: 10);
+        var historyResult = historyTask.Result;
         if (historyResult.IsSuccess && historyResult.Value is not null)
             _feedEntries = historyResult.Value;
         else

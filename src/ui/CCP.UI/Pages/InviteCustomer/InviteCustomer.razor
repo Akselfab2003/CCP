@@ -1,7 +1,7 @@
 @using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @inject IJSRuntime JS
-@attribute [Authorize(Policy = "RequireManager")]
+@attribute [Authorize(Roles = UserRolesExtensions.CreateCustomersRoleString)]
 
 <EditForm Model="InviteCustomerModel" OnValidSubmit="@Submit">
     <DataAnnotationsValidator />
@@ -57,19 +57,37 @@
         <div class="customer-list-container">
             <div class="dash-card">
                 <div class="dash-card-header">
-                    <span class="dash-card-title">Existing Customers (0)</span>
+                    <span class="dash-card-title">Existing Customers (@(customers.Count()))</span>
                 </div>
 
                 <div class="customer-list">
-                    <!-- Customer items vil være her -->
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
-                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                        </svg>
-                        <p>No customers yet</p>
-                    </div>
+
+                    @if (customers.Count() == 0)
+                    {
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                            </svg>
+                            <p>No customers yet</p>
+                        </div>
+                    }
+
+
+                    @foreach (var cust in customers)
+                    {
+                        <div class="customer-item">
+                            <div class="customer-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
+                                @GetInitials(cust.Name)
+                            </div>
+                            <div class="customer-info">
+                                <div class="customer-name">@cust.Name</div>
+                                <div class="customer-email">@cust.Email</div>
+                            </div>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>

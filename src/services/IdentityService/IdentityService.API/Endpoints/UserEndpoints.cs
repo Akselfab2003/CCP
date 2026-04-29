@@ -33,35 +33,9 @@ namespace IdentityService.API.Endpoints
                      .ProducesProblem(StatusCodes.Status404NotFound)
                      .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-            userGroup.MapGet("/test", async (HttpContext context) =>
-            {
-                return await GetAuthDetails(context);
-            });
-
             return routeBuilder;
         }
 
-        private static async Task<IResult> GetAuthDetails(HttpContext context)
-        {
-            try
-            {
-                if (context.User.Identity?.IsAuthenticated != true)
-                {
-                    return Results.Unauthorized();
-                }
-                var authDetails = new
-                {
-                    UserName = context.User.Identity.Name,
-                    Claims = context.User.Claims.Select(c => new { c.Type, c.Value }).ToList()
-                };
-                return Results.Ok(authDetails);
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(detail: $"An error occurred while fetching authentication details: {ex.Message}", statusCode: 500);
-
-            }
-        }
 
         private static async Task<IResult> GenerateAuthenticationToken([FromBody] AuthenticatingRequest authenticationRequest, [FromServices] IUserService userService)
         {

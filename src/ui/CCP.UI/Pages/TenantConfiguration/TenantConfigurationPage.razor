@@ -1,8 +1,9 @@
 ﻿@page "/tenant-configuration"
 @layout CCPLayout
 @rendermode InteractiveServer
+@using CCP.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "CCP.Rolesorg.Admin")]
+@attribute [Authorize(Roles = UserRolesExtensions.ManageTenantRoleString)]
 <div class="container">
     <div class="header">
         <h1 class="header-title">Email Configuration</h1>

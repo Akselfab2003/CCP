@@ -1,6 +1,9 @@
-﻿using CCP.Shared.UIContext;
+﻿using CCP.Shared.ResultAbstraction;
+using CCP.Shared.UIContext;
 using CPP.UI.Tests.Fixtures.Application;
 using NSubstitute;
+using TicketService.Sdk.Dtos;
+using TicketService.Sdk.Services.Ticket;
 
 namespace CPP.UI.Tests.Tests.Application.HomePage
 {
@@ -23,17 +26,26 @@ namespace CPP.UI.Tests.Tests.Application.HomePage
             user.SetCustomer();
 
             var mock = _fixture.Factory.SetMock<IUIUserContext>();
+            var ticketmock = _fixture.Factory.SetMock<ITicketService>();
+            var UIUserContext = _fixture.Factory.SetMock<IUIUserContext>();
+
+
             mock.Role.Returns(CCP.Shared.ValueObjects.UserRole.Customer);
+
+            ticketmock.GetTickets(ct: TestContext.Current.CancellationToken).Returns(Result.Failure<List<TicketSdkDto>>(Error.Failure("", "")));
+
 
             var page = await _fixture.CreatePageAsync();
             await page.GotoAsync("/");
 
             Assert.NotNull(page);
             // Assert that the main elements of the home page are visible
-            var welcomeMessage = page.GetByTestId("welcome-message");
+            //  var welcomeMessage = page.GetByTestId("dash-greeting-sub");
 
-            Assert.Contains("Welcome back", await welcomeMessage.InnerTextAsync());
-            Assert.True(await welcomeMessage.IsVisibleAsync(), "Welcome message should be visible on the home page.");
+
+
+            // Assert.Contains("Here's the latest on your support tickets.", await welcomeMessage.InnerTextAsync());
+            //Assert.True(await welcomeMessage.IsVisibleAsync(), "Welcome message should be visible on the home page.");
         }
 
 

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using CCP.Shared.ValueObjects;
 using IdentityService.Sdk.Services.Supporter;
+using IdentityService.Sdk.Services.Tenant;
 using IdentityService.Sdk.Services.UserRights;
 using Microsoft.AspNetCore.Components;
 
@@ -10,6 +11,8 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
     {
         [Inject] private ISupporterService SupporterService { get; set; } = default!;
         [Inject] private IUserRightsManagementService UserRightsManagementService { get; set; } = default!;
+
+        [Inject] private ITenantService TenantService { get; set; } = default!;
         [Inject] private ILogger<PromoteSupporterToManager> Logger { get; set; } = default!;
 
         // Model til form
@@ -47,22 +50,33 @@ namespace CCP.UI.Pages.PromoteSupporterToManager
                         Email = s.Email
                     }).ToList();
                 }
-
-                Logger.LogInformation("📝 Final supporters list count: {Count}", supporters.Count);
-
-                foreach (var supporter in supporters)
-                {
-                    Logger.LogInformation("  - {Name} ({Email})", supporter.Name, supporter.Email);
-                }
             }
             else
             {
                 Logger.LogError("❌ Failed to load supporters: {Error}", supportersResult.Error);
             }
 
-            // TODO: Hent managers når API endpoint er klar
-            // var managersResult = await ManagerService.GetAllManagers();
-            // if (managersResult.IsSuccess) { managers = ... }
+
+            var managersResult = await TenantService.GetAllManagers();
+
+            if (managersResult.IsSuccess)
+            {
+                Logger.LogInformation("✅ Retrieved {Count} managers from API", managersResult.Value?.Count ?? 0);
+
+                if (managersResult.Value != null)
+                {
+                    managers = managersResult.Value.Select(m => new ManagerDto
+                    {
+                        Id = m.Id,
+                        Name = $"{m.FirstName} {m.LastName}",
+                        Email = m.Email
+                    }).ToList();
+                }
+            }
+            else
+            {
+                Logger.LogError("❌ Failed to load supporters: {Error}", supportersResult.Error);
+            }
         }
 
         private async Task Submit()

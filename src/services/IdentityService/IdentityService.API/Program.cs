@@ -21,6 +21,7 @@ namespace IdentityService.API
             // Add services to the container.
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
+
             builder.Services.ConfigureDefaultOpenTelemetry("IdentityService.API");
             builder.Services.AddHttpContextAccessor();
 

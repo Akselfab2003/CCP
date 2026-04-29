@@ -4,7 +4,7 @@
 @using CCP.UI.Components.CreateTicket
 @using CCP.UI.Layout
 @page "/tickets/create"
-@attribute [Authorize]
+@attribute [Authorize(Roles = UserRolesExtensions.CreateTicketsRoleString)]
 @layout CCPLayout
 @inject IUIUserContext UserContext
 

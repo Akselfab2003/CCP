@@ -3,7 +3,6 @@
 using IdentityService.Sdk.User.Authenticate;
 using IdentityService.Sdk.User.Item;
 using IdentityService.Sdk.User.Search;
-using IdentityService.Sdk.User.Test;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -27,11 +26,6 @@ namespace IdentityService.Sdk.User
         public global::IdentityService.Sdk.User.Search.SearchRequestBuilder Search
         {
             get => new global::IdentityService.Sdk.User.Search.SearchRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The test property</summary>
-        public global::IdentityService.Sdk.User.Test.TestRequestBuilder Test
-        {
-            get => new global::IdentityService.Sdk.User.Test.TestRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the IdentityService.Sdk.user.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>

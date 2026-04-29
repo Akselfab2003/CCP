@@ -1,4 +1,5 @@
 ﻿using CCP.Shared.ResultAbstraction;
+using CCP.Shared.ValueObjects;
 using IdentityService.Application.Models;
 using IdentityService.Application.Services.Member;
 using IdentityService.Application.Services.Organization;
@@ -27,20 +28,20 @@ namespace IdentityService.API.Endpoints
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             tenantRoute.MapGet("/members", GetAllTenantMembers)
-                       .RequireAuthorization()
+                       .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.ViewUsersRoleString))
                        .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status404NotFound)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             tenantRoute.MapPost("/invite", InviteNewTenantMember)
-                       .RequireAuthorization()
+                       .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.InviteUsersRoleString))
                        .Produces(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             tenantRoute.MapGet("/GetAllTenantManagers", GetAllTenantManagers)
-                       .RequireAuthorization()
+                       .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.ViewUsersRoleString))
                        .Produces<List<TenantMemberDto>>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status404NotFound)

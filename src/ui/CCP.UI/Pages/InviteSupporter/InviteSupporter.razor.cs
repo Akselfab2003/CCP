@@ -23,7 +23,7 @@ namespace CCP.UI.Pages.InviteSupporter
             isSubmitting = true;
             successMessage = null;
             submitErrorMessage = null;
-            StateHasChanged(); // Force UI update
+            StateHasChanged(); //Force UI update
 
             try
             {
@@ -33,7 +33,7 @@ namespace CCP.UI.Pages.InviteSupporter
                 {
                     successMessage = $"Invitation sent to {InviteSupporterModel.Email}!";
 
-                    // Reset form
+                    //Reset form
                     InviteSupporterModel = new InviteSupporterModel();
                 }
                 else
@@ -49,7 +49,7 @@ namespace CCP.UI.Pages.InviteSupporter
             finally
             {
                 isSubmitting = false;
-                StateHasChanged(); // Force UI update
+                StateHasChanged(); //Force UI update
             }
         }
 

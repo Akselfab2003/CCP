@@ -16,22 +16,26 @@ namespace TicketService.Api.Endpoints
                                      .RequireAuthorization();
 
             ticketRoute.MapPost("/create", CreateTicket)
+                       .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.CreateTicketsRoleString))
                        .Produces<int>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             ticketRoute.MapGet("/GetTicket/{ticketId:int}", GetTicketById)
+                       .RequireAuthorization()
                        .Produces<TicketDto>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status404NotFound)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             ticketRoute.MapGet("/GetTickets", GetTicketsByParameters)
+                       .RequireAuthorization()
                        .Produces<List<TicketDto>>(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
                        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
             ticketRoute.MapPatch("/{ticketId:int}/status", UpdateTicketStatus)
+                       .RequireAuthorization(p => p.RequireRole(UserRolesExtensions.ManageTicketStatusRoleString))
                        .Produces(StatusCodes.Status200OK)
                        .ProducesProblem(StatusCodes.Status404NotFound)
                        .ProducesProblem(StatusCodes.Status400BadRequest)
