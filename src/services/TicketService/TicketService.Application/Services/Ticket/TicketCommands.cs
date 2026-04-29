@@ -88,11 +88,21 @@ namespace TicketService.Application.Services.Ticket
                 try
                 {
                     _serviceAccountOverrider.SetOrganizationId(_currentUser.OrganizationId);
-
                     var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
 
                     if (request.CustomerId.HasValue && request.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketCreatedAsync(request.CustomerId.Value, result.Value.Title, result.Value.Id, result.Value.Status, tenantResult.Value.Name);
+                        _ = _emailSdkService.NotifyTicketCreatedAsync(
+                                request.CustomerId.Value,
+                                result.Value.Title,
+                                result.Value.Id,
+                                result.Value.Status,
+                                tenantResult.Value.Name)
+                            .ContinueWith(t =>
+                            {
+                                if (t.IsFaulted)
+                                    _logger.LogWarning("Failed to send ticket creation email for ticket {TicketId}: {Error}",
+                                        result.Value.Id, t.Exception?.Message);
+                            }, TaskScheduler.Default);
                 }
                 catch (Exception ex)
                 {
@@ -157,13 +167,19 @@ namespace TicketService.Application.Services.Ticket
                     var tenantResult = await _tenantService.GetTenantDetailsAsync(_currentUser.OrganizationId);
 
                     if (ticketEntity.CustomerId.HasValue && ticketEntity.CustomerId.Value != Guid.Empty)
-                        await _emailSdkService.NotifyTicketStatusChangedAsync(customerId: ticketEntity.CustomerId.Value,
-                                                                              ticketTitle: ticketEntity.Title,
-                                                                              ticketId: ticketId,
-                                                                              newStatus: newStatus,
-                                                                              oldStatus: oldStatus,
-                                                                              orgName: tenantResult.Value.Name
-                                                                              );
+                        _ = _emailSdkService.NotifyTicketStatusChangedAsync(
+                                customerId: ticketEntity.CustomerId.Value,
+                                ticketTitle: ticketEntity.Title,
+                                ticketId: ticketId,
+                                newStatus: newStatus,
+                                oldStatus: oldStatus,
+                                orgName: tenantResult.Value.Name)
+                            .ContinueWith(t =>
+                            {
+                                if (t.IsFaulted)
+                                    _logger.LogWarning("Failed to send ticket status update email for ticket {TicketId}: {Error}",
+                                        ticketId, t.Exception?.Message);
+                            }, TaskScheduler.Default);
                 }
                 catch (Exception ex)
                 {

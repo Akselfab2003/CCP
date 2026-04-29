@@ -44,6 +44,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
     private bool _isLoadingMoreMessages;
     private bool _shouldScrollToBottom;
     private ElementReference _messagesContainer;
+    private ElementReference _composerTextarea;
 
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50 MB
 
@@ -227,27 +228,33 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
 
         _isSending = true;
 
+        var optimisticContent = _newMessageContent;
+        var optimisticAttachment = _pendingAttachment;
+
+        _newMessageContent = string.Empty;
+        _pendingAttachment = null;
+        _pendingAttachmentPreviewUrl = null;
+        _shouldScrollToBottom = true;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
+        catch { /* ignore */ }
+        await InvokeAsync(StateHasChanged);
+
         var result = await MessageSdkService.CreateMessageAsync(
             ticketId: Ticket.Id,
             organizationId: Ticket.OrganizationId,
             userId: UserContext.UserId,
-            content: _newMessageContent,
+            content: optimisticContent,
             isInternalNote: false,
-            attachmentUrl: _pendingAttachment?.Url,
-            attachmentFileName: _pendingAttachment?.FileName,
-            attachmentContentType: _pendingAttachment?.ContentType);
+            attachmentUrl: optimisticAttachment?.Url,
+            attachmentFileName: optimisticAttachment?.FileName,
+            attachmentContentType: optimisticAttachment?.ContentType);
 
-        if (result.IsSuccess)
-        {
-            _newMessageContent = string.Empty;
-            _pendingAttachment = null;
-            _pendingAttachmentPreviewUrl = null;
-            _shouldScrollToBottom = true;
-        }
-        else
+        if (!result.IsSuccess)
         {
             Logger.LogError("TicketDetailCustomer failed to send message: {Code} - {Description}",
                 result.Error.Code, result.Error.Description);
+            _newMessageContent = optimisticContent;
+            _pendingAttachment = optimisticAttachment;
         }
 
         _isSending = false;
@@ -304,7 +311,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
             if (name is not null) _userNameCache[userId] = name;
     }
 
-    private void NavigateBack() => NavigationManager.NavigateTo("/inbox");
+    private void NavigateBack() => NavigationManager.NavigateTo("/my-tickets");
 
     private bool IsOwnMessage(MessageDto m) => UserContext.UserId != Guid.Empty && m.UserId == UserContext.UserId;
 
@@ -332,6 +339,13 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
     private async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !e.ShiftKey) await SendMessageAsync();
+    }
+
+    private async Task HandleComposerInput(ChangeEventArgs e)
+    {
+        _newMessageContent = e.Value?.ToString() ?? string.Empty;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.autoResizeComposer", _composerTextarea); }
+        catch { /* ignore if JS not ready */ }
     }
 
     private string GetStatusLabel(int status) => status switch

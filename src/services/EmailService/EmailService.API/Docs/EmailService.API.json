@@ -324,6 +324,39 @@
           }
         }
       }
+    },
+    "/api/TenantEmailConfiguration/update": {
+      "put": {
+        "tags": [
+          "TenantEmailConfiguration"
+        ],
+        "parameters": [
+          {
+            "name": "DefaultSenderEmail",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/TenantEmailConfiguration/get": {
+      "get": {
+        "tags": [
+          "TenantEmailConfiguration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

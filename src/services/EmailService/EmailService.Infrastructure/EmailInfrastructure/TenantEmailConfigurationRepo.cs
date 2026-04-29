@@ -92,7 +92,7 @@ namespace EmailService.Infrastructure.EmailInfrastructure
         {
             try
             {
-                var val = await _dbContext.TenantEmailConfigurations.SingleOrDefaultAsync(t => t.OrganizationId == tenantId);
+                var val = await _dbContext.TenantEmailConfigurations.FirstOrDefaultAsync(t => t.OrganizationId == tenantId);
                 return val is null
                     ? Result.Failure<TenantEmailConfiguration>(Error.NotFound("TenantEmailConfiguration.NotFound", $"Tenant email configuration with tenant ID {tenantId} not found"))
                     : Result.Success(val);

@@ -189,12 +189,122 @@
                     <button class="tds-composer-tab @(_isInternalNoteMode ? "active" : "")" @onclick="() => _isInternalNoteMode = true">Internal Note</button>
                 </div>
                 <div class="tds-composer-body">
+
+                    <!-- ── AI Suggestion Panel ── -->
+                    @if (_isLoadingAiSuggestion)
+                    {
+                        <div class="tds-ai-panel tds-ai-panel--loading">
+                            <svg class="tds-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                            </svg>
+                            <span>Generating AI suggestion…</span>
+                        </div>
+                    }
+                    else if (_aiSuggestionError is not null)
+                    {
+                        <div class="tds-ai-panel tds-ai-panel--error">
+                            <div class="tds-ai-panel-header">
+                                <span class="tds-ai-panel-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="12" y1="8" x2="12" y2="12" />
+                                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                                    </svg>
+                                    Could not generate suggestion
+                                </span>
+                                <button class="tds-ai-panel-dismiss" @onclick="DismissAiSuggestion" title="Dismiss">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="tds-ai-panel-error-msg">@_aiSuggestionError</p>
+                        </div>
+                    }
+                    else if (_showAiSuggestion && _aiSuggestion is not null)
+                    {
+                        <div class="tds-ai-panel">
+                            <div class="tds-ai-panel-header">
+                                <span class="tds-ai-panel-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                                    </svg>
+                                    AI Suggestion
+                                </span>
+                                <div style="display:flex;gap:6px;align-items:center;">
+                                    <span class="tds-ai-confidence @GetConfidenceClass(_aiSuggestion.Confidence)">
+                                        @_aiSuggestion.Confidence% confidence
+                                    </span>
+                                    <button class="tds-ai-panel-dismiss" @onclick="DismissAiSuggestion" title="Dismiss">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+                                            <line x1="18" y1="6" x2="6" y2="18" />
+                                            <line x1="6" y1="6" x2="18" y2="18" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(_aiSuggestion.AgentHeadsUp))
+                            {
+                                <div class="tds-ai-headsup">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                        <line x1="12" y1="9" x2="12" y2="13" />
+                                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                                    </svg>
+                                    @_aiSuggestion.AgentHeadsUp
+                                </div>
+                            }
+
+                            @if (_aiSuggestion.NeedsMoreInfo && !string.IsNullOrWhiteSpace(_aiSuggestion.InfoNeeded))
+                            {
+                                <div class="tds-ai-moreinfo">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="12" y1="8" x2="12" y2="12" />
+                                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                                    </svg>
+                                    More info needed: @_aiSuggestion.InfoNeeded
+                                </div>
+                            }
+
+                            <div class="tds-ai-reply-block">
+                                <p class="tds-ai-reply-text">@_aiSuggestion.Reply</p>
+                                <button class="tds-ai-use-btn" @onclick="() => UseAiSuggestion(_aiSuggestion.Reply)">
+                                    Use this reply
+                                </button>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(_aiSuggestion.AlternativeReply))
+                            {
+                                <div class="tds-ai-alt-block">
+                                    <span class="tds-ai-alt-label">Alternative</span>
+                                    <p class="tds-ai-reply-text">@_aiSuggestion.AlternativeReply</p>
+                                    <button class="tds-ai-use-btn tds-ai-use-btn--alt" @onclick="() => UseAiSuggestion(_aiSuggestion.AlternativeReply!)">
+                                        Use alternative
+                                    </button>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(_aiSuggestion.Reasoning))
+                            {
+                                <details class="tds-ai-reasoning">
+                                    <summary>Why this reply?</summary>
+                                    <p>@_aiSuggestion.Reasoning</p>
+                                </details>
+                            }
+                        </div>
+                    }
+                    <!-- ── End AI Suggestion Panel ── -->
+
                     <textarea class="tds-composer-input"
                               placeholder="@(_isInternalNoteMode ? "Write an internal note..." : "Write a reply...")"
-                              rows="3"
                               style="@(_isInternalNoteMode ? "border-color:#f59e0b;background:rgba(245,158,11,0.04);" : "")"
-                              @bind="_newMessageContent"
-                              @onkeydown="HandleKeyDown" />
+                              value="@_newMessageContent"
+                              @oninput="HandleComposerInput"
+                              @onkeydown="HandleKeyDown"
+                              @ref="_composerTextarea" />
 
                     @if (_pendingAttachment is not null)
                     {
@@ -238,6 +348,27 @@
                                 </svg>
                             }
                         </label>
+
+                        <!-- AI Suggest button -->
+                        <button class="tds-ai-trigger-btn @(_isLoadingAiSuggestion ? "tds-ai-trigger-btn--loading" : "")"
+                                @onclick="GenerateAiReplyAsync"
+                                disabled="@_isLoadingAiSuggestion"
+                                title="Generate AI reply suggestion">
+                            @if (_isLoadingAiSuggestion)
+                            {
+                                <svg class="tds-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                                </svg>
+                            }
+                            AI Suggest
+                        </button>
+
                         <button class="tds-send-btn"
                                 style="@(_isInternalNoteMode ? "background:#f59e0b;box-shadow:0 0 14px rgba(245,158,11,0.3);" : "")"
                                 @onclick="SendMessageAsync" disabled="@_isSending">
@@ -364,3 +495,12 @@
     }
 
 </div>
+
+@code {
+    private string GetConfidenceClass(int confidence) => confidence switch
+    {
+        >= 75 => "tds-ai-confidence--high",
+        >= 45 => "tds-ai-confidence--mid",
+        _ => "tds-ai-confidence--low"
+    };
+}

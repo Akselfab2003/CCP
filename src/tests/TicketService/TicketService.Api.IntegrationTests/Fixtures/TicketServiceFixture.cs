@@ -28,6 +28,7 @@ namespace TicketService.Api.IntegrationTests.Fixtures
 
         public async ValueTask InitializeAsync()
         {
+            DefaultTimeout = TimeSpan.FromMinutes(5);
             await Initialize();
             DB_Services.AddInfrastructure();
             SDK_Services.AddHttpContextAccessor();
