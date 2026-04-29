@@ -118,7 +118,13 @@ public class MessageService : IMessageService
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         if (!request.IsInternalNote)
-            await ForwardMessageToServices(ticket.Value, message);
+            _ = ForwardMessageToServices(ticket.Value, message)
+                .ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        _logger.LogWarning("ForwardMessageToServices failed for ticket {TicketId}: {Error}",
+                            message.TicketId, t.Exception?.Message);
+                }, TaskScheduler.Default);
 
         await PublishNewMsgEventToForAIAnalysis(ticket.Value.Id, ticket.Value.OrganizationId);
 

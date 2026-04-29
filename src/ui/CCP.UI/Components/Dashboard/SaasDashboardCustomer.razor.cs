@@ -66,6 +66,7 @@ public partial class SaasDashboardCustomer : ComponentBase
     private string GetHistoryInitials(TicketHistoryEntryDto entry) =>
         entry.EventType switch
         {
+            "TicketCreated" => "🎫",
             "MessageSent" => "💬",
             "StatusChanged" => "📋",
             "AssignedToSupporter" => "👤",
@@ -75,6 +76,7 @@ public partial class SaasDashboardCustomer : ComponentBase
     private string GetHistoryDescription(TicketHistoryEntryDto entry) =>
         entry.EventType switch
         {
+            "TicketCreated" => $"Ticket #{entry.TicketId} was created",
             "MessageSent" => $"New message on ticket #{entry.TicketId}" +
                 (entry.NewValue is not null ? $" — {entry.NewValue}" : ""),
             "StatusChanged" => $"Ticket #{entry.TicketId} status changed to {entry.NewValue}",
@@ -85,6 +87,7 @@ public partial class SaasDashboardCustomer : ComponentBase
     private string GetHistoryTagClass(TicketHistoryEntryDto entry) =>
         entry.EventType switch
         {
+            "TicketCreated" => "tag-teal",
             "MessageSent" => "tag-indigo",
             "StatusChanged" when entry.NewValue == "Closed" => "tag-slate",
             "StatusChanged" when entry.NewValue == "WaitingForCustomer" => "tag-red",
@@ -96,6 +99,7 @@ public partial class SaasDashboardCustomer : ComponentBase
     private string GetHistoryTagLabel(TicketHistoryEntryDto entry) =>
         entry.EventType switch
         {
+            "TicketCreated" => "Ticket Created",
             "MessageSent" => "New Message",
             "StatusChanged" when entry.NewValue == "WaitingForCustomer" => "Awaiting Your Reply",
             "StatusChanged" when entry.NewValue == "WaitingForSupport" => "With Support",
@@ -108,6 +112,7 @@ public partial class SaasDashboardCustomer : ComponentBase
     private string GetHistoryDotClass(TicketHistoryEntryDto entry) =>
         entry.EventType switch
         {
+            "TicketCreated" => "dot-green",
             "MessageSent" => "dot-green",
             "StatusChanged" when entry.NewValue == "WaitingForCustomer" => "dot-red",
             "StatusChanged" when entry.NewValue == "Closed" => "dot-slate",

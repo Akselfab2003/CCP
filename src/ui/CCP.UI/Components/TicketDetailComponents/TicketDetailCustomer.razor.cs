@@ -228,29 +228,33 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
 
         _isSending = true;
 
+        var optimisticContent = _newMessageContent;
+        var optimisticAttachment = _pendingAttachment;
+
+        _newMessageContent = string.Empty;
+        _pendingAttachment = null;
+        _pendingAttachmentPreviewUrl = null;
+        _shouldScrollToBottom = true;
+        try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
+        catch { /* ignore */ }
+        await InvokeAsync(StateHasChanged);
+
         var result = await MessageSdkService.CreateMessageAsync(
             ticketId: Ticket.Id,
             organizationId: Ticket.OrganizationId,
             userId: UserContext.UserId,
-            content: _newMessageContent,
+            content: optimisticContent,
             isInternalNote: false,
-            attachmentUrl: _pendingAttachment?.Url,
-            attachmentFileName: _pendingAttachment?.FileName,
-            attachmentContentType: _pendingAttachment?.ContentType);
+            attachmentUrl: optimisticAttachment?.Url,
+            attachmentFileName: optimisticAttachment?.FileName,
+            attachmentContentType: optimisticAttachment?.ContentType);
 
-        if (result.IsSuccess)
-        {
-            _newMessageContent = string.Empty;
-            _pendingAttachment = null;
-            _pendingAttachmentPreviewUrl = null;
-            _shouldScrollToBottom = true;
-            try { await JSRuntime.InvokeVoidAsync("scrollHelpers.resetComposerHeight", _composerTextarea); }
-            catch { /* ignore */ }
-        }
-        else
+        if (!result.IsSuccess)
         {
             Logger.LogError("TicketDetailCustomer failed to send message: {Code} - {Description}",
                 result.Error.Code, result.Error.Description);
+            _newMessageContent = optimisticContent;
+            _pendingAttachment = optimisticAttachment;
         }
 
         _isSending = false;
@@ -307,7 +311,7 @@ public partial class TicketDetailCustomer : ComponentBase, IAsyncDisposable
             if (name is not null) _userNameCache[userId] = name;
     }
 
-    private void NavigateBack() => NavigationManager.NavigateTo("/inbox");
+    private void NavigateBack() => NavigationManager.NavigateTo("/my-tickets");
 
     private bool IsOwnMessage(MessageDto m) => UserContext.UserId != Guid.Empty && m.UserId == UserContext.UserId;
 
