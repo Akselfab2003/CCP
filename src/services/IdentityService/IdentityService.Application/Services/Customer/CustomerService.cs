@@ -6,6 +6,9 @@ using IdentityService.Application.Services.Organization;
 using IdentityService.Application.Services.User;
 using Keycloak.Sdk.services.management;
 using Keycloak.Sdk.services.members;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace IdentityService.Application.Services.Customer
@@ -19,13 +22,17 @@ namespace IdentityService.Application.Services.Customer
         private readonly IUserService _userService;
         private readonly IManagementKeycloakService _managementService;
         private readonly IMemberKeycloakService _memberService;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         public CustomerService(ILogger<CustomerService> logger,
                                IOrganizationService organizationService,
                                ICurrentUser currentUser,
                                IGroupService groupService,
                                IUserService userService,
                                IManagementKeycloakService managementService,
-                               IMemberKeycloakService memberService)
+                               IMemberKeycloakService memberService,
+                               IConfiguration configuration,
+                               IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
             _organizationService = organizationService;
@@ -34,6 +41,8 @@ namespace IdentityService.Application.Services.Customer
             _userService = userService;
             _managementService = managementService;
             _memberService = memberService;
+            _configuration = configuration;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<Result<Guid>> InviteCustomer(string Email, CancellationToken ct = default)
@@ -63,9 +72,21 @@ namespace IdentityService.Application.Services.Customer
                     return Result.Failure<Guid>(AddUserToGroupResult.Error);
                 }
 
+                string RedirectUrl = string.Empty;
+                if (_webHostEnvironment.IsDevelopment())
+                {
+                    RedirectUrl = "https://localhost:7033";
+                }
+                else
+                {
+                    RedirectUrl = _configuration["InvitationRedirectUrl"] ?? throw new InvalidOperationException("InvitationRedirectUrl is not configured");
+                }
+
+
                 int lifespan = 24 * 60 * 60; // 24 hours in seconds
                 var SendRequiredActionsEmailResult = await _managementService.ExecuteEmailRequiredActions(email: Email,
                                                                                                           userId: userId.ToString(),
+                                                                                                          redirectUrl: RedirectUrl,
                                                                                                           actions: ["UPDATE_PASSWORD"],
                                                                                                           lifespan: lifespan,
                                                                                                           ct: ct);

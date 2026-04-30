@@ -6,6 +6,8 @@ using IdentityService.Application.Services.Organization;
 using IdentityService.Application.Services.User;
 using Keycloak.Sdk.services.management;
 using Keycloak.Sdk.services.members;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -21,6 +23,8 @@ namespace Identity.Application.Tests.Services
         private readonly IManagementKeycloakService _managementService;
         private readonly IMemberKeycloakService _memberService;
         private readonly ICustomerService _customerService;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public CustomerServiceTests()
         {
@@ -31,7 +35,10 @@ namespace Identity.Application.Tests.Services
             _userService = Substitute.For<IUserService>();
             _managementService = Substitute.For<IManagementKeycloakService>();
             _memberService = Substitute.For<IMemberKeycloakService>();
-            _customerService = new CustomerService(_logger, _organizationService, _currentUser, _groupService, _userService, _managementService, _memberService);
+            _configuration = Substitute.For<IConfiguration>();
+            _webHostEnvironment = Substitute.For<IWebHostEnvironment>();
+
+            _customerService = new CustomerService(_logger, _organizationService, _currentUser, _groupService, _userService, _managementService, _memberService, _configuration, _webHostEnvironment);
         }
 
         [Fact]
