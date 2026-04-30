@@ -40,7 +40,7 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
                       o => o.UseVector()));
 
     builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
-    builder.Services.AddApiAuthenticationServices("MessagingService.Api", "CCP");
+    builder.Services.AddApiAuthenticationServices("MessagingService.Api", "CCP", keycloakServiceUrl);
 
     builder.Services.AddClientCredentialsTokenManagement()
                     .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
