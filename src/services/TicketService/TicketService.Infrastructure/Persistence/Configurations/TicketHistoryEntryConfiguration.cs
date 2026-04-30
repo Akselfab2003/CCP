@@ -25,6 +25,11 @@ namespace TicketService.Infrastructure.Persistence.Configurations
             builder.Property(h => h.OccurredAt)
                    .IsRequired();
 
+            builder.Property(h => h.IsInternalNote)
+                   .IsRequired()
+                   .HasDefaultValue(false)
+                   .HasColumnName("is_internal_note");
+
             builder.HasOne<Ticket>()
                    .WithMany()
                    .HasForeignKey(h => h.TicketId)

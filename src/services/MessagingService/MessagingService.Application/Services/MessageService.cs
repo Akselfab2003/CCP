@@ -131,7 +131,8 @@ public class MessageService : IMessageService
         _ = _ticketService.RecordMessageSentAsync(
             message.TicketId,
             message.UserId,
-            message.Content.Length > 120 ? message.Content[..120] : message.Content
+            message.Content.Length > 120 ? message.Content[..120] : message.Content,
+            message.IsInternalNote
 
         ).ContinueWith(t =>
                 {

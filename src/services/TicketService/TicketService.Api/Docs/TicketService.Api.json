@@ -788,6 +788,9 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "isInternalNote": {
+            "type": "boolean"
           }
         }
       },
