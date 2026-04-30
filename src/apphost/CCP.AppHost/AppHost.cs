@@ -268,7 +268,10 @@ Gateway
     .WithReference(TicketService)
     .WithReference(MessagingService)
     .WithReference(IdentityService)
-    .WithEnvironment("CCP.ServiceAccount", ServiceAccountSecret)
+    .WithEnvironment(env =>
+    {
+        env.EnvironmentVariables.Add("SERVICE_ACCOUNT_SECRET", ServiceAccountSecret);
+    })
     .WithUrlForEndpoint("https", endpoint =>
     {
         endpoint.Url = "/swagger";

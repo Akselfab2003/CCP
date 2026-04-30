@@ -1,4 +1,6 @@
 using System.Reflection;
+using Duende.AccessTokenManagement;
+using Duende.IdentityModel.Client;
 using Gateway.Api.Endpoints;
 using IdentityService.Sdk.ServiceDefaults;
 using MessagingService.Sdk.ServiceDefaults;
@@ -29,6 +31,21 @@ if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
     builder.Services.AddApiAuthenticationServices("Gateway.Api", "CCP", keycloakURL);
 
     builder.Services.AddSwaggerGen(c => { SetupSwagger.SetupSwaggerForChatApp(c); });
+
+
+    builder.Services.AddClientCredentialsTokenManagement()
+                   .AddClient(ClientCredentialsClientName.Parse("CCP.ServiceAccount"), client =>
+                   {
+                       client.TokenEndpoint = new Uri($"{keycloakURL}/realms/CCP/protocol/openid-connect/token");
+                       client.ClientId = ClientId.Parse("CCP.ServiceAccount");
+                       client.ClientSecret = ClientSecret.Parse(
+                           builder.Configuration["SERVICE_ACCOUNT_SECRET"]
+                           ?? throw new InvalidOperationException("SERVICE_ACCOUNT_SECRET configuration value is required.")
+                       );
+                       client.Scope = Scope.ParseOrDefault("openid");
+                       client.ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader;
+                   });
+
 }
 
 builder.Services.AddTicketServiceSdk(
