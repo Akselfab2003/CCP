@@ -1,15 +1,23 @@
-﻿using ChatApp.Encryption;
+﻿using CCP.Shared.AuthContext;
+using ChatApp.Encryption;
 using CustomerService.Api.DB;
 using CustomerService.Domain.Entities;
 using CustomerService.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 using CustomerSVG = CustomerService.Infrastructure.Persistence.Repositories.CustomerRepository;
 
 namespace CustomerService.Tests
 {
     public class CustomerServiceTests
     {
+        private ICurrentUser _currentUser = null!;
+
+        public CustomerServiceTests()
+        {
+            _currentUser = NSubstitute.Substitute.For<ICurrentUser>();
+        }
         //Laver en in-memory database for test
         private CustomerDBContext GetInMemoryDbContext()
         {
@@ -17,7 +25,8 @@ namespace CustomerService.Tests
             var options = new DbContextOptionsBuilder<CustomerDBContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Unik database for hver test
                 .Options;
-            return new CustomerDBContext(options, encryptionService);
+
+            return new CustomerDBContext(options, encryptionService, _currentUser);
         }
 
         [Fact]
@@ -69,29 +78,30 @@ namespace CustomerService.Tests
         public async Task GetAllCustomers_ReturnsAllCustomers_WhenCustomersExist()
         {
             //Arrange
+            Guid US = Guid.NewGuid();
+            _currentUser.OrganizationId.Returns(US);
             using var context = GetInMemoryDbContext();
             var service = new CustomerSVG(NullLogger<CustomerRepository>.Instance, context);
-
             //Test kunder
             context.Customers.AddRange(
                 new Customer
                 {
                     Id = Guid.NewGuid(),
-                    OrganizationId = Guid.NewGuid(),
+                    OrganizationId = US,
                     Name = "Test Customer 1",
                     Email = "test1@test.com"
                 },
                 new Customer
                 {
                     Id = Guid.NewGuid(),
-                    OrganizationId = Guid.NewGuid(),
+                    OrganizationId = US,
                     Name = "Test Customer 2",
                     Email = "test2@test.com"
                 },
                 new Customer
                 {
                     Id = Guid.NewGuid(),
-                    OrganizationId = Guid.NewGuid(),
+                    OrganizationId = US,
                     Name = "Test Customer 3",
                     Email = "test3@test.com"
                 });
