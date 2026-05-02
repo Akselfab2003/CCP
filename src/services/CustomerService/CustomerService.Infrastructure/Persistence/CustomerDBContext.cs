@@ -1,4 +1,5 @@
-﻿using ChatApp.Encryption;
+﻿using CCP.Shared.AuthContext;
+using ChatApp.Encryption;
 using CustomerService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,13 @@ namespace CustomerService.Api.DB
     public class CustomerDBContext : DbContext
     {
         private readonly IEncryptionService _encryptionService;
+        private readonly ICurrentUser _currentUser;
 
-        public CustomerDBContext(DbContextOptions<CustomerDBContext> options, IEncryptionService encryptionService)
+        public CustomerDBContext(DbContextOptions<CustomerDBContext> options, IEncryptionService encryptionService, ICurrentUser currentUser)
             : base(options)
         {
             _encryptionService = encryptionService;
+            _currentUser = currentUser;
         }
 
         // Customer table
@@ -38,6 +41,8 @@ namespace CustomerService.Api.DB
                     .HasConversion(encryptedConverter)
                     .HasMaxLength(500);
             });
+
+            modelBuilder.Entity<Customer>().HasQueryFilter(c => c.OrganizationId == _currentUser.OrganizationId);
         }
     }
 }
