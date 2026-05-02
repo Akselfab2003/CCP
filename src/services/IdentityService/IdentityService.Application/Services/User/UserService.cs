@@ -3,6 +3,7 @@ using Duende.IdentityModel.Client;
 using IdentityService.Application.Models;
 using Keycloak.Sdk.Models;
 using Keycloak.Sdk.services.users;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace IdentityService.Application.Services.User
@@ -11,10 +12,12 @@ namespace IdentityService.Application.Services.User
     {
         private readonly ILogger<UserService> _logger;
         private readonly IUserKeycloakService _userKeycloakService;
-        public UserService(ILogger<UserService> logger, IUserKeycloakService userKeycloakService)
+        private readonly IConfiguration _configuration;
+        public UserService(ILogger<UserService> logger, IUserKeycloakService userKeycloakService, IConfiguration configuration)
         {
             _logger = logger;
             _userKeycloakService = userKeycloakService;
+            _configuration = configuration;
         }
 
         public async Task<Result<string>> Authenticate(AuthenticatingRequest authenticatingRequest, CancellationToken ct = default)
@@ -25,7 +28,7 @@ namespace IdentityService.Application.Services.User
 
                 var response = await Client.RequestPasswordTokenAsync(new PasswordTokenRequest()
                 {
-                    Address = "http://localhost:8080/realms/CCP/protocol/openid-connect/token",
+                    Address = $"{_configuration["services:Keycloak:http:0"]}/realms/CCP/protocol/openid-connect/token",
                     ClientId = "CCP",
                     Scope = "openid profile",
                     UserName = authenticatingRequest.UserName,
