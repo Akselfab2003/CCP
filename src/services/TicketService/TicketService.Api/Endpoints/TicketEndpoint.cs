@@ -140,7 +140,7 @@ namespace TicketService.Api.Endpoints
             try
             {
                 var entries = await historyRepository.GetByCustomerIdAsync(customerId, limit);
-                return Results.Ok(entries);
+                return Results.Ok(entries.Where(e => !e.IsInternalNote).ToList());
             }
             catch (Exception ex)
             {

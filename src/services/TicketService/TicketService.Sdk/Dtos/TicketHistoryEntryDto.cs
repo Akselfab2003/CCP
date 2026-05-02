@@ -24,5 +24,8 @@ namespace TicketService.Sdk.Dtos
 
         [JsonPropertyName("occurredAt")]
         public DateTimeOffset OccurredAt { get; set; }
+
+        [JsonPropertyName("isInternalNote")]
+        public bool IsInternalNote { get; set; }
     }
 }

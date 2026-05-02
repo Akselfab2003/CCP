@@ -26,6 +26,8 @@ namespace TicketService.Sdk.Models
 #endif
         /// <summary>The id property</summary>
         public int? Id { get; set; }
+        /// <summary>The isInternalNote property</summary>
+        public bool? IsInternalNote { get; set; }
         /// <summary>The newValue property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -74,6 +76,7 @@ namespace TicketService.Sdk.Models
                 { "actorUserId", n => { ActorUserId = n.GetGuidValue(); } },
                 { "eventType", n => { EventType = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetIntValue(); } },
+                { "isInternalNote", n => { IsInternalNote = n.GetBoolValue(); } },
                 { "newValue", n => { NewValue = n.GetStringValue(); } },
                 { "occurredAt", n => { OccurredAt = n.GetDateTimeOffsetValue(); } },
                 { "oldValue", n => { OldValue = n.GetStringValue(); } },
@@ -90,6 +93,7 @@ namespace TicketService.Sdk.Models
             writer.WriteGuidValue("actorUserId", ActorUserId);
             writer.WriteStringValue("eventType", EventType);
             writer.WriteIntValue("id", Id);
+            writer.WriteBoolValue("isInternalNote", IsInternalNote);
             writer.WriteStringValue("newValue", NewValue);
             writer.WriteDateTimeOffsetValue("occurredAt", OccurredAt);
             writer.WriteStringValue("oldValue", OldValue);

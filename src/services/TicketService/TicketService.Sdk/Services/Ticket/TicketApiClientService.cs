@@ -203,14 +203,14 @@ namespace TicketService.Sdk.Services.Ticket
             }
         }
 
-        public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet, CancellationToken ct = default)
+        public async Task<Result> RecordMessageSentAsync(int ticketId, Guid? senderUserId, string messageSnippet, bool isInternalNote = false, CancellationToken ct = default)
         {
             try
             {
                 var httpClient = _httpClientFactory.CreateClient(ClientName);
                 var response = await httpClient.PostAsJsonAsync(
                     $"/ticket/{ticketId}/history/message",
-                    new { SenderUserId = senderUserId, MessageSnippet = messageSnippet },
+                    new { SenderUserId = senderUserId, MessageSnippet = messageSnippet, IsInternalNote = isInternalNote },
                     ct);
 
                 if (!response.IsSuccessStatusCode)

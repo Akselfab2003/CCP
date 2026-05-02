@@ -228,7 +228,8 @@ namespace TicketService.Application.Services.Ticket
                     actorUserId: senderUserId,
                     eventType: isInternalNote ? "InternalNoteAdded" : "MessageSent",
                     oldValue: null,
-                    newValue: snippet
+                    newValue: snippet,
+                    isInternalNote: isInternalNote
                 ));
                 return Result.Success();
             }

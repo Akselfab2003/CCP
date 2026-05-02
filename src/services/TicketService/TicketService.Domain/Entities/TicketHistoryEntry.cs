@@ -9,6 +9,7 @@ namespace TicketService.Domain.Entities
         public string? OldValue { get; private set; }
         public string? NewValue { get; private set; }
         public DateTimeOffset OccurredAt { get; private set; }
+        public bool IsInternalNote { get; private set; }
 
         private TicketHistoryEntry() { }
 
@@ -17,7 +18,8 @@ namespace TicketService.Domain.Entities
             Guid? actorUserId,
             string eventType,
             string? oldValue,
-            string? newValue)
+            string? newValue,
+            bool isInternalNote = false)
         {
             return new TicketHistoryEntry
             {
@@ -26,7 +28,8 @@ namespace TicketService.Domain.Entities
                 EventType = eventType,
                 OldValue = oldValue,
                 NewValue = newValue,
-                OccurredAt = DateTimeOffset.UtcNow
+                OccurredAt = DateTimeOffset.UtcNow,
+                IsInternalNote = isInternalNote
             };
         }
     }
