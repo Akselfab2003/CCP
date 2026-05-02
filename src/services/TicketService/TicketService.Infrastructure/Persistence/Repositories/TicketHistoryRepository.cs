@@ -23,7 +23,7 @@ namespace TicketService.Infrastructure.Persistence.Repositories
         public async Task<List<TicketHistoryEntry>> GetByTicketIdAsync(int ticketId, int limit = 20, CancellationToken ct = default)
         {
             return await _context.TicketHistory
-                .Where(h => h.TicketId == ticketId)
+                .Where(h => h.TicketId == ticketId && _context.Tickets.Any(t => t.Id == h.TicketId))
                 .OrderByDescending(h => h.OccurredAt)
                 .Take(limit)
                 .ToListAsync(ct);
@@ -44,6 +44,7 @@ namespace TicketService.Infrastructure.Persistence.Repositories
         public async Task<List<TicketHistoryEntry>> GetRecentOrgHistoryAsync(int limit = 20, CancellationToken ct = default)
         {
             return await _context.TicketHistory
+                .Where(h => _context.Tickets.Any(t => t.Id == h.TicketId))
                 .OrderByDescending(h => h.OccurredAt)
                 .Take(limit)
                 .ToListAsync(ct);
