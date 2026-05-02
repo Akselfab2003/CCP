@@ -2,6 +2,7 @@
 using IdentityService.Application.Services.User;
 using Keycloak.Sdk.Models;
 using Keycloak.Sdk.services.users;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -13,12 +14,13 @@ namespace Identity.Application.Tests.Services
         private readonly ILogger<UserService> _logger;
         private readonly IUserKeycloakService _userKeycloakService;
         private readonly IUserService _userService;
-
+        private readonly IConfiguration _configuration;
         public UserServiceTests()
         {
             _logger = NSubstitute.Substitute.For<ILogger<UserService>>();
             _userKeycloakService = NSubstitute.Substitute.For<IUserKeycloakService>();
-            _userService = new UserService(_logger, _userKeycloakService);
+            _configuration = NSubstitute.Substitute.For<IConfiguration>();
+            _userService = new UserService(_logger, _userKeycloakService, _configuration);
         }
 
         [Fact]
